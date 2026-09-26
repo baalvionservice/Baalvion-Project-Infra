@@ -4,6 +4,7 @@
 import { entityRouteSegment, isPublicCompany } from '@/lib/utils/seo';
 import { env } from '@/config/env';
 import { CompanyEntity } from '@/types/entity';
+import { CIN, LEGAL_ENTITY_NAME, REGISTERED_ADDRESS } from '@baalvion/company';
 
 const siteUrl = () => (env.siteUrl.endsWith('/') ? env.siteUrl.slice(0, -1) : env.siteUrl);
 const absoluteUrl = (path: string) => `${siteUrl()}${path.startsWith('/') ? path : `/${path}`}`;
@@ -18,6 +19,8 @@ export const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Imperialpedia',
+    legalName: LEGAL_ENTITY_NAME,
+    identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
     url: siteUrl(),
     logo: absoluteUrl('/logo.png'),
     description:
@@ -27,15 +30,14 @@ export const structuredData = {
       email: env.supportEmail,
       contactType: 'customer support',
     },
-    // Registered office of Baalvion Industries Private Limited (CIN
-    // U43121OD2025PTC048479), the legal entity operating Imperialpedia.
+    // Registered office of the legal entity operating Imperialpedia.
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Upper Mania, PO Pakjhola, Semiliguda',
-      addressLocality: 'Koraput',
-      addressRegion: 'Odisha',
-      postalCode: '764036',
-      addressCountry: 'IN',
+      streetAddress: REGISTERED_ADDRESS.street,
+      addressLocality: REGISTERED_ADDRESS.locality,
+      addressRegion: REGISTERED_ADDRESS.region,
+      postalCode: REGISTERED_ADDRESS.postalCode,
+      addressCountry: REGISTERED_ADDRESS.country,
     },
     sameAs: [
       'https://twitter.com/imperialpedia',

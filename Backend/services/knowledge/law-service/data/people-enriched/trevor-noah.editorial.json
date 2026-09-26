@@ -1,0 +1,99 @@
+{
+  "display_name": null,
+  "short_bio": "South African comedian who hosted The Daily Show from 2015 to 2022 and wrote the memoir Born a Crime.",
+  "biography": "Trevor Noah was born in Johannesburg in 1984 to a Black Xhosa mother and a white Swiss father, at a time when their relationship was illegal under apartheid. He built a stand-up career in South Africa and hosted television shows there.\n\nIn 2015 he succeeded Jon Stewart as host of The Daily Show on Comedy Central, and he stayed until December 2022. His memoir Born a Crime appeared in 2016.\n\nHe has hosted the Grammy Awards ceremony several times.",
+  "awards": [
+    {
+      "title": "MTV Africa Music Awards",
+      "year": 2015
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work – Biography/Auto-biography",
+      "year": 2017
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work – Debut Author",
+      "year": 2017
+    },
+    {
+      "title": "Nickelodeon Kids' Choice Awards",
+      "year": 2017
+    },
+    {
+      "title": "GLAAD Media Award for Outstanding Talk Show Episode",
+      "year": 2017
+    },
+    {
+      "title": "MTV Movie & TV Award for Best Host",
+      "year": 2017
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Short Form Variety Series",
+      "year": 2017
+    },
+    {
+      "title": "Thurber Prize for American Humor",
+      "year": 2017
+    },
+    {
+      "title": "Time 100",
+      "year": 2018
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Writing in a Comedy Series",
+      "year": 2019
+    },
+    {
+      "title": "Erasmus Prize",
+      "year": 2023
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Born a Crime",
+      "year": 2016,
+      "note": "Memoir"
+    },
+    {
+      "title": "The Daily Show with Trevor Noah",
+      "year": 2015,
+      "note": "Host until 2022"
+    },
+    {
+      "title": "Afraid of the Dark",
+      "year": 2017,
+      "note": "Stand-up special"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1984-02-20",
+      "title": "Born in Johannesburg"
+    },
+    {
+      "date": "2015",
+      "title": "Becomes host of The Daily Show"
+    },
+    {
+      "date": "2016",
+      "title": "Publishes Born a Crime"
+    },
+    {
+      "date": "2022",
+      "title": "Leaves The Daily Show"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q7839350"
+    },
+    {
+      "label": "Wikipedia: Trevor Noah",
+      "url": "https://en.wikipedia.org/wiki/Trevor_Noah"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

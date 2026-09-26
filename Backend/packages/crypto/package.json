@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/crypto",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Cryptographic utilities: token generation, hashing",
   "private": true,
@@ -21,8 +25,8 @@
   },
   "devDependencies": {
     "tsup":       "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf":     "^6.0.1",
-    "@types/node": "^22.0.0"
+    "@types/node": "^24.13.4"
   }
 }

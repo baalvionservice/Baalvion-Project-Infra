@@ -140,6 +140,12 @@ export const authLawApi = {
   forgotPassword: (email: string) => authBffClient.post('/api/auth/forgot-password', { email }),
   resetPassword: (token: string, newPassword: string) =>
     authBffClient.post('/api/auth/reset-password', { token, newPassword, password: newPassword }),
+  // Passwordless sign-in. First/last name are captured at REQUEST time and bound to the code,
+  // so verify provisions a new account with the right name and they can never be spoofed later.
+  requestEmailCode: (email: string, firstName?: string, lastName?: string) =>
+    authBffClient.post('/api/auth/email/otp/request', { email, firstName, lastName }),
+  verifyEmailCode: (email: string, code: string) =>
+    authBffClient.post('/api/auth/email/otp/verify', { email, code }),
 };
 
 export const articlesPublicApi = {

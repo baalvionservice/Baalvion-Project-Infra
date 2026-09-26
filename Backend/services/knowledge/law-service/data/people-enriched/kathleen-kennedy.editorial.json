@@ -1,0 +1,72 @@
+{
+  "display_name": null,
+  "short_bio": "Film producer who co-founded Amblin Entertainment and became president of Lucasfilm in 2012.",
+  "biography": "Kathleen Kennedy was born in Berkeley, California, and studied at San Diego State University. She began in local television and then worked as an assistant to Steven Spielberg.\n\nIn 1981 she co-founded Amblin Entertainment with Spielberg and Frank Marshall and produced E.T. the Extra-Terrestrial (1982). With Marshall she later formed the Kennedy/Marshall Company, whose credits include The Sixth Sense (1999) and The Curious Case of Benjamin Button (2008).\n\nIn 2012 George Lucas named her co-chair of Lucasfilm and then its president after he sold the company to Disney. She produced Star Wars: The Force Awakens (2015).",
+  "awards": [
+    {
+      "title": "Crystal Award",
+      "year": 1995
+    },
+    {
+      "title": "Irving G. Thalberg Memorial Award",
+      "year": 2019
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "E.T. the Extra-Terrestrial",
+      "year": 1982,
+      "note": "Producer"
+    },
+    {
+      "title": "The Sixth Sense",
+      "year": 1999,
+      "note": "Producer"
+    },
+    {
+      "title": "The Curious Case of Benjamin Button",
+      "year": 2008,
+      "note": "Producer"
+    },
+    {
+      "title": "Star Wars: The Force Awakens",
+      "year": 2015,
+      "note": "Producer"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1953-06-05",
+      "title": "Born in Berkeley, California"
+    },
+    {
+      "date": "1981",
+      "title": "Co-founds Amblin Entertainment"
+    },
+    {
+      "date": "1982",
+      "title": "Produces E.T. the Extra-Terrestrial"
+    },
+    {
+      "date": "2012",
+      "title": "Takes over leadership of Lucasfilm"
+    },
+    {
+      "date": "2015",
+      "title": "Produces Star Wars: The Force Awakens"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q237207"
+    },
+    {
+      "label": "Wikipedia: Kathleen Kennedy (producer)",
+      "url": "https://en.wikipedia.org/wiki/Kathleen_Kennedy_(producer)"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

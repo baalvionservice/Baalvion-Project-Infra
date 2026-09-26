@@ -1,0 +1,58 @@
+{
+  "display_name": null,
+  "short_bio": "Associate Justice of the Supreme Court since 1991.",
+  "biography": "Clarence Thomas was born in Pin Point, Georgia, studied at Holy Cross and took his law degree at Yale in 1974. He worked for Missouri’s attorney general and later at Monsanto, then in the Reagan administration, where he chaired the Equal Employment Opportunity Commission from 1982.\n\nGeorge H. W. Bush appointed him to the DC Circuit in 1990 and nominated him to the Supreme Court in 1991. After hearings that included testimony from Anita Hill, the Senate confirmed him 52–48.\n\nHe is known for an originalist reading of the Constitution and wrote the memoir My Grandfather’s Son (2007).",
+  "awards": [
+    {
+      "title": "Horatio Alger Award",
+      "year": 1992
+    },
+    {
+      "title": "Francis Boyer Award",
+      "year": 2001
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "My Grandfather’s Son",
+      "year": 2007,
+      "note": "Memoir"
+    },
+    {
+      "title": "New York State Rifle & Pistol Association v. Bruen",
+      "year": 2022,
+      "note": "Majority opinion"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1948-06-23",
+      "title": "Born in Pin Point, Georgia"
+    },
+    {
+      "date": "1982",
+      "title": "Becomes chairman of the EEOC"
+    },
+    {
+      "date": "1990",
+      "title": "Appointed to the DC Circuit"
+    },
+    {
+      "date": "1991-10-23",
+      "title": "Sworn in as a Supreme Court justice"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11142"
+    },
+    {
+      "label": "Wikipedia: Clarence Thomas",
+      "url": "https://en.wikipedia.org/wiki/Clarence_Thomas"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

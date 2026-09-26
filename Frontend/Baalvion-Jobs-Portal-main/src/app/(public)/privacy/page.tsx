@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
 
       <div className="container mx-auto py-16 lg:py-24 max-w-4xl space-y-12">
         <p className="text-xl text-muted-foreground">
-            This Privacy Policy describes how Baalvion Industries Pvt Ltd ("Baalvion", "we", "us", or "our") collects, uses, and discloses information in connection with your use of our website, Jobs.Baalvion.com, and our related services (collectively, the "Platform").
+            This Privacy Policy describes how Baalvion Industries Private Limited ("Baalvion", "we", "us", or "our") collects, uses, and discloses information in connection with your use of our website, Jobs.Baalvion.com, and our related services (collectively, the "Platform").
         </p>
 
         <Separator />
@@ -207,7 +207,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="text-lg text-muted-foreground">
                 <p>Email: legal@baalvion.com</p>
-                <p>Baalvion Industries Pvt Ltd</p>
+                <p>Baalvion Industries Private Limited</p>
                 <p>[Your Registered Office Address, City, Postal Code, India]</p>
             </div>
         </Section>

@@ -5,8 +5,10 @@ import { ArrowRight } from "lucide-react";
 import { docsNav } from "@/lib/docs-nav";
 
 export const metadata: Metadata = {
-  title: "Documentation",
-  description: "Everything you need to integrate the Baalvion Intelligence News API into your product or agent.",
+  title: "Ship Your First Integration in Under 5 Minutes — Full API Docs",
+  description:
+    "Everything you need to integrate the Baalvion Intelligence News API into your product or AI agent — auth, endpoints, and a live quickstart.",
+  alternates: { canonical: "/docs" },
 };
 
 export default function DocsIndexPage() {

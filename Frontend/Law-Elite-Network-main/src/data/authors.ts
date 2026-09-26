@@ -52,6 +52,19 @@ export interface LawAuthor {
   certifications?: string[];
   /** Optional public profile links. */
   social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
+  /**
+   * 2026-09-26: temporarily archived pending Google AdSense approval — these
+   * are real people, not fabricated, and their data stays here unchanged so
+   * they can be brought back exactly as-is once approved. None currently has
+   * a published article under a live category, so archiving them closes an
+   * inconsistency (they rendered live regardless of the site's "keep only a
+   * few contributors visible" policy) rather than removing anything real.
+   * `getAllAuthors()`/`getAuthorBySlug()`/`getAuthorByName()` below, and
+   * `getMergedAuthors()`/`getMergedAuthorBySlug()` in lib/authors-server.ts,
+   * all filter these out — un-archive by deleting this field, not by
+   * re-adding removed data.
+   */
+  archived?: boolean;
 }
 
 export const LAW_AUTHORS: LawAuthor[] = [
@@ -61,10 +74,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Corporate & Securities Editor',
     credentials: 'Corporate & Securities desk, Law Elite Network',
     bio:
-      'Elena Rossi leads Law Elite Network’s coverage of corporate structure, shareholder arrangements, and securities fundamentals, translating dense company-law concepts — from incorporation and share classes to founder agreements and governance — into guidance that founders, directors, and investors can actually use. ' +
-      'Her explainers focus on the questions that recur across jurisdictions: what a shareholders’ agreement should protect, how ownership and control come apart, and where standard templates quietly fail. Elena reviews each corporate guide on the network for accuracy and balance before publication, following the process described in our Editorial Standards.',
+      'Elena Rossi leads Law Elite Network’s coverage of corporate structure, shareholder arrangements, and securities fundamentals, covering topics from incorporation and share classes to founder agreements and governance. ' +
+      'Her articles address shareholders’ agreements, the relationship between ownership and control, and the limits of standard templates. Elena is a Law Elite Network editor; her articles follow the process described in our Editorial Standards.',
     expertise: ['Business & Corporate', 'Tax & Finance'],
     avatarSeed: 'elena-rossi',
+    archived: true,
   },
   {
     slug: 'marcus-hale',
@@ -72,10 +86,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Technology & Data Protection Editor',
     credentials: 'Technology & Data Protection desk, Law Elite Network',
     bio:
-      'Marcus Hale writes Law Elite Network’s technology, intellectual-property, and data-protection coverage. His work tracks how privacy regimes such as the GDPR and CCPA, trademark and copyright systems, and platform regulation actually affect founders and product teams. ' +
-      'Marcus is known for cutting through acronyms — explaining what “processor” versus “controller” means in practice, when a trademark beats a copyright, and how company formation choices ripple into data obligations later. He edits the network’s IP and privacy guides.',
+      'Marcus Hale writes Law Elite Network’s technology, intellectual-property, and data-protection coverage. His articles cover privacy regimes such as the GDPR and CCPA, trademark and copyright, and platform regulation. ' +
+      'Topics include the difference between a data “processor” and “controller”, how trademark and copyright differ, and how company-formation choices relate to data obligations. He edits the network’s IP and privacy guides.',
     expertise: ['Technology & IP', 'Business & Corporate'],
     avatarSeed: 'marcus-hale',
+    archived: true,
   },
   {
     slug: 'priya-menon',
@@ -84,9 +99,10 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Startups & Venture desk, Law Elite Network',
     bio:
       'Priya Menon covers the legal groundwork of building a company: entity choice, founder equity and vesting, cap tables, early fundraising, and the contracts a young business signs before it can afford counsel. ' +
-      'She writes for the founder who needs to understand the trade-offs before talking to a lawyer, not after. Priya’s startup-law explainers are designed to be read at 11pm the night before a decision has to be made.',
+      'Her articles are general education for founders and are not a substitute for advice from a qualified lawyer.',
     expertise: ['Business & Corporate'],
     avatarSeed: 'priya-menon',
+    archived: true,
   },
   {
     slug: 'sofia-almeida',
@@ -94,10 +110,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Family Law Editor',
     credentials: 'Family Law desk, Law Elite Network',
     bio:
-      'Sofia Almeida heads family-law coverage at Law Elite Network, with a focus on divorce, financial settlement, and the practical mechanics of separating two lives. She writes with the understanding that readers arrive at these guides during some of the hardest weeks of their lives. ' +
-      'Her work explains process and options without alarmism — what the steps are, what tends to be negotiable, and when a person genuinely needs a lawyer rather than a template. Sofia reviews the network’s family and personal-law guides.',
+      'Sofia Almeida heads family-law coverage at Law Elite Network, with a focus on divorce, financial settlement, and the practical mechanics of separating two lives.' +
+      'Her articles explain process and options, including what the steps are and when professional legal help is advisable. Sofia edits the network’s family and personal-law guides.',
     expertise: ['Family & Personal'],
     avatarSeed: 'sofia-almeida',
+    archived: true,
   },
   {
     slug: 'rajesh-iyer',
@@ -105,10 +122,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Family & Children’s Law Contributor',
     credentials: 'Family & Children’s Law desk, Law Elite Network',
     bio:
-      'Rajesh Iyer writes Law Elite Network’s coverage of child custody, parenting arrangements, and the welfare standards courts apply when families restructure. He is careful to separate what the law actually weighs — the best interests of the child — from the myths that surround custody disputes. ' +
-      'His guides walk parents through arrangements, modification, and the evidence that matters, while steering them toward qualified local counsel for their specific situation.',
+      'Rajesh Iyer writes Law Elite Network’s coverage of child custody, parenting arrangements, and the welfare standards courts apply when families restructure. ' +
+      'His articles cover arrangements, modification and the evidence courts consider, and direct readers to qualified local counsel for their specific situation.',
     expertise: ['Family & Personal'],
     avatarSeed: 'rajesh-iyer',
+    archived: true,
   },
   {
     slug: 'eleanor-whitfield',
@@ -116,10 +134,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Estate Planning & Probate Editor',
     credentials: 'Estate Planning & Probate desk, Law Elite Network',
     bio:
-      'Eleanor Whitfield covers wills, estate planning, and probate for Law Elite Network, writing about how people pass on what they own — and how avoidable mistakes in a will or a beneficiary form unravel decades of intentions. ' +
-      'Her explainers cover what makes a will valid, why witnessing rules matter, and the difference between planning that survives a challenge and planning that doesn’t. Eleanor edits the network’s estate and succession guides.',
+      'Eleanor Whitfield covers wills, estate planning, and probate for Law Elite Network, writing about how people pass on what they own and beneficiary designations. ' +
+      'Her articles cover what makes a will valid and why witnessing rules matter. Eleanor edits the network’s estate and succession guides.',
     expertise: ['Family & Personal'],
     avatarSeed: 'eleanor-whitfield',
+    archived: true,
   },
   {
     slug: 'priya-nair',
@@ -127,10 +146,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Senior Legal Editor',
     credentials: 'Senior Editor, Law Elite Network',
     bio:
-      'Priya Nair is a senior editor at Law Elite Network whose byline spans commercial agreements, tax fundamentals, employment contracts, intellectual property, and property transactions. Her breadth comes from working across the desks where these areas overlap — a single business decision often touching all of them at once. ' +
-      'Priya’s role is consistency: making sure that a tenant’s rights guide and a corporate-tax explainer hold the same standard of clarity, accuracy, and worldwide framing. She is one of the network’s most-published contributors.',
+      'Priya Nair is a senior editor at Law Elite Network whose byline spans commercial agreements, tax fundamentals, employment contracts, intellectual property, and property transactions.' +
+      'Her role is editorial consistency across the network’s desks, covering clarity, accuracy and worldwide framing.',
     expertise: ['Tax & Finance', 'Employment & Labor', 'Technology & IP', 'Property & Real Estate'],
     avatarSeed: 'priya-nair',
+    archived: true,
   },
   {
     slug: 'daniel-okafor',
@@ -138,10 +158,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Criminal & Regulatory Editor',
     credentials: 'Criminal & Regulatory desk, Law Elite Network',
     bio:
-      'Daniel Okafor covers criminal procedure, white-collar and regulatory matters, tax enforcement, and property law for Law Elite Network. He focuses on the points where ordinary people meet the enforcement side of the law — bail, investigations, audits, and disputes — and explains rights and process plainly. ' +
-      'His guides are built around a simple principle: readers should understand what is happening to them and what their options are before they sit across from a prosecutor, an auditor, or opposing counsel.',
+      'Daniel Okafor covers criminal procedure, white-collar and regulatory matters, tax enforcement, and property law for Law Elite Network. His articles cover bail, investigations, audits and disputes. ' +
+      'His guides are general education and direct readers to qualified counsel for their specific situation.',
     expertise: ['Criminal Law', 'Tax & Finance', 'Property & Real Estate'],
     avatarSeed: 'daniel-okafor',
+    archived: true,
   },
   {
     slug: 'daniel-okoro',
@@ -149,10 +170,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Employment Law Contributor',
     credentials: 'Employment Law desk, Law Elite Network',
     bio:
-      'Daniel Okoro writes Law Elite Network’s employment coverage, with particular attention to dismissal, wrongful termination, and the rights employees keep when a job ends. He explains the difference between a lawful dismissal and an unlawful one, and what documentation tends to decide which is which. ' +
-      'His work is written for both sides of the relationship — employees trying to understand a sudden termination, and small employers trying to do it correctly.',
+      'Daniel Okoro writes Law Elite Network’s employment coverage, with particular attention to dismissal, wrongful termination, and the rights employees keep when a job ends.' +
+      'His articles are written for both employees and employers.',
     expertise: ['Employment & Labor'],
     avatarSeed: 'daniel-okoro',
+    archived: true,
   },
   {
     slug: 'aisha-rahman',
@@ -160,10 +182,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Criminal Justice Contributor',
     credentials: 'Criminal Justice desk, Law Elite Network',
     bio:
-      'Aisha Rahman covers criminal justice for Law Elite Network, from how bail is set and challenged to how white-collar offences are investigated and charged. She writes to demystify a system that is deliberately intimidating, explaining the stages of a case and the rights that apply at each one. ' +
+      'Aisha Rahman covers criminal justice for Law Elite Network, from how bail is set and challenged to how white-collar offences are investigated and charged. Her articles explain the stages of a case and the rights that apply at each one. ' +
       'Aisha’s explainers are general education for a global readership and always point serious matters toward qualified local defence counsel.',
     expertise: ['Criminal Law'],
     avatarSeed: 'aisha-rahman',
+    archived: true,
   },
   {
     slug: 'marcus-whitfield',
@@ -171,10 +194,11 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Dispute Resolution Editor',
     credentials: 'Dispute Resolution desk, Law Elite Network',
     bio:
-      'Marcus Whitfield covers how disputes are resolved outside — and inside — the courtroom: arbitration, mediation, negotiation, and litigation. He helps readers understand which path fits which conflict, what each costs in time and money, and where an enforceable outcome actually comes from. ' +
-      'His guides treat dispute resolution as a set of deliberate choices rather than an inevitable march to trial, and he edits the network’s dispute-resolution coverage.',
+      'Marcus Whitfield covers how disputes are resolved outside — and inside — the courtroom: arbitration, mediation, negotiation, and litigation. His articles compare these routes and what each involves. ' +
+      'He edits the network’s dispute-resolution coverage.',
     expertise: ['Dispute Resolution'],
     avatarSeed: 'marcus-whitfield',
+    archived: true,
   },
   {
     slug: 'deepak-kumar-kuldeep',
@@ -199,6 +223,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: ['Business & Corporate', 'Technology & IP', 'Employment & Labor', 'Property & Real Estate', 'Dispute Resolution'],
     avatarSeed: 'waki-malik',
     social: { linkedin: 'https://in.linkedin.com/in/wakimalik' },
+    archived: true,
   },
   {
     slug: 'aman-thakur',
@@ -211,6 +236,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: ['Family & Personal'],
     avatarSeed: 'aman-thakur',
     social: { linkedin: 'https://in.linkedin.com/in/aman-thakur-b30015247' },
+    archived: true,
   },
   {
     slug: 'maria-harizanova',
@@ -223,6 +249,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: ['Employment & Labor', 'Business & Corporate'],
     avatarSeed: 'maria-harizanova',
     social: { linkedin: 'https://bg.linkedin.com/in/maria-harizanova-6b0329115' },
+    archived: true,
   },
   {
     slug: 'claire-hannon',
@@ -235,6 +262,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: ['Business & Corporate', 'Tax & Finance'],
     avatarSeed: 'claire-hannon',
     social: { linkedin: 'https://au.linkedin.com/in/claire-hannon' },
+    archived: true,
   },
   {
     slug: 'yessica-ruiz',
@@ -247,6 +275,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: ['Legal Education & History', 'U.S. Law & Constitution'],
     avatarSeed: 'yessica-ruiz',
     social: { linkedin: 'https://www.linkedin.com/in/yessica-ruiz-b277ba281' },
+    archived: true,
   },
   {
     slug: 'abinesh-raj',
@@ -257,6 +286,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: [],
     avatarSeed: 'abinesh-raj',
     social: { linkedin: 'https://in.linkedin.com/in/abinesh-raj-6718b2315' },
+    archived: true,
   },
   {
     slug: 'aishwarya-gorak',
@@ -267,6 +297,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: [],
     avatarSeed: 'aishwarya-gorak',
     social: { linkedin: 'https://in.linkedin.com/in/aishwarya-gorak-766956139' },
+    archived: true,
   },
   {
     slug: 'diksha-singhal',
@@ -277,6 +308,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: [],
     avatarSeed: 'diksha-singhal',
     social: { linkedin: 'https://www.linkedin.com/in/diksha-singhal-aa11b6192/' },
+    archived: true,
   },
   {
     slug: 'anna-solovieva',
@@ -287,6 +319,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     expertise: [],
     avatarSeed: 'anna-solovieva',
     social: { linkedin: 'https://be.linkedin.com/in/anna-solovieva-049b7b60' },
+    archived: true,
   },
 ];
 
@@ -308,13 +341,16 @@ export function authorNameToSlug(name: string | null | undefined): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Non-archived roster — everything reader-facing (`generateStaticParams`, profile lookups) uses this, never `LAW_AUTHORS` directly. */
+export const ACTIVE_LAW_AUTHORS: LawAuthor[] = LAW_AUTHORS.filter((a) => !a.archived);
+
 export function getAllAuthors(): LawAuthor[] {
-  return LAW_AUTHORS;
+  return ACTIVE_LAW_AUTHORS;
 }
 
 export function getAuthorBySlug(slug: string): LawAuthor | null {
   const target = slug.toLowerCase();
-  return LAW_AUTHORS.find((a) => a.slug === target) ?? null;
+  return ACTIVE_LAW_AUTHORS.find((a) => a.slug === target) ?? null;
 }
 
 /** Resolve a byline string to a full profile, matching by slug. */

@@ -26,7 +26,7 @@ module.exports = {
     next('amarise-web',      'AmariseMaisonAvenue-main',         3033),
     next('gti-web',          'Global-Trade-Infrastructure-main', 9003),
     next('jobs-web',         'Baalvion-Jobs-Portal-main',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
-    next('ctm-web',          'controlthemarket-main',            3034),
+    next('testrank-baalvion-web', 'testrank-baalvion',           3034),
     next('dashboard-web',    'company-unified-Dashboard-main',   3024),
     next('law-web',          'Law-Elite-Network-main',           9002),
     next('brand-web',        'brand-connector-main',             3035),
@@ -34,6 +34,7 @@ module.exports = {
     // Absent until 2026-09: CI derives its frontend build matrix from this list,
     // so Imperialpedia was the one production site CI never built.
     next('imperialpedia-web','Imperialpedia-main',               3029),
+    next('canwemarry-web',   'CanWeMarry-main',                  3071),
 
     // --- Vite SPAs ---
     vite('insiders-web',     'For Invstors and Founders',        8080),

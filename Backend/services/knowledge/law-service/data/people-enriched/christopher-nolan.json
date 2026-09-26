@@ -1,0 +1,108 @@
+{
+  "slug": "christopher-nolan",
+  "category": "directors",
+  "wikidata_id": "Q25191",
+  "full_name": "Christopher Nolan",
+  "description": "English and American filmmaker (born 1970)",
+  "birth_date": "1970-07-30",
+  "birth_place": "City of Westminster",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "England",
+    "United States"
+  ],
+  "occupations": [
+    "film director",
+    "screenwriter",
+    "film producer",
+    "writer",
+    "camera operator",
+    "film actor",
+    "executive producer",
+    "film editor",
+    "cinematographer",
+    "director",
+    "producer",
+    "film screenwriter"
+  ],
+  "education": [
+    {
+      "institution": "University College London"
+    },
+    {
+      "institution": "Haileybury and Imperial Service College"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Indiana Film Journalists Association Award for Best Director",
+      "year": 2010
+    },
+    {
+      "title": "Edgar Awards",
+      "year": 2002
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 2019
+    },
+    {
+      "title": "Saturn Awards"
+    },
+    {
+      "title": "The Waldo Salt Screenwriting Award",
+      "year": 2001
+    },
+    {
+      "title": "Hugo Award for Best Dramatic Presentation, Long Form",
+      "year": 2011
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 2024
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 2024
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2024
+    },
+    {
+      "title": "BAFTA Award for Best Direction",
+      "year": 2024
+    },
+    {
+      "title": "Bradbury Award"
+    },
+    {
+      "title": "Knight Bachelor",
+      "year": 2024
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q25191"
+    }
+  ],
+  "photo": {
+    "file": "christopher-nolan.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 915,
+    "credit": "Republic of Korea / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Christopher_Nolan.jpg"
+  },
+  "fetched_at": "2026-09-21T19:27:22.038Z"
+}

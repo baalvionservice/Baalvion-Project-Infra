@@ -1,0 +1,140 @@
+{
+  "slug": "adele",
+  "category": "musicians",
+  "wikidata_id": "Q23215",
+  "full_name": "Adele",
+  "description": "English singer-songwriter (born 1988)",
+  "birth_date": "1988-05-05",
+  "birth_place": "Tottenham",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom"
+  ],
+  "occupations": [
+    "singer-songwriter",
+    "musician",
+    "recording artist",
+    "composer",
+    "singer",
+    "songwriter"
+  ],
+  "education": [
+    {
+      "institution": "BRIT School for Performing Arts and Technology"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Member of the Order of the British Empire",
+      "start": 2013
+    }
+  ],
+  "awards": [
+    {
+      "title": "Member of the Order of the British Empire",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Best New Artist",
+      "year": 2009
+    },
+    {
+      "title": "Grammy Award for Best Pop Solo Performance",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Record of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Academy Award for Best Original Song",
+      "year": 2013
+    },
+    {
+      "title": "Golden Globe Award for Best Original Song",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 2017
+    },
+    {
+      "title": "Brit Award for British Female Solo Artist",
+      "year": 2016
+    },
+    {
+      "title": "Grammy Award for Best Female Pop Vocal Performance",
+      "year": 2009
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Pop Vocal Album",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Music Video",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Song of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Pop Solo Performance",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Best Song Written for Visual Media",
+      "year": 2014
+    },
+    {
+      "title": "Grammy Award for Best Pop Vocal Album",
+      "year": 2017
+    },
+    {
+      "title": "Grammy Award for Record of the Year",
+      "year": 2017
+    },
+    {
+      "title": "Premios Odeón"
+    },
+    {
+      "title": "Time 100",
+      "year": 2022
+    },
+    {
+      "title": "Broadcast Film Critics Association Award for Best Song",
+      "year": 2012
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/Adele",
+    "instagram": "https://www.instagram.com/adele",
+    "facebook": "https://www.facebook.com/adele"
+  },
+  "official_website": "https://www.adele.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q23215"
+    }
+  ],
+  "photo": {
+    "file": "adele.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1328,
+    "credit": "Marc E. / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Adele_2016.jpg"
+  },
+  "fetched_at": "2026-09-21T19:17:26.476Z"
+}

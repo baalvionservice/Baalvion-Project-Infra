@@ -623,7 +623,7 @@ export default function PlacementPage() {
             </div>
             <div>
               <p className="font-semibold text-lg">
-                TalentOS is operated by Baalvion Industries Pvt Ltd
+                TalentOS is operated by Baalvion Industries Private Limited
               </p>
               <p className="text-muted-foreground text-sm mt-1">
                 A technology company committed to building trustworthy, transparent
@@ -739,7 +739,7 @@ export default function PlacementPage() {
               {
                 href: "/careers",
                 label: "Careers at Baalvion",
-                description: "Browse roles at Baalvion Industries Pvt Ltd.",
+                description: "Browse roles at Baalvion Industries Private Limited.",
                 icon: <Briefcase className="h-5 w-5" />,
               },
               {

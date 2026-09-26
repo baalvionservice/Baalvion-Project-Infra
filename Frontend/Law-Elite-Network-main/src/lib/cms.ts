@@ -93,9 +93,14 @@ interface CmsContent {
   featuredImage?: string | null;
   contentType: string;
   contentBlocks?: Block[];
+  /** Where an editor-started article came from (admin "Write full article"). Shown under Sources when no citations were written. */
+  externalSourceName?: string | null;
+  externalSourceUrl?: string | null;
   customFields?: Record<string, any> | null;
   seoMetadata?: Record<string, any> | null;
   category?: { id: string; name: string; slug: string } | null;
+  /** Primary category id. The delivery API's singular `category` is null when that category row is not active, but this id is still set. */
+  categoryId?: string | null;
   /**
    * Every category tagged on this content (public-service resolves `categoryIds`
    * into full records). Includes both the top-level practice-area category and,
@@ -108,6 +113,12 @@ interface CmsContent {
   // BIGINT column -- the API actually returns this as a numeric string (see
   // toArticle()'s `views` mapping below), not a number.
   viewCount?: number | string;
+  /** Admin-set homepage/section flags (ContentEditor's Media tab -> NewsMetaPanel), not derived from traffic. */
+  isTrending?: boolean;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
 }
 
 export interface CmsSitePage {
@@ -182,6 +193,32 @@ async function getContent(slug: string, strict = false): Promise<CmsContent | nu
 // for (or the API runs out), instead of trusting one request to cover it.
 const LIST_CONTENT_MAX_PAGES = 20;
 
+/**
+ * The list endpoint returns `categoryId` but neither `category` nor
+ * `categories[]`, so list-derived articles (sitemap, author article counts,
+ * category pages, feeds) had no category at all. Look each distinct primary
+ * category up once, through one record's detail response (which does carry
+ * `categories[]`), and attach it to every list item that shares the id.
+ * A failed lookup leaves the item as it was.
+ */
+async function withPrimaryCategories(items: CmsContent[]): Promise<CmsContent[]> {
+  const lacks = (c: CmsContent) => !!c.categoryId && !c.category && !(c.categories && c.categories.length);
+  const probes = new Map<string, CmsContent>();
+  for (const c of items) if (lacks(c) && !probes.has(c.categoryId as string)) probes.set(c.categoryId as string, c);
+  if (probes.size === 0) return items;
+  const byId = new Map<string, NonNullable<CmsContent['categories']>[number]>();
+  await Promise.all(
+    [...probes.values()].map(async (c) => {
+      const detail = await getContent(c.slug).catch(() => null);
+      for (const cat of detail?.categories || []) byId.set(cat.id, cat);
+    }),
+  );
+  return items.map((c) => {
+    const cat = lacks(c) ? byId.get(c.categoryId as string) : undefined;
+    return cat ? { ...c, categories: [cat] } : c;
+  });
+}
+
 async function listContent(params: Record<string, string | number> = {}): Promise<CmsContent[]> {
   const requestedLimit = Number(params.limit ?? 200);
   const all: CmsContent[] = [];
@@ -198,7 +235,7 @@ async function listContent(params: Record<string, string | number> = {}): Promis
     all.push(...items);
     if (!j?.pagination?.hasNext) break;
   }
-  return all.slice(0, requestedLimit);
+  return withPrimaryCategories(all.slice(0, requestedLimit));
 }
 
 /**
@@ -216,7 +253,7 @@ async function listContentPaged(
   const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
   const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
   const total = typeof j?.pagination?.total === 'number' ? j.pagination.total : items.length;
-  return { items, total };
+  return { items: await withPrimaryCategories(items), total };
 }
 
 function blocksToHtml(blocks?: Block[]): string {
@@ -308,6 +345,8 @@ export interface CmsArticle {
   featuredImage?: string;
   /** View count, when the CMS tracks it — omit from UI when absent rather than fabricating a number. */
   views?: number;
+  /** Admin-toggled "Trending" flag (ContentEditor -> Media -> NewsMetaPanel), independent of view count. */
+  isTrending?: boolean;
   /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
   customFields?: Record<string, any>;
   /** Country this guide is jurisdiction-specific to (customFields.country), e.g. "United States". Absent for worldwide-general content. */
@@ -365,6 +404,35 @@ function readPrimarySources(value: unknown): { label: string; url?: string }[] |
   return sources.length > 0 ? sources : undefined;
 }
 
+/** The source name and link attached to a post, as a one-entry Sources list. Only when both are present and the link is https. */
+function attachedSource(c: { externalSourceName?: string | null; externalSourceUrl?: string | null }): { label: string; url?: string }[] | undefined {
+  const label = c.externalSourceName?.trim();
+  const url = c.externalSourceUrl?.trim();
+  return label && url && /^https:\/\//i.test(url) ? [{ label, url }] : undefined;
+}
+
+type CatRef = { id: string; name: string; slug: string; parentId?: string | null };
+
+/**
+ * The record's primary category. The delivery API's singular `category` is
+ * null whenever the primary category row is not `active` (public-service joins
+ * it with status = 'active'), yet `categories[]` still carries the row and
+ * `categoryId` still names the primary. Reading only `category` made every
+ * such article look category-less: indexable, absent from the sitemap, no
+ * breadcrumb category, and its author counted as having a live article.
+ *
+ * Order: (1) `category`; (2) the top-level entry of `categories[]` whose id is
+ * `categoryId`; (3) the only top-level entry when `categoryId` is absent. With
+ * several top-level entries and no matching `categoryId` there is no reliable
+ * primary signal, so nothing is chosen (undefined) rather than picking one.
+ */
+export function resolvePrimaryCategory(c: Pick<CmsContent, 'category' | 'categories' | 'categoryId'>): CatRef | undefined {
+  if (c.category) return c.category;
+  const top = (c.categories || []).filter((cat) => !cat.parentId);
+  if (c.categoryId) return top.find((cat) => cat.id === c.categoryId);
+  return top.length === 1 ? top[0] : undefined;
+}
+
 function toArticle(c: CmsContent): CmsArticle {
   const cf = c.customFields || {};
   const rawLetter = (cf.alphabet || (c.title || '#').charAt(0) || '#').toString().toUpperCase();
@@ -387,9 +455,10 @@ function toArticle(c: CmsContent): CmsArticle {
     // in a renamed category — so those pages fall back to bundled placeholder
     // art instead of the article's real uploaded image — and article-url.ts /
     // Breadcrumbs / RelatedArticles build links to the dead old slug.
-    category: c.category
-      ? { id: c.category.id, name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
-      : undefined,
+    category: (() => {
+      const primary = resolvePrimaryCategory(c);
+      return primary ? { id: primary.id, name: primary.name, slug: toNewCategorySlug(primary.slug) } : undefined;
+    })(),
     subcategory: childCategory
       ? { id: childCategory.id, name: childCategory.name, slug: childCategory.slug }
       : undefined,
@@ -402,9 +471,10 @@ function toArticle(c: CmsContent): CmsArticle {
     // BIGINT column -- pg serializes it as a string ("58"), so the old strict
     // `typeof === 'number'` check here silently nulled out every view count.
     views: c.viewCount != null ? Number(c.viewCount) : undefined,
+    isTrending: !!c.isTrending,
     customFields: c.customFields ?? undefined,
     country: typeof cf.country === 'string' ? cf.country : undefined,
-    primarySources: readPrimarySources(cf.citations),
+    primarySources: readPrimarySources(cf.citations) ?? attachedSource(c),
     reviewerSlug: typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined,
     reviewedAt: typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined,
     reviewerJurisdiction: typeof cf.reviewerJurisdiction === 'string' ? cf.reviewerJurisdiction : undefined,

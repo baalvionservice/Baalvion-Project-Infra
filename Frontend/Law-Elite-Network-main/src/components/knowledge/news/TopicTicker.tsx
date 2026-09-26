@@ -25,7 +25,7 @@ export function TopicTicker({ categories }: TopicTickerProps) {
             <Link
               key={cat.id}
               href={`/${cat.slug}`}
-              className="shrink-0 px-3 py-1 text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:text-news-600 whitespace-nowrap transition-colors"
+              className="shrink-0 px-3 py-2.5 sm:py-1 text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:text-news-600 whitespace-nowrap transition-colors"
             >
               {cat.name}
             </Link>

@@ -1,0 +1,139 @@
+{
+  "display_name": null,
+  "short_bio": "British theoretical physicist and author of A Brief History of Time.",
+  "biography": "Stephen Hawking was born in Oxford in 1942 and studied at University College, Oxford, and then at Cambridge. In 1963, aged 21, he was diagnosed with motor neurone disease, and he lost the use of his voice, later speaking through a synthesiser.\n\nWith Roger Penrose he proved singularity theorems about the origins of the universe, and in 1974 he showed that black holes emit radiation, now called Hawking radiation. He was Lucasian Professor of Mathematics at Cambridge from 1979 to 2009.\n\nA Brief History of Time (1988) sold in the millions. He received the Presidential Medal of Freedom in 2009 and died on 14 March 2018.",
+  "awards": [
+    {
+      "title": "Adams Prize",
+      "year": 1966
+    },
+    {
+      "title": "Eddington Medal",
+      "year": 1975
+    },
+    {
+      "title": "Pius XI Medal",
+      "year": 1975
+    },
+    {
+      "title": "Hughes Medal",
+      "year": 1976
+    },
+    {
+      "title": "Maxwell Medal and Prize",
+      "year": 1976
+    },
+    {
+      "title": "Albert Einstein Medal",
+      "year": 1979
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 1982
+    },
+    {
+      "title": "Gold Medal of the Royal Astronomical Society",
+      "year": 1985
+    },
+    {
+      "title": "IOP Dirac Medal",
+      "year": 1987
+    },
+    {
+      "title": "Wolf Prize in Physics",
+      "year": 1988
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 1989
+    },
+    {
+      "title": "Naylor Prize and Lectureship",
+      "year": 1999
+    },
+    {
+      "title": "Albert Medal",
+      "year": 1999
+    },
+    {
+      "title": "Royal Society Science Books Prize",
+      "year": 2002
+    },
+    {
+      "title": "Oskar Klein Medal",
+      "year": 2003
+    },
+    {
+      "title": "Michelson–Morley Award",
+      "year": 2003
+    },
+    {
+      "title": "Copley Medal",
+      "year": 2006
+    },
+    {
+      "title": "Fonseca Prize",
+      "year": 2008
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2009
+    },
+    {
+      "title": "Special Breakthrough Prize in Fundamental Physics",
+      "year": 2013
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Hawking radiation",
+      "year": 1974,
+      "note": "Theoretical result"
+    },
+    {
+      "title": "A Brief History of Time",
+      "year": 1988,
+      "note": "Book"
+    },
+    {
+      "title": "The Theory of Everything",
+      "year": 2014,
+      "note": "Film about his life"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1942-01-08",
+      "title": "Born in Oxford"
+    },
+    {
+      "date": "1963",
+      "title": "Diagnosed with motor neurone disease"
+    },
+    {
+      "date": "1974",
+      "title": "Predicts black-hole radiation"
+    },
+    {
+      "date": "1979",
+      "title": "Becomes Lucasian Professor of Mathematics"
+    },
+    {
+      "date": "2018-03-14",
+      "title": "Dies in Cambridge"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q17714"
+    },
+    {
+      "label": "Wikipedia: Stephen Hawking",
+      "url": "https://en.wikipedia.org/wiki/Stephen_Hawking"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

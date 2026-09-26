@@ -1,0 +1,66 @@
+[
+  {
+    "slug": "legal-dispute",
+    "name": "Legal Dispute",
+    "pillar": "legal"
+  },
+  {
+    "slug": "defamation-law",
+    "name": "Defamation Law",
+    "pillar": "legal",
+    "aliases": [
+      "Defamation"
+    ]
+  },
+  {
+    "slug": "constitutional-law",
+    "name": "Constitutional Law",
+    "pillar": "legal"
+  },
+  {
+    "slug": "equal-protection",
+    "name": "Equal Protection",
+    "pillar": "legal"
+  },
+  {
+    "slug": "press-freedom",
+    "name": "Press Freedom",
+    "pillar": "legal"
+  },
+  {
+    "slug": "maritime-law",
+    "name": "Maritime Law",
+    "pillar": "legal",
+    "aliases": [
+      "Jones Act"
+    ]
+  },
+  {
+    "slug": "entertainment-news",
+    "name": "Entertainment News",
+    "pillar": "entertainment"
+  },
+  {
+    "slug": "film-industry",
+    "name": "Film Industry",
+    "pillar": "entertainment"
+  },
+  {
+    "slug": "music-industry",
+    "name": "Music Industry",
+    "pillar": "entertainment"
+  },
+  {
+    "slug": "sports-news",
+    "name": "Sports News",
+    "pillar": "sports"
+  },
+  {
+    "slug": "olympics",
+    "name": "Olympics",
+    "pillar": "sports",
+    "aliases": [
+      "Olympic Games"
+    ]
+  }
+]

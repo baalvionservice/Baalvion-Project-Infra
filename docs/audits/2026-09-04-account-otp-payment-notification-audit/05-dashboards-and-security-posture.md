@@ -21,7 +21,7 @@ Covers checklist sections "User Dashboard" and "Security & Monitoring". Identity
 - **Law-Elite-Network-main** — ✅ profile, notifications, invoices, subscriptions; ❌ security/sessions/refunds/activity-log for end users.
 - **Mining.Baalvion-main** — ✅ profile, notifications; refund policy is a static page only; ❌ purchase history/invoices/sessions.
 - **brand-connector-main** — ✅ invoices, subscriptions, refunds, notifications, profile.
-- **controlthemarket-main** — ✅ profile, invoices/subscription (company role), activity log; security is admin-only.
+- **testrank-baalvion** (renamed from controlthemarket-main) — ✅ profile, invoices/subscription (company role), activity log; security is admin-only.
 - **market-underworld** — ✅ invoices, subscriptions, purchases, notifications, sessions (role-scoped).
 - **IR-Baalvion-main** — ✅ notifications, subscriptions, activity log; ❌ security/devices/purchase/invoices/refunds.
 

@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/commerce-rbac",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Commerce-domain RBAC Policy Enforcement Point (PEP): the single, shared store/country authorization layer for every commerce service. RBAC remains the source of truth; this package holds the enforcement logic once.",
   "private": true,

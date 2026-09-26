@@ -1,8 +1,8 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/ctm-service/Dockerfile -t ctm-service .
-FROM node:20.12-alpine AS base
-RUN corepack enable
+FROM node:26.9-alpine AS base
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
@@ -20,9 +20,18 @@ COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # (The root lockfile itself is consistent — `pnpm install --frozen-lockfile` passes on the host.)
 RUN pnpm install --no-frozen-lockfile --filter baalvion-ctm-service...
 COPY --from=pruner /repo/out/full/ ./
+# turbo prune carries neither the root tsconfig.base.json (which every package tsconfig
+# extends) nor any built output. Workspace packages like @baalvion/money point their
+# "exports" at dist/, which only exists after tsup runs — so without these two lines the
+# image builds clean, `pnpm deploy` copies a package with no dist/, and the container dies
+# at require() time with MODULE_NOT_FOUND and a health check that just says "unhealthy".
+# Cost production an outage on app-insiders 2026-09-09. The prune already scopes this to
+# the packages this service actually depends on.
+COPY tsconfig.base.json ./tsconfig.base.json
+RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=baalvion-ctm-service --prod /out
 
-FROM node:20.12-alpine AS final
+FROM node:26.9-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \

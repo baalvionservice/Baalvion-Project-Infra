@@ -148,7 +148,7 @@ async function fetchTopicArticles(slug: string, limit: number): Promise<NewsArti
 }
 
 /**
- * Dedicated Personal Finance hub — a NerdWallet/Investopedia-style money
+ * Dedicated Personal Finance hub — a NerdWallet/Imperialpedia-style money
  * knowledge center: a topic dashboard, curated "Start Here" picks, eight real
  * per-topic sections (pillar + supporting guides), related product reviews,
  * real "vs." comparison pieces, working calculators, a recency-sorted news

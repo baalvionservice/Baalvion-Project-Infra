@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CONTENT_CACHE_TAG } from "@/lib/cache-tags";
 import { NextResponse } from "next/server";
+import { notifyFollowersOfPublish } from "@/lib/follow-notify";
 
 /**
  * On-publish revalidation webhook.
@@ -67,5 +68,7 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, revalidated, indexNow });
+  const followNotify = await notifyFollowersOfPublish([...(body.paths ?? []), ...(body.urls ?? [])]);
+
+  return NextResponse.json({ ok: true, revalidated, indexNow, followNotify });
 }

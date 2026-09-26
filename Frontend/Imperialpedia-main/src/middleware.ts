@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { GONE_TOP_LEVEL_SLUGS } from '@/lib/content/retired-paths';
 
 /**
  * Imperialpedia middleware — single source of truth (the duplicate root middleware.ts was removed).
@@ -193,6 +194,22 @@ const REMOVED_PATHS = new Set<string>([
   '/explore',
 ]);
 
+// Whole-category removals with no redirect target — 410 Gone, hub AND every
+// article under it, same treatment as /companies etc. above. Driven by
+// GONE_TOP_LEVEL_SLUGS in retired-paths.ts (one source of truth, so nav/
+// footer/homepage link-filtering via isRetiredPath can never disagree with
+// what actually 410s here) rather than a second hand-maintained list.
+//
+// A 301 still tells a crawler "there used to be content here," which is the
+// wrong signal for a page that's simply gone or merged with no address to
+// forward to — every internal link that used to point at one of these was
+// updated to go straight to its real destination (or dropped) instead of
+// routing through a redirect. Whole-prefix (not just the bare path) because
+// several of these have (or had) [slug] children — an old article URL falling
+// through to the catch-all route's slug lookup would otherwise land on a
+// wrong-status 404 instead of a clean 410.
+const REMOVED_PATH_PREFIXES = GONE_TOP_LEVEL_SLUGS.map((slug) => `/${slug}`);
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -247,6 +264,12 @@ export function middleware(request: NextRequest) {
     pathname === '/technologies' || pathname.startsWith('/technologies/') ||
     pathname === '/industries' || pathname.startsWith('/industries/')
   ) {
+    return goneResponse();
+  }
+
+  // REMOVED_PATH_PREFIXES coverage (see the array above) — same whole-prefix
+  // 410 treatment as /companies etc. above, for routes that had [slug] children.
+  if (REMOVED_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return goneResponse();
   }
 
@@ -370,5 +393,29 @@ export const config = {
     '/research-ai',
     '/knowledge-map',
     '/explore',
+    // 2026-09-23 removals — see GONE_TOP_LEVEL_SLUGS in retired-paths.ts and
+    // REMOVED_PATH_PREFIXES above.
+    '/datasets',
+    '/learning-paths',
+    '/savings',
+    '/savings/:path*',
+    '/scams-and-fraud-protection',
+    '/scams-and-fraud-protection/:path*',
+    '/creator-guides',
+    '/creator-guides/:path*',
+    '/social-media-earnings',
+    '/social-media-earnings/:path*',
+    '/articles',
+    '/articles/:path*',
+    // /investing/:path* and /personal-finance/:path* already covered by the
+    // matcher entries above (were there for the individual-article
+    // removals); only the bare hub paths are new here.
+    '/investing',
+    '/personal-finance',
+    '/reviews',
+    // /financial-intelligence/:path* already covered by the matcher entry
+    // above (was there for the individual-article removals); only the bare
+    // hub path is new here.
+    '/financial-intelligence',
   ],
 };

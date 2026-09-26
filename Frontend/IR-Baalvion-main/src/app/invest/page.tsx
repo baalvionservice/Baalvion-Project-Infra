@@ -7,8 +7,11 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Invest — Discover Opportunities | Baalvion Invest',
-  description: 'Discover vetted private investment opportunities across industries and stages. For qualified and accredited investors on the Baalvion Invest marketplace.',
+  description: 'Private placement opportunities, available by invitation to identified investors.',
   alternates: { canonical: '/invest' },
+  // Invitation-only under Companies Act s.42 (lib/invite-gate.ts). robots.txt already blocks
+  // this path; the meta tag covers a crawler that reaches it by a direct link anyway.
+  robots: { index: false, follow: false },
 };
 
 const COMPANY = 'Baalvion Industries Private Limited';

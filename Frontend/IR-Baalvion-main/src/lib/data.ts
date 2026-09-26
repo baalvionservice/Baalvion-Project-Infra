@@ -19,7 +19,7 @@ export const leadershipTeam = [
   },
   {
     name: "Adarsh Patra",
-    title: "Chief Executive Officer",
+    title: "Chief Technology Officer",
     bio: "Adarsh leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
     imageId: "executive-1-photo",
   },
@@ -91,263 +91,51 @@ export const VicePersidents = [
     position: "Worldwide Sales",
     bio: "Jaid Alam oversees Baalvion's worldwide sales operations, driving revenue growth and client acquisition across global markets. With a proven track record in sales leadership and a deep understanding of the B2B commerce landscape, he is instrumental in expanding our customer base and strengthening our market position.",
   },
-  {
-    name: "Nathan P. Cole",
-    title: "Vice President",
-    position: "Investor Relations",
-    bio: "Nathan P. Cole leads Baalvion's communications and engagement with the company's shareholders, analysts and the wider investment community, ensuring clear, consistent and transparent dialogue with investors.",
-  },
 ];
 
-export const boardOfDirectors = [
-  {
-    name: "Jonathan R. Whitfield",
-    title: "Non-Executive Chairman of the Board",
-    imageId: "bod-1",
-    bio: "Jonathan R. Whitfield serves as Non-Executive Chairman of the Board of Baalvion Industries Private Limited. He brings more than three decades of leadership across global technology, infrastructure and financial services, and chairs the Board with a focus on long-term value creation, sound governance and disciplined oversight.",
-  },
-  {
-    name: "Margaret A. Sinclair",
-    title: "Lead Independent Director",
-    imageId: "bod-2",
-    bio: "Margaret A. Sinclair is the Lead Independent Director of Baalvion Industries Private Limited. A seasoned finance and operations executive, she provides independent oversight of management and serves as a key liaison between the Board and shareholders.",
-  },
-  {
-    name: "David C. Harrington",
-    title: "Independent Director",
-    imageId: "bod-3",
-    bio: "David C. Harrington is an Independent Director of Baalvion Industries Private Limited. With a distinguished career in capital markets and corporate strategy, he advises the Board on growth, capital allocation and value creation.",
-  },
-  {
-    name: "Catherine E. Lawson",
-    title: "Independent Director",
-    imageId: "bod-4",
-    bio: "Catherine E. Lawson is an Independent Director of Baalvion Industries Private Limited. She brings deep expertise in operations, technology and organisational development, and supports the Board's oversight of strategy execution and talent.",
-  },
-  {
-    name: "Richard P. Donnelly",
-    title: "Independent Director",
-    imageId: "bod-5",
-    bio: "Richard P. Donnelly is an Independent Director of Baalvion Industries Private Limited. A veteran of global risk management and regulated industries, he provides the Board with independent counsel on risk, compliance and governance.",
-  },
-  {
-    name: "Andrew S. Caldwell",
-    title: "Non-Executive Director",
-    imageId: "bod-6",
-    bio: "Andrew S. Caldwell serves as a Non-Executive Director of Baalvion Industries Private Limited. With extensive experience in growth investing and company building, he advises the Board on long-term strategy, scaling and global expansion.",
-  },
-  {
-    name: "Eleanor M. Brooks",
-    title: "Non-Executive Director",
-    imageId: "bod-7",
-    bio: "Eleanor M. Brooks is a Non-Executive Director of Baalvion Industries Private Limited. She brings a strong record in technology, product and innovation leadership, and helps the Board oversee the company's long-term technology direction and market positioning.",
-  },
-];
+/**
+ * Real directors only.
+ *
+ * Seven invented directors sat here — "Jonathan R. Whitfield, Non-Executive Chairman of
+ * the Board", "Margaret A. Sinclair, Lead Independent Director" and five more — each with
+ * a governance bio naming Baalvion Industries Private Limited and claiming independent
+ * oversight of management. None are directors of the company. cmsGetBoard() falls back to
+ * this list whenever the CMS returns no board, so they rendered on the public
+ * /governance/board-of-directors page.
+ *
+ * Board composition is a statutory fact about a company and a representation to investors;
+ * independent-director claims carry governance meaning. This is not a place for
+ * placeholders. Leave empty until the real directors are entered in the CMS — the page
+ * says the roster is not published yet rather than showing invented names.
+ */
+export const boardOfDirectors: never[] = [];
 
-export const newsArticles = [
-  {
-    title:
-      "Baalvion Sets Out Its Vision for a Unified Operating System for Global Trade",
-    excerpt:
-      "Baalvion Industries outlines its long-term strategy to bring logistics, trade finance and compliance onto a single, transparent platform — reducing friction and unlocking efficiency across global B2B commerce.",
-    date: "2026-05-20",
-    category: "Vision",
-  },
-  {
-    title:
-      "Building a Compliance-First Standard for Cross-Border B2B Commerce",
-    excerpt:
-      "Why Baalvion embeds AML, KYC and sanctions screening into the core of every transaction — making cross-border trade faster to underwrite and safer for every participant.",
-    date: "2026-04-28",
-    category: "Compliance",
-  },
-  {
-    title:
-      "Connecting Logistics, Trade Finance and Compliance on One Platform",
-    excerpt:
-      "A look at how Baalvion's integrated architecture replaces fragmented point solutions with a single, connected flow — and why that creates a compounding network effect.",
-    date: "2026-04-10",
-    category: "Platform",
-  },
-  {
-    title:
-      "Baalvion Strengthens Governance with an Independent Board and Investor Reporting Framework",
-    excerpt:
-      "The company formalises independent board oversight and a transparent investor-reporting cadence as it builds toward institutional-grade standards for qualified investors.",
-    date: "2026-03-22",
-    category: "Governance",
-  },
-];
-
-export const pressReleases = [
-  {
-    title:
-      "Baalvion Industries to Present at the 2026 Global B2B Commerce & Trade Finance Conference on February 10th",
-    date: "Feb 02, 2026",
-    link: "#",
-  },
-  {
-    title: "Baalvion Industries Strengthens Board with New Independent Director Appointment",
-    date: "Jan 27, 2026",
-    link: "#",
-  },
-  {
-    title:
-      "Baalvion Reports Full Year 2025 Diluted EPS of $35.31, or $48.09 as adjusted; Fourth Quarter 2025 Diluted EPS of $7.16, or $13.16 as adjusted",
-    date: "Jan 15, 2026",
-    link: "#",
-    download: "#",
-    webcast: "#",
-    supplement: "#",
-  },
-];
-
-export const documents = [
-  {
-    id: 1,
-    name: "Baalvion Corporate Bylaws.pdf",
-    type: "PDF",
-    category: "Legal",
-    uploadDate: "2024-01-05",
-    size: "1.2 MB",
-  },
-  {
-    id: 2,
-    name: "Series A - Pitch Deck.pptx",
-    type: "PPTX",
-    category: "Presentations",
-    uploadDate: "2024-07-22",
-    size: "15.2 MB",
-  },
-  {
-    id: 3,
-    name: "Series A - Financial Model.xlsx",
-    type: "XLSX",
-    category: "Financials",
-    uploadDate: "2024-07-22",
-    size: "1.8 MB",
-  },
-  {
-    id: 4,
-    name: "Q2 2024 Unaudited Financials.pdf",
-    type: "PDF",
-    category: "Financials",
-    uploadDate: "2024-07-25",
-    size: "2.5 MB",
-  },
-  {
-    id: 5,
-    name: "Independent Audited Financials (FY 2023).pdf",
-    type: "PDF",
-    category: "Financials",
-    uploadDate: "2024-05-10",
-    size: "4.1 MB",
-  },
-  {
-    id: 6,
-    name: "Master Shareholder Agreement.pdf",
-    type: "PDF",
-    category: "Legal",
-    uploadDate: "2024-01-10",
-    size: "0.8 MB",
-  },
-  {
-    id: 7,
-    name: "Series A - Subscription Agreement.docx",
-    type: "DOCX",
-    category: "Legal",
-    uploadDate: "2024-07-14",
-    size: "0.4 MB",
-  },
-  {
-    id: 8,
-    name: "Risk Disclosure Statement (Updated Q3 2024).pdf",
-    type: "PDF",
-    category: "Compliance",
-    uploadDate: "2024-07-12",
-    size: "0.5 MB",
-  },
-  {
-    id: 9,
-    name: "Capital Deployment & Use of Funds.pdf",
-    type: "PDF",
-    category: "Strategy",
-    uploadDate: "2024-07-11",
-    size: "1.2 MB",
-  },
-];
-
-export const investorData = {
-  name: "Qualified Investor",
-  executiveOverview: {
-    investedAmount: 750000,
-    ownershipPercentage: 1.87,
-    securityType: "Series A Preferred",
-  },
-  status: {
-    accreditation: "Verified",
-    dataRoomAccess: "Granted",
-    kycAml: "Passed",
-  },
-  capitalStructure: {
-    shareClass: "Series A",
-    sharesHeld: 150000,
-    votingPower: "1.87%",
-    certificateId: "BV-CERT-001A-007",
-    capTable: [
-      { class: "Founders", count: "2,000,000", ownership: "50.00%" },
-      { class: "Seed", count: "500,000", ownership: "12.50%" },
-      { class: "Series A", count: "1,500,000", ownership: "37.50%" },
-    ],
-  },
-  financialReporting: {
-    reports: [
-      {
-        name: "Q2 2024 Financial Report",
-        date: "2024-07-25",
-        link: "/data-room",
-      },
-      {
-        name: "H1 2024 Capital Deployment Summary",
-        date: "2024-07-11",
-        link: "/data-room",
-      },
-    ],
-    metrics: {
-      totalValue: 985000,
-      totalReturnsPercent: 31.3,
-      capitalDeploymentPercent: 85,
-    },
-  },
-  governanceUpdates: {
-    notices: [
-      {
-        id: 1,
-        message:
-          "Action Required: Please vote on the new director proposal before August 5th.",
-        date: "2024-07-28",
-      },
-      {
-        id: 2,
-        message:
-          "Governance Update: Q3 board meeting minutes are now available.",
-        date: "2024-07-29",
-      },
-    ],
-  },
-  communications: {
-    announcements: [
-      {
-        id: 1,
-        message:
-          "New document 'Q2 2024 Financial Report.pdf' added to the data room.",
-        date: "2024-07-25",
-      },
-      {
-        id: 2,
-        message: "Webinar: Join us for the Q3 Investor Update on August 15th.",
-        date: "2024-07-30",
-      },
-    ],
-  },
-};
+/**
+ * Everything below this point was invented and has been removed.
+ *
+ * It is dead code — cms.ts imports only the four rosters above — which is the only reason
+ * it was not caught with the fabricated people. That makes it more dangerous, not less: the
+ * moment a documents or performance section is wired up, an investor sees it as real.
+ *
+ *   newsArticles / pressReleases  an acquisition ("VeriTrade"), a partnership ("PortLink
+ *                                 Logistics"), a Davos appearance by a founder named
+ *                                 "Alexandros Vasilias" who does not exist, "150% YoY
+ *                                 Growth", and "Full Year 2025 Diluted EPS of $35.31".
+ *                                 The same items were published to the CMS and have now
+ *                                 been purged from it.
+ *
+ *   documents                     "Independent Audited Financials (FY 2023).pdf" and
+ *                                 "Q2 2024 Unaudited Financials.pdf" — reporting periods
+ *                                 that predate the company, which was incorporated on
+ *                                 2025-03-11 — plus a Series A pitch deck, financial model,
+ *                                 subscription agreement, shareholder agreement and risk
+ *                                 disclosure, none of which exist.
+ *
+ *   investorData                  a holding of $750,000 at 1.87% for "Series A Preferred",
+ *                                 a certificate id, KYC marked Passed, and a cap table.
+ *                                 Fabricated holdings are a representation to whoever is
+ *                                 shown them.
+ *
+ * Real editorial belongs in the CMS. Real investor positions belong in ir-service, which
+ * owns them. Neither belongs in a bundled fixture.
+ */

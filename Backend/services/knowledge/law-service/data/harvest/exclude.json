@@ -1,0 +1,4 @@
+{
+  "_note": "Entities the harvester must never attach a Commons photo to: the only match on Wikidata is a namesake, not our person.",
+  "exclude": ["person:eric-decker", "person:john-roberts"]
+}

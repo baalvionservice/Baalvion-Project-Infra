@@ -4,8 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { Linkedin, Twitter, Facebook, Instagram, BookOpen } from 'lucide-react';
-import { authorNameToSlug, getAllAuthors } from '@/data/authors';
+import { Linkedin, Twitter, Facebook, Instagram, Mail, Rss, Home, ChevronRight } from 'lucide-react';
+import { authorNameToSlug, getAllAuthors, isEditorRole } from '@/data/authors';
+import { credentialStatus, credentialNotice } from '@/lib/author-credentials';
 import { getMergedAuthorBySlug } from '@/lib/authors-server';
 import { mergeArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
@@ -13,36 +14,34 @@ import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
-// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): an author's article list here is exactly the kind of surface the
-// retirement plan calls out -- a retired-category guide must stop being
-// linked from a live, indexed page even though it still resolves at
-// /article/{slug} until the CMS-side archive runs. sitemap.ts's
-// isKeptCategoryArticle mirrors this filter (see its own comment) so a
-// contributor whose only work is retired doesn't get a sitemap entry for a
-// page that would now show "No published guides yet".
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
 const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
 function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
   const rawSlug = a.category?.slug;
   return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
 }
 
-// Serve a cached page and refresh it in the background every 5 minutes,
-// instead of re-rendering (and re-fetching from the CMS) on every single
-// visitor/Googlebot request.
-// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
-// this on publish, so the window is only the no-webhook safety net.
 export const revalidate = 86400;
 
-// `revalidate` above only produces a cached HTML response for paths Next
-// knows about ahead of time -- without this, a dynamic segment with no
-// generateStaticParams renders fully per-request regardless of `revalidate`.
-// The bundled authors are a small, known, local list, so prerendering them
-// here is what actually makes this route ISR'd for them. CMS-only authors
-// (not in this list) still render fine on demand via getMergedAuthorBySlug --
-// dynamicParams stays true by default.
 export function generateStaticParams() {
   return getAllAuthors().map((a) => ({ slug: a.slug }));
+}
+
+/** Generate initials from a name, e.g. "Elena Rossi" → "ER" */
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+/** Format a date string to "Month DD, YYYY" */
+function formatDate(d: string | undefined): string {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 export default async function AuthorProfilePage(
@@ -55,77 +54,158 @@ export default async function AuthorProfilePage(
   ]);
   if (!author) notFound();
 
-  // Match a byline ("Elena Rossi") to this profile by its normalized slug.
-  // mergeArticles() folds in CMS-sourced guides (CMS wins by slug) so a
-  // contributor whose work lives only in the CMS isn't shown as having
-  // published nothing.
   const articles: LawArticle[] = mergeArticles(cmsArticles)
     .filter((a) => authorNameToSlug(a.author) === author.slug && isKeptCategoryArticle(a))
-    .sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
-  const avatar = resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed });
+  const initials = getInitials(author.name);
+  const firstName = author.name.split(' ')[0].toUpperCase();
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
-  const firstName = author.name.split(' ')[0];
 
-  // Bold-label meta rows, Investopedia-style ("Title:", "Education:", ...).
-  // Each row only renders when real data backs it -- education/certifications
-  // are CMS-managed and verified-only (see LawAuthor doc comment), never
-  // inferred, so most profiles simply won't show those rows yet.
+  const credStatus = credentialStatus(author);
+
   const metaRows: { label: string; value: string }[] = [
-    author.title && { label: 'Title', value: author.title },
-    author.credentials && { label: 'Affiliation', value: author.credentials },
-    author.education?.length && { label: 'Education', value: author.education.join(', ') },
-    author.certifications?.length && { label: 'Certifications', value: author.certifications.join(', ') },
-    author.expertise.length > 0 && { label: 'Expertise', value: author.expertise.join(', ') },
+    author.title && { label: 'TITLE', value: author.title },
+    author.credentials && { label: credStatus === 'supplied' ? 'CREDENTIALS (AS SUPPLIED, NOT VERIFIED)' : 'AFFILIATION', value: author.credentials },
+    author.education?.length && { label: 'EDUCATION', value: author.education.join(', ') },
+    author.certifications?.length && { label: 'CERTIFICATIONS', value: author.certifications.join(', ') },
+    author.expertise.length > 0 && { label: 'EXPERTISE', value: author.expertise.join(', ') },
   ].filter(Boolean) as { label: string; value: string }[];
 
-  const socialLinks = [
-    author.social?.linkedin && { href: author.social.linkedin, label: 'LinkedIn', Icon: Linkedin },
-    author.social?.x && { href: author.social.x, label: 'X', Icon: Twitter },
-    author.social?.facebook && { href: author.social.facebook, label: 'Facebook', Icon: Facebook },
-    author.social?.instagram && { href: author.social.instagram, label: 'Instagram', Icon: Instagram },
-  ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin }[];
+  // Social icon configs — all displayed as round icon buttons
+  const socialButtons = [
+    author.social?.linkedin && {
+      href: author.social.linkedin,
+      label: 'LinkedIn',
+      Icon: Linkedin,
+      title: `${author.name} on LinkedIn`,
+      external: true,
+    },
+    author.social?.x && {
+      href: author.social.x,
+      label: 'X / Twitter',
+      Icon: Twitter,
+      title: `${author.name} on X`,
+      external: true,
+    },
+    author.social?.facebook && {
+      href: author.social.facebook,
+      label: 'Facebook',
+      Icon: Facebook,
+      title: `${author.name} on Facebook`,
+      external: true,
+    },
+    author.social?.instagram && {
+      href: author.social.instagram,
+      label: 'Instagram',
+      Icon: Instagram,
+      title: `${author.name} on Instagram`,
+      external: true,
+    },
+    // Email — links to contact page with author pre-filled in subject
+    {
+      href: `/contact-us?subject=Attention%3A%20${encodeURIComponent(author.name)}`,
+      label: 'Contact',
+      Icon: Mail,
+      title: `Contact ${author.name}`,
+      external: false,
+    },
+    // RSS feed
+    {
+      href: `/author/${slug}/feed.xml`,
+      label: 'RSS Feed',
+      Icon: Rss,
+      title: `RSS feed — ${author.name}`,
+      external: false,
+    },
+  ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin; title: string; external: boolean }[];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f9f9fb]">
       <Navbar />
 
-      <main className="pt-20 pb-24">
-        <div className="container mx-auto px-6 max-w-5xl pt-8">
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm font-medium text-slate-400">
-            <Link href="/" className="hover:text-slate-700">Home</Link>
-            <span className="mx-2">/</span>
-            <Link href="/authors" className="hover:text-slate-700">Contributors</Link>
-            <span className="mx-2">/</span>
-            <span className="text-slate-700">{author.name}</span>
-          </nav>
-        </div>
+      <main className="pt-14 pb-20">
 
-        {/* Banner */}
-        <div className="bg-blue-50 border-y border-blue-100">
-          <div className="container mx-auto px-6 max-w-5xl py-10 md:py-12">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 rounded-2xl overflow-hidden bg-slate-200 shadow-sm">
-                <Image src={avatar} alt={author.name} fill className="object-cover grayscale" data-ai-hint="professional portrait" />
-              </div>
-              <div>
-                <h1 className="text-3xl md:text-[44px] font-bold text-slate-900 tracking-tight font-serif leading-tight">
+        {/* ─── HERO HEADER (navy bg + red bottom border) ─── */}
+        <div className="w-full bg-[#0F2440] text-white border-b-[6px] border-[#E13131] shadow-xl">
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+
+            {/* Breadcrumb */}
+            <div className="pt-6">
+              <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm pb-2 text-slate-300">
+                <Link href="/" className="flex items-center gap-1.5 font-semibold hover:text-white transition-colors">
+                  <Home className="h-3.5 w-3.5" />
+                  Home
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                <Link href="/authors" className="font-semibold hover:text-white transition-colors text-[#C8A24A]">
+                  Authors
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                <span className="font-bold text-white truncate max-w-[200px] sm:max-w-sm" aria-current="page">
+                  {author.name}
+                </span>
+              </nav>
+            </div>
+
+            {/* Author hero row */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 py-10 lg:py-12">
+
+              {/* Avatar — initials circle with gold bg */}
+              <span className="relative flex overflow-hidden h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-full border-4 border-white shadow-xl">
+                <span className="flex h-full w-full items-center justify-center rounded-full text-3xl font-black bg-[#C8A24A] text-[#0F2440]">
+                  {initials}
+                </span>
+              </span>
+
+              <div className="space-y-2">
+                {/* Site badge */}
+                <div className="flex items-center gap-2">
+                  <span className="bg-[#E13131] text-white text-xs font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 inline-block shadow-sm">
+                    LAW ELITE NETWORK AUTHOR
+                  </span>
+                </div>
+
+                {/* Name */}
+                <h1 className="text-4xl sm:text-5xl font-black text-white font-serif uppercase tracking-tighter leading-none">
                   {author.name}
                 </h1>
-                {socialLinks.length > 0 && (
-                  <div className="flex items-center gap-2 mt-4">
-                    {socialLinks.map(({ href, label, Icon }) => (
-                      <a
-                        key={label}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${author.name} on ${label}`}
-                        className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-colors"
-                      >
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    ))}
+
+                {/* Title — gold mono */}
+                {author.title && (
+                  <p className="text-sm font-mono font-bold uppercase tracking-wider text-[#C8A24A]">
+                    {author.title}
+                  </p>
+                )}
+
+                {/* Social / action buttons */}
+                {socialButtons.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 pt-2">
+                    {socialButtons.map(({ href, label, Icon, title, external }) =>
+                      external ? (
+                        <a
+                          key={label}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={title}
+                          aria-label={title}
+                          className="h-10 w-10 rounded-full bg-white text-[#0F2440] border-2 border-white hover:bg-[#E13131] hover:text-white hover:border-[#E13131] flex items-center justify-center transition-colors shadow-sm"
+                        >
+                          <Icon className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <Link
+                          key={label}
+                          href={href}
+                          title={title}
+                          aria-label={title}
+                          className="h-10 w-10 rounded-full bg-white text-[#0F2440] border-2 border-white hover:bg-[#E13131] hover:text-white hover:border-[#E13131] flex items-center justify-center transition-colors shadow-sm"
+                        >
+                          <Icon className="h-4 w-4" />
+                        </Link>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -133,92 +213,182 @@ export default async function AuthorProfilePage(
           </div>
         </div>
 
-        <div className="container mx-auto px-6 max-w-5xl pt-10">
+        {/* ─── DOSSIER CARD + ARTICLES ─── */}
+        <section className="py-14">
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
-          {metaRows.length > 0 && (
-            <dl className="space-y-2 mb-12 text-[15px] leading-relaxed">
-              {metaRows.map(({ label, value }) => (
-                <div key={label}>
-                  <dt className="inline font-bold text-slate-900">{label}: </dt>
-                  <dd className="inline text-slate-700">{value}</dd>
+            {/* Dossier card */}
+            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-6 pb-10 mb-14 relative rounded-sm">
+              {/* Red top accent */}
+              <div className="absolute top-0 left-0 right-0 h-2 bg-[#E13131]" />
+
+              <div className="px-6 sm:px-10 pt-8">
+                {/* Dossier header */}
+                <div className="flex items-center gap-2 border-b-2 border-black pb-3 pt-1">
+                  <span className="bg-[#E13131] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
+                    LAW ELITE DOSSIER
+                  </span>
+                  <h2 className="text-sm font-black uppercase tracking-widest text-black font-mono">
+                    AUTHOR CREDENTIALS &amp; VERIFICATION
+                  </h2>
                 </div>
-              ))}
-            </dl>
-          )}
 
-          <section className="max-w-3xl mb-14">
-            <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">Experience</h2>
-            <div className="space-y-5 text-[18px] leading-[1.7] text-slate-700 font-serif">
-              {bioParagraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+                {/* Meta rows */}
+                {metaRows.length > 0 && (
+                  <dl className="space-y-2 text-sm font-semibold mt-4">
+                    {metaRows.map(({ label, value }) => (
+                      <div key={label}>
+                        <dt className="inline font-mono uppercase text-[#E13131] font-black">{label}: </dt>
+                        <dd className="inline text-slate-900 font-bold">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+
+                {/* Verification status: only what the data supports */}
+                <div className="mt-5 border-2 border-black bg-slate-50 p-5 text-xs sm:text-sm font-bold text-slate-800 space-y-2">
+                  <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E13131]">
+                    VERIFICATION STATUS
+                  </p>
+                  <p>Confirmed: {author.name} is a Law Elite Network {isEditorRole(author.title) ? 'editor' : 'contributor'}.</p>
+                  <p>
+                    {credentialNotice(credStatus)}
+                  </p>
+                  <p>Articles are general legal education, not legal advice.</p>
+                </div>
+
+                {/* Editorial highlights */}
+                {articles.length > 0 && (
+                  <div className="mt-5 bg-slate-50 p-5 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E13131] mb-2">
+                      EDITORIAL HIGHLIGHTS
+                    </p>
+                    <ul className="space-y-2 text-xs sm:text-sm font-bold text-black">
+                      <li className="flex items-start gap-2">
+                        <span className="text-[#E13131] font-mono font-black">01.</span>
+                        <span>Has published {articles.length} article{articles.length !== 1 ? 's' : ''} on Law Elite Network.</span>
+                      </li>
+                      {author.expertise.length > 0 && (
+                        <li className="flex items-start gap-2">
+                          <span className="text-[#E13131] font-mono font-black">02.</span>
+                          <span>Covers: {author.expertise.slice(0, 3).join(', ')}{author.expertise.length > 3 ? ' and more.' : '.'}</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Bio */}
+                <div className="space-y-3 pt-6">
+                  <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
+                    BIOGRAPHY &amp; EXPERIENCE
+                  </h3>
+                  {bioParagraphs.map((p, i) => (
+                    <p key={i} className="text-sm sm:text-base font-medium text-slate-800 leading-relaxed">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+
+                {/* Education */}
+                {author.education && author.education.length > 0 && (
+                  <div className="space-y-3 pt-6">
+                    <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
+                      EDUCATION
+                    </h3>
+                    <ul className="space-y-1.5">
+                      {author.education.map((e) => (
+                        <li key={e} className="flex items-start gap-2 text-sm font-bold text-slate-800">
+                          <span className="text-[#E13131] font-mono font-black mt-0.5">→</span>
+                          <span>{e}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Editorial integrity */}
+                <div className="space-y-3 pt-6">
+                  <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
+                    EDITORIAL INTEGRITY
+                  </h3>
+                  <p className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">
+                    Law Elite Network publishes plain-language legal guides for a worldwide audience. Every article names its author.
+                    Learn more in our{' '}
+                    <Link href="/editorial-standards" className="text-[#E13131] hover:underline">
+                      editorial standards →
+                    </Link>
+                  </p>
+                </div>
+              </div>
             </div>
-          </section>
 
-          {author.education && author.education.length > 0 && (
-            <section className="max-w-3xl mb-14">
-              <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">Education</h2>
-              <ul className="list-disc pl-5 space-y-1.5 text-[16px] leading-relaxed text-slate-700">
-                {author.education.map((e) => (
-                  <li key={e}>{e}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <section className="max-w-3xl mb-16 pt-8 border-t border-slate-100">
-            <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">About Law Elite Network</h2>
-            <p className="text-[15px] leading-relaxed text-slate-600">
-              Law Elite Network is a legal knowledge platform that publishes clear, well-sourced legal explainers for a
-              worldwide audience and operates a directory through which readers can discover qualified practitioners.
-              Every profile is created for editorial attribution and is subject to our{' '}
-              <Link href="/editorial-standards" className="text-blue-600 hover:underline">editorial standards</Link>. Learn
-              more in our{' '}
-              <Link href="/about-us" className="text-blue-600 hover:underline">About Us</Link> page.
-            </p>
-          </section>
-
-          <section>
-            <div className="flex items-center gap-3 mb-10 pt-4 border-t-4 border-blue-600">
-              <BookOpen className="w-6 h-6 text-blue-600 mt-4" />
-              <h2 className="text-3xl font-bold text-slate-900 pt-4">
-                Latest from {firstName}{' '}
-                {articles.length > 0 && <span className="text-slate-400 font-medium text-xl">({articles.length})</span>}
-              </h2>
-            </div>
+            {/* ─── ARTICLES LIST ─── */}
+            <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black pb-4">
+              <div className="flex items-center gap-3">
+                <span className="bg-[#E13131] text-white text-xs font-black uppercase tracking-widest px-3 py-1 -skew-x-12">
+                  LAW ELITE ARCHIVE
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-black uppercase font-serif">
+                  LATEST ARTICLES BY {firstName}
+                </h2>
+              </div>
+              {articles.length > 0 && (
+                <span className="bg-black text-white text-xs font-mono font-bold px-3 py-1 uppercase">
+                  {articles.length} ARTICLE{articles.length !== 1 ? 'S' : ''} PUBLISHED
+                </span>
+              )}
+            </header>
 
             {articles.length === 0 ? (
-              <p className="text-slate-500 italic">No published guides yet.</p>
+              <p className="text-slate-500 italic font-medium py-8">No published guides yet.</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="divide-y-2 divide-slate-200">
                 {articles.map((art) => (
-                  <Link key={art.id} href={articleUrl(art)} className="group block h-full">
-                    <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
-                      <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
+                  <article key={art.id} className="py-6 first:pt-0 group">
+                    <Link
+                      href={articleUrl(art)}
+                      className="flex flex-row gap-4 sm:gap-6 items-start"
+                    >
+                      {/* Thumbnail */}
+                      <div className="relative w-24 h-24 sm:w-[220px] sm:h-[147px] shrink-0 overflow-hidden bg-slate-200 border-2 border-black">
                         <Image
                           src={resolveArticleImage(art)}
                           alt={art.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          data-ai-hint="legal dossier"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(min-width: 640px) 220px, 96px"
+                          data-ai-hint="legal article"
                         />
                       </div>
-                      <div className="p-5 flex flex-col flex-1">
-                        <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight mb-2">
-                          {art.category?.name ?? 'Legal Guide'}
-                        </span>
-                        <h3 className="text-[17px] font-bold text-slate-900 leading-[1.3] group-hover:text-blue-700 transition-colors line-clamp-3">
+
+                      {/* Content */}
+                      <div className="min-w-0 flex-1">
+                        {art.category?.name && (
+                          <span className="text-[10px] sm:text-[11px] font-mono font-black uppercase tracking-widest text-[#E13131]">
+                            {art.category.name}
+                          </span>
+                        )}
+                        <h3 className="mt-1 text-base sm:text-xl font-black text-slate-950 leading-snug font-serif group-hover:text-[#E13131] transition-colors line-clamp-2 sm:line-clamp-none">
                           {art.title}
                         </h3>
+                        <span className="block mt-1.5 text-[11px] font-mono font-bold uppercase tracking-wide text-slate-500">
+                          {formatDate(art.updatedAt)}
+                        </span>
+                        {(art.summary || (art as any).excerpt) && (
+                          <p className="hidden sm:block mt-2 text-sm text-slate-700 leading-relaxed line-clamp-2">
+                            {art.summary || (art as any).excerpt}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </article>
                 ))}
               </div>
             )}
-          </section>
 
-        </div>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

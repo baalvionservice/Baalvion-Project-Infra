@@ -14,6 +14,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const db = require('./models');
 const { runMigrations } = require('./db/migrate');
 const { startBillingWorker, stopBillingWorker } = require('./service/billingWorker');
+const { startIngestWorker, stopIngestWorker } = require('./service/ingestWorker');
 const realtime = require('./service/realtime');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
@@ -28,6 +29,9 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 // JSON parser so its bytes aren't consumed/re-encoded.
 const paymentController = require('./controller/paymentController');
 app.post(['/v1/payments/webhook', '/api/v1/payments/webhook'], rateLimit(), express.raw({ type: '*/*' }), paymentController.webhookHandler);
+// Cashfree also needs the raw body for HMAC verification. PayU has no signature header — it
+// form-POSTs the result back, parsed fine by the urlencoded parser mounted just below.
+app.post(['/v1/payments/cashfree-webhook', '/api/v1/payments/cashfree-webhook'], rateLimit(), express.raw({ type: '*/*' }), paymentController.cashfreeWebhookHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
@@ -61,8 +65,18 @@ const start = async () => {
     realtime.attach(server);
     server.listen(config.port, () => console.log(`[law-service] running on port ${config.port}`));
     startBillingWorker();
+    startIngestWorker();
 
+    // Drain this service's payment outbox onto the event bus. Each service owns its own `pcl`
+    // schema in its own database, so each needs its own relay — without it, payments record
+    // correctly and reach nobody. A no-op unless PAYMENT_SPINE=true, and a relay that fails to
+    // start must never block boot: the outbox is durable, so it drains once the cause is fixed.
+    const paymentSpine = require('./service/paymentSpine');
+    paymentSpine.startPaymentRelay();
+
+    registerShutdown('payment-outbox', async () => { await paymentSpine.stopPaymentRelay(); });
     registerShutdown('billing-worker', async () => { stopBillingWorker(); });
+    registerShutdown('ingest-worker', async () => { stopIngestWorker(); });
     registerShutdown('db', async () => {
         if (db.sequelize && db.sequelize.close) await db.sequelize.close();
     });

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Target, BookOpen, Sparkles, Mail } from 'lucide-react';
 import { CmsPage } from '@/components/pages/CmsPage';
 import { getCmsPage } from '@/services/data/cms-public';
+import { AboutEditorialTeam } from '@/components/about/AboutEditorialTeam';
 
 // Managed in the CMS (admin-platform). ISR instead of force-dynamic: content here
 // changes on the order of months, not requests, and the on-publish webhook
@@ -32,14 +33,30 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'About Us',
     description:
-      'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and AI-assisted analysis.',
+      'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and calculators.',
     canonical: '/about',
     noIndex: false,
   });
 }
 
 export default async function AboutPage() {
-  return <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />} />;
+  return (
+    <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />}>
+      <AboutEditorialTeamSection />
+    </CmsPage>
+  );
+}
+
+// Self-contained (own Container/spacing) rather than relying on a parent
+// layout: CmsPage only wraps `children` in its own Container on the
+// live-CMS-content path, not on the `fallback` path (they're mutually
+// exclusive branches), so this needs to look right sitting after either one.
+function AboutEditorialTeamSection() {
+  return (
+    <Container isNarrow className="mt-4 pt-12 pb-8 border-t border-white/10">
+      <AboutEditorialTeam />
+    </Container>
+  );
 }
 
 function AboutFallback() {
@@ -83,7 +100,7 @@ function AboutFallback() {
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
                 Articles and structured pages on stocks, funds, real estate, credit, taxes, and more — plus
-                calculators and AI-assisted features designed to summarize and explore topics responsibly.
+                calculators designed to help you explore topics responsibly.
               </Text>
             </div>
             <div className="space-y-4 rounded-2xl border border-white/10 bg-card/40 p-6">
@@ -101,22 +118,20 @@ function AboutFallback() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-card/40 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary text-lg font-bold">
-              AK
-            </div>
             <div className="space-y-1.5">
               <Text variant="h3" className="text-lg font-bold">
-                Allen Krewz — Founder
+                Deepak Kumar Kuldeep — Founder &amp; Director, Baalvion Industries Private Limited
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                Imperialpedia was founded and is maintained by Allen Krewz.
+                Imperialpedia began as an independent project on March 26, 2022, and found a legal
+                home when Baalvion Industries Private Limited was incorporated on March 11, 2025.
               </Text>
               <a
-                href="mailto:allenkrewzz@gmail.com"
+                href="/contact"
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
               >
                 <Mail className="h-3.5 w-3.5" aria-hidden />
-                allenkrewzz@gmail.com
+                Contact us
               </a>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import React, {  createContext, useContext  } from "react";
 
 /**
  * The real AdSense publisher ID, resolved server-side once in app/layout.tsx

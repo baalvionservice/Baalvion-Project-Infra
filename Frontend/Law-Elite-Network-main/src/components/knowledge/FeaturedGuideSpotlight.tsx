@@ -42,6 +42,12 @@ export function FeaturedGuideSpotlight({ article, author }: { article: any; auth
         href={href}
         className="inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold uppercase tracking-wide hover:bg-blue-800 transition-colors w-fit"
       >
+        {/* Visually hidden but in the DOM text content -- Lighthouse's SEO
+            link-text audit reads textContent, not aria-label, so a
+            screen-reader-only accessible-name span (the usual pattern)
+            doesn't satisfy it the way it satisfies the a11y link-name check.
+            This gives both real content instead of a bare "Read More". */}
+        <span className="sr-only">{article.title}: </span>
         Read More <ArrowRight className="w-3.5 h-3.5" />
       </Link>
     </div>

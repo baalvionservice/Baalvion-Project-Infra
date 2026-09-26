@@ -4,6 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { useAuthStore } from '@/lib/store/authStore';
+import { isPublicPath } from '@/lib/constants/public-paths';
 
 const BASE_URL      = process.env.NEXT_PUBLIC_API_URL        || 'https://api.baalvion.com/api/v1/infrastructure/proxy/v1';
 // Auth goes through the SAME-ORIGIN proxy (next.config rewrite → gateway) so the httpOnly
@@ -89,7 +90,7 @@ const makeAuthRetryInterceptor =
       return client(original);
     } catch {
       useAuthStore.getState().logout();
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+      if (typeof window !== 'undefined' && !isPublicPath(window.location.pathname)) {
         window.location.href = '/login';
       }
       return Promise.reject(normalizeError(error));

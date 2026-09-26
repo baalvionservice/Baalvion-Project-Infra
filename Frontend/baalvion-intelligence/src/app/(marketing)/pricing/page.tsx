@@ -6,8 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { comparisonFeatures, plans } from "@/lib/plans";
 
 export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Simple, transparent pricing for the Baalvion Intelligence news API — from Free to Enterprise.",
+  title: "Pricing That Starts at $0 — See What You're Missing",
+  description:
+    "Free tier, real API key, no credit card required. Compare Free vs Starter vs Growth vs Pro vs Enterprise and find the plan that actually fits your build.",
+  alternates: { canonical: "/pricing" },
 };
 
 export default function PricingPage() {

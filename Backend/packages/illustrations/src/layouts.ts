@@ -51,7 +51,8 @@ function kickerText(kicker: string, palette: Palette, x: number, y: number): str
 }
 
 function iconLeftTextRight({ icons, palette, kicker }: LayoutInput): string {
-  const primary = icons[0];
+  // resolveIcons() never returns fewer than two icons, so icons[0] is always present.
+  const primary = icons[0] as IconDef;
   const rest = icons.slice(1, 3);
   const parts = [renderIconGroup(primary, 90, 190, 220, palette.accent)];
   rest.forEach((icon, i) => {
@@ -68,15 +69,16 @@ function iconGrid({ icons, palette, kicker }: LayoutInput): string {
     [460, 140, 150],
     [300, 340, 160],
   ];
-  const parts = icons
-    .slice(0, 3)
-    .map((icon, i) => renderIconGroup(icon, positions[i][0], positions[i][1], positions[i][2], i === 0 ? palette.accent : palette.ink));
+  const parts = icons.slice(0, 3).map((icon, i) => {
+    const [x, y, size] = positions[i] as [number, number, number];
+    return renderIconGroup(icon, x, y, size, i === 0 ? palette.accent : palette.ink);
+  });
   parts.push(kickerText(kicker, palette, 60, 115));
   return svgShell(palette, parts.join(''));
 }
 
 function centerBadge({ icons, palette, kicker }: LayoutInput): string {
-  const primary = icons[0];
+  const primary = icons[0] as IconDef;
   const parts = [
     `<circle cx="400" cy="270" r="150" fill="${palette.bgTo}" stroke="${palette.accent}" stroke-width="3" opacity="0.9" />`,
     renderIconGroup(primary, 300, 170, 200, palette.accent),
@@ -94,7 +96,7 @@ function chartBand({ icons, palette, kicker }: LayoutInput): string {
     kickerText(kicker, palette, 60, 115),
     `<polyline points="60,460 220,380 360,420 520,300 700,220" fill="none" stroke="${palette.accent}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />`,
   ];
-  const primary = icons[0];
+  const primary = icons[0] as IconDef;
   parts.push(renderIconGroup(primary, 560, 140, 170, palette.accent));
   const rest = icons.slice(1, 3);
   rest.forEach((icon, i) => {
@@ -108,7 +110,7 @@ function diagonalSplit({ icons, palette, kicker }: LayoutInput): string {
     `<polygon points="0,600 800,0 800,600" fill="${palette.accent}" opacity="0.08" />`,
     kickerText(kicker, palette, 60, 115),
   ];
-  const primary = icons[0];
+  const primary = icons[0] as IconDef;
   parts.push(renderIconGroup(primary, 470, 220, 190, palette.accent));
   const rest = icons.slice(1, 3);
   rest.forEach((icon, i) => {

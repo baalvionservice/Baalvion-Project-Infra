@@ -109,6 +109,7 @@ export interface WebsiteStats {
   draftContent: number;
   scheduledContent: number;
   pendingReview: number;
+  archivedContent: number;
   totalMedia: number;
   mediaStorageUsedMb: number;
   pageViewsThisMonth: number;

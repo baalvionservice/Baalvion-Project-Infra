@@ -20,6 +20,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
       'Eviction is the legal process a landlord must follow to remove a tenant — requiring proper notice, a court order, and lawful enforcement, never self-help.',
     author: 'Waki Malik',
     updatedAt: 'June 22, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -53,7 +54,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <h2>How Eviction Works Around the World</h2>
 <ul>
 <li><strong>United States:</strong> Eviction (often called "unlawful detainer") is governed by state and local law, with required notices and a court process; tenant protections vary widely by city and state.</li>
-<li><strong>United Kingdom:</strong> Landlords must use prescribed notices and, if needed, obtain a possession order from the court before bailiffs can act; self-eviction is a criminal offence.</li>
+<li><strong>United Kingdom:</strong> Landlords must use prescribed notices and, if needed, obtain a possession order from the court before bailiffs can act; unlawful eviction, such as changing the locks, can be a criminal offence.</li>
 <li><strong>European Union:</strong> Member states have their own tenancy laws, many offering strong tenant protections and mandatory court involvement.</li>
 <li><strong>India:</strong> Rent-control and tenancy laws vary by state, often requiring landlords to prove specific grounds before a rent authority or court.</li>
 </ul>
@@ -80,7 +81,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <h2>Sources & Further Reading</h2>
 <ul>
 <li>U.S. National Low Income Housing Coalition, eviction process and tenant protections by state</li>
-<li>UK Renters' Rights Act and Housing Act 1988, Section 21/Section 8 notice procedures</li>
+<li>UK Renters' Rights Act 2025 and Housing Act 1988, Section 8 notice procedures (Section 21 no-fault notices were abolished in England from 1 May 2026)</li>
 <li>India, state-level Rent Control Acts and Model Tenancy Act 2021</li>
 <li>UN-Habitat, comparative housing and tenure security reports</li>
 </ul>
@@ -92,7 +93,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     primarySources: [
       { label: 'National Low Income Housing Coalition, tenant protections database', url: 'https://nlihc.org/tenant-protections' },
       { label: 'Renters\' Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/26/contents' },
-      { label: 'Housing Act 1988, sections 8 and 21 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1988/50/contents' },
+      { label: 'Housing Act 1988, section 8 (UK; section 21 abolished in England from 1 May 2026 by the Renters\' Rights Act 2025)', url: 'https://www.legislation.gov.uk/ukpga/1988/50/contents' },
       { label: 'India, Model Tenancy Act 2021' },
       { label: 'UN-Habitat, Land Tenure Security in Selected Countries', url: 'https://unhabitat.org/land-tenure-security-in-selected-countries' },
     ],

@@ -47,7 +47,9 @@ test('refuses a float amount', () => {
 });
 
 test('a site with no rails cannot use the spine at all', () => {
-  const dead = createPaymentSpine({ pool, siteId: 'law', railFor });
+  // 'law' used to stand in here; it now holds a razorpay rail because the site really does
+  // charge. imperialpedia still cannot take money — no checkout UI exists to reach its API.
+  const dead = createPaymentSpine({ pool, siteId: 'imperialpedia', railFor });
   assert.throws(() => dead.validate(input, 'CAPTURED'), (e) => e.code === 'NO_RAILS_CONFIGURED');
 });
 

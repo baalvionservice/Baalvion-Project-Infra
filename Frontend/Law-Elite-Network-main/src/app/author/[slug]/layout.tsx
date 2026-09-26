@@ -66,7 +66,10 @@ export async function generateMetadata(
     keywords: [a.name, a.title, ...(a.expertise || []), 'legal editor', 'law elite network contributor'].filter(
       (x): x is string => Boolean(x),
     ),
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      types: { 'application/rss+xml': `${url}/feed.xml` },
+    },
     robots: { index: hasArticles, follow: true },
     openGraph: { type: 'profile', url, title, description, images: [{ url: image, alt: a.name }] },
     twitter: { card: 'summary', title, description, images: [image] },
@@ -89,7 +92,8 @@ export default async function AuthorLayout(
     '@type': 'Person',
     name: a.name,
     url,
-    image,
+    // A data: URI is not a fetchable image URL for structured data (bundled authors have no portrait).
+    image: image && !image.startsWith('data:') ? image : undefined,
     jobTitle: a.title || undefined,
     description: a.bio || undefined,
     knowsAbout: a.expertise && a.expertise.length ? a.expertise : undefined,
@@ -109,6 +113,8 @@ export default async function AuthorLayout(
 
   return (
     <>
+      {/* Per-author RSS discovery link */}
+      <link rel="alternate" type="application/rss+xml" title={`${a?.name ?? slug} — Law Elite Network`} href={`${url}/feed.xml`} />
       {personLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }} />
       )}

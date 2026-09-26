@@ -1,0 +1,97 @@
+{
+  "slug": "morgan-freeman",
+  "category": "actors",
+  "wikidata_id": "Q48337",
+  "full_name": "Morgan Freeman",
+  "description": "American actor and producer (born 1937)",
+  "birth_date": "1937-06-01",
+  "birth_place": "Memphis",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "television actor",
+    "film director",
+    "aircraft pilot",
+    "character actor",
+    "stage actor",
+    "actor",
+    "television presenter",
+    "voice actor",
+    "beekeeper",
+    "television producer",
+    "director",
+    "film actor",
+    "producer"
+  ],
+  "education": [
+    {
+      "institution": "Greenwood Public School District"
+    },
+    {
+      "institution": "Los Angeles City College"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Academy Award for Best Supporting Actor",
+      "year": 2005
+    },
+    {
+      "title": "Kennedy Center Honors"
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2011
+    },
+    {
+      "title": "Golden Globe Awards"
+    },
+    {
+      "title": "Silver Bear"
+    },
+    {
+      "title": "star on Hollywood Walk of Fame"
+    },
+    {
+      "title": "National Medal of Arts",
+      "year": 2015
+    },
+    {
+      "title": "Clarence Derwent Awards"
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Male Actor in a Supporting Role"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/morgan_freeman",
+    "instagram": "https://www.instagram.com/morganfreeman",
+    "facebook": "https://www.facebook.com/MorganFreeman"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q48337"
+    }
+  ],
+  "photo": {
+    "file": "morgan-freeman.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1414,
+    "credit": "Georges Biard / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Morgan_Freeman_Deauville_2018.jpg"
+  },
+  "fetched_at": "2026-09-21T19:16:52.329Z"
+}

@@ -9,7 +9,7 @@ export default function FaqSection() {
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
-          <p className="mt-2 text-lg text-muted-foreground">Got questions? We've got answers.</p>
+          <p className="mt-2 text-lg text-muted-foreground">Got questions? We&apos;ve got answers.</p>
         </div>
         <Accordion type="single" collapsible className="w-full">
           {faqData.map((faq, index) => (

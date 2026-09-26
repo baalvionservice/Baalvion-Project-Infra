@@ -10,15 +10,17 @@ import { cn } from '@/lib/utils';
 export default function CareersPage() {
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // AdSense second-rejection finding: this table of contents promised 8
+  // sections and the page delivered 2, one of them three words long
+  // ("Excellence Collaboration Innovation") -- a reviewer reads that as the
+  // site under construction. Trimmed to match what the page actually has
+  // rather than filling in fabricated job listings, benefit claims, or a
+  // fake hiring process for roles that don't currently exist (see
+  // content-integrity-standing-rule).
   const tocLinks = [
     { label: "Our Mission", id: "mission" },
     { label: "Culture & Values", id: "culture" },
-    { label: "Benefits & Growth", id: "benefits" },
-    { label: "Engineering Roles", id: "engineering" },
-    { label: "Editorial Roles", id: "editorial" },
-    { label: "Legal Research Roles", id: "legal-research" },
-    { label: "Diversity & Inclusion", id: "diversity" },
-    { label: "Application Process", id: "process" },
+    { label: "Get in Touch", id: "contact" },
   ];
 
   return (
@@ -75,9 +77,33 @@ export default function CareersPage() {
             <div id="culture" className="space-y-6">
               <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Culture & Values</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <ValueCard icon={<Briefcase className="w-5 h-5" />} title="Excellence" />
-                <ValueCard icon={<Users className="w-5 h-5" />} title="Collaboration" />
-                <ValueCard icon={<Zap className="w-5 h-5" />} title="Innovation" />
+                <ValueCard
+                  icon={<Briefcase className="w-5 h-5" />}
+                  title="Excellence"
+                  description="Every guide goes through our editorial standards before it's published -- accuracy comes before speed."
+                />
+                <ValueCard
+                  icon={<Users className="w-5 h-5" />}
+                  title="Collaboration"
+                  description="Editors and contributors work practice area by practice area, not in isolation, so coverage stays consistent."
+                />
+                <ValueCard
+                  icon={<Zap className="w-5 h-5" />}
+                  title="Innovation"
+                  description="We're a small, growing team building a legal knowledge platform from scratch -- there's real room to shape how it works."
+                />
+              </div>
+            </div>
+
+            <div id="contact" className="space-y-6">
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Get in Touch</h2>
+              <div className="prose-legal">
+                <p>
+                  We don&apos;t have open roles listed here right now. If you&apos;re interested in
+                  writing, editing, or working with Law Elite Network, reach out through our{' '}
+                  <Link href="/contact-us" className="text-blue-600 hover:underline">Contact page</Link>{' '}
+                  and tell us what you have in mind.
+                </p>
               </div>
             </div>
           </section>
@@ -90,11 +116,12 @@ export default function CareersPage() {
   );
 }
 
-function ValueCard({ icon, title }: { icon: React.ReactNode, title: string }) {
+function ValueCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
     <div className="p-6 border border-slate-100 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all">
       <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 mb-4">{icon}</div>
-      <h4 className="text-lg font-bold text-slate-900">{title}</h4>
+      <h4 className="text-lg font-bold text-slate-900 mb-2">{title}</h4>
+      <p className="text-sm text-slate-500 leading-relaxed">{description}</p>
     </div>
   );
 }

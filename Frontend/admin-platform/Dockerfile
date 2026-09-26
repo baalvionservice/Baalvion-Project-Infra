@@ -9,8 +9,8 @@
 #     --build-arg NEXT_PUBLIC_APP_URL=https://admin.baalvion.com \
 #     --build-arg NEXT_PUBLIC_GATEWAY_URL=https://api.baalvion.com \
 #     .
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+FROM node:26-alpine AS base
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
@@ -32,6 +32,13 @@ ARG NEXT_PUBLIC_GATEWAY_URL
 ARG NEXT_PUBLIC_CMS_API_URL
 ARG NEXT_PUBLIC_AUTH_URL
 ARG NEXT_PUBLIC_APP_ENV=production
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG ALLOW_LOCAL_BACKENDS
+ENV ALLOW_LOCAL_BACKENDS=$ALLOW_LOCAL_BACKENDS
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
@@ -50,5 +57,8 @@ USER nextjs
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Next standalone emits the workspace server.js under the package path.
-CMD ["node", "Frontend/admin-platform/server.js"]
+# WORKDIR is already the package path, so server.js is right here -- not
+# Frontend/admin-platform/server.js again (that duplicated path doesn't exist
+# and was never actually caught before because nothing had run this image;
+# CI only builds and CVE-scans it, it never starts the container).
+CMD ["node", "server.js"]

@@ -1,0 +1,102 @@
+{
+  "teams": [
+    {
+      "slug": "los-angeles-lakers",
+      "name": "Los Angeles Lakers",
+      "sport": "Basketball",
+      "countryCode": "US",
+      "description": "A National Basketball Association (NBA) team based in Los Angeles, California, one of the league’s most successful franchises.",
+      "url": "https://www.nba.com/lakers",
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry, not affiliated with the team or the NBA."
+      }
+    },
+    {
+      "slug": "cleveland-cavaliers",
+      "name": "Cleveland Cavaliers",
+      "sport": "Basketball",
+      "countryCode": "US",
+      "description": "A National Basketball Association (NBA) team based in Cleveland, Ohio.",
+      "url": "https://www.nba.com/cavaliers",
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry, not affiliated with the team or the NBA."
+      }
+    },
+    {
+      "slug": "miami-heat",
+      "name": "Miami Heat",
+      "sport": "Basketball",
+      "countryCode": "US",
+      "description": "A National Basketball Association (NBA) team based in Miami, Florida.",
+      "url": "https://www.nba.com/heat",
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry, not affiliated with the team or the NBA."
+      }
+    }
+  ],
+  "competitions": [
+    {
+      "slug": "2008-beijing-olympics-mens-basketball",
+      "name": "2008 Beijing Olympics — Men’s Basketball",
+      "sport": "Basketball",
+      "level": "olympic",
+      "countryCode": "CN",
+      "date": "2008-08",
+      "description": "The men’s basketball tournament at the 2008 Summer Olympics in Beijing. The United States national team, nicknamed the \"Redeem Team,\" won the gold medal.",
+      "peopleInvolved": [
+        {
+          "personSlug": "lebron-james",
+          "role": "Player, United States national team",
+          "result": "Gold medal"
+        }
+      ],
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry."
+      }
+    },
+    {
+      "slug": "2012-london-olympics-mens-basketball",
+      "name": "2012 London Olympics — Men’s Basketball",
+      "sport": "Basketball",
+      "level": "olympic",
+      "countryCode": "GB",
+      "date": "2012-08",
+      "description": "The men’s basketball tournament at the 2012 Summer Olympics in London. The United States national team won the gold medal.",
+      "peopleInvolved": [
+        {
+          "personSlug": "lebron-james",
+          "role": "Player, United States national team",
+          "result": "Gold medal"
+        }
+      ],
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry."
+      }
+    },
+    {
+      "slug": "2016-nba-finals",
+      "name": "2016 NBA Finals",
+      "sport": "Basketball",
+      "level": "championship",
+      "countryCode": "US",
+      "date": "2016-06",
+      "description": "The championship series of the NBA’s 2015–16 season, in which the Cleveland Cavaliers defeated the Golden State Warriors after trailing 3–1 in the series, the franchise’s first NBA championship.",
+      "peopleInvolved": [
+        {
+          "personSlug": "lebron-james",
+          "role": "Player, Cleveland Cavaliers",
+          "result": "NBA Finals MVP; won championship"
+        }
+      ],
+      "verification": {
+        "verified": true,
+        "sourceNote": "Long-settled public record — independent reference entry."
+      }
+    }
+  ]
+}

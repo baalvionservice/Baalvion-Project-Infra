@@ -29,7 +29,7 @@ export default function Error({
         />
         <h1 className="text-3xl font-bold tracking-tight">Something went wrong!</h1>
         <p className="mt-4 text-muted-foreground">
-          We're sorry, but an unexpected error occurred on our end. Our team has been notified.
+          We&apos;re sorry, but an unexpected error occurred on our end. Our team has been notified.
         </p>
         <div className="mt-8">
           <Button

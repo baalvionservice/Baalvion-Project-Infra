@@ -1,0 +1,157 @@
+{
+  "slug": "tom-hanks",
+  "category": "actors",
+  "wikidata_id": "Q2263",
+  "full_name": "Tom Hanks",
+  "description": "American actor and film producer (born 1956)",
+  "birth_date": "1956-07-09",
+  "birth_place": "Concord",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States",
+    "Greece"
+  ],
+  "occupations": [
+    "film actor",
+    "film director",
+    "film producer",
+    "writer",
+    "voice actor",
+    "screenwriter",
+    "composer",
+    "character actor",
+    "television actor",
+    "television director",
+    "television producer",
+    "actor",
+    "television presenter",
+    "executive producer",
+    "narrator",
+    "stage actor",
+    "comedian",
+    "short story writer",
+    "director",
+    "producer",
+    "film screenwriter",
+    "musician"
+  ],
+  "education": [
+    {
+      "institution": "Chabot College"
+    },
+    {
+      "institution": "Skyline High School"
+    },
+    {
+      "institution": "California State University, Sacramento"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 1994
+    },
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 1995
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Male Actor in a Leading Role",
+      "year": 1995
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Cast in a Motion Picture",
+      "year": 1996
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Musical or Comedy",
+      "year": 1989
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 1994
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 1995
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 2001
+    },
+    {
+      "title": "Theatre World Award",
+      "year": 2013
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2016
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2014
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2002
+    },
+    {
+      "title": "Knight of the Legion of Honour",
+      "year": 2016
+    },
+    {
+      "title": "Golden Globe Cecil B. DeMille Award",
+      "year": 2020
+    },
+    {
+      "title": "Golden Globe Awards",
+      "year": 1989
+    },
+    {
+      "title": "Silver Bear",
+      "year": 1994
+    },
+    {
+      "title": "Producers Guild of America Awards"
+    },
+    {
+      "title": "honorary doctor of Harvard University",
+      "year": 2023
+    },
+    {
+      "title": "Britannia Awards",
+      "year": 2004
+    },
+    {
+      "title": "Officer of the Legion of Honour"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/tomhanks",
+    "instagram": "https://www.instagram.com/tomhanks",
+    "facebook": "https://www.facebook.com/TomHanks"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2263"
+    }
+  ],
+  "photo": {
+    "file": "tom-hanks.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1336,
+    "credit": "Eva Rinaldi from Abbotsford, Australia / Wikimedia Commons",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tom_Hanks_at_the_Elvis_Premiere_2022.jpg"
+  },
+  "fetched_at": "2026-09-21T19:16:20.358Z"
+}

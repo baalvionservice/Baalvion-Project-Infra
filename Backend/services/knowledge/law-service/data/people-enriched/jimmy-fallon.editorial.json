@@ -1,0 +1,63 @@
+{
+  "display_name": null,
+  "short_bio": "Comedian and host of The Tonight Show since 2014.",
+  "biography": "Jimmy Fallon was born in Brooklyn and raised in Saugerties, New York, and attended the College of Saint Rose. He joined the cast of Saturday Night Live in 1998 and anchored its Weekend Update segment with Tina Fey.\n\nHe left in 2004 for film work and returned to television in 2009 as the host of Late Night, succeeding Conan O’Brien.\n\nIn February 2014 he took over The Tonight Show from Jay Leno; the format leans on games, sketches and musical bits with the house band The Roots.",
+  "awards": [
+    {
+      "title": "Primetime Emmy Award for Outstanding Guest Actor in a Comedy Series",
+      "year": 2012
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Guest Actor in a Comedy Series",
+      "year": 2014
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Saturday Night Live",
+      "year": 1998,
+      "note": "Cast member until 2004"
+    },
+    {
+      "title": "Late Night with Jimmy Fallon",
+      "year": 2009,
+      "note": "Host"
+    },
+    {
+      "title": "The Tonight Show Starring Jimmy Fallon",
+      "year": 2014,
+      "note": "Host"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1974-09-19",
+      "title": "Born in Brooklyn, New York"
+    },
+    {
+      "date": "1998",
+      "title": "Joins the cast of Saturday Night Live"
+    },
+    {
+      "date": "2009",
+      "title": "Becomes host of Late Night"
+    },
+    {
+      "date": "2014",
+      "title": "Becomes host of The Tonight Show"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q335680"
+    },
+    {
+      "label": "Wikipedia: Jimmy Fallon",
+      "url": "https://en.wikipedia.org/wiki/Jimmy_Fallon"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

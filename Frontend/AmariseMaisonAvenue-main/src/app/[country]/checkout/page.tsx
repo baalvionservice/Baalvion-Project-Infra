@@ -43,7 +43,6 @@ import { getProductById } from "@/lib/catalog";
 import { getMembershipPlans } from "@/lib/cms";
 import { PaymentGateway, CountryCode } from "@/lib/types";
 import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
-import { RiskEngine } from "@/lib/fraud/risk-engine";
 
 function CheckoutPageInner() {
   const {
@@ -53,7 +52,6 @@ function CheckoutPageInner() {
     paymentPlans,
     countryConfigs,
     fxRates,
-    recordFraudLog,
     catalogSource,
   } = useAppStore();
   const { country } = useParams();
@@ -120,15 +118,45 @@ function CheckoutPageInner() {
   // Save-to-account: default ON for signed-in shoppers with nothing saved yet.
   const [shouldSaveAddress, setShouldSaveAddress] = useState(false);
 
+  // Razorpay, not Stripe. The default used to be STRIPE, so every shopper on a store without a
+  // Stripe account was preselected onto a gateway that could not charge them and only found out
+  // at the final step. The server-reported `preferred` overrides this once it loads.
   const [selectedGateway, setSelectedGateway] =
-    useState<PaymentGateway>("STRIPE");
+    useState<PaymentGateway>("RAZORPAY");
+  // Gateways with working credentials, resolved server-side. Null while unknown.
+  const [availableGateways, setAvailableGateways] = useState<PaymentGatewaySlug[] | null>(null);
+  // Show a gateway only when the store can charge with it. Until the list loads we show the
+  // conservative default set — never the full list, because an unchargeable option in a payment
+  // form is a dead end, not a graceful fallback.
+  const gatewayOffered = (g: PaymentGateway) =>
+    availableGateways === null
+      ? DEFAULT_GATEWAYS.includes(g)
+      : availableGateways.includes(GATEWAY_SLUG[g]);
+
+  // Ask the store which gateways can actually charge, and adopt its preferred one. A failed read
+  // leaves the safe default in place rather than widening the choice.
+  useEffect(() => {
+    let active = true;
+    orderApi.paymentGateways().then((res) => {
+      if (!active || !res.ok || !res.data?.gateways?.length) return;
+      setAvailableGateways(res.data.gateways);
+      const preferred = res.data.preferred;
+      setSelectedGateway((cur) => {
+        if (res.data!.gateways.includes(GATEWAY_SLUG[cur])) return cur;
+        const match = (Object.keys(GATEWAY_SLUG) as PaymentGateway[])
+          .find((k) => GATEWAY_SLUG[k] === (preferred ?? res.data!.gateways[0]));
+        return match ?? cur;
+      });
+    });
+    return () => { active = false; };
+  }, []);
+
   const [isSettling, setIsSettling] = useState(false);
   const [orderRef, setOrderRef] = useState("");
   // The human-readable order number (ORD-…) shown on the confirmation + used for guest tracking.
   const [orderNumberRef, setOrderNumberRef] = useState("");
   const [inventoryLockId, setInventoryLockId] = useState<string | null>(null);
   const [lockedFXRate, setLockedFXRate] = useState<number | null>(null);
-  const [fraudBlocked, setFraudBlocked] = useState(false);
   // Optional gift note captured on the cart page (per market) → threaded into the order metadata.
   const [giftNote, setGiftNote] = useState("");
   // Bank-transfer / concierge: wire instructions shown on the confirmation step (order reserved, unpaid).
@@ -368,43 +396,7 @@ function CheckoutPageInner() {
         return;
       }
 
-      toast({
-        title: "Security Check",
-        description: "Verifying your order…",
-      });
-
-      // 1. Evaluate Fraud Risk
-      const riskAnalysis = RiskEngine.evaluateAcquisitionRisk(
-        null, // No VIP session mock
-        cart,
-        countryCode as CountryCode,
-        { attemptCount: 1, ipHub: countryCode.toUpperCase() }
-      );
-
-      recordFraudLog(
-        RiskEngine.createLog(currentUser?.id || "guest", riskAnalysis)
-      );
-
-      if (riskAnalysis.action === "block") {
-        setFraudBlocked(true);
-        toast({
-          variant: "destructive",
-          title: "Order on Hold",
-          description:
-            "This order has been flagged by our security team. Please contact a specialist.",
-        });
-        return;
-      }
-
-      if (riskAnalysis.action === "flag") {
-        toast({
-          title: "Enhanced Verification",
-          description:
-            "Due to the value of this order, a specialist review is active.",
-        });
-      }
-
-      // 2. Lock Inventory
+      // Lock Inventory
       toast({
         title: "Reserving Your Pieces",
         description: "Confirming availability in our global registry…",
@@ -863,32 +855,6 @@ function CheckoutPageInner() {
     );
   }
 
-  if (fraudBlocked) {
-    return (
-      <div className="container mx-auto px-6 py-40 flex flex-col items-center justify-center space-y-10 animate-fade-in text-center">
-        <div className="p-12 bg-red-50 border border-red-100 rounded-full text-red-600">
-          <AlertTriangle className="w-16 h-16" strokeWidth={1.25} />
-        </div>
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-headline tracking-tight">
-            Order on Hold
-          </h1>
-          <p className="text-gray-500 font-light max-w-md mx-auto">
-            For your security, this order requires a private conversation with
-            our concierge before it can be completed.
-          </p>
-        </div>
-        <Button
-          onClick={() => router.push(`/${countryCode}/contact`)}
-          size="lg"
-          className="rounded-none bg-black hover:bg-plum px-16 h-14 text-[10px] font-bold uppercase tracking-[0.35em] transition-all"
-        >
-          Contact Concierge
-        </Button>
-      </div>
-    );
-  }
-
   if (cart.length === 0 && !selectedPlan && step !== 3) {
     return null;
   }
@@ -1278,38 +1244,38 @@ function CheckoutPageInner() {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <GatewayCard
+                      {gatewayOffered("STRIPE") && <GatewayCard
                         id="STRIPE"
                         label="Card"
                         desc="Visa, Mastercard, Amex, Apple Pay"
                         icon={<CreditCard className="w-5 h-5" />}
                         active={selectedGateway === "STRIPE"}
                         onClick={() => setSelectedGateway("STRIPE")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("RAZORPAY") && <GatewayCard
                         id="RAZORPAY"
                         label="UPI & Netbanking"
                         desc="Razorpay · UPI, Netbanking, Cards"
                         icon={<Smartphone className="w-5 h-5" />}
                         active={selectedGateway === "RAZORPAY"}
                         onClick={() => setSelectedGateway("RAZORPAY")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("PAYU") && <GatewayCard
                         id="PAYU"
                         label="International"
                         desc="PayU · Cards & wallets worldwide"
                         icon={<Globe className="w-5 h-5" />}
                         active={selectedGateway === "PAYU"}
                         onClick={() => setSelectedGateway("PAYU")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("BANK_TRANSFER") && <GatewayCard
                         id="BANK_TRANSFER"
                         label="Bank Transfer"
                         desc="Wire / ACH · settles in 2–3 days"
                         icon={<Building2 className="w-5 h-5" />}
                         active={selectedGateway === "BANK_TRANSFER"}
                         onClick={() => setSelectedGateway("BANK_TRANSFER")}
-                      />
+                      />}
                     </div>
 
                     <div className="flex flex-col gap-5">
@@ -1629,6 +1595,10 @@ function GatewayCard({
  * never applied. With the storefront statically rendered, the boundary has to be
  * real: the shell prerenders, and this hydrates with the query string.
  */
+// Offered before the store's configured-gateway list arrives. Excludes Stripe: there is no Stripe
+// merchant account on this estate, so it must never be preselected or offered unprompted.
+const DEFAULT_GATEWAYS: PaymentGateway[] = ["RAZORPAY", "PAYU", "BANK_TRANSFER"];
+
 export default function CheckoutPage() {
   return (
     <Suspense fallback={null}>

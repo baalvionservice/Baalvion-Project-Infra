@@ -1,6 +1,7 @@
-import { cache, Suspense } from "react";
+import React, {  cache, Suspense  } from "react";
 import { newsArticles, NewsArticle, NewsCategory } from "@/lib/data.news";
-import { getPublishedNewsBySlug, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
+import { getPublishedNewsBySlug, getPublishedNews, getRecentContent, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
+import { MoreFromGrid, MoreFromList, type MoreFromItem } from "@/components/news/MoreFrom";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
 import Image from "next/image";
@@ -147,105 +148,93 @@ const CATEGORY_HREF: Partial<Record<NewsCategory, string>> = {
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: { params: Promise<SlugParams> }) {
-  const { slug: segments } = await params;
+  try {
+    const { slug: segments } = await params;
 
-  if (isDatedSegments(segments)) {
-    const [, , , articleSlug] = segments;
-    const article = await findNewsArticle(articleSlug);
-    if (!article) return {};
+    if (isDatedSegments(segments)) {
+      const [, , , articleSlug] = segments;
+      const article = await findNewsArticle(articleSlug).catch(() => null);
+      if (!article) return {};
 
-    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
-    const authorProfile = await findAuthorProfileByName(article.author.name);
-    const base = buildMetadata({
-      title: article.title,
-      description: truncateForMeta(article.excerpt),
-      keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
-      canonical: newsArticleHref(article),
-      // Some articles fall back to an inline `data:image/svg+xml,...` illustration
-      // (see @baalvion/illustrations) when no hosted artwork exists yet — that's fine
-      // for the on-page <Image>, but social unfurlers and crawlers fetch og:image as
-      // an HTTP(S) URL and can't resolve a data URI, so it must never reach this tag.
-      // buildMetadata falls back to the sitewide default OG image when this is undefined.
-      ogImage: isAllowedImageHost(article.imageUrl) ? article.imageUrl : undefined,
-      ogType: "article",
-    });
+      const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+      const authorProfile = await findAuthorProfileByName(article.author.name).catch(() => null);
+      const base = buildMetadata({
+        title: article.title,
+        description: truncateForMeta(article.excerpt),
+        keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
+        canonical: newsArticleHref(article),
+        ogImage: isAllowedImageHost(article.imageUrl) ? article.imageUrl : undefined,
+        ogType: "article",
+      });
 
-    return {
-      ...base,
-      authors: [
-        {
-          name: article.author.name,
-          url: authorProfile ? `${baseUrl}/authors/${authorProfile.slug}` : undefined,
+      return {
+        ...base,
+        authors: [
+          {
+            name: article.author.name,
+            url: authorProfile ? `${baseUrl}/authors/${authorProfile.slug}` : undefined,
+          },
+        ],
+        openGraph: {
+          ...base.openGraph,
+          type: "article",
+          publishedTime: article.publishedAt,
+          modifiedTime: article.updatedAt || article.publishedAt,
+          authors: [article.author.name],
+          section: article.category,
+          tags: article.tags,
         },
-      ],
-      openGraph: {
-        ...base.openGraph,
-        type: "article",
-        publishedTime: article.publishedAt,
-        modifiedTime: article.updatedAt || article.publishedAt,
-        authors: [article.author.name],
-        section: article.category,
-        tags: article.tags,
-      },
-    };
-  }
+      };
+    }
 
-  // Content-engine guides canonically live at /<categorySlug>/<slug> — a
-  // 2-segment path that isn't a real nested route (Next.js always resolves a
-  // more specific static/dynamic route first) falls through here.
-  if (segments.length === 2) {
-    const [, articleSlug] = segments;
-    return buildArticleDetailMetadata(articleSlug);
-  }
+    if (segments.length === 2) {
+      const [, articleSlug] = segments;
+      return buildArticleDetailMetadata(articleSlug).catch(() => ({}));
+    }
 
-  if (segments.length !== 1) return {};
-  const slug = segments[0];
+    if (segments.length !== 1) return {};
+    const slug = segments[0];
 
-  // Check if this is a terms-beginning-with pattern
-  if (GLOSSARY_LIVE && slug.startsWith("terms-beginning-with-")) {
-    const letter = slug.replace("terms-beginning-with-", "");
-    const terms: Term[] = await fetchTermsByLetter(letter);
-    if (terms && terms.length > 0) {
+    if (GLOSSARY_LIVE && slug.startsWith("terms-beginning-with-")) {
+      const letter = slug.replace("terms-beginning-with-", "");
+      const terms: Term[] = await fetchTermsByLetter(letter).catch(() => []);
+      if (terms && terms.length > 0) {
+        return buildMetadata({
+          title: `Financial Terms Starting with "${letter.toUpperCase()}" | Imperial Finance Glossary`,
+          description: `Explore our comprehensive glossary of financial terms starting with "${letter.toUpperCase()}". From A to Z, find clear definitions and expert insights on investment, economics, and market terminology to enhance your financial literacy.`,
+          canonical: `/${slug}`,
+          noIndex: false,
+        });
+      }
+    }
+
+    const review = await fetchReviewBySlug(slug).catch(() => null);
+    if (review) {
       return buildMetadata({
-        title: `Financial Terms Starting with "${letter.toUpperCase()}" | Imperial Finance Glossary`,
-        description: `Explore our comprehensive glossary of financial terms starting with "${letter.toUpperCase()}". From A to Z, find clear definitions and expert insights on investment, economics, and market terminology to enhance your financial literacy.`,
+        title: review.title,
+        description: review.metaDescription,
         canonical: `/${slug}`,
         noIndex: false,
       });
     }
-  }
 
-  // Review pages get their own metadata (live from imperialpedia-service, static fallback)
-  const review = await fetchReviewBySlug(slug);
-  if (review) {
+    const article =
+      newsArticles.find((a) => a.slug === slug) ??
+      (await getPublishedNewsBySlug(slug).catch(() => null)) ??
+      staticNewsBySlug(slug);
+    if (!article) return {};
     return buildMetadata({
-      title: review.title,
-      description: review.metaDescription,
-      canonical: `/${slug}`,
+      title: article.title,
+      description: article.excerpt,
+      canonical: newsArticleHref(article),
       noIndex: false,
     });
+  } catch {
+    return {};
   }
-
-  // Standard article metadata — static set first, then live CMS news, then the
-  // committed snapshot (so real articles keep valid metadata when the CMS is offline).
-  const article =
-    newsArticles.find((a) => a.slug === slug) ??
-    (await getPublishedNewsBySlug(slug)) ??
-    staticNewsBySlug(slug);
-  if (!article) return {};
-  return buildMetadata({
-    title: article.title,
-    description: article.excerpt,
-    // News content's canonical home is the dated CNBC-style URL (or, for
-    // world-tagged news, the nested /world/<region>/<country>/... permalink —
-    // see newsArticleHref) — this bare `/slug` route redirects there below;
-    // keep metadata pointed at the same destination.
-    canonical: newsArticleHref(article),
-    noIndex: false,
-  });
 }
 
-// ─── Dated CNBC-style article page (/YYYY/MM/DD/slug) ────────────────────────
+// ─── Dated Imperialpedia-style article page (/YYYY/MM/DD/slug) ────────────────────────
 
 async function DatedArticlePage({ segments }: { segments: [string, string, string, string] }) {
   const [year, month, day, slug] = segments;
@@ -268,10 +257,10 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const canonicalPath = trueCanonical;
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
-  const authorProfile = await findAuthorProfileByName(article.author.name);
+  const authorProfile = await findAuthorProfileByName(article.author.name).catch(() => null);
   const [reviewerProfile, factCheckerProfile] = await Promise.all([
-    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
-    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug) : Promise.resolve(null),
+    article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
+    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
   ]);
   const categoryPath = CATEGORY_HREF[article.category];
 
@@ -404,7 +393,11 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
           )}
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
+        {/* Imperialpedia sets its article body in a 630px column; ours ran to 872px, which
+            is ~105 characters a line — well past the 65-75 that reads comfortably.
+            Capping the text column rather than the grid keeps the hero image and
+            share bar full width, the way a news template is supposed to work. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,680px)_320px] gap-10 xl:gap-14 lg:justify-center">
           {/* ══ LEFT: Article ══════════════════════════════════════════ */}
           <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -420,7 +413,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             </div>
 
             {/* Article Title */}
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 font-headline">{article.title}</h1>
+            <h1 className="!font-news text-[2.125rem] sm:text-[2.625rem] font-bold tracking-tight text-gray-900 font-headline leading-[1.06]">{article.title}</h1>
 
             <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
               {article.excerpt}
@@ -494,7 +487,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                 points/byline so it never interrupts the opening read, same
                 "post-content" philosophy as the content-engine article template. */}
             <div className="my-6">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="8086915093" format="auto" responsive={true} />
             </div>
 
             <div className="prose-none">
@@ -506,7 +499,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             {bodyBlocksBottom.length > 0 && (
               <>
                 <div className="my-8">
-                  <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+                  <AdSenseUnit slot="4123172240" format="auto" responsive={true} />
                 </div>
                 <div className="prose-none">
                   {bodyBlocksBottom.map((block, i) => (
@@ -517,7 +510,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
 
             <div className="my-8">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="7967495593" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
@@ -614,8 +607,60 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
           </aside>
         </div>
+
+        {/* Imperialpedia closes an article with full-width "MORE IN <SECTION>" and "MORE
+            FROM" blocks below the two-column grid, not inside the text column.
+            Sponsored ("FROM THE WEB") is deliberately not reproduced. */}
+        <Suspense fallback={null}>
+          <ArticleMoreFrom currentSlug={slug} category={article.category} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+/**
+ * Related coverage for the foot of a news article.
+ *
+ * Pulls live CMS news, drops the piece being read, and splits it: the newest on
+ * the same beat leads the image grid, everything else fills the headline list.
+ * Renders nothing when the CMS has nothing to show, rather than an empty rule
+ * with a gold bar over it.
+ */
+async function ArticleMoreFrom({ currentSlug, category }: { currentSlug: string; category?: string | null }) {
+  // News first. A young desk publishes news slowly while the site already has a
+  // library of guides, so the site's other content backs it up rather than
+  // leaving the reader at a dead end under a gold rule.
+  const [wire, evergreen] = await Promise.all([
+    getPublishedNews(24),
+    getRecentContent(16),
+  ]);
+  const seen = new Set<string>([currentSlug]);
+  const news = [...wire, ...evergreen].filter((n) => {
+    if (!n.slug || seen.has(n.slug)) return false;
+    seen.add(n.slug);
+    return true;
+  });
+  if (!news.length) return null;
+
+  const toItem = (n: (typeof news)[number]): MoreFromItem => ({
+    title: n.title,
+    href: newsArticleHref(n),
+    image: n.imageUrl ?? null,
+    byline: n.author?.name ?? null,
+  });
+
+  const sameBeat = category ? news.filter((n) => n.category === category) : [];
+  const gridSource = sameBeat.length >= 2 ? sameBeat : news;
+  const grid = gridSource.slice(0, 5).map(toItem);
+  const gridHrefs = new Set(grid.map((g) => g.href));
+  const list = news.filter((n) => !gridHrefs.has(newsArticleHref(n))).slice(0, 6).map(toItem);
+
+  return (
+    <>
+      <MoreFromGrid title={category ? `More in ${category}` : "More from Imperialpedia"} items={grid} />
+      <MoreFromList title="From Imperialpedia" items={list} />
+    </>
   );
 }
 
@@ -675,7 +720,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
   }
 
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically
-  // live at the dated CNBC-style URL, or the nested /world/<region>/<country>
+  // live at the dated Imperialpedia-style URL, or the nested /world/<region>/<country>
   // permalink for world-tagged news (see newsArticleHref) — redirect old/bare
   // `/<slug>` hits there instead of rendering a duplicate copy at this URL.
   const staticNewsMatch = newsArticles.find((a) => a.slug === slug);
@@ -808,7 +853,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
             {/* Post-content unit, same slot/placement pattern used sitewide —
                 never interrupts the primary reading flow. */}
             <div className="my-8">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="7967495593" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
@@ -870,18 +915,32 @@ async function BareSlugPage({ slug }: { slug: string }) {
  * the correct canonical instead of serving a second indexable copy.
  */
 async function CategoryArticlePage({ categorySlug, articleSlug }: { categorySlug: string; articleSlug: string }) {
-  const article = await resolveArticleForDetail(articleSlug);
-  if (!article) notFound();
+  try {
+    const article = await resolveArticleForDetail(articleSlug).catch(() => null);
+    if (!article) notFound();
 
-  const canonicalCategory = article.categorySlug;
-  if (!canonicalCategory) {
-    permanentRedirect(`/financial-intelligence/${articleSlug}`);
-  }
-  if (canonicalCategory !== categorySlug) {
-    permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
-  }
+    const canonicalCategory = article.categorySlug;
+    if (!canonicalCategory) {
+      permanentRedirect(`/financial-intelligence/${articleSlug}`);
+    }
+    if (canonicalCategory !== categorySlug) {
+      permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
+    }
 
-  return <ArticleDetailContent article={article} />;
+    return await ArticleDetailContent({ article });
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
+    }
+    notFound();
+  }
 }
 
 // ─── Route entry point ────────────────────────────────────────────────────────
@@ -911,17 +970,31 @@ export async function generateStaticParams(): Promise<SlugParams[]> {
 // silently following the most aggressive one is how it ended up regenerating
 // every 30 seconds. Publishes come through /api/revalidate's revalidateTag(),
 // so this is the no-webhook safety net.
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export default async function CatchAllSlugPage({ params }: { params: Promise<SlugParams> }) {
-  const { slug: segments } = await params;
+  try {
+    const { slug: segments } = await params;
 
-  if (isDatedSegments(segments)) {
-    return <DatedArticlePage segments={segments} />;
+    if (isDatedSegments(segments)) {
+      return <DatedArticlePage segments={segments} />;
+    }
+    if (segments.length === 2) {
+      return <CategoryArticlePage categorySlug={segments[0]} articleSlug={segments[1]} />;
+    }
+    if (segments.length !== 1) notFound();
+    return <BareSlugPage slug={segments[0]} />;
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
+    }
+    notFound();
   }
-  if (segments.length === 2) {
-    return <CategoryArticlePage categorySlug={segments[0]} articleSlug={segments[1]} />;
-  }
-  if (segments.length !== 1) notFound();
-  return <BareSlugPage slug={segments[0]} />;
 }

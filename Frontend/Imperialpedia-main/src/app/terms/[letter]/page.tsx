@@ -94,7 +94,7 @@ export default async function TermsByLetterPage({
   return (
     <div className="min-h-screen bg-background">
       <Container className="py-10 lg:py-14">
-        {/* Heading — bold neutral sans, Investopedia dictionary style */}
+        {/* Heading — bold neutral sans, Imperialpedia dictionary style */}
         <h1 className="!font-ui mb-3 text-4xl font-extrabold tracking-tight text-foreground lg:text-[2.75rem]">
           Terms Beginning With &apos;{label}&apos;
         </h1>

@@ -4,6 +4,8 @@ const db = require('../models');
 const { sendSuccess, sendPaginated, sendError } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { decideAccess, loadSubscriptionForUser, resolveArticleAccess } = require('../service/entitlementService');
+const { contentFingerprint } = require('../service/editorialAuditService');
+const reviewService = require('../service/editorialReviewService');
 
 const PRIVILEGED_ROLES = ['admin', 'owner', 'super_admin'];
 const isPrivilegedCaller = (req) => ((req.auth && req.auth.roles) || []).some((r) => PRIVILEGED_ROLES.includes(r));
@@ -225,6 +227,27 @@ const publishArticle = async (req, res, next) => {
 
         if (article.author_id !== req.user.id && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
             return next(new AppError('FORBIDDEN', 'Not authorized', 403));
+        }
+
+        // PROMPT 5 — Human-Vetted Publishing Workflow: publication requires a persisted,
+        // human-authored approval (editorial_reviews) whose reviewed fingerprint still matches
+        // the article's CURRENT content. Frontend controls are UX only — this is the actual
+        // enforcement point, so an approval can never be bypassed by calling this endpoint
+        // directly, and a stale (edited-since-approval) approval can never publish (spec §14/§15).
+        const latestReview = await db.ArticleEditorialReview.findOne({
+            where: { article_id: article.id },
+            order: [['created_at', 'DESC']],
+        });
+        const currentFingerprint = contentFingerprint(article.title, article.content);
+        const reviewStatus = reviewService.deriveReviewStatus(latestReview, currentFingerprint);
+        if (reviewStatus !== 'APPROVED') {
+            return next(new AppError(
+                'HUMAN_REVIEW_REQUIRED',
+                reviewStatus === 'STALE'
+                    ? 'Article changed after human approval. Complete the editorial review again before publishing.'
+                    : 'This article needs a completed human editorial review and approval before it can be published.',
+                409
+            ));
         }
 
         await article.update({ status: 'published', published_at: new Date() });

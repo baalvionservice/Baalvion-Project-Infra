@@ -46,6 +46,7 @@ public class BillingFulfillmentClient {
   private final String communityFulfillUrl;
   private final String giftcardFulfillUrl;
   private final String walletFulfillUrl;
+  private final String insidersFulfillUrl;
   private final String internalSecret;
   private final boolean enabled;
 
@@ -55,6 +56,7 @@ public class BillingFulfillmentClient {
       @Value("${app.billing.community-fulfill-url:http://app-community:3064/v1/community/billing/fulfill}") String communityFulfillUrl,
       @Value("${app.billing.giftcard-fulfill-url:http://app-giftcard:3065/v1/giftcards/billing/fulfill}") String giftcardFulfillUrl,
       @Value("${app.billing.wallet-fulfill-url:http://app-wallet:3039/api/v1/wallets/billing/fulfill}") String walletFulfillUrl,
+      @Value("${app.billing.insiders-fulfill-url:http://app-insiders:3050/v1/billing/fulfill}") String insidersFulfillUrl,
       @Value("${app.billing.fulfill-enabled:true}") boolean enabled,
       @Value("${app.internal-secret:${INTERNAL_SERVICE_SECRET:}}") String internalSecret) {
     this.objectMapper = objectMapper;
@@ -62,6 +64,7 @@ public class BillingFulfillmentClient {
     this.communityFulfillUrl = communityFulfillUrl;
     this.giftcardFulfillUrl = giftcardFulfillUrl;
     this.walletFulfillUrl = walletFulfillUrl;
+    this.insidersFulfillUrl = insidersFulfillUrl;
     this.enabled = enabled;
     this.internalSecret = internalSecret;
     if (enabled) {
@@ -69,6 +72,7 @@ public class BillingFulfillmentClient {
       validateFulfillUrl(communityFulfillUrl);
       validateFulfillUrl(giftcardFulfillUrl);
       validateFulfillUrl(walletFulfillUrl);
+      validateFulfillUrl(insidersFulfillUrl);
       if (internalSecret == null || internalSecret.isBlank()) {
         log.warn("Billing fulfillment is enabled but app.internal-secret/INTERNAL_SERVICE_SECRET is blank "
             + "— every CAPTURED webhook dispatch will fail until it is configured.");
@@ -110,6 +114,11 @@ public class BillingFulfillmentClient {
       targetUrl = giftcardFulfillUrl;
     } else if ("wallet".equals(fulfillTarget)) {
       targetUrl = walletFulfillUrl;
+    } else if ("insiders".equals(fulfillTarget)) {
+      // Elite Circle membership on marketunderworld.com — per-USER like community/giftcard, so
+      // it must be routed here rather than falling through to the orgId check below (a
+      // membership charge carries no orgId and would be silently skipped).
+      targetUrl = insidersFulfillUrl;
     } else {
       Object orgId = metadata.get("orgId");
       if (orgId == null || String.valueOf(orgId).isBlank()) {

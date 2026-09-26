@@ -44,6 +44,9 @@ router.delete('/sessions/:sessionId', ctrl.revokeSession);
 // Audit logs
 router.get('/audit-logs', ctrl.getAuditLogs);
 
+// Sign-in activity per property — who signed in on which site, from auth.auth_audit_log.
+router.get('/login-activity', ctrl.getLoginActivity);
+
 // Per-business access (trade, jobs, ir, …) — the non-CMS half of one-panel access control.
 // Inherits requireStaffAdmin from the router-level gate above.
 const bizCtrl = require('../controller/businessAccessController');

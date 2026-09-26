@@ -6,6 +6,12 @@ import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
+import { getPodcastHub } from '@/lib/podcasts-hub';
+import { getShowPeople, getVideoHub, personUrl as showPersonUrl, seasonUrl, showUrl } from '@/lib/videos-hub';
+// People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
+// 2026-09-25 alongside the routes below -- see the retirement comment
+// further down this file. Restore together. Podcasts/Videos were kept live.
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -40,7 +46,11 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 1800 }, signal: controller.signal });
+    // 900s is the repo-wide floor (see scripts/check-cache-hygiene.mjs) — this
+    // window becoming the ISR floor for every route reaching this fetcher is
+    // exactly the bug that check exists to catch. Real freshness comes from
+    // the outer unstable_cache's tag below, not this number.
+    const res = await fetch(url, { next: { revalidate: 900 }, signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
@@ -92,11 +102,19 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/` },
+    // /case-law, /legislation, /law-changes still 301 to / (next.config.ts)
+    // -- see retired-links.ts's RETIRED_SECTIONS. /news un-retired
+    // 2026-09-25 at explicit request (1 published article today, more
+    // expected as drafts get approved).
     { url: `${BASE_URL}/news` },
-    { url: `${BASE_URL}/case-law` },
-    { url: `${BASE_URL}/legislation` },
-    { url: `${BASE_URL}/law-changes` },
     { url: `${BASE_URL}/about-us` },
+    // /people, /entertainment, /legal/cases, /legal/courts, /sports (+
+    // /sports/teams, /sports/competitions), /topics, /countries dropped
+    // 2026-09-25: all now 301 to / (next.config.ts, third retirement pass) --
+    // submitting a URL that immediately redirects is exactly what
+    // REDIRECTED_ARTICLE_SLUGS below exists to prevent for articles, so the
+    // same reasoning applies to these hubs. Restore alongside
+    // CURRENT_CATEGORY_SLUGS once AdSense clears.
     { url: `${BASE_URL}/authors` },
     { url: `${BASE_URL}/editorial-standards` },
     { url: `${BASE_URL}/corrections` },
@@ -147,7 +165,8 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // article temporarily reachable only at /article/{slug}, not something to
   // actively resubmit to Google.
   const currentSlugSetForArticles = new Set<string>(CURRENT_CATEGORY_SLUGS);
-  const isSitemapEligible = (a: ArticleEntry): boolean => {
+  const isSitemapEligible = (a: ArticleEntry & { noindex?: boolean }): boolean => {
+    if (a.noindex) return false;
     const rawSlug = a.category?.slug;
     if (rawSlug) return currentSlugSetForArticles.has(toNewCategorySlug(rawSlug));
     return !!a.slug && ROOT_FLAT_ARTICLE_SLUGS.has(a.slug);
@@ -263,18 +282,53 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
+  // People, Entertainment, Legal cases/courts, Sports, Topics, and Countries
+  // routes dropped from the sitemap 2026-09-25 (third retirement pass -- see
+  // CURRENT_CATEGORY_SLUGS's comment): all of those pillars now 301 to /
+  // (next.config.ts), so submitting their URLs here would resubmit pages
+  // that immediately redirect, same problem REDIRECTED_ARTICLE_SLUGS exists
+  // to prevent for articles. Restore this block once AdSense approves the
+  // Fashion-only site. Podcasts and Videos were kept live (real content) and
+  // stay in the sitemap below.
+
+  // Podcasts and videos: only pages an editor has finished (indexable) or that have real videos. Thin pages stay out.
+  const [podcastHub, videoHub] = await Promise.all([getPodcastHub(), getVideoHub()]);
+  const podcastRoutes: MetadataRoute.Sitemap = [
+    ...(podcastHub.length > 0 ? [{ url: `${BASE_URL}/podcasts` }] : []),
+    ...podcastHub.filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}/podcasts/${p.slug}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) })),
+  ];
+  const showsWithVideos = new Set(videoHub.videos.map((v) => v.showSlug));
+  const videoRoutes: MetadataRoute.Sitemap = [
+    ...(videoHub.videos.length > 0 ? [{ url: `${BASE_URL}/videos` }] : []),
+    ...videoHub.shows.filter((sh) => sh.indexable || showsWithVideos.has(sh.slug)).map((sh) => ({ url: `${BASE_URL}${showUrl(sh.slug)}`, ...(sh.reviewedAt ? { lastModified: new Date(sh.reviewedAt) } : {}) })),
+    ...videoHub.videos.map((v) => ({ url: `${BASE_URL}/videos/${v.slug}`, ...(v.publishedAt ? { lastModified: new Date(v.publishedAt) } : {}) })),
+  ];
+
+  const seasonRoutes: MetadataRoute.Sitemap = videoHub.shows.flatMap((sh) => sh.seasons.filter((x) => x.participants.length >= 8).map((x) => ({ url: `${BASE_URL}${seasonUrl(sh.slug, x.number)}` })));
+  const showPeopleRoutes: MetadataRoute.Sitemap = (await Promise.all(videoHub.shows.map(async (sh) => (await getShowPeople(sh.slug)).filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}${showPersonUrl(sh.slug, p.slug)}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) }))))).flat();
+
   return [
     ...staticRoutes,
+    ...seasonRoutes,
+    ...showPeopleRoutes,
+    ...podcastRoutes,
+    ...videoRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
   ];
 }
 
+// Tagged with the same CONTENT_CACHE_TAG every other CMS-backed read uses, so
+// the publish webhook's revalidateTag() (see /api/revalidate) busts this
+// cache immediately on publish instead of leaving the sitemap to catch up on
+// its own 5-minute window -- it was untagged before, so a CMS publish only
+// looked instant for the pages it directly names; the sitemap itself quietly
+// kept serving up to 30 (now 5) stale minutes regardless.
 const getCachedSitemapEntries = unstable_cache(
   buildSitemapEntries,
   ['law-elite-network-sitemap-entries'],
-  { revalidate: 1800 },
+  { revalidate: 300, tags: [CONTENT_CACHE_TAG] },
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -1,5 +1,9 @@
 {
   "name": "law-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Law Service — Law Elite Network legal platform backend",
   "license": "ISC",
@@ -8,13 +12,17 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate": "node db/migrate.js",
+    "migrate": "node db/migrate.js && node ../../../packages/payment-consistency/scripts/migrate.mjs",
     "migrate:status": "node db/migrate.js --status",
     "seed": "node scripts/seed.js",
     "test": "node --test"
   },
   "dependencies": {
     "@baalvion/email": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/payment-consistency": "workspace:*",
+    "@baalvion/sites": "workspace:*",
+    "ioredis": "^5.4.1",
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
@@ -28,8 +36,8 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "ioredis": "^5.4.1",
-    "multer": "^2.1.1",
-    "nodemailer": "^9.0.1",
+    "multer": "^2.3.0",
+    "nodemailer": "^9.1.1",
     "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
     "prom-client": "^15.1.3",

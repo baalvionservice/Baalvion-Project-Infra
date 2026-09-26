@@ -1,8 +1,8 @@
 import React from "react";
 import "./globals.css";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { env } from "@/config/env";
-import { Source_Serif_4 } from "next/font/google";
+import { Source_Serif_4, Figtree } from "next/font/google";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
@@ -18,6 +18,18 @@ import { structuredData } from "@/lib/seo/structuredData";
 const CMS_SLUG =
   process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
+// Next.js always emits its own default <meta name="viewport"> tag for the
+// App Router regardless of whether one is configured here — the manual
+// <meta name="viewport"> that used to sit in this file's <head> JSX (below)
+// meant the page shipped two conflicting viewport tags. Declaring it here
+// instead makes this the one source Next dedupes against.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
 
@@ -30,29 +42,22 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "Imperialpedia — The Financial Intelligence Network",
+    default: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     template: "%s | Imperialpedia",
   },
 
   description:
-    'Imperialpedia is a financial intelligence and reference platform: an encyclopedic knowledge graph of companies, countries, industries, and technologies alongside live market data and editorially reviewed articles.',
+    'Imperialpedia is an independent financial education platform covering stock market fundamentals, personal budgeting, fraud protection, and the creator economy — written by named contributors with cited sources.',
   keywords: [
-    "financial intelligence",
-    "market analysis",
-    "investment research",
-    "stock market",
-    "economic indicators",
+    "stock market investing",
+    "budgeting",
+    "fraud protection",
+    "creator economy",
     "financial glossary",
-    "investing",
-    "personal finance",
     "Imperialpedia",
   ],
 
   authors: [
-    {
-      name: "Allen Krewzz",
-      url: `${env.siteUrl}/authors/allen-krewzz`,
-    },
     {
       name: "Tamanna Shaikh",
       url: `${env.siteUrl}/authors/tamanna-shaikh`,
@@ -71,15 +76,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: env.siteUrl,
     siteName: "Imperialpedia",
-    title: "Imperialpedia — The Financial Intelligence Network",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
+      'Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy.',
     images: [
       {
         url: `${env.siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "Imperialpedia — Financial Intelligence",
+        alt: "Imperialpedia — Financial Education",
       },
     ],
   },
@@ -88,9 +93,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@imperialpedia",
     creator: "@imperialpedia",
-    title: "Imperialpedia — The Financial Intelligence Network",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
+      'Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy.',
     images: [`${env.siteUrl}/og-image.png`],
   },
 
@@ -123,6 +128,19 @@ const corinthian = localFont({
   display: "swap",
 });
 
+// Figtree stands in for Proxima Nova on the news template. Measured against the
+// real thing: headline set width within 0.3% and x-height within two units at
+// 100px, where Montserrat — the usual suggestion — runs 16% wide. Proxima Nova
+// itself is a commercial licence from Mark Simonson; the demo files floating
+// around replace $, %, - and the digit 4 with a watermark glyph, so they cannot
+// be used at all.
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-news",
+  display: "swap",
+});
+
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "600", "700", "900"],
@@ -149,7 +167,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(sourceSerif.variable, corinthian.variable)}
+      className={cn(sourceSerif.variable, corinthian.variable, figtree.variable)}
     >
       <head>
         {/* Google Consent Mode v2 -- must run BEFORE any ad/analytics script, so no
@@ -217,10 +235,16 @@ export default async function RootLayout({
             defaults. Confirm this ordering with a live view-source check after any
             future edit near here, the same way the original bug was found. */}
         {adsenseClient && (
+          // suppressHydrationWarning for the same reason as the consent script above:
+          // AdSense's injected show_ads_impl script can land in <head> before hydration
+          // and shift this node's position, so React diffs it against the wrong sibling.
+          // Confirmed live: without this, that cosmetic mismatch was throwing React error
+          // #418 (hard hydration-mismatch recovery, not just a dev warning) on every load.
           <script
             defer
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
             crossOrigin="anonymous"
+            suppressHydrationWarning
           />
         )}
         {adsenseClient && (
@@ -238,13 +262,6 @@ export default async function RootLayout({
             script. See PreferredSourceButton for where the matching
             [google-add-preferred-source-btn] element renders. */}
         <script async src="https://news.google.com/swg/js/v1/publisher.js" />
-
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-
-        <meta name="theme-color" content="#ffffff" />
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">

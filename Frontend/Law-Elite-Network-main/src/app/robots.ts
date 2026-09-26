@@ -27,6 +27,9 @@ const ALLOW = [
   // "blocked by robots.txt"). More specific Allow wins over the shorter
   // Disallow regardless of list order, per the robots.txt spec Google follows.
   '/api/image',
+  // /news un-retired 2026-09-25 (see next.config.ts) -- /case-law,
+  // /legislation and /law-changes stay retired and are still not in this
+  // list.
   '/news',
   '/search',
   '/plans',
@@ -50,6 +53,12 @@ const ALLOW = [
   '/article/',
   '/law/',
   ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
+  // Kept live through the 2026-09-25 Fashion-only narrowing (see
+  // category-slugs.ts) -- real content (Stuff You Should Know, Desert
+  // Island Discs, The Rest Is Football; real Bigg Boss episodes), not
+  // retired alongside the other pillars.
+  '/podcasts',
+  '/videos',
   '/authors',
   '/author/',
 ];
@@ -64,6 +73,9 @@ const DISALLOW = [
   '/transactions',
   '/billing',
   '/notifications',
+  '/following',
+  '/saved',
+  '/studio',
   '/my-counsel',
   '/referral',
   '/onboarding',

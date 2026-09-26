@@ -661,6 +661,17 @@ db.Payment = def('Payment', 'payments', {
     meta: { type: DataTypes.JSONB, defaultValue: {} },
 }, bothTs);
 
+// Durable idempotency for payment-service's fulfilment callback (migration 009). The claim is
+// a row, not process memory: a provider redelivery or a JVM retry must net exactly one
+// membership activation even across a restart or a second replica.
+db.BillingWebhookEvent = def('BillingWebhookEvent', 'billing_webhook_events', {
+    id: uuidPk,
+    provider: { type: DataTypes.STRING, allowNull: false },
+    event_id: { type: DataTypes.TEXT, allowNull: false },
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'claimed' },
+    payload: { type: DataTypes.JSONB, defaultValue: {} },
+}, bothTs);
+
 // ── Protocol platform (migration 008) ─────────────────────────────────────────
 db.ProtocolExpert = def('ProtocolExpert', 'protocol_experts', {
     id: uuidPk,

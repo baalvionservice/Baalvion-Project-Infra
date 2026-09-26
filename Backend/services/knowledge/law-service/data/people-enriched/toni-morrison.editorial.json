@@ -1,0 +1,127 @@
+{
+  "display_name": null,
+  "short_bio": "American novelist and winner of the 1993 Nobel Prize in Literature.",
+  "biography": "Toni Morrison was born Chloe Ardelia Wofford in Lorain, Ohio, and studied at Howard University and Cornell. She worked as an editor at Random House while writing, and published her first novel, The Bluest Eye, in 1970.\n\nSong of Solomon (1977) won the National Book Critics Circle Award, and Beloved (1987) won the 1988 Pulitzer Prize for Fiction. In 1993 she became the first Black woman to receive the Nobel Prize in Literature.\n\nShe received the Presidential Medal of Freedom in 2012 and died on 5 August 2019.",
+  "awards": [
+    {
+      "title": "Janet Heidinger Kafka Prize",
+      "year": 1977
+    },
+    {
+      "title": "Langston Hughes Medal",
+      "year": 1981
+    },
+    {
+      "title": "Ohio Women's Hall of Fame",
+      "year": 1982
+    },
+    {
+      "title": "American Book Awards",
+      "year": 1988
+    },
+    {
+      "title": "Anisfield-Wolf Book Awards",
+      "year": 1988
+    },
+    {
+      "title": "Pulitzer Prize for Fiction",
+      "year": 1988
+    },
+    {
+      "title": "Helmerich Award",
+      "year": 1988
+    },
+    {
+      "title": "Common Wealth Award of Distinguished Service",
+      "year": 1989
+    },
+    {
+      "title": "Nobel Prize in Literature",
+      "year": 1993
+    },
+    {
+      "title": "Jefferson Lecture",
+      "year": 1996
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 2000
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work, Fiction",
+      "year": 2004
+    },
+    {
+      "title": "New Jersey Hall of Fame",
+      "year": 2008
+    },
+    {
+      "title": "Norman Mailer Prize",
+      "year": 2009
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2012
+    },
+    {
+      "title": "The Nichols-Chancellor's Medal",
+      "year": 2013
+    },
+    {
+      "title": "PEN Oakland/Josephine Miles Literary Award",
+      "year": 2013
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Bluest Eye",
+      "year": 1970,
+      "note": "Novel"
+    },
+    {
+      "title": "Song of Solomon",
+      "year": 1977,
+      "note": "Novel"
+    },
+    {
+      "title": "Beloved",
+      "year": 1987,
+      "note": "Novel; Pulitzer Prize for Fiction"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1931-02-18",
+      "title": "Born in Lorain, Ohio"
+    },
+    {
+      "date": "1970",
+      "title": "Publishes The Bluest Eye"
+    },
+    {
+      "date": "1988",
+      "title": "Wins the Pulitzer Prize for Beloved"
+    },
+    {
+      "date": "1993",
+      "title": "Awarded the Nobel Prize in Literature"
+    },
+    {
+      "date": "2019-08-05",
+      "title": "Dies in New York"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q72334"
+    },
+    {
+      "label": "Wikipedia: Toni Morrison",
+      "url": "https://en.wikipedia.org/wiki/Toni_Morrison"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

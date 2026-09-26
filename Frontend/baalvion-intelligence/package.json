@@ -1,5 +1,9 @@
 {
   "name": "baalvion-intelligence-web",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,11 +12,14 @@
     "start": "next start -p 3070",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build",
+    "cf:preview": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/auth-sdk": "workspace:*",
+    "@baalvion/design": "workspace:*",
     "@opennextjs/cloudflare": "^1.20.1",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.6",
@@ -25,7 +32,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
-    "next": "15.5.21",
+    "next": "15.5.24",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^2.15.1",
@@ -33,15 +40,13 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
     "eslint": "^9.39.4",
-    "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "typescript-eslint": "^8.57.1",
+    "typescript": "^5.9.3",
     "wrangler": "^4.110.0"
   }
 }

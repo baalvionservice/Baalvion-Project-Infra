@@ -21,12 +21,12 @@ const getWorkflow = async (req, res, next) => {
 
 const transition = async (req, res, next) => {
     try {
-        const { action, notes, scheduledAt } = req.validated;
+        const { action, notes, scheduledAt, publishedAt } = req.validated;
         const userLevel = getUserLevel(req);
 
         const result = await workflowService.transition(
             req.params.websiteId, req.params.contentId,
-            req.user.id, userLevel, action, notes, scheduledAt
+            req.user.id, userLevel, action, notes, scheduledAt, publishedAt
         );
 
         if (action === 'schedule') {

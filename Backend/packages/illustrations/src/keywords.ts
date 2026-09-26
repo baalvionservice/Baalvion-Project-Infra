@@ -1,12 +1,25 @@
-import { FINANCE_ICONS, LAW_ICONS, GENERIC_ICONS, type IconDef } from './icons';
-import { pickMany } from './hash';
+import {
+  FINANCE_ICONS, LAW_ICONS, GENERIC_ICONS, ENTERTAINMENT_ICONS, SPORTS_ICONS,
+  type IconDef,
+} from './icons';
+import { pick, pickMany } from './hash';
 
 /**
  * Keyword → icon-id mapping. Matched case-insensitively as whole words against
- * `title + tags + excerpt`. Order matters only in that earlier matches are kept
- * first when multiple phrases hit — resolveIcons() dedupes and caps at 3.
+ * `title + category + tags + excerpt`. Order matters only in that earlier
+ * matches are kept first when multiple phrases hit — resolveIcons() dedupes
+ * and caps at 3. Entertainment/sports patterns sit first: LEN's headlines are
+ * almost always framed as legal analysis ("...Arbitration Award...",
+ * "...Defamation Defense"), so without priority every celebrity/athlete
+ * story converges on the same scales/gavel/courthouse icons regardless of
+ * who or what it's actually about.
  */
 const KEYWORD_ICONS: Array<{ pattern: RegExp; icons: string[] }> = [
+  { pattern: /\bfilm|movie|actor|actress|hollywood|studio|screen|premiere|box office/i, icons: ['camera', 'filmClap', 'star'] },
+  { pattern: /\balbum|tour|grammy|singer|musician|concert|record label/i, icons: ['microphone', 'star', 'camera'] },
+  { pattern: /\btelevision|tv show|streaming|series|episode/i, icons: ['filmClap', 'camera', 'star'] },
+  { pattern: /\bathlete|footballer|soccer|nfl|nba|mls|nhl|olympic|tournament|championship|quarterback|striker|match\b/i, icons: ['trophy', 'sportsBall', 'medal'] },
+  { pattern: /\bceleb(?:rity|rities)|paparazzi|red carpet|tabloid/i, icons: ['camera', 'star', 'microphone'] },
   { pattern: /\bmortgage|home loan|refinanc/i, icons: ['house', 'percent', 'chartUp'] },
   { pattern: /\binflation|purchasing power|cost of living/i, icons: ['coinStack', 'chartDown', 'wallet'] },
   { pattern: /\bbudget|budgeting|50\/30\/20/i, icons: ['calculator', 'pieChart', 'wallet'] },
@@ -38,8 +51,18 @@ export interface ArticleInput {
   seed: string;
 }
 
+/** Entertainment/sports categories checked first: LEN's law-flavored category
+ * names ("Celebrity News") would otherwise fall through to the law-keyword
+ * check below on words like "litigation" that also appear in "Celebrity
+ * News" article titles — category identity should win over that coincidence. */
 function iconPoolForCategory(category?: string | null): IconDef[] {
   const normalized = (category || '').toLowerCase();
+  if (['celebrity', 'movie', 'film', 'music', 'television', 'streaming', 'entertainment'].some((m) => normalized.includes(m))) {
+    return ENTERTAINMENT_ICONS;
+  }
+  if (['sport', 'athlete', 'athletic'].some((m) => normalized.includes(m))) {
+    return SPORTS_ICONS;
+  }
   if (['law', 'legal', 'court', 'attorney', 'lawyer', 'compliance', 'litigation'].some((m) => normalized.includes(m))) {
     return LAW_ICONS;
   }
@@ -49,10 +72,20 @@ function iconPoolForCategory(category?: string | null): IconDef[] {
   return GENERIC_ICONS;
 }
 
-/** Resolve 2-3 icons for an article: keyword matches first, hash-picked category defaults as fallback. */
+/** Resolve 2-3 icons for an article: one guaranteed from the category's own
+ * pool (so a "Celebrity News" story never shows only generic law icons just
+ * because its headline happens to say "litigation"), topped up with keyword
+ * matches from title/category/tags/excerpt, and a deterministic category
+ * fallback if neither produced enough. */
 export function resolveIcons(input: ArticleInput): IconDef[] {
-  const haystack = [input.title, ...(input.tags || []), input.excerpt || ''].join(' ');
+  const haystack = [input.title, input.category || '', ...(input.tags || []), input.excerpt || ''].join(' ');
+  const pool = iconPoolForCategory(input.category);
+
   const matchedIds: string[] = [];
+  const categoryIsTopical = pool === ENTERTAINMENT_ICONS || pool === SPORTS_ICONS;
+  if (categoryIsTopical) {
+    matchedIds.push(pick(pool, input.seed, 'icon-category-lead').id);
+  }
   for (const { pattern, icons } of KEYWORD_ICONS) {
     if (pattern.test(haystack)) {
       for (const id of icons) {
@@ -62,17 +95,22 @@ export function resolveIcons(input: ArticleInput): IconDef[] {
     if (matchedIds.length >= 3) break;
   }
 
-  const allById = new Map(
-    [...FINANCE_ICONS, ...LAW_ICONS, ...GENERIC_ICONS].map((icon) => [icon.id, icon]),
-  );
-  const matched = matchedIds.slice(0, 3).map((id) => allById.get(id)).filter(Boolean) as IconDef[];
+  const matched = matchedIds.slice(0, 3).map((id) => getIconById(id)).filter(Boolean) as IconDef[];
   if (matched.length >= 2) return matched;
 
-  const pool = iconPoolForCategory(input.category);
   const fallback = pickMany(pool, input.seed, 2, 'icon-fallback');
   // Merge any partial keyword match with the deterministic fallback, deduped.
   const merged = [...matched, ...fallback].filter(
     (icon, index, arr) => arr.findIndex((other) => other.id === icon.id) === index,
   );
   return merged.slice(0, 3);
+}
+
+const ICON_BY_ID = new Map(
+  [...FINANCE_ICONS, ...LAW_ICONS, ...GENERIC_ICONS, ...ENTERTAINMENT_ICONS, ...SPORTS_ICONS].map(
+    (icon) => [icon.id, icon],
+  ),
+);
+function getIconById(id: string): IconDef | undefined {
+  return ICON_BY_ID.get(id);
 }

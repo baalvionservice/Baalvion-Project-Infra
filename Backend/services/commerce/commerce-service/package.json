@@ -1,5 +1,9 @@
 {
   "name": "commerce-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Enterprise Commerce Service",
   "main": "index.js",
@@ -14,6 +18,7 @@
     "seed:undo": "sequelize-cli db:seed:undo:all"
   },
   "dependencies": {
+    "@baalvion/money": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",

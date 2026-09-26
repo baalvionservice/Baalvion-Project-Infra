@@ -18,10 +18,15 @@ module.exports = {
     version: process.env.SERVICE_VERSION || '1.0.0',
     port,
     apiVersion: 'v1',
+    // Local frontends that call the public delivery API directly from the browser.
+    // 3029 (Imperialpedia) and 9002 (Law Elite) were missing, so every client-side
+    // category fetch failed CORS the moment those apps were pointed at a local CMS.
     corsOrigins: parseList(process.env.CORS_ORIGINS, [
         'http://localhost:3000',
+        'http://localhost:3029',
         'http://localhost:3030',
         'http://localhost:5173',
+        'http://localhost:9002',
     ]),
     jwt: {
         publicKey: require('@baalvion/auth-node').requireEnv('JWT_PUBLIC_KEY').replace(/\\n/g, '\n'),

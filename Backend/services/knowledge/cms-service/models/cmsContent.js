@@ -53,14 +53,20 @@ module.exports = function (sequelize, DataTypes) {
         deletionRequestedBy: { type: DataTypes.BIGINT, allowNull: true },
         deletionRequestedAt: { type: DataTypes.DATE, allowNull: true },
         deletionRequestNote: { type: DataTypes.TEXT, allowNull: true },
+        deletedBy: { type: DataTypes.BIGINT, allowNull: true },
     }, {
         sequelize,
         tableName: 'cms_contents',
         schema: 'cms',
         timestamps: true,
         underscored: true,
+        // Soft delete: content.destroy() sets deleted_at instead of removing the row.
+        // Nothing is actually gone until permanentlyDeleteContent() runs destroy({ force: true }).
+        paranoid: true,
         indexes: [
-            { unique: true, fields: ['website_id', 'slug'], name: 'cms_contents_website_slug_unique' },
+            // Partial: only live (non-trashed) rows compete for a slug — see migration
+            // 20260046. A trashed item's old slug is free to reuse immediately.
+            { unique: true, fields: ['website_id', 'slug'], where: { deleted_at: null }, name: 'cms_contents_website_slug_unique' },
             { fields: ['website_id'] },
             { fields: ['category_id'] },
             { fields: ['author_id'] },

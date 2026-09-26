@@ -1,3 +1,5 @@
+import { isRetiredPath } from "@/lib/content/retired-paths";
+
 /**
  * Resolves the real canonical href for a `NewsArticle`-shaped card. The same
  * shape is used for both dated news (canonical `/YYYY/MM/DD/slug`) and
@@ -12,8 +14,12 @@ export function newsArticleHref(article: { slug: string; publishedAt: string; co
     // A guide's permalink lives under its real CMS category (e.g. /bonds/<slug>)
     // so browsing from /bonds and opening an article stays under /bonds, not a
     // flat /financial-intelligence/ bucket disconnected from the topic hub.
-    // Falls back to the legacy bucket only for rows with no category assigned.
-    return article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
+    // Falls back to the legacy bucket for rows with no category, or whose CMS
+    // category is a slug we've since retired — the CMS record was never
+    // re-categorized when the category was consolidated away, so building the
+    // URL from it verbatim would 30x straight back to the homepage.
+    const category = article.categorySlug && !isRetiredPath(`/${article.categorySlug}`) ? article.categorySlug : null;
+    return category ? `/${category}/${article.slug}` : `/financial-intelligence/${article.slug}`;
   }
   // Country-level world news (both region + country tagged) gets the nested
   // permalink, one level deeper again when a state/province is also tagged;
@@ -25,7 +31,7 @@ export function newsArticleHref(article: { slug: string; publishedAt: string; co
 }
 
 /**
- * Canonical article URL scheme, matching how wire outlets like CNBC path their
+ * Canonical article URL scheme, matching how wire outlets like Imperialpedia path their
  * own article pages (`/YYYY/MM/DD/slug`) instead of a bare `/slug`.
  */
 export function articleUrl(dateISO: string | null | undefined, slug: string): string {
@@ -74,6 +80,10 @@ export interface LinkableStory {
   slug?: string;
   dateISO?: string;
   href?: string;
+  /** CMS contentType ('article' | 'news' | …) and category, when known — an
+   *  article's canonical lives at /<categorySlug>/<slug>, not at a dated path. */
+  contentType?: string;
+  categorySlug?: string;
 }
 
 /**
@@ -83,7 +93,22 @@ export interface LinkableStory {
  * nothing to link to yet.
  */
 export function storyHref(item: LinkableStory): { href: string; external: boolean } | null {
-  if (item.slug) return { href: articleUrl(item.dateISO, item.slug), external: false };
+  if (item.slug) {
+    // Was always articleUrl(), i.e. the dated /YYYY/MM/DD/<slug> news path, for
+    // every owned item. Guides carry a category and canonicalise to
+    // /<categorySlug>/<slug>, so every World tile pointing at one emitted a URL
+    // that 301s — 11 of them, on /world and each regional page. newsArticleHref
+    // already encodes the correct shape per content type; defer to it.
+    return {
+      href: newsArticleHref({
+        slug: item.slug,
+        publishedAt: item.dateISO ?? "",
+        contentType: item.contentType,
+        categorySlug: item.categorySlug,
+      }),
+      external: false,
+    };
+  }
   if (item.href) return { href: item.href, external: true };
   return null;
 }

@@ -185,7 +185,7 @@ export default function InvestorUpdatePreview({
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">
-                    Driving user acquisition for TechCorp India's new SaaS
+                    Driving user acquisition for TechCorp India&apos;s new SaaS
                     product.
                   </p>
                 </CardContent>

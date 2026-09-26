@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Required for the self-hosted Docker image (Dockerfile copies .next/standalone) — every
+  // other app in the monorepo that ships a Docker image sets this the same way. Harmless for
+  // Vercel, which ignores it. win32 guard matches sibling configs (standalone's symlinked
+  // node_modules trace breaks on Windows dev machines).
+  output: process.platform === 'win32' ? undefined : 'standalone',
+  // The monorepo ROOT, not this app's own directory. Pointing this at __dirname (as it was
+  // before) made Next trace dependencies as if this app's own folder were the workspace root —
+  // harmless for `next dev`/Vercel, but it breaks standalone output in a real pnpm monorepo
+  // build: pnpm's node_modules symlinks are relative and computed assuming the true repo-root
+  // depth (Frontend/Imperialpedia-main/node_modules/next -> ../../../node_modules/.pnpm/...,
+  // 3 levels up to repo root). With __dirname as the trace root, `next build` still copies
+  // node_modules at that same nested relative depth into .next/standalone, but Docker then
+  // has nowhere to put the matching 3-level-up target unless the image preserves that same
+  // full nested path — which is exactly what the Dockerfile does. Pointing this at repo root
+  // instead matches what every other app in the monorepo gets automatically (they don't set
+  // this at all — Next infers it from the lockfile location, which IS the repo root).
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
@@ -54,7 +72,7 @@ const nextConfig: NextConfig = {
     // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
     return [
       { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
-      // Investopedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
+      // Imperialpedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
       // /terms-beginning-with-num) map onto the real /terms/[letter] listing route.
       { source: '/terms-beginning-with-:letter', destination: '/terms/:letter' },
     ];
@@ -142,20 +160,24 @@ const nextConfig: NextConfig = {
       { source: '/gdp/:path*', destination: '/', permanent: true },
       { source: '/global', destination: '/', permanent: true },
       { source: '/global/:path*', destination: '/', permanent: true },
+      { source: '/government', destination: '/', permanent: true },
+      { source: '/government/:path*', destination: '/', permanent: true },
       { source: '/indicators', destination: '/', permanent: true },
       { source: '/indicators/:path*', destination: '/', permanent: true },
       { source: '/inflation', destination: '/', permanent: true },
       { source: '/inflation/:path*', destination: '/', permanent: true },
       { source: '/interest-rates', destination: '/', permanent: true },
       { source: '/interest-rates/:path*', destination: '/', permanent: true },
-      { source: '/investing', destination: '/', permanent: true },
-      { source: '/investing/:path*', destination: '/', permanent: true },
       { source: '/live-market-news', destination: '/', permanent: true },
       { source: '/live-market-news/:path*', destination: '/', permanent: true },
       { source: '/loan-reviews', destination: '/', permanent: true },
       { source: '/loan-reviews/:path*', destination: '/', permanent: true },
       { source: '/loans', destination: '/', permanent: true },
       { source: '/loans/:path*', destination: '/', permanent: true },
+      { source: '/market-news', destination: '/', permanent: true },
+      { source: '/market-news/:path*', destination: '/', permanent: true },
+      { source: '/markets', destination: '/', permanent: true },
+      { source: '/markets/:path*', destination: '/', permanent: true },
       { source: '/monetary-policy', destination: '/', permanent: true },
       { source: '/monetary-policy/:path*', destination: '/', permanent: true },
       { source: '/money-management', destination: '/', permanent: true },
@@ -170,10 +192,10 @@ const nextConfig: NextConfig = {
       { source: '/mutual-funds/:path*', destination: '/', permanent: true },
       { source: '/options', destination: '/', permanent: true },
       { source: '/options/:path*', destination: '/', permanent: true },
-      { source: '/personal-finance', destination: '/', permanent: true },
-      { source: '/personal-finance/:path*', destination: '/', permanent: true },
       { source: '/planning', destination: '/', permanent: true },
       { source: '/planning/:path*', destination: '/', permanent: true },
+      { source: '/politics', destination: '/', permanent: true },
+      { source: '/politics/:path*', destination: '/', permanent: true },
       { source: '/portfolio', destination: '/', permanent: true },
       { source: '/portfolio/:path*', destination: '/', permanent: true },
       { source: '/real-estate', destination: '/', permanent: true },
@@ -182,8 +204,6 @@ const nextConfig: NextConfig = {
       { source: '/retirement/:path*', destination: '/', permanent: true },
       { source: '/saving-money', destination: '/', permanent: true },
       { source: '/saving-money/:path*', destination: '/', permanent: true },
-      { source: '/savings', destination: '/', permanent: true },
-      { source: '/savings/:path*', destination: '/', permanent: true },
       { source: '/student-budget', destination: '/', permanent: true },
       { source: '/student-budget/:path*', destination: '/', permanent: true },
       { source: '/student-loans', destination: '/', permanent: true },
@@ -288,13 +308,10 @@ const nextConfig: NextConfig = {
       // made this a 301 chaining straight into a 410, which Google flags as a
       // broken redirect rather than a clean removal. /research-ai now 410s
       // directly at the edge instead.
-      // /market and /markets were both retired when the standalone markets page
-      // was removed in favour of the dynamic /market-news hub (see commit
-      // 7383eadc) — Search Console still has both indexed. /markets used to
-      // 301 to /market, which no longer exists, producing a dead redirect
-      // chain (308 → 404); both now resolve straight to the real hub.
-      { source: '/market', destination: '/market-news', permanent: true },
-      { source: '/markets', destination: '/market-news', permanent: true },
+      // /market was retired when the standalone markets page was removed;
+      // redirected to / pending Google AdSense approval.
+      { source: '/market', destination: '/', permanent: true },
+      { source: '/market/:path*', destination: '/', permanent: true },
       // /companies/google used to redirect to /companies/alphabet, but the
       // entire /companies section (including /companies/alphabet) is now
       // permanently 410'd (see REMOVED_PATHS in middleware.ts) — that made this
@@ -349,34 +366,15 @@ const nextConfig: NextConfig = {
       // real live feed at /latest/<slug> — two indexable URLs for the same
       // intent. Consolidated onto /latest, the one with real market data.
       { source: '/category/:slug', destination: '/latest/:slug', permanent: true },
-      // The entire articles section (hub + every individual article) moved to
-      // /financial-intelligence. Old thin-topic consolidations below resolve
-      // straight to their final destination in one hop; everything else under
-      // /articles/* falls through to the catch-all rule at the end.
-      { source: '/articles', destination: '/financial-intelligence', permanent: true },
-      // Consolidate near-duplicate article topics into one comprehensive guide
-      // each, instead of publishing several thin pages that would cannibalize
-      // the same search intent.
-      { source: '/articles/emergency-funds', destination: '/financial-intelligence/emergency-fund-guide', permanent: true },
-      { source: '/articles/gdp-growth', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/gdp-limitations', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/nominal-vs-real-gdp', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/economic-growth', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/loan-types-explained', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/loan-eligibility-and-approval', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/loan-repayment-strategies', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/managing-student-loan-debt', destination: '/financial-intelligence/student-loan-repayment-plans', permanent: true },
-      // Catch-all: any remaining /articles/<slug> hit (bookmarks, external
-      // backlinks, search-engine cache) 301s to its new home so nothing 404s
-      // and link equity carries over.
-      { source: '/articles/:slug*', destination: '/financial-intelligence/:slug*', permanent: true },
-      // These 3 guide/topic slugs no longer resolve to any live CMS article (Search
-      // Console still has them indexed as duplicate/canonicalized from before the
-      // content was retired) — redirect to the closest live hub instead of leaving
-      // a hard 404 for the residual crawl traffic and any external backlinks.
-      { source: '/financial-intelligence/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
+      // 2026-09-23: /articles and /financial-intelligence (the entire articles
+      // section — hub + every individual article) are both permanently 410'd
+      // now (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts / middleware.ts) —
+      // removed the whole block of /articles/* redirects that used to chain
+      // into /financial-intelligence/*, since a redirect into a 410 is the
+      // exact anti-pattern this file avoids everywhere else (see /industries
+      // and /research-ai below for the same reasoning). /articles/* and
+      // /financial-intelligence/* now 410 directly at the edge instead.
       { source: '/stocks/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
-      { source: '/financial-intelligence/diversification', destination: '/financial-intelligence', permanent: true },
       // The entire /industries section (hub + every per-industry page) was retired —
       // only 3 industries were ever populated (finance/semiconductors/software), making
       // the whole section thin/near-empty content that AdSense review flags. This used
@@ -433,8 +431,15 @@ const nextConfig: NextConfig = {
               // news.google.com serves the "Preferred Sources" widget loader (see layout.tsx's
               // literal <script> tag and PreferredSourceButton) -- it was never allow-listed here,
               // so the browser blocked the load on every single page, confirmed the same way.
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com https://static.cloudflareinsights.com`,
+              // In dev the CMS and its analytics collector live on localhost rather
+              // than api.baalvion.com, so the collect.js element load was blocked on
+              // every page. Scoped to isDev — production must never trust localhost.
+              // static.cloudflareinsights.com is Cloudflare's own RUM beacon, injected
+              // automatically once the site is proxied (orange-cloud) — not something we
+              // added ourselves, but the browser still enforces our CSP against it, so it
+              // was CSP-blocked (console error + Issues-panel entry) on every page load.
+              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:*' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com https://static.cloudflareinsights.com`,
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only
@@ -458,7 +463,10 @@ const nextConfig: NextConfig = {
               // csi.gstatic.com is Google's client-side instrumentation ping that
               // show_ads_impl.js fires once the ad script actually runs -- unlisted here it
               // CSP-blocked on every page once script-src let the ad script itself load.
-              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://csi.gstatic.com",
+              // cloudflareinsights.com (no "static." prefix — that's the script host above,
+              // this is where the RUM beacon actually POSTs its data) — same Cloudflare-
+              // injected beacon, blocked under connect-src once the script itself could load.
+              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://csi.gstatic.com https://cloudflareinsights.com",
               // www.googletagmanager.com/ns.html is the GTM <noscript> fallback iframe.
               // ep2.adtrafficquality.google + www.google.com are AdSense's own ad-quality
               // confirmation/verification iframes (loaded by show_ads_impl.js); news.google.com
@@ -472,21 +480,42 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Static, hashed build output — safe to cache forever; only matters on the
+      // self-hosted Docker/standalone path (Vercel's CDN already does this for
+      // `_next/static` on its own, but doesn't know about our own `/fonts`/`/images`).
+      {
+        source: '/_next/static/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/fonts/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      // Not content-hashed like /fonts or /_next/static — a redeploy can replace
+      // a file at the same path, so this revalidates rather than going immutable.
+      {
+        source: '/leadership/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
+      {
+        source: '/images/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
     ];
   },
   images: {
-    // Vercel's on-demand Image Optimization API (/_next/image) is metered and
-    // caps out under real traffic — once the quota is hit it returns 402
-    // Payment Required for EVERY image on the site (confirmed live: raw files
-    // at api.baalvion.com/uploads/* return 200, but imperialpedia.com/_next/image
-    // returns 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED for the same file).
-    // `unoptimized: true` makes next/image render the original src directly —
-    // no resize/reformat pass, no Vercel billing dependency, so images can
-    // never go dark sitewide again regardless of upload volume or traffic.
-    // Uploaded photos are already reasonably sized and generated artwork is
-    // SVG (vector, no benefit from raster resizing), so the loss of on-the-fly
-    // webp/avif conversion here is a non-issue in practice.
-    unoptimized: true,
+    // Previously unoptimized: true — Vercel's on-demand Image Optimization API
+    // is metered and was capping out under real traffic, returning 402
+    // Payment Required for EVERY image sitewide once the quota hit (confirmed
+    // live: raw files at api.baalvion.com/uploads/* returned 200, but
+    // imperialpedia.com/_next/image returned 402 for the same file). That risk
+    // is gone now that this site is self-hosted on the VPS — image
+    // optimization runs on our own server via `sharp`, not a metered Vercel
+    // service, so there's no quota to exhaust. Confirmed via a live Lighthouse
+    // audit that without this, a 1200x675 upload was shipped at full
+    // resolution for a 348x196 display slot (~32KB wasted on that one image
+    // alone).
+    unoptimized: false,
     // Only self (imperialpedia.com) and the cms-service origin that hosts
     // auto-generated article artwork — no stock/placeholder/third-party hosts.
     remotePatterns: [
@@ -507,7 +536,13 @@ const nextConfig: NextConfig = {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    // Was 60s — article artwork is generated once at publish time and rarely
+    // changes after, so a 1-minute TTL bought nothing for freshness while
+    // actively working against search-engine image indexing: a crawler that
+    // re-fetches a "stale" /_next/image URL every visit gets deprioritized
+    // relative to one with stable, cacheable image URLs. Matches the
+    // /images/* Cache-Control policy above.
+    minimumCacheTTL: 86400,
     // Every SVG served through next/image here is our own deterministically generated
     // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow;
     // `contentSecurityPolicy` below still sandboxes the optimized-image response.
@@ -532,10 +567,17 @@ const nextConfig: NextConfig = {
       "recharts",
       "date-fns",
       "@tanstack/react-query",
+      "framer-motion",
+      "embla-carousel-react",
     ],
   },
   // Compression
   compress: true,
+  // Ships .js.map files alongside the production bundle so DevTools/Lighthouse
+  // can resolve real file/line info instead of flagging large first-party
+  // chunks as unmapped. Maps are only fetched when a browser's devtools are
+  // actually open — no effect on real page-load performance.
+  productionBrowserSourceMaps: true,
   // PWA-like optimizations
   poweredByHeader: false,
   // NOTE: previously this config force-merged every node_modules package into a single

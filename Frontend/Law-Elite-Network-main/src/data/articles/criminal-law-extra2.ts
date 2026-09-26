@@ -20,6 +20,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
       'DUI and DWI are offences for driving while impaired, usually measured against a legal blood-alcohol limit, carrying fines, licence loss, and sometimes jail.',
     author: 'Daniel Okafor',
     updatedAt: 'June 21, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -49,7 +50,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
 
 <h2>How the Law Differs Around the World</h2>
 <ul>
-<li><strong>United States:</strong> Limits and terminology vary by state, with a common general limit of 0.08% BAC and lower thresholds for commercial or young drivers.</li>
+<li><strong>United States:</strong> Limits and terminology vary by state, with a common general limit of 0.08% BAC (Utah has used 0.05% since December 2018) and lower thresholds for commercial or young drivers.</li>
 <li><strong>United Kingdom:</strong> Drink-driving is an offence above set limits, and refusing to provide a specimen is itself a crime; Scotland uses a lower limit than England and Wales.</li>
 <li><strong>European Union:</strong> Most member states set limits at or below 0.05%, with stricter limits for novice and professional drivers.</li>
 <li><strong>India:</strong> Driving with blood alcohol above the prescribed limit is an offence under the Motor Vehicles Act, with fines, imprisonment, and licence consequences.</li>

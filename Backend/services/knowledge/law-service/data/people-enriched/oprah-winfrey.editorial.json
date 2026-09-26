@@ -1,0 +1,132 @@
+{
+  "display_name": null,
+  "short_bio": "Talk-show host, producer and media owner who ran The Oprah Winfrey Show for 25 seasons.",
+  "biography": "Oprah Winfrey was born in Kosciusko, Mississippi, and studied at Tennessee State University. She began as a news anchor in Nashville and Baltimore before moving to Chicago to host AM Chicago in 1984.\n\nThe programme was renamed The Oprah Winfrey Show in 1986 and went national. It ran until 2011. Her production company, Harpo, produced the show, and her Book Club, launched in 1996, could push a novel onto the bestseller lists.\n\nShe was Oscar-nominated for her role in The Color Purple (1985). In 2011 she launched the network OWN. She received the Presidential Medal of Freedom in 2013.",
+  "awards": [
+    {
+      "title": "People's Choice Awards",
+      "year": 1988
+    },
+    {
+      "title": "NAACP Image Award for Entertainer of the Year",
+      "year": 1991
+    },
+    {
+      "title": "NAACP Image Award for Outstanding News, Talk or Information – Series or Special",
+      "year": 1993
+    },
+    {
+      "title": "Horatio Alger Award",
+      "year": 1993
+    },
+    {
+      "title": "National Women's Hall of Fame",
+      "year": 1994
+    },
+    {
+      "title": "Peabody Awards",
+      "year": 1995
+    },
+    {
+      "title": "Jefferson Awards for Public Service",
+      "year": 1998
+    },
+    {
+      "title": "Producers Guild of America Awards",
+      "year": 1999
+    },
+    {
+      "title": "Spingarn Medal",
+      "year": 2000
+    },
+    {
+      "title": "Bob Hope Humanitarian Award",
+      "year": 2002
+    },
+    {
+      "title": "Marian Anderson Award",
+      "year": 2003
+    },
+    {
+      "title": "Time 100",
+      "year": 2004
+    },
+    {
+      "title": "NAACP Image Award – Hall of Fame Award",
+      "year": 2005
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2010
+    },
+    {
+      "title": "Anisfield-Wolf Book Awards",
+      "year": 2010
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2013
+    },
+    {
+      "title": "Disney Legends",
+      "year": 2017
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Color Purple",
+      "year": 1985,
+      "note": "Oscar-nominated performance"
+    },
+    {
+      "title": "The Oprah Winfrey Show",
+      "year": 1986,
+      "note": "Host and executive producer"
+    },
+    {
+      "title": "Oprah’s Book Club",
+      "year": 1996,
+      "note": "Founder"
+    },
+    {
+      "title": "OWN: Oprah Winfrey Network",
+      "year": 2011,
+      "note": "Founder"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1954-01-29",
+      "title": "Born in Kosciusko, Mississippi"
+    },
+    {
+      "date": "1984",
+      "title": "Begins hosting AM Chicago"
+    },
+    {
+      "date": "1986",
+      "title": "The Oprah Winfrey Show goes national"
+    },
+    {
+      "date": "2011",
+      "title": "Ends her show and launches OWN"
+    },
+    {
+      "date": "2013",
+      "title": "Receives the Presidential Medal of Freedom"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q55800"
+    },
+    {
+      "label": "Wikipedia: Oprah Winfrey",
+      "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

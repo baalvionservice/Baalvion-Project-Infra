@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#E31937"/>
+  <!-- Brand mark: same three-ascending-bars + violet node as ImperialpediaMark.tsx, scaled up -->
+  <g transform="translate(126, 90) scale(4)">
+    <rect x="10" y="38" width="9" height="18" fill="#FFFFFF"/>
+    <rect x="24.5" y="27" width="9" height="29" fill="#FFFFFF"/>
+    <rect x="39" y="14" width="9" height="42" fill="#FFFFFF"/>
+    <circle cx="43.5" cy="7" r="6" fill="#7C3AED"/>
+  </g>
+  <!-- Wordmark: same style as the header nav's text-based logo (bold, uppercase, tracked) -->
+  <text
+    x="256"
+    y="430"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-weight="900"
+    font-size="56"
+    letter-spacing="2"
+    fill="#FFFFFF"
+  >IMPERIALPEDIA</text>
+</svg>

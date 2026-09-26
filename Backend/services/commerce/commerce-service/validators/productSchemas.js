@@ -33,6 +33,29 @@ exports.createProductSchema = z.object({ categoryId: z.string().uuid().optional(
 exports.updateProductSchema = z.object({ categoryId: z.string().uuid().optional().nullable(), name: z.string().min(1).max(500).optional(), slug: z.string().max(500).regex(/^[a-z0-9-]+$/).optional(), shortDescription: z.string().max(1000).optional().nullable(), description: z.string().optional().nullable(), sku: z.string().max(200).optional(), weight: z.number().min(0).optional(), dimensions: z.record(z.unknown()).optional(), specifications: z.record(z.unknown()).optional(), seoMetadata: seoMetadataSchema.optional(), tags: z.array(z.string()).optional(), customFields: z.record(z.unknown()).optional(), isFeatured: z.boolean().optional(), isDigital: z.boolean().optional(), requiresShipping: z.boolean().optional(), stockQuantity: z.number().int().min(0).optional(), trackInventory: z.boolean().optional(), allowBackorder: z.boolean().optional(), ...resaleFields });
 exports.bulkUpdateSchema = z.object({ ids: z.array(z.string().uuid()).min(1).max(100), action: z.enum(['publish', 'archive', 'delete', 'assign_category']), categoryId: z.string().uuid().optional() });
 
+// Bulk product import (CSV → JSON on the client). `category` is a slug OR display name resolved
+// against this store's real taxonomy server-side (see productService.importProducts) — never a
+// caller-supplied categoryId, so a typo can't silently attach products to the wrong department.
+// Photos are NOT importable this way (the media pipeline requires real file uploads for
+// encryption — see productMediaController); rows create as drafts with real text/price fields,
+// and photos are added per-product afterward from the product edit page.
+exports.importProductsSchema = z.object({
+    rows: z.array(z.object({
+        name: z.string().min(1).max(500),
+        category: z.string().min(1).max(200),
+        shortDescription: z.string().max(1000).optional(),
+        description: z.string().optional(),
+        sku: z.string().max(200).optional(),
+        price: z.number().min(0),
+        currencyCode: z.string().length(3).default('USD'),
+        condition: z.enum(PRODUCT_CONDITIONS).optional(),
+        conditionNotes: z.string().max(5000).optional(),
+        materials: z.array(z.string()).optional(),
+        tags: z.array(z.string()).optional(),
+        stockQuantity: z.number().int().min(0).optional(),
+    })).min(1).max(500),
+});
+
 // Mirrors adminListCategoriesQuerySchema (categorySchemas.js) — same cross-store admin query shape.
 exports.adminListProductsQuerySchema = z.object({
     storeId: z.string().uuid().optional(),

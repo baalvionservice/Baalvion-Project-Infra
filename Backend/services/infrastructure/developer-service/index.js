@@ -28,10 +28,14 @@ app.use(helmet());
 // Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
 app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-// Razorpay webhook needs the RAW body for signature verification — registered before
+// Razorpay/Cashfree webhooks need the RAW body for signature verification — registered before
 // express.json() below, which would otherwise consume and parse it first. Public (no
-// authenticate/requireDeveloper): Razorpay calls this directly, authenticated only by signature.
+// authenticate/requireDeveloper): the provider calls these directly, authenticated only by signature.
 app.post('/v1/billing/razorpay-webhook', express.raw({ type: 'application/json' }), billingController.handleRazorpayWebhook);
+app.post('/v1/billing/cashfree-webhook', express.raw({ type: 'application/json' }), billingController.handleCashfreeWebhook);
+// PayU has no signature header — it form-POSTs the result back (verified by reverse SHA-512
+// hash), so this route needs urlencoded body parsing, not JSON.
+app.post('/v1/billing/payu-webhook', express.urlencoded({ extended: false }), billingController.handlePayuReturn);
 app.use(express.json({ limit: '2mb' }));
 app.use(requestContext);
 
@@ -66,6 +70,14 @@ const start = async () => {
 
     server.listen(config.port, () => logger.info(`[developer-service] running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
 
+    // Drain this service's payment outbox onto the event bus. Each service owns its own `pcl`
+    // schema in its own database, so each needs its own relay — without it, plan payments record
+    // correctly and reach nobody. A no-op unless PAYMENT_SPINE=true; a relay that cannot start
+    // must never block boot, because the outbox is durable and drains once the cause is fixed.
+    const paymentSpine = require('./services/paymentSpine');
+    paymentSpine.startPaymentRelay();
+
+    registerShutdown('payment-outbox', async () => { await paymentSpine.stopPaymentRelay(); });
     registerShutdown('delivery-worker', async () => { stopDeliveryWorker(); });
     registerShutdown('event-consumer', async () => { await stopEventConsumer(); });
     registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });

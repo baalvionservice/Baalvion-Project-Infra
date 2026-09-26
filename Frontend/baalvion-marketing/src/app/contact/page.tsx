@@ -4,16 +4,36 @@ import { SiteFooter } from '@/components/site-footer';
 import { PageHero } from '@/components/ui/page-hero';
 import { Reveal } from '@/components/reveal';
 import { ContactForm } from '@/components/contact-form';
+import {
+  CIN,
+  ENTITY_TYPE,
+  INCORPORATED_ON,
+  LEGAL_ENTITY_NAME,
+  OPERATING_ADDRESS,
+  REGISTERED_ADDRESS,
+} from '@baalvion/company';
 
 export const metadata: Metadata = {
   title: 'Contact',
   description: 'Get in touch with the Baalvion team for sales enquiries, support, or partnership questions.',
 };
 
-/** Placeholder business details — replace with confirmed entity information before launch. */
+/**
+ * The real registered and operating addresses, from @baalvion/company — the same source the
+ * IR and about sites use. These replace two "Placeholder HQ / Region / Country" entries that
+ * would have shipped as the company's offices.
+ */
 const OFFICES = [
-  { city: 'Placeholder HQ', region: 'Region / Country', note: 'Primary office' },
-  { city: 'Placeholder Regional Office', region: 'Region / Country', note: 'Regional presence' },
+  {
+    city: `${OPERATING_ADDRESS.locality}, ${OPERATING_ADDRESS.region}`,
+    region: OPERATING_ADDRESS.country === 'IN' ? 'India' : OPERATING_ADDRESS.country,
+    note: 'Operating office',
+  },
+  {
+    city: `${REGISTERED_ADDRESS.locality}, ${REGISTERED_ADDRESS.region}`,
+    region: REGISTERED_ADDRESS.country === 'IN' ? 'India' : REGISTERED_ADDRESS.country,
+    note: `Registered office · ${LEGAL_ENTITY_NAME} · CIN ${CIN}`,
+  },
 ];
 
 export default function ContactPage() {
@@ -48,8 +68,12 @@ export default function ContactPage() {
               <div>
                 <p className="eyebrow">Business information</p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-2">
-                  Placeholder — registered entity name, address, and business identifiers to be
-                  added here ahead of launch.
+                  {LEGAL_ENTITY_NAME} · {ENTITY_TYPE}
+                  <br />
+                  CIN {CIN} · Incorporated {INCORPORATED_ON}
+                  <br />
+                  {REGISTERED_ADDRESS.street}, {REGISTERED_ADDRESS.locality},{' '}
+                  {REGISTERED_ADDRESS.region} {REGISTERED_ADDRESS.postalCode}
                 </p>
               </div>
               <div>

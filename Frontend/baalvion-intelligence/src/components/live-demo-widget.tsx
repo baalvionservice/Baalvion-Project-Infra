@@ -15,6 +15,9 @@ export function LiveDemoWidget() {
 
   return (
     <div className="glow-card relative overflow-hidden rounded-xl p-6 md:p-8">
+      <Badge variant="secondary" className="mb-4 w-fit">
+        Sample preview — illustrative data, not a live query
+      </Badge>
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-5">
         <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
           <Search className="h-4 w-4" aria-hidden />

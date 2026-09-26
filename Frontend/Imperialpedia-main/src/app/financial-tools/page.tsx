@@ -1,4 +1,6 @@
 import React from 'react';
+import { withoutRetired } from '@/lib/content/retired-paths';
+import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
 import Link from 'next/link';
 import { getCalculatorList } from '@/services/mock-api/calculators';
 import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard';
@@ -38,7 +40,7 @@ const LIVE_SLUGS = new Set([
 /** Goal → calculator map. Real editorial content answering the question a
  * reader actually has before they know a calculator's name — every entry
  * points at a real, working tool (see LIVE_SLUGS). */
-const CHOOSER: { question: string; slug: string; label: string }[] = [
+const RAW_CHOOSER: { question: string; slug: string; label: string }[] = [
   { question: 'How much will my savings actually grow over time?', slug: 'compound-interest', label: 'Compound Interest Calculator' },
   { question: 'What will this loan really cost me, total?', slug: 'loan', label: 'Loan Payment Calculator' },
   { question: 'Will my contributions get me to my investing goal?', slug: 'investment', label: 'Investment Growth Calculator' },
@@ -49,10 +51,13 @@ const CHOOSER: { question: string; slug: string; label: string }[] = [
   { question: 'Did I actually profit on that trade, after fees?', slug: 'profit-loss', label: 'Profit/Loss Calculator' },
 ];
 
+const CHOOSER = withoutAdsenseHidden(RAW_CHOOSER.map((c) => ({ ...c, href: `/financial-tools/${c.slug}` })));
+
 export default async function FinancialToolsDashboard() {
   const response = await getCalculatorList();
   const allTools = response.data;
-  const tools = allTools.filter((t) => LIVE_SLUGS.has(t.slug));
+  const rawTools = allTools.filter((t) => LIVE_SLUGS.has(t.slug)).map((t) => ({ ...t, href: `/financial-tools/${t.slug}` }));
+  const tools = withoutAdsenseHidden(rawTools);
   const categories = Array.from(new Set(tools.map((t) => t.category)));
   const startHere = START_HERE_SLUGS.map((slug) => tools.find((t) => t.slug === slug)).filter(
     (t): t is (typeof tools)[number] => Boolean(t)
@@ -223,18 +228,22 @@ export default async function FinancialToolsDashboard() {
           </a>
         </section>
 
-        {/* Explore More — cross-links into the site's editorial hubs */}
+        {/* Explore More — cross-links into the site's editorial hubs.
+            Was Personal Finance / Investing / Stocks / Economy; three of those
+            four are retired hubs that 301 to the homepage, so this row sent
+            readers back to the start. Filtered through withoutRetired so a
+            future retirement drops a link instead of breaking it. */}
         <section>
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
             Explore More
           </h2>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
-            {[
-              { href: '/personal-finance', label: 'Personal Finance' },
-              { href: '/investing', label: 'Investing' },
+            {withoutRetired([
               { href: '/stocks', label: 'Stocks' },
-              { href: '/economy', label: 'Economy' },
-            ].map((link) => (
+              { href: '/budgeting-basics', label: 'Budgeting' },
+              { href: '/fraud-protection', label: 'Scams & Fraud Protection' },
+              { href: '/market-news', label: 'Market News' },
+            ]).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

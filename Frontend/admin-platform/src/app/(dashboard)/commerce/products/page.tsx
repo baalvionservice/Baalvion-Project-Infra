@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye } from 'lucide-react';
+import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye, Upload } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -91,12 +91,20 @@ export default function ProductsPage() {
         title="Products"
         description={`${total} products across your store`}
         actions={
-          <Button size="sm" asChild>
-            <Link href="/commerce/products/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Product
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/commerce/products/import">
+                <Upload className="mr-2 h-4 w-4" />
+                Import
+              </Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/commerce/products/new">
+                <Plus className="mr-2 h-4 w-4" />
+                New Product
+              </Link>
+            </Button>
+          </div>
         }
       />
 

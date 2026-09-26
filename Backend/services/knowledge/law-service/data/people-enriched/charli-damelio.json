@@ -1,0 +1,60 @@
+{
+  "slug": "charli-damelio",
+  "category": "influencers",
+  "wikidata_id": "Q83648587",
+  "full_name": "Charli D'Amelio",
+  "description": "American social media personality (born 2004)",
+  "birth_date": "2004-05-01",
+  "birth_place": "Norwalk",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "influencer",
+    "vlogger",
+    "dancer",
+    "actor",
+    "television producer",
+    "TikToker"
+  ],
+  "education": [
+    {
+      "institution": "King School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/charlidamelio",
+    "instagram": "https://www.instagram.com/charlidamelio",
+    "facebook": "https://www.facebook.com/thecharlidamelio"
+  },
+  "official_website": "https://www.charlidamelio.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q83648587"
+    }
+  ],
+  "photo": {
+    "file": "charli-damelio.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1129,
+    "credit": "Brad Mondo / Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Charli_D%27Amelio_in_Nov_2020_5.jpg"
+  },
+  "fetched_at": "2026-09-21T19:23:56.927Z"
+}

@@ -11,8 +11,15 @@ export interface RealArticle {
   language: string;
   category: string;
   sentiment: Sentiment | null;
-  entities: string[] | null;
+  entities: Array<{ name: string; count: number }> | null;
   source: { id: string; name: string; type: string };
+}
+
+// Mirrors newsController.getEntities() (Backend/services/knowledge/news-service) — real
+// frequency ranking over recently ingested articles' extracted entities.
+export interface EntitiesResponse {
+  windowHours: number;
+  items: Array<{ name: string; count: number; lastMentionedAt: string }>;
 }
 
 export interface PaginatedArticles {
@@ -64,4 +71,39 @@ export interface ApiKeyRecord {
   last_used_at: string | null;
   /** Present only in the response body immediately after issue/rotate — shown once. */
   key?: string;
+}
+
+// Mirrors developer-service's alertRuleService.publicView() shape
+// (Backend/services/infrastructure/developer-service/services/alertRuleService.js).
+export interface AlertRuleRecord {
+  id: string;
+  org_id: string;
+  label: string;
+  condition_type: "keyword" | "category" | "country" | "sentiment" | "entity";
+  condition_value: string;
+  webhook_url: string;
+  active: boolean;
+  last_triggered_at: string | null;
+  trigger_count: number;
+  created_at: string;
+}
+
+// Mirrors developer-service's usageService.getUsageForOrg() shape
+// (Backend/services/infrastructure/developer-service/services/usageService.js) — real
+// counts read from news-service's Redis quota counters, not mocked.
+export interface UsageReport {
+  month: string;
+  redisAvailable: boolean;
+  keys: Array<{
+    keyId: string;
+    name: string;
+    mode: "live" | "test";
+    last4: string;
+    scopes: string[];
+    usedToday: number;
+    monthToDate: number;
+  }>;
+  totalMonthToDate: number;
+  totalToday: number;
+  dailySeries: Array<{ day: string; requests: number }>;
 }

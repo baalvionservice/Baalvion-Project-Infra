@@ -104,6 +104,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
       'When a contract is broken, the law offers remedies like damages, specific performance, or cancellation, aimed at putting the wronged party right.',
     author: 'Elena Rossi',
     updatedAt: 'June 20, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -121,7 +122,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
 <h3>Other Categories of Damages</h3>
 <ul>
 <li><strong>Consequential damages:</strong> further losses that flow from the breach, recoverable if they were reasonably foreseeable.</li>
-<li><strong>Liquidated damages:</strong> a sum the parties agreed in advance, enforceable if it is a genuine estimate rather than a penalty.</li>
+<li><strong>Liquidated damages:</strong> a sum the parties agreed in advance, enforceable if it is a genuine estimate rather than a penalty (the test differs by country: in England and Wales it now asks whether the clause protects a legitimate interest and is not out of all proportion, following <em>Cavendish Square Holding v Makdessi</em> [2015] UKSC 67).</li>
 <li><strong>Nominal damages:</strong> a small symbolic sum where a breach occurred but caused no measurable loss.</li>
 </ul>
 
@@ -172,6 +173,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
       { label: 'U.C.C. Article 2 — Sales', url: 'https://www.law.cornell.edu/ucc/2' },
       { label: 'Sale of Goods Act 1979 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1979/54/contents' },
       { label: 'India, Specific Relief Act 1963 (as amended) and Indian Contract Act 1872' },
+      { label: 'Cavendish Square Holding BV v Makdessi [2015] UKSC 67 (BAILII; page not opened, 403)', url: 'https://www.bailii.org/uk/cases/UKSC/2015/67.html' },
       { label: 'UNIDROIT Principles of International Commercial Contracts 2016', url: 'https://www.unidroit.org/instruments/commercial-contracts/unidroit-principles-2016/' },
     ],
   },

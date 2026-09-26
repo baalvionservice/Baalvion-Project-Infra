@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/ledger",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Chart of accounts and double-entry posting rules \u2014 what journal lines a payment, a refund, a settlement and a revenue recognition produce. Pure and balanced by construction.",
   "private": true,
@@ -26,9 +30,9 @@
     "@baalvion/money": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.19.0",
+    "@types/node": "^24.13.4",
     "tsup": "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf": "^6.0.1"
   }
 }

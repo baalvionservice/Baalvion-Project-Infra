@@ -1,7 +1,7 @@
 # Multi-stage build for the shared auth surface (Next.js standalone output).
 # Built from the repo ROOT so the pnpm workspace lockfile is available.
-FROM node:22-alpine AS base
-RUN corepack enable
+FROM node:26-alpine AS base
+RUN npm install -g corepack && corepack enable
 WORKDIR /app
 
 # Install workspace deps for auth-baalvion AND build in ONE stage, so the package's node_modules
@@ -10,7 +10,16 @@ WORKDIR /app
 FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY Frontend/auth-baalvion/package.json Frontend/auth-baalvion/package.json
+# auth-baalvion DOES have a @baalvion/* workspace dep now — @baalvion/design, which it imports
+# as `@baalvion/design/base.css`. Its manifest must be present for the filtered install to
+# resolve the workspace link, and its source must be copied and BUILT, because the package's
+# "exports" point at dist/ which only exists after tsup runs. Without this the image builds
+# until webpack, then fails `Can't resolve '@baalvion/design/base.css'`.
+COPY Backend/packages/design/package.json Backend/packages/design/package.json
 RUN pnpm install --filter auth-baalvion... --frozen-lockfile
+COPY Backend/packages/design ./Backend/packages/design
+COPY tsconfig.base.json ./tsconfig.base.json
+RUN pnpm --filter @baalvion/design run build
 COPY Frontend/auth-baalvion ./Frontend/auth-baalvion
 # NEXT_PUBLIC_* are inlined into the client bundle at build time, so they must be present as ENV
 # for `pnpm build`. The Turnstile SITE key is public (safe to bake); the SECRET key lives only on

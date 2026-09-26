@@ -1,0 +1,54 @@
+{
+  "display_name": null,
+  "short_bio": "Human-rights barrister at Doughty Street Chambers.",
+  "biography": "Amal Clooney was born in Beirut and raised in England. She studied at St Hugh’s College, Oxford, and took a law degree at New York University School of Law, and she practises as a barrister at Doughty Street Chambers in London.\n\nHer clients have included Nadia Murad, the Yazidi survivor of Islamic State captivity, former Maldives president Mohamed Nasheed and Julian Assange. She has practised at the International Court of Justice and in 2015 joined the legal team representing Armenia before the European Court of Human Rights in its case against Doğu Perinçek.\n\nIn 2012 she served as an adviser to Kofi Annan, then the UN–Arab League envoy on Syria. She married the actor George Clooney in 2014.",
+  "awards": [
+    {
+      "title": "BBC 100 Women",
+      "year": 2023
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Nadia Murad",
+      "year": 2016,
+      "note": "Legal representation before the UN"
+    },
+    {
+      "title": "Perinçek v. Switzerland",
+      "year": 2015,
+      "note": "Member of the legal team for Armenia before the European Court of Human Rights"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1978-02-03",
+      "title": "Born in Beirut, Lebanon"
+    },
+    {
+      "date": "2012",
+      "title": "Advises Kofi Annan on Syria"
+    },
+    {
+      "date": "2014",
+      "title": "Marries George Clooney"
+    },
+    {
+      "date": "2015",
+      "title": "Joins the legal team representing Armenia before the European Court of Human Rights"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q16769592"
+    },
+    {
+      "label": "Wikipedia: Amal Clooney",
+      "url": "https://en.wikipedia.org/wiki/Amal_Clooney"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

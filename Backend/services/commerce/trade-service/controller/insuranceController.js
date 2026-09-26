@@ -32,11 +32,58 @@ const { accountsFor, trustFlow } = require('../lib/insuranceAccounts');
 const placement = require('../service/insurance/placement');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 const pid = () => `INS-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
 const cid = () => `CLM-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
 const did = () => `CLD-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
 const num = (x) => (x == null ? 0 : Number(x) || 0);
+/**
+ * Sum a money column across rows exactly.
+ *
+ * Two bugs in one: float accumulation drifts (forty lines of 249.99 sum to 9999.599999999993),
+ * and adding amounts in different currencies produces a number that looks authoritative and is
+ * meaningless. Rows are summed per currency in integer minor units; a mixed-currency set is
+ * logged rather than silently added, and the dominant currency's total is returned so the
+ * response shape stays as callers expect.
+ */
+function sumMoney(rows, field, label) {
+    const byCurrency = new Map();
+    for (const r of rows) {
+        const value = r[field];
+        if (value == null) continue;
+        const ccy = String(r.currency || 'USD').toUpperCase();
+        let total;
+        try {
+            total = (byCurrency.get(ccy) || Money.zero(ccy)).add(Money.fromDatabaseValue(value, ccy));
+        } catch {
+            continue; // an unknown currency is skipped rather than silently coerced
+        }
+        byCurrency.set(ccy, total);
+    }
+    if (byCurrency.size === 0) return 0;
+    if (byCurrency.size > 1) {
+        console.warn(JSON.stringify({
+            evt: 'insurance.mixed_currency_sum', field: label || field,
+            currencies: [...byCurrency.keys()],
+            msg: 'summing across currencies is not meaningful — reporting the largest set only',
+        }));
+    }
+    const dominant = [...byCurrency.entries()].sort((a, b) => (b[1].greaterThan(a[1]) ? 1 : -1))[0][1];
+    return Number(dominant.toDecimalString());
+}
+
+/** Remaining capacity, computed exactly and never below zero. */
+function remainingCapacity(limit, used, currency) {
+    const ccy = String(currency || 'USD').toUpperCase();
+    try {
+        const left = Money.fromDatabaseValue(limit, ccy).subtract(Money.fromDatabaseValue(used, ccy));
+        return left.isNegative() ? 0 : Number(left.toDecimalString());
+    } catch {
+        return Math.max(0, Number(limit) - Number(used));
+    }
+}
+
 
 // ── Tenant helpers ────────────────────────────────────────────────────────────
 function isAdmin(req) {
@@ -386,9 +433,9 @@ const summary = async (req, res, next) => {
         const settled = claims.filter((c) => ['paid', 'rejected'].includes(c.status) && c.filed_at && c.resolved_at);
         const openClaims = claims.filter((c) => !['paid', 'rejected', 'withdrawn'].includes(c.status));
 
-        const premiumEarned = policies.filter((p) => p.bound_at).reduce((s, p) => s + num(p.premium), 0);
-        const paidOut = paid.reduce((s, c) => s + num(c.payout_amount), 0);
-        const recovered = claims.reduce((s, c) => s + num(c.subrogation_recovered), 0);
+        const premiumEarned = sumMoney(policies.filter((p) => p.bound_at), 'premium', 'premiumEarned');
+        const paidOut = sumMoney(paid, 'payout_amount', 'claimsPaidOut');
+        const recovered = sumMoney(claims, 'subrogation_recovered', 'subrogationRecovered');
 
         const avgSettlementDays = settled.length
             ? settled.reduce((s, c) => s + (new Date(c.resolved_at) - new Date(c.filed_at)), 0) / settled.length / 86400000
@@ -401,10 +448,11 @@ const summary = async (req, res, next) => {
         // Reporting them as one number would hide exactly the thing worth watching.
         const placedPolicies = policies.filter((p) => p.placement_status === 'placed');
         const retained = policies.filter((p) => p.placement_status === 'platform_retained' && ['active', 'claimed'].includes(p.status));
-        const commissionEarned = placedPolicies.filter((p) => p.bound_at).reduce((s2, p) => s2 + num(p.commission_amount), 0);
-        const remitted = placedPolicies.filter((p) => p.bound_at).reduce((s2, p) => s2 + num(p.net_premium), 0);
-        const retainedExposure = retained.reduce((s2, p) => s2 + num(p.coverage_amount), 0);
-        const carrierSettled = claims.reduce((s2, c) => s2 + num(c.underwriter_settled_amount), 0);
+        const bound = placedPolicies.filter((p) => p.bound_at);
+        const commissionEarned = sumMoney(bound, 'commission_amount', 'commissionEarned');
+        const remitted = sumMoney(bound, 'net_premium', 'remitted');
+        const retainedExposure = sumMoney(retained, 'coverage_amount', 'retainedExposure');
+        const carrierSettled = sumMoney(claims, 'underwriter_settled_amount', 'carrierSettled');
 
         const binders = await db.InsuranceUnderwriter.findAll({ where: { status: 'bound' }, limit: 100 });
         const capacity = [];
@@ -413,7 +461,7 @@ const summary = async (req, res, next) => {
             const limit = uw.capacity_limit != null ? num(uw.capacity_limit) : null;
             capacity.push({
                 id: uw.id, name: uw.name, used, limit,
-                remaining: limit == null ? null : Math.max(0, Math.round((limit - used) * 100) / 100),
+                remaining: limit == null ? null : remainingCapacity(limit, used, uw.currency),
                 utilisation: limit ? Math.round((used / limit) * 10000) / 10000 : null,
             });
         }
@@ -426,22 +474,22 @@ const summary = async (req, res, next) => {
                 boundBinders: binders.length,
                 placedPolicies: placedPolicies.length,
                 retainedPolicies: retained.length,
-                commissionEarned: Math.round(commissionEarned * 100) / 100,
-                premiumRemitted: Math.round(remitted * 100) / 100,
+                commissionEarned,
+                premiumRemitted: remitted,
                 // The number to watch: cover written on Baalvion's own book because no
                 // binder could take it.
-                platformRetainedExposure: Math.round(retainedExposure * 100) / 100,
-                carrierSettledOnClaims: Math.round(carrierSettled * 100) / 100,
+                platformRetainedExposure: retainedExposure,
+                carrierSettledOnClaims: carrierSettled,
                 capacity,
             },
             activePolicies: active.length,
             totalPolicies: policies.length,
-            insuredValueActive: Math.round(active.reduce((s, p) => s + num(p.coverage_amount), 0) * 100) / 100,
-            premiumEarned: Math.round(premiumEarned * 100) / 100,
+            insuredValueActive: sumMoney(active, 'coverage_amount', 'insuredValueActive'),
+            premiumEarned,
             openClaims: openClaims.length,
             totalClaims: claims.length,
-            claimsPaidOut: Math.round(paidOut * 100) / 100,
-            subrogationRecovered: Math.round(recovered * 100) / 100,
+            claimsPaidOut: paidOut,
+            subrogationRecovered: recovered,
             // Net loss ratio — payouts less recoveries over premium earned. Null (not
             // zero, and not a placeholder) until there is premium to divide by.
             lossRatio: premiumEarned > 0 ? Math.round(((paidOut - recovered) / premiumEarned) * 10000) / 10000 : null,

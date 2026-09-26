@@ -1,0 +1,66 @@
+{
+  "display_name": null,
+  "short_bio": "Attorney and politician; former California attorney general, senator and vice president.",
+  "biography": "Kamala Harris was born in Oakland, California, earned her undergraduate degree at Howard University and her law degree at UC Hastings. Alameda County employed her as a deputy district attorney before San Francisco voters made her District Attorney in 2004.\n\nShe was California’s Attorney General from 2011 to 2017 and a US Senator from 2017 to 2021. In 2021 she became Vice President, the first woman to hold the office, and in 2024 she was the Democratic nominee for president.\n\nShe lost that election to Donald Trump.",
+  "awards": [
+    {
+      "title": "Thurgood Marshall Award",
+      "year": 2005
+    },
+    {
+      "title": "Time 100",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Attorney General of California",
+      "year": 2011,
+      "note": "Served until 2017"
+    },
+    {
+      "title": "Vice President of the United States",
+      "year": 2021,
+      "note": "Served until 2025"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1964-10-20",
+      "title": "Born in Oakland, California"
+    },
+    {
+      "date": "2004",
+      "title": "Becomes District Attorney of San Francisco"
+    },
+    {
+      "date": "2011",
+      "title": "Becomes Attorney General of California"
+    },
+    {
+      "date": "2017",
+      "title": "Becomes a US Senator"
+    },
+    {
+      "date": "2021-01-20",
+      "title": "Becomes Vice President"
+    },
+    {
+      "date": "2024-11-05",
+      "title": "Loses the presidential election"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q10853588"
+    },
+    {
+      "label": "Wikipedia: Kamala Harris",
+      "url": "https://en.wikipedia.org/wiki/Kamala_Harris"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

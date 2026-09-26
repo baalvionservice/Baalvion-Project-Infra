@@ -16,10 +16,11 @@ const { createPaymentSpine, createPaymentOutboxRelay, sequelizeQueryRunner } = r
 
 const SITE_ID = 'community';
 
-// Communities are crypto-only, which is the rail the registry grants this site. An unmapped
-// provider returns undefined and the spine refuses the record rather than filing it under a
-// rail the payment did not use.
-const PROVIDER_RAIL = { crypto: 'crypto' };
+// Communities started crypto-only; Razorpay/PayU/Cashfree were added alongside it (not instead
+// of it) so members can also pay by card/UPI/bank transfer. An unmapped provider returns
+// undefined and the spine refuses the record rather than filing it under a rail the payment
+// did not use — keep this in sync with the registry's `rails` entry for site 'community'.
+const PROVIDER_RAIL = { crypto: 'crypto', razorpay: 'razorpay', payu: 'payu', cashfree: 'cashfree' };
 const railFor = (provider) => PROVIDER_RAIL[String(provider || '').toLowerCase()];
 
 function isEnabled() {
@@ -45,14 +46,14 @@ function spine() {
  * re-deciding it. Never throws to its caller: a spine failure must not turn a paid membership
  * into a 503 that payment-service retries forever.
  */
-async function reportMembershipPayment({ eventId, communitySlug, userId, amountMinor, currency, providerRef, email }) {
+async function reportMembershipPayment({ eventId, communitySlug, userId, amountMinor, currency, providerRef, provider, email }) {
     if (!isEnabled()) return null;
     if (amountMinor == null || !communitySlug) return null;
 
     return spine().recordCapture({
         // The provider's event is the payment's identity here — there is no local order row.
         paymentId: String(providerRef || eventId),
-        provider: 'crypto',
+        provider: String(provider || 'crypto').toLowerCase(),
         transactionId: String(providerRef || eventId),
         // Already an integer count of minor units on the way in, so nothing is converted.
         amountMinor,

@@ -4,8 +4,8 @@
 # This app is CMS-driven and reads the CMS public delivery API server-side at runtime,
 # so it needs no NEXT_PUBLIC_* baked in beyond the public app URL. CMS_PUBLIC_URL /
 # CMS_WEBSITE_SLUG are read at request time (server components), passed as runtime env.
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+FROM node:26-alpine AS base
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps
@@ -27,6 +27,11 @@ RUN pnpm install --no-frozen-lockfile
 # (CMS_PUBLIC_URL / CMS_WEBSITE_SLUG are plain runtime env, NOT baked). The only build-time
 # value the client bundle needs is the public app URL.
 ARG NEXT_PUBLIC_APP_URL
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG BUILD_STANDALONE
+ENV BUILD_STANDALONE=$BUILD_STANDALONE
 # CRITICAL: ARG alone is NOT visible to `next build`; re-export as ENV so it is inlined.
 # BUILD_STANDALONE=1 enables `output: 'standalone'` (see next.config.ts) for the container
 # image; it stays off for local `next build` so Windows/pm2 builds don't hit symlink EPERM.
@@ -34,6 +39,11 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
     BUILD_STANDALONE=1 \
     NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm turbo run build --filter=about-baalvion-web
 
 # 4) Minimal runner (standalone server)

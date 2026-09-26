@@ -12,21 +12,33 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
  * @fileOverview High-Fidelity Editorial Footer
  * Matches the Investopedia-style layout with dark navy aesthetics and A-Z strip.
  */
-const EXPLORE_LINKS = [
-  { href: '/news', label: 'Legal News' },
-  { href: '/case-law', label: 'Case Law' },
-  { href: '/legislation', label: 'Legislation' },
-  { href: '/law-changes', label: 'Law Changes' },
-];
+// AdSense second-rejection retirement: /news, /case-law, /legislation and
+// /law-changes all now 301 to / (see next.config.ts + retired-links.ts's
+// RETIRED_SECTIONS) -- the "Explore" link column that pointed at them is
+// gone rather than left linking into redirects.
 
-// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): shrunk to the 3 live practice areas -- the other 13 are retired
-// (301 to / via next.config.ts), so linking them here would send readers
-// straight into a redirect instead of a page.
+// Third AdSense-readiness retirement pass, 2026-09-25 (see
+// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): narrowed further to
+// Fashion, Videos, Podcasts, and (added back in the same pass) the original
+// Practice Areas -- Entertainment, Sports, People, Topics, Countries, and
+// Legal Cases/Courts stay retired (301 to / via next.config.ts), so linking
+// them here would send readers straight into a redirect instead of a page.
+// Restore the rest alongside CURRENT_CATEGORY_SLUGS once AdSense approves
+// the site as it stands.
 const PRACTICE_AREA_LINKS = [
+  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
   { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
   { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
-  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
+  { href: '/law-school-success', label: 'Law School Success' },
+];
+
+const FASHION_LINKS = [
+  { href: '/fashion', label: 'Fashion Hub' },
+];
+
+const MEDIA_LINKS = [
+  { href: '/videos', label: 'Videos' },
+  { href: '/podcasts', label: 'Podcasts' },
 ];
 
 const ABOUT_LINKS = [
@@ -60,14 +72,30 @@ export function PublicFooter() {
 
             {/* Left: Branding & Newsletter */}
             <div className="md:col-span-4 space-y-6 md:space-y-10">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
-                  <LawEliteMark className="w-6 h-6" />
-                </div>
-                <span className="text-3xl font-bold tracking-tighter font-serif">
-                  Law <span className="text-white/90">Elite</span>
+              <Link href="/" className="flex items-center gap-2.5 group" aria-label="Law Elite Network – Home">
+                {/* Scales of Justice mark */}
+                <svg viewBox="0 0 64 64" className="h-10 w-10 flex-shrink-0" aria-hidden="true">
+                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
+                  <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
+                  <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
+                  <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
+                  <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
+                  <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
+                  <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
+                  <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
+                  <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+                </svg>
+                {/* Wordmark */}
+                <span className="flex flex-col leading-none">
+                  <span className="font-headline text-xl font-black tracking-tight text-white uppercase leading-none">
+                    LAW ELITE
+                  </span>
+                  <span className="bg-[#E13131] text-white text-[9px] font-black uppercase tracking-[0.18em] px-1.5 py-[2px] mt-0.5 leading-none">
+                    NETWORK
+                  </span>
                 </span>
               </Link>
+
 
               <div className="space-y-6">
                 <FooterNewsletterForm />
@@ -86,10 +114,16 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-3"
-              title="Explore"
+              title="Practice Areas"
+              sections={[{ heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS }]}
+            />
+
+            <FooterLinkColumn
+              colSpan="md:col-span-2"
+              title="Fashion & Media"
               sections={[
-                { heading: 'Explore', links: EXPLORE_LINKS },
-                { heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS },
+                { heading: 'Fashion', links: FASHION_LINKS },
+                { heading: 'Media', links: MEDIA_LINKS },
               ]}
             />
 
@@ -137,7 +171,7 @@ export function PublicFooter() {
             Law Elite <span className="text-slate-500">Network.</span>
           </span>
           <p className="text-[11px] font-medium text-slate-500">
-            Law Elite Network is operated by Baalvion Industries Private Limited, part of the Baalvion Group.
+            Law Elite Network is operated by Baalvion Industries Private Limited.
             © {new Date().getFullYear()} All rights reserved. CIN: U43121OD2025PTC048479
           </p>
         </div>

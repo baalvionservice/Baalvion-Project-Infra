@@ -1,0 +1,60 @@
+{
+  "display_name": null,
+  "short_bio": "American author and science communicator, co-creator of Crash Course and SciShow.",
+  "biography": "Hank Green was born in Birmingham, Alabama, and studied biochemistry at Eckerd College. In 2007 he and his brother, the novelist John Green, began the Vlogbrothers video series.\n\nHe co-founded the VidCon convention in 2010, helped start the educational series Crash Course in 2011 and created SciShow in 2012. His company Complexly produces his educational channels.\n\nHis first novel, An Absolutely Remarkable Thing (2018), was a bestseller.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Vlogbrothers",
+      "year": 2007,
+      "note": "Video series with John Green"
+    },
+    {
+      "title": "Crash Course",
+      "year": 2011,
+      "note": "Co-creator"
+    },
+    {
+      "title": "SciShow",
+      "year": 2012,
+      "note": "Founder"
+    },
+    {
+      "title": "An Absolutely Remarkable Thing",
+      "year": 2018,
+      "note": "Novel"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1980-05-05",
+      "title": "Born in Birmingham, Alabama"
+    },
+    {
+      "date": "2007",
+      "title": "Starts the Vlogbrothers series"
+    },
+    {
+      "date": "2010",
+      "title": "Co-founds VidCon"
+    },
+    {
+      "date": "2018",
+      "title": "Publishes An Absolutely Remarkable Thing"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q550996"
+    },
+    {
+      "label": "Wikipedia: Hank Green",
+      "url": "https://en.wikipedia.org/wiki/Hank_Green"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true,
+  "official_website": ""
+}

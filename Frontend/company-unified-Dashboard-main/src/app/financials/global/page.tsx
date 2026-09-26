@@ -200,7 +200,7 @@ function GlobalFinancialsContent() {
             </CardHeader>
             <CardContent className="pt-4">
               <p className="text-sm text-muted-foreground">
-                TechCorp India's launch of the new AI-powered analytics tool has
+                TechCorp India&apos;s launch of the new AI-powered analytics tool has
                 driven a significant increase in monthly recurring revenue.
               </p>
             </CardContent>

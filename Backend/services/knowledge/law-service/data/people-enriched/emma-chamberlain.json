@@ -1,0 +1,62 @@
+{
+  "slug": "emma-chamberlain",
+  "category": "influencers",
+  "wikidata_id": "Q63349606",
+  "full_name": "Emma Chamberlain",
+  "description": "American media personality (born 2001)",
+  "birth_date": "2001-05-22",
+  "birth_place": "San Mateo County",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "vlogger",
+    "podcaster",
+    "YouTuber",
+    "television producer",
+    "entrepreneur",
+    "Internet celebrity"
+  ],
+  "education": [
+    {
+      "institution": "Notre Dame High School"
+    },
+    {
+      "institution": "Central Middle School (San Carlos, California)"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Streamy Awards",
+      "year": 2018
+    },
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    },
+    {
+      "title": "Diamond Play Button"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/emmachamberlain",
+    "instagram": "https://www.instagram.com/emmachamberlain"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q63349606"
+    }
+  ],
+  "photo": {
+    "skipped": "no image on Wikidata"
+  },
+  "fetched_at": "2026-09-21T19:19:48.355Z"
+}

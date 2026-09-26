@@ -38,7 +38,7 @@ export default function SimulatorPage() {
         <h1 className="text-3xl font-bold tracking-tight">Century Simulator</h1>
         <div className="flex items-center gap-4">
           <p className="text-muted-foreground">
-            Project your business empire's growth over the next century.
+            Project your business empire&apos;s growth over the next century.
           </p>
           <Badge variant="destructive" className="bg-yellow-100 text-yellow-800 border-yellow-300">
             This is a theoretical simulation for planning purposes only.

@@ -5,7 +5,7 @@ const variantCtrl = require('../controller/variantController');
 const mediaCtrl = require('../controller/productMediaController');
 const { validate } = require('../middleware/validate');
 const { loadStoreRole, requireStoreRole, requireProductOwner } = require('../middleware/commerceAccess');
-const { createProductSchema, updateProductSchema, bulkUpdateSchema } = require('../validators/productSchemas');
+const { createProductSchema, updateProductSchema, bulkUpdateSchema, importProductsSchema } = require('../validators/productSchemas');
 const { createVariantSchema, updateVariantSchema, pricingSchema } = require('../validators/variantSchemas');
 const { updateMediaSchema, reorderMediaSchema } = require('../validators/mediaSchemas');
 
@@ -14,6 +14,7 @@ const router = Router({ mergeParams: true });
 router.get('/', loadStoreRole, productCtrl.listProducts);
 router.post('/', loadStoreRole, requireStoreRole('content_editor'), validate(createProductSchema), productCtrl.createProduct);
 router.post('/bulk', loadStoreRole, requireStoreRole('content_editor'), validate(bulkUpdateSchema), productCtrl.bulkUpdate);
+router.post('/import', loadStoreRole, requireStoreRole('content_editor'), validate(importProductsSchema), productCtrl.importProducts);
 
 router.get('/:productId', loadStoreRole, productCtrl.getProduct);
 router.patch('/:productId', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(updateProductSchema), productCtrl.updateProduct);

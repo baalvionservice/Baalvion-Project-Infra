@@ -2,7 +2,6 @@
  * @fileOverview Barrel export for Content Engine components.
  */
 
-export * from './OutlineGenerator';
 export * from './ArticlePage';
 export * from './ArticleHeader';
 export * from './ArticleBody';
@@ -10,6 +9,7 @@ export * from './ArticleSection';
 export * from './ContentBlockRenderer';
 export * from './ArticleList';
 export * from './ArticleCard';
+export * from './AuthorArticleList';
 export * from './CategoryHeader';
 export * from './RelatedArticles';
 export * from './TagList';

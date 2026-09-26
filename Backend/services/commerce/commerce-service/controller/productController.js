@@ -58,4 +58,11 @@ const bulkUpdate = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate };
+const importProducts = async (req, res, next) => {
+    try {
+        const result = await productService.importProducts(req.params.storeId, req.auth.userId, req.validated.rows);
+        return sendSuccess(req, res, result, 201);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate, importProducts };

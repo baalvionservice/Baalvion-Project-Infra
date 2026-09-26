@@ -21,6 +21,16 @@ export interface CmsOnlyCategory {
   pillarTitle?: string;
   metaTitle?: string;
   metaDescription?: string;
+  /**
+   * LEN master-IA vertical this category belongs under (see the People-pillar
+   * memory/build). Omitted = 'legal', the site's original and still-dominant
+   * pillar -- every category defined before this field existed is legal, so
+   * leaving it unset there is correct, not a gap. [categorySlug]/page.tsx and
+   * layout.tsx branch on this to avoid hardcoded legal copy ("Practice Area",
+   * "{name} Lawyers", "{name} attorney" keywords) leaking onto a Movies or
+   * Music hub.
+   */
+  pillar?: 'legal' | 'entertainment';
 }
 
 export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
@@ -294,5 +304,63 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
 
 <p><em>Last updated August 11, 2026. This page provides general educational information and does not constitute legal or career advice. Read our full <a href="/terms-of-service#disclaimers">legal disclaimer</a>.</em></p>
 `.trim(),
+  },
+  'law-school-success': {
+    id: 'cms-cat-law-school-success',
+    name: 'Law School Success',
+    slug: 'law-school-success',
+    description: 'Practical, sourced guides for law students -- how to read a casebook, how many hours to actually study, and the study skills nobody explains clearly.',
+    pillarTitle: 'Law School Success',
+    metaTitle: 'Law School Success: Study Guides for Law Students',
+    metaDescription: 'Sourced, practical guides for law students -- study hours, casebook reading, and the skills that actually matter, backed by real data instead of generic advice.',
+  },
+
+  // Entertainment pillar (LEN master IA) -- new hubs, launched with the
+  // category infrastructure live but no articles published under them yet.
+  // Descriptions describe editorial scope only, not content that exists yet.
+  movies: {
+    id: 'cms-cat-movies',
+    name: 'Movies',
+    slug: 'movies',
+    description: 'Film industry news, new releases, and notable productions.',
+    metaTitle: 'Movies — Film News & Coverage',
+    metaDescription: 'Movie industry news and coverage on Law Elite Network.',
+    pillar: 'entertainment',
+  },
+  music: {
+    id: 'cms-cat-music',
+    name: 'Music',
+    slug: 'music',
+    description: 'Music industry news, releases, and artists.',
+    metaTitle: 'Music — Industry News & Coverage',
+    metaDescription: 'Music industry news and coverage on Law Elite Network.',
+    pillar: 'entertainment',
+  },
+  television: {
+    id: 'cms-cat-television',
+    name: 'Television',
+    slug: 'television',
+    description: 'TV industry news, shows, and personalities.',
+    metaTitle: 'Television — Industry News & Coverage',
+    metaDescription: 'Television industry news and coverage on Law Elite Network.',
+    pillar: 'entertainment',
+  },
+  streaming: {
+    id: 'cms-cat-streaming',
+    name: 'Streaming',
+    slug: 'streaming',
+    description: 'Streaming platforms, original series, and releases.',
+    metaTitle: 'Streaming — Industry News & Coverage',
+    metaDescription: 'Streaming industry news and coverage on Law Elite Network.',
+    pillar: 'entertainment',
+  },
+  'celebrity-news': {
+    id: 'cms-cat-celebrity-news',
+    name: 'Celebrity News',
+    slug: 'celebrity-news',
+    description: 'News and coverage of actors, musicians, athletes, and other public figures.',
+    metaTitle: 'Celebrity News',
+    metaDescription: 'Celebrity news and coverage on Law Elite Network.',
+    pillar: 'entertainment',
   },
 };

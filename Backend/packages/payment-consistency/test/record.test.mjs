@@ -47,7 +47,11 @@ test('refuses a rail the site was never granted', () => {
 });
 
 test('refuses a site with no rails configured', () => {
-  for (const siteId of ['law', 'imperialpedia', 'signal', 'jobs']) {
+  // law and signal were in this list until they were found to be charging already — law-service
+  // and developer-service both ship live Razorpay integrations — and were granted rails. The
+  // sites left here genuinely have no charge path: imperialpedia-service has a complete checkout
+  // API but its frontend has no checkout UI, and jobs has neither.
+  for (const siteId of ['imperialpedia', 'jobs', 'about', 'ships']) {
     assert.throws(
       () => recordPayment({ ...base, siteId, rail: 'razorpay', provider: 'razorpay' }),
       (e) => e.code === 'NO_RAILS_CONFIGURED',

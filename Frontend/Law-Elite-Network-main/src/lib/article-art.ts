@@ -1,13 +1,13 @@
 import { articleArtDataUri, personSilhouetteDataUri } from '@baalvion/illustrations';
-import { getAllArticles } from '@/data/law-content';
+import bundledSlugs from '@/data/bundled-article-slugs.json';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // `pnpm run generate:article-art` (wired into `build`) writes one PNG per bundled
-// article — see scripts/generate-article-art.ts. It iterates getAllArticles()
-// unconditionally, so that same slug set (not a filesystem check, which would
-// pull Node's `fs` into the client bundle of every caller) tells us which
-// slugs have a generated PNG.
-const BUNDLED_ARTICLE_SLUGS = new Set(getAllArticles().map((a) => a.slug));
+// article and the matching slug list below — see scripts/generate-article-art.ts.
+// A generated list, not a filesystem check (which would pull Node's `fs` into the
+// client bundle of every caller) and not getAllArticles() (which would pull every
+// article body into it).
+const BUNDLED_ARTICLE_SLUGS = new Set<string>(bundledSlugs);
 
 /**
  * Resolves an article's real featured image (from the CMS, law-service, or bundled

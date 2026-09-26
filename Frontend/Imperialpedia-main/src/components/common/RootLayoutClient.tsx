@@ -19,19 +19,19 @@ import { AdSenseClientProvider } from "@/components/common/AdSenseClientContext"
 
 type RootLayoutClientProps = Readonly<{ children: React.ReactNode; adsenseClient: string | null }>;
 
-// Routes that ship their own CNBC-style masthead/footer (src/components/cnbc/*
+// Routes that ship their own Imperialpedia-style masthead/footer (src/components/cnbc/*
 // via each route's own layout.tsx) and must not also get the sitewide
-// Investopedia-style Navbar/Footer stacked on top — previously only /admin
+// Imperialpedia-style Navbar/Footer stacked on top — previously only /admin
 // was excluded here, which meant /world silently double-stacked chrome
 // (sitewide Navbar -> world's own TopNav -> world's own Footer -> sitewide
 // Footer) despite world/layout.tsx's comment claiming otherwise.
-const CNBC_ROUTES = ["/world", "/news", "/market-news"];
+const Imperialpedia_ROUTES = ["/world", "/news", "/market-news"];
 
 export default function RootLayoutClient({ children, adsenseClient }: RootLayoutClientProps) {
     const pathname = usePathname();
     const suppressGlobalChrome =
         pathname?.startsWith("/admin") ||
-        CNBC_ROUTES.some((p) => pathname === p || pathname?.startsWith(`${p}/`));
+        Imperialpedia_ROUTES.some((p) => pathname === p || pathname?.startsWith(`${p}/`));
 
     useEffect(() => {
         trackPageView(pathname);

@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
+import { withoutRetired } from '@/lib/content/retired-paths';
+import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
+import { NEWS_SECTION_LIVE } from '@/config/sections';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -25,55 +28,79 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 // retired categories that 301 to / (see next.config.ts). This footer column
 // was never updated when the Navbar was fixed for the same issue. Replaced
 // with the site's actual live sections.
+// 2026-09-10: News and Reviews dropped for the same reason, one step further
+// along — both routes exist and render, but neither has the content to justify
+// being a section. /reviews has published zero reviews; /news fronts an
+// eight-tab newsroom over two articles. Linking either from every page in the
+// site put an empty section one click from anywhere. Gated rather than deleted
+// so both come back the moment they're published into — see config/sections.ts.
 const EXPLORE_COLUMN = {
   label: 'Explore',
-  links: [
-    { label: 'Stocks', href: '/stocks' },
-    { label: 'Budgeting', href: '/budgeting-basics' },
-    { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
-    { label: 'Market News', href: '/market-news' },
-    { label: 'Financial Tools', href: '/financial-tools' },
-    { label: 'News', href: '/news' },
-    { label: 'Reviews', href: '/reviews' },
-  ],
+  links: withoutAdsenseHidden(
+    withoutRetired([
+      { label: 'Stocks', href: '/stocks' },
+      { label: 'Budgeting', href: '/budgeting-basics' },
+      { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
+      // Added 2026-09-11 — Creator Economy hub.
+      { label: 'Creator Economy', href: '/creator-economy' },
+      { label: 'Market News', href: '/market-news' },
+      { label: 'Financial Tools', href: '/financial-tools' },
+      ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
+      // /reviews permanently 410'd 2026-09-23 (see GONE_TOP_LEVEL_SLUGS in
+      // retired-paths.ts) — dropped outright rather than left behind a
+      // REVIEWS_SECTION_LIVE flag that can never flip back true.
+    ])
+  ),
 };
 
-// Essential company/editorial/legal links only — pruned from a much longer list
-// of policy and disclosure pages (advertising policy, ownership disclosure,
-// ethics policy, diversity policy, source-attribution policy, DMCA, etc.) that
-// added clutter without helping a reader. Those pages still exist for anyone
-// who links to them directly; they're just no longer part of the footer's
-// primary navigation.
+// 2026-09-23: consolidated from 6 links to 4 — "Social Media Earnings" folded
+// into Instagram, "Creator Business Guides" folded into Tools (see
+// creator-economy-topics.ts and next.config.ts's redirects). Still wrapped in
+// withoutRetired for consistency with every other column in this file, and
+// FOOTER_COLUMNS below drops the column entirely if it ever hits zero links.
+const CREATOR_ECONOMY_COLUMN = {
+  label: 'Creator Economy',
+  links: withoutAdsenseHidden(
+    withoutRetired([
+      { label: 'YouTube Monetization', href: '/youtube-monetization' },
+      { label: 'Instagram & Social Media Earnings', href: '/instagram-monetization' },
+      { label: 'Website Monetization', href: '/website-monetization' },
+      { label: 'Creator Business & Tools', href: '/creator-tools' },
+    ])
+  ),
+};
+
 const FOOTER_COLUMNS = [
   EXPLORE_COLUMN,
+  CREATOR_ECONOMY_COLUMN,
   {
     label: 'Company',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'About Us', href: '/about' },
       { label: 'Contact Us', href: '/contact' },
       { label: 'Our Authors', href: '/authors' },
       { label: 'Careers', href: '/careers' },
-    ],
+    ]),
   },
   {
     label: 'Editorial',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'Editorial Policy', href: '/editorial-policy' },
       { label: 'Fact-Checking Policy', href: '/fact-checking' },
       { label: 'Corrections Policy', href: '/corrections' },
-    ],
+    ]),
   },
   {
     label: 'Legal & Privacy',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'Terms of Service', href: '/terms-of-service' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
       { label: 'Disclaimer', href: '/disclaimer' },
       { label: 'Cookie Policy', href: '/cookie-policy' },
       { label: 'Sitemap', href: '/sitemap.xml' },
-    ],
+    ]),
   },
-];
+].filter((col) => col.links.length > 0);
 
 // Shared outlined-pill CTA button — bold, small, uppercase, tracked-out, matching
 // the promo-box treatment below (deliberately louder than the calm nav links).

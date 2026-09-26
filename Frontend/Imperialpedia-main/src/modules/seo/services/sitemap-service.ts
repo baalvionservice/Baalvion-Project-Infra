@@ -1,21 +1,11 @@
-import {
-  articlesService,
-  calculatorsService,
-} from "@/services/data";
-import { loadCountries } from "@/lib/data/loaders";
-import { fetchAllTerms } from "@/lib/data/term-live";
-import { reviewSlugs } from "@/lib/data/review-live";
-import { getPublishedNews } from "@/services/data/cms-public";
-import { newsArticleHref } from "@/lib/data/article-url";
-import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
+import { articlesService } from "@/services/data";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
-import { GLOSSARY_LIVE } from "@/config/glossary";
 import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { REMOVED_ARTICLE_PATHS } from "@/lib/content/removed-article-paths";
-import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
-import stockIndexes from "@/data/indexes/indexes.json";
-import stockLists from "@/data/stock-lists/stock-lists.json";
+import { isRetiredPath } from "@/lib/content/retired-paths";
+import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
+import { getPublicAuthors } from "@/services/data/cms-public";
 
 /**
  * @fileOverview Scalable XML sitemap system for 10k–1M+ URLs.
@@ -40,6 +30,15 @@ export interface SitemapEntry {
     | "yearly"
     | "never";
   priority?: number;
+  /**
+   * The real, direct image URL (never a data: URI, never the /_next/image
+   * proxy) for the Google Images sitemap extension. Pages render images
+   * through /_next/image?url=...&w=...&q=..., a dynamically parameterized
+   * URL Google's own docs call out as unreliable for image discovery —
+   * this is the documented fix: point the image sitemap at the stable
+   * origin file instead.
+   */
+  image?: { loc: string; title?: string };
 }
 
 /** Max URLs per shard. Google's hard limit is 50,000 / 50MB — stay safely under. */
@@ -51,6 +50,17 @@ let entriesCache: { at: number; entries: SitemapEntry[] } | null = null;
 
 function baseUrl(): string {
   return env.siteUrl.endsWith("/") ? env.siteUrl.slice(0, -1) : env.siteUrl;
+}
+
+/**
+ * The image sitemap extension needs a real, absolute, directly-fetchable
+ * image URL — never the generated data: URI fallback (safeImageUrl's
+ * last resort for a row with no uploaded artwork; meaningless in a sitemap,
+ * since it isn't a URL Google can crawl at all).
+ */
+function articleImage(url: string | undefined | null, title: string | undefined): { loc: string; title?: string } | undefined {
+  if (!url || url.startsWith("data:")) return undefined;
+  return { loc: url, title: title || undefined };
 }
 
 function escapeXml(s: string): string {
@@ -75,62 +85,23 @@ export const sitemapService = {
     const entries: SitemapEntry[] = [];
 
     // 1. Static public pages (every indexable, crawlable route).
-    // "/creators", "/creators/leaderboards", "/creators/trust" removed entirely
-    // (routes deleted) — the Creators feature was pulled from the site.
-    // "/terms", "/topics", "/learning-paths" removed — glossary/topic-discovery
-    // surface is offline pending AdSense approval, see src/config/glossary.ts.
-    // Every CategoryFeed-backed topic hub (taxes, bonds, crypto, debt, ...) is
-    // also removed from this static list: each one individually noindexes itself
-    // via its own generateMetadata + categoryHasLiveContent (empty hubs read to
-    // Google as exactly the thin/low-value content pattern that blocks AdSense
-    // approval), and submitting a noindexed URL in the sitemap is a contradiction
-    // Search Console flags. All of them are submitted conditionally below instead,
-    // by that same categoryHasLiveContent check, once real content exists.
-    // "/countries" hub is also removed — the hub page (and every ?query= variant of
-    // it) was permanently killed in the 2026-08 SEO cleanup pass, see REMOVED_PATHS in
-    // middleware.ts. Individual country pages (e.g. /countries/japan) are unaffected
-    // and still submitted below via pushEntities.
-    // "/companies" and "/technologies" (hub + every individual [slug] detail page)
-    // were removed site-wide and are not submitted at all.
-    // "/knowledge-map" removed — the Knowledge Graph page only ever produced real
-    // connections through companies/industries/technologies, all three of which were
-    // removed site-wide; without them it was countries with zero edges (not a graph)
-    // while still linking out to those dead entity types. Retired entirely rather than
-    // patched (see middleware.ts REMOVED_PATHS and knowledge-graph-service.ts removal).
-    // "/explore" removed (2026-08-27) for the same reason — a country-discovery entry
-    // point built around /countries and /technologies, both already gone. Route deleted
-    // and permanently 410'd (see middleware.ts REMOVED_PATHS); submitting it here would
-    // contradict that.
-    // 2026-09-03: banking/bonds/commodities/credit/economy/etfs/investing/
-    // mutual-funds/options/personal-finance removed — retired pending AdSense
-    // review (see the redirect block in next.config.ts and Navbar.tsx), so
-    // submitting them here would list URLs that now just 301 to /. Restore
-    // once each category's articles are republished.
+    // 2026-09-25: deliberately trimmed to exactly what's required — core
+    // static pages, author profiles, the 3 live category hubs (plus /stocks
+    // below), and the published articles themselves. Everything else
+    // (financial-tools calculators, prompts, glossary terms, world/news
+    // pages, countries, market quotes, stock reference guides, every other
+    // topic hub) is intentionally left out of the sitemap by request, not
+    // just gated behind a not-yet-live flag — see git history on this file
+    // for the fuller per-section reasoning if any of it needs to come back.
     const corePages = [
       "",
       "/about",
-      "/financial-intelligence",
-      // /budgeting removed 2026-09-04: not a real category (0 articles, was
-      // serving bundled demo content), now redirects to /budgeting-basics,
-      // which is already submitted below via TOPIC_HUB_SLUGS.
+      "/authors",
       "/contact",
-      "/financial-tools",
-      "/financial-tools/compound-interest",
-      "/financial-tools/inflation",
-      "/financial-tools/investment",
-      "/financial-tools/loan",
-      "/market-news",
       "/privacy-policy",
-      "/reviews",
       "/stocks",
       "/terms-of-service",
       "/transparency",
-      "/world",
-      "/world/us",
-      "/world/europe",
-      "/world/asia",
-      "/world/china",
-      "/world/emerging",
     ];
     corePages.forEach((path) => {
       entries.push({
@@ -141,39 +112,9 @@ export const sitemapService = {
       });
     });
 
-    // 2a. Real glossary terms (static-fallback live set — same source that powers the
-    // `/terms/[letter]/[slug]` pages) drive both the A–Z hub inclusion below and the
-    // individual term entries further down, so the sitemap never submits a hub or a
-    // term URL that doesn't actually resolve.
-    const glossaryTerms = GLOSSARY_LIVE
-      ? await (async () => {
-          try {
-            return await fetchAllTerms();
-          } catch {
-            return [];
-          }
-        })()
-      : [];
-    const letterOf = (title: string) => {
-      const first = title.charAt(0).toLowerCase();
-      return /^[0-9]/.test(first) ? "num" : first;
-    };
-    const lettersWithTerms = new Set(glossaryTerms.map((t) => letterOf(t.title)));
-
-    // A–Z dictionary hubs (Investopedia-style listing pages). Only letters with at
-    // least one real glossary entry are submitted so empty hubs aren't indexed.
-    // Skipped entirely while the glossary is offline (see GLOSSARY_LIVE above).
-    ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
-      if (!lettersWithTerms.has(l)) return;
-      entries.push({ loc: `${base}/terms-beginning-with-${l}`, changefreq: "weekly", priority: 0.5 });
-    });
-
     // 2. Dynamic node IDs in parallel (each resilient to backend hiccups).
     const safe = async <T>(p: Promise<T>, fb: T): Promise<T> => {
       try { return await p; } catch { return fb; }
-    };
-    const listSafe = async <T>(p: Promise<{ data: T[] }>): Promise<T[]> => {
-      try { return (await p).data ?? []; } catch { return []; }
     };
     // The requested `limit` is a ceiling, not a guarantee — cms-service caps page
     // size at 100 server-side regardless of what's asked for, so a single
@@ -198,10 +139,16 @@ export const sitemapService = {
         return [];
       }
     };
-    const [articles, calcs] = await Promise.all([
-      listAllPages(articlesService.getArticles),
-      listSafe(calculatorsService.getCalculatorList()),
-    ]);
+    const cmsArticles = await listAllPages(articlesService.getArticles);
+
+    // Live CMS only — no merge with staticArticleList()'s 478-article backup
+    // catalog. That catalog exists purely as an offline/CMS-down fallback for
+    // page rendering; submitting it to the sitemap meant every article ever
+    // unpublished from the CMS (e.g. the September 2026 Stocks/Budgeting trim
+    // to a curated 10 each) stayed listed forever, since nothing in the static
+    // snapshot ever shrinks. A sitemap is a crawl invitation, not a historical
+    // archive — pre-AdSense-resubmission, it must reflect exactly what's live.
+    const articles = cmsArticles;
 
     // Thin/duplicate articles permanently killed in the 2026-08 SEO cleanup pass (see
     // REMOVED_PATHS in middleware.ts) — excluded here too so a still-published CMS row
@@ -211,148 +158,51 @@ export const sitemapService = {
     articles.forEach((article) => {
       const path = article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
       if (REMOVED_ARTICLE_PATHS.has(path)) return;
+      // Same stale-category guard as the news loop below: an article's stored
+      // CMS category can point at a since-retired slug even though the page
+      // itself still renders fine under its real category elsewhere.
+      if (isRetiredPath(path)) return;
       entries.push({
         loc: `${base}${path}`,
         lastmod: article.publishedAt?.split("T")[0] || today,
         changefreq: "weekly",
         priority: 0.8,
+        image: articleImage(article.featuredImage, article.title),
       });
     });
 
-    // Every CategoryFeed-backed topic hub — submit the hub itself only once it
-    // actually has a published article, so Google is never handed an empty
-    // CategoryFeed page (~40KB of template chrome and nothing else). Checked via
-    // the exact same `categoryHasLiveContent` each hub's own generateMetadata
-    // uses to decide noindex, so the sitemap and each page's own robots meta can
-    // never disagree with each other. Picks up new content the moment it's
-    // published in the CMS — no code change or redeploy.
-    // "bonds", "commodities", "etfs", "mutual-funds", and "options" removed —
-    // each is now a flagship dedicated hub (BondsHub/ETFsHub/MutualFundsHub/
-    // OptionsHub/CommoditiesHub) with substantial unique keyTakeaways/sections
-    // content from topic-config.ts, the same as banking/budgeting/credit/
-    // investing/stocks, so they're submitted unconditionally via corePages
-    // above instead of gated behind live CMS content.
-    const TOPIC_HUB_SLUGS = [
-      "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
-      "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
-      "cd-rates", "checking", "credit-cards", "crypto",
-      "cryptocurrency", "debt", "earnings", "emergency-fund",
-      "family-budget", "fed", "financial-calculators", "financial-independence",
-      // New category (2026-09-04), no articles published yet — gated the same
-      // way as every other non-corePages hub, so it starts appearing in the
-      // sitemap automatically the moment the first article goes live.
-      "fraud-protection",
-      // "income", "insurance", and "taxes" removed — none has a live route
-      // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
-      // categoryHasLiveContent for them could submit URLs to the sitemap that
-      // 410 the moment Google fetches them.
-      "fiscal-policy", "gdp", "global", "government", "indicators",
-      "inflation", "interest-rates", "live-market-news",
-      "loan-reviews", "loans", "monetary-policy", "money-management",
-      "money-market", "monthly-budget", "mortgages",
-      "planning", "politics", "portfolio", "real-estate", "retirement",
-      "saving-money", "savings", "student-budget", "student-loans",
-      "tax-software", "unemployment",
-    ] as const;
-    const topicHubResults = await Promise.all(
-      TOPIC_HUB_SLUGS.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
+    // The 3 category hubs (besides /stocks, already in corePages) that the
+    // 46 live articles actually live under. Submitted only once each actually
+    // has a published article — checked via the same `categoryHasLiveContent`
+    // each hub's own generateMetadata uses to decide noindex, so the sitemap
+    // and each page's own robots meta can never disagree with each other.
+    const LIVE_CATEGORY_HUB_SLUGS = ["creator-economy", "budgeting-basics", "fraud-protection"] as const;
+    const liveCategoryHubSlugs = LIVE_CATEGORY_HUB_SLUGS.filter((slug) => !isRetiredPath(`/${slug}`));
+    const categoryHubResults = await Promise.all(
+      liveCategoryHubSlugs.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
     );
-    topicHubResults.forEach(({ slug, hasContent }) => {
+    categoryHubResults.forEach(({ slug, hasContent }) => {
       if (hasContent) {
         entries.push({ loc: `${base}/${slug}`, lastmod: today, changefreq: "weekly", priority: 0.7 });
       }
     });
 
-    // Real glossary terms — matches the actual `/terms/[letter]/[slug]` pages 1:1
-    // (previously sourced from a small hardcoded mock glossary that didn't match the
-    // real term set, which meant submitted URLs could 404).
-    glossaryTerms.forEach((term) => {
-      entries.push({
-        loc: `${base}/terms/${letterOf(term.title)}/${term.slug}`,
-        lastmod: today,
-        changefreq: "monthly",
-        priority: 0.7,
-      });
+    // 3. Author profiles. /authors and every /authors/{slug} page renders and
+    // is crawlable, and the footer links the index from every page — the
+    // masthead is the expertise signal reviewers look for on a finance site.
+    const authors = await safe(getPublicAuthors(), []);
+    authors.forEach((author) => {
+      if (author?.slug) {
+        entries.push({ loc: `${base}/authors/${author.slug}`, changefreq: "monthly", priority: 0.6 });
+      }
     });
 
-    calcs.forEach((calc) => {
-      entries.push({ loc: `${base}/financial-tools/${calc.slug}`, changefreq: "monthly", priority: 0.9 });
-    });
-
-    // Hand-curated index/stock-list guides (data/indexes, data/stock-lists) —
-    // small, real editorial sets, not auto-generated per-symbol pages.
-    stockIndexes.forEach((idx) => {
-      entries.push({ loc: `${base}/stocks/indexes/${idx.slug}`, changefreq: "monthly", priority: 0.7 });
-    });
-    stockLists.forEach((list) => {
-      entries.push({ loc: `${base}/stocks/lists/${list.slug}`, changefreq: "monthly", priority: 0.7 });
-    });
-
-    // 3. Structured entities + review guides + published news.
-    const [countries, news] = await Promise.all([
-      safe(loadCountries(), []),
-      safe(getPublishedNews(1000), []),
-    ]);
-    // 3 country entity pages permanently killed in the 2026-08 SEO cleanup pass
-    // (REMOVED_PATHS in middleware.ts) — pushEntities is keyed by slug alone so
-    // these need their own exclusion. Companies and technologies aren't submitted
-    // at all: both routes (hub + every individual [slug] page) were removed
-    // site-wide, not just a handful of slugs.
-    const REMOVED_COUNTRY_SLUGS = new Set(["united-states", "taiwan", "south-korea"]);
-    const pushEntities = (items: Array<{ slug?: string }>, prefix: string, priority = 0.7, exclude?: Set<string>) =>
-      (items || []).forEach((e) => {
-        if (e?.slug && !exclude?.has(e.slug)) entries.push({ loc: `${base}${prefix}/${e.slug}`, changefreq: "weekly", priority });
-      });
-    pushEntities(countries, "/countries", 0.7, REMOVED_COUNTRY_SLUGS);
-
-    // "/news" and "/latest" are the same empty-hub case as the topic pages
-    // above, just keyed on published `news` content instead of a category —
-    // submit them only once at least one news item is actually published.
-    if (news.length > 0) {
-      entries.push({ loc: `${base}/news`, lastmod: today, changefreq: "daily", priority: 0.7 });
-      entries.push({ loc: `${base}/latest`, lastmod: today, changefreq: "daily", priority: 0.7 });
-    }
-
-    // Market quote pages — every symbol this site actually renders a
-    // `/markets/quote/[symbol]` page for (same tracked list the markets
-    // breakdown panels and quote page itself use), so these financial entity
-    // pages are discoverable rather than relying on internal links alone.
-    // Excluded: DGS2 (2-year Treasury yield) has no individual quote source —
-    // not an imperialpedia-service row, not a Yahoo ticker under any name
-    // (verified live 2026-08-26). Redirects to /bonds instead (next.config.ts).
-    // Every other tracked symbol, including the regional composites (CHINA, EM,
-    // APAC → real ETF proxies FXI/EEM/VPL) and the other two yield tenors
-    // (DGS30 → ^TYX, DGS3MO → ^IRX), now has real Yahoo-backed data — see
-    // marketsLoader.ts's CANONICAL_TO_YAHOO.
-    // Held back from the sitemap entirely while MARKET_QUOTES_LIVE is false
-    // (pending AdSense approval — see config/market-quotes.ts): each page's
-    // own generateMetadata also self-noindexes via the same flag, so this is
-    // belt-and-suspenders, not a contradiction of what's actually indexable.
-    if (MARKET_QUOTES_LIVE) {
-      const QUOTE_PAGE_UNSUPPORTED = new Set(["DGS2"]);
-      ALL_TRACKED_SYMBOLS.filter((symbol) => !QUOTE_PAGE_UNSUPPORTED.has(symbol)).forEach((symbol) => {
-        entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
-      });
-    }
-    (reviewSlugs || []).forEach((slug) =>
-      entries.push({ loc: `${base}/${slug}`, changefreq: "weekly", priority: 0.8 }),
-    );
-    (news || []).forEach((n) => {
-      // Canonical is the dated /YYYY/MM/DD/slug path, or the nested
-      // /world/<region>/<country>/... permalink for world-tagged news (see
-      // newsArticleHref in article-url.ts) — the bare-slug path used here
-      // previously just 301s there, so Google was being pointed at a URL
-      // that immediately redirects instead of the real one. Submitting the
-      // flat path for a world-tagged article was the same problem one hop
-      // shorter: that page self-redirects to the nested one too.
-      if (n?.slug) entries.push({ loc: `${base}${newsArticleHref(n)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
-    });
-
-    // Dedupe by URL.
+    // Dedupe by URL and filter out paths hidden by AdSense cleanup mode
     const seen = new Set<string>();
     const unique = entries.filter((e) => (seen.has(e.loc) ? false : (seen.add(e.loc), true)));
-    logger.info(`Sitemap collected ${unique.length} URLs in ${Date.now() - start}ms`);
-    return unique;
+    const filtered = unique.filter((e) => !isPathHiddenByAdsenseCleanup(e.loc));
+    logger.info(`Sitemap collected ${filtered.length} URLs in ${Date.now() - start}ms`);
+    return filtered;
   },
 
   /** Cached entry snapshot shared by the index and all shards. */
@@ -399,11 +249,11 @@ export const sitemapService = {
     const xmlEntries = entries
       .map(
         (entry) => `  <url>
-    <loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `\n    <lastmod>${entry.lastmod}</lastmod>` : ""}${entry.changefreq ? `\n    <changefreq>${entry.changefreq}</changefreq>` : ""}${entry.priority != null ? `\n    <priority>${entry.priority.toFixed(1)}</priority>` : ""}
+    <loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `\n    <lastmod>${entry.lastmod}</lastmod>` : ""}${entry.changefreq ? `\n    <changefreq>${entry.changefreq}</changefreq>` : ""}${entry.priority != null ? `\n    <priority>${entry.priority.toFixed(1)}</priority>` : ""}${entry.image ? `\n    <image:image>\n      <image:loc>${escapeXml(entry.image.loc)}</image:loc>${entry.image.title ? `\n      <image:title>${escapeXml(entry.image.title)}</image:title>` : ""}\n    </image:image>` : ""}
   </url>`,
       )
       .join("\n");
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlEntries}\n</urlset>`;
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${xmlEntries}\n</urlset>`;
   },
 
   /** Back-compat: full flat urlset (unused by the sharded routes). */

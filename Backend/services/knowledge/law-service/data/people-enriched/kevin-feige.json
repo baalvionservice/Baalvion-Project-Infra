@@ -1,0 +1,64 @@
+{
+  "slug": "kevin-feige",
+  "category": "producers",
+  "wikidata_id": "Q515161",
+  "full_name": "Kevin Feige",
+  "description": "American producer and studio executive (born 1973)",
+  "birth_date": "1973-06-02",
+  "birth_place": "Boston",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "executive producer"
+  ],
+  "education": [
+    {
+      "institution": "University of Southern California"
+    },
+    {
+      "institution": "USC School of Cinematic Arts"
+    },
+    {
+      "institution": "Westfield High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Inkpot Award",
+      "year": 2017
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Marvel Studios"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/Kevfeige"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q515161"
+    }
+  ],
+  "photo": {
+    "file": "kevin-feige.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1458,
+    "credit": "rwoan / Wikimedia Commons",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kevin_Feige.jpg"
+  },
+  "fetched_at": "2026-09-21T19:18:33.096Z"
+}

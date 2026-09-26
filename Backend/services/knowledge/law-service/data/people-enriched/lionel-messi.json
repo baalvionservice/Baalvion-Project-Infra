@@ -1,0 +1,130 @@
+{
+  "slug": "lionel-messi",
+  "category": "athletes",
+  "wikidata_id": "Q615",
+  "full_name": "Lionel Messi",
+  "description": "Argentine association football player (born 1987)",
+  "birth_date": "1987-06-24",
+  "birth_place": "Rosario",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "AR",
+  "citizenship": [
+    "Argentina",
+    "Spain",
+    "Italy"
+  ],
+  "occupations": [
+    "association football player"
+  ],
+  "education": [],
+  "positions": [
+    {
+      "title": "UNICEF Goodwill Ambassador",
+      "start": 2010
+    }
+  ],
+  "awards": [
+    {
+      "title": "World Cup Golden Ball",
+      "year": 2014
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2010
+    },
+    {
+      "title": "Ballon d'Or",
+      "year": 2009
+    },
+    {
+      "title": "FIFA World Player of the Year",
+      "year": 2009
+    },
+    {
+      "title": "European Golden Shoe",
+      "year": 2010
+    },
+    {
+      "title": "Onze d'Or",
+      "year": 2009
+    },
+    {
+      "title": "Trofeo Alfredo Di Stéfano",
+      "year": 2009
+    },
+    {
+      "title": "Footballer of the Year of Argentina",
+      "year": 2005
+    },
+    {
+      "title": "Pichichi Trophy",
+      "year": 2010
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2011
+    },
+    {
+      "title": "Best International Athlete ESPY Award",
+      "year": 2012
+    },
+    {
+      "title": "Saint George's Cross",
+      "year": 2019
+    },
+    {
+      "title": "Laureus World Sports Award for Sportsman of the Year",
+      "year": 2020
+    },
+    {
+      "title": "Alejandro buceta",
+      "year": 2005
+    },
+    {
+      "title": "Bravo Award",
+      "year": 2007
+    },
+    {
+      "title": "Premios Protagonistas",
+      "year": 2008
+    },
+    {
+      "title": "Ballon d'Or Dream Team",
+      "year": 2020
+    },
+    {
+      "title": "The Best FIFA Men's Player",
+      "year": 2019
+    },
+    {
+      "title": "UEFA Club Footballer of the Year",
+      "year": 2009
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/fundacionmessi",
+    "instagram": "https://www.instagram.com/leomessi",
+    "facebook": "https://www.facebook.com/LeoMessi"
+  },
+  "official_website": "https://messi.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q615"
+    }
+  ],
+  "photo": {
+    "file": "lionel-messi.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1500,
+    "credit": "Bryan Berlin / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg"
+  },
+  "fetched_at": "2026-09-21T19:20:47.049Z"
+}

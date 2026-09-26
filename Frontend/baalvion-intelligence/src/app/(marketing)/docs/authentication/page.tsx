@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Authentication",
+  title: "One Header Is All That Stands Between You and the Full API",
   description: "How to authenticate requests to the Baalvion Intelligence News API with bearer tokens.",
+  alternates: { canonical: "/docs/authentication" },
 };
 
 const authHeaderExample = `Authorization: Bearer bk_live_51H8x2K...`;

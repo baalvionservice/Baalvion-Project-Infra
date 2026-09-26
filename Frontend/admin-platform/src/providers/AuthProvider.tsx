@@ -5,8 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { authApi } from '@/lib/api/auth';
 import { refreshAccessToken } from '@/lib/api/client';
+import { isPublicPath } from '@/lib/constants/public-paths';
 
-const PUBLIC_PATHS = ['/login', '/mfa', '/forgot-password', '/reset-password'];
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       // middleware redirects authenticated users away before this mounts. Skip the cookie
       // refresh entirely; otherwise every login-page load fires a guaranteed-401
       // /auth-bff/refresh, spamming the console and the auth-service rate limiter.
-      if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+      if (isPublicPath(pathname)) {
         if (!cancelled) setHydrated(true);
         return;
       }
@@ -71,7 +71,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // ── Redirect logic (only after hydration completes) ──────────────────────────────────────────
   useEffect(() => {
     if (!isHydrated) return;
-    const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+    const isPublic = isPublicPath(pathname);
     const authenticated = isAuthenticated();
 
     if (!authenticated && !isPublic) {

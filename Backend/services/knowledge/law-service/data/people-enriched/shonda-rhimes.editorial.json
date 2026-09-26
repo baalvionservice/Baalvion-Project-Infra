@@ -1,0 +1,84 @@
+{
+  "display_name": null,
+  "short_bio": "Television writer and producer, creator of Grey’s Anatomy and founder of Shondaland.",
+  "biography": "Shonda Rhimes was born in Chicago, studied at Dartmouth College and then film at the University of Southern California. She co-wrote the film Crossroads (2002) and The Princess Diaries 2 (2004).\n\nShe created Grey’s Anatomy for ABC in 2005 and spin-off series Private Practice followed in 2007. Scandal (2012) and, as producer, How to Get Away with Murder (2014) formed the Thursday night lineup she called TGIT.\n\nHer company Shondaland moved to Netflix under a 2017 deal, and its series Bridgerton premiered in 2020.",
+  "awards": [
+    {
+      "title": "Lucy Award",
+      "year": 2007
+    },
+    {
+      "title": "International Emmy Founders Award",
+      "year": 2016
+    },
+    {
+      "title": "Time 100",
+      "year": 2021
+    },
+    {
+      "title": "Fellow of the American Academy of Arts and Sciences",
+      "year": 2023
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 2023
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Grey’s Anatomy",
+      "year": 2005,
+      "note": "Creator"
+    },
+    {
+      "title": "Private Practice",
+      "year": 2007,
+      "note": "Creator"
+    },
+    {
+      "title": "Scandal",
+      "year": 2012,
+      "note": "Creator"
+    },
+    {
+      "title": "Bridgerton",
+      "year": 2020,
+      "note": "Executive producer through Shondaland"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1970-01-13",
+      "title": "Born in Chicago, Illinois"
+    },
+    {
+      "date": "2005",
+      "title": "Grey’s Anatomy premieres on ABC"
+    },
+    {
+      "date": "2012",
+      "title": "Scandal premieres"
+    },
+    {
+      "date": "2017",
+      "title": "Shondaland signs a deal with Netflix"
+    },
+    {
+      "date": "2020",
+      "title": "Bridgerton premieres on Netflix"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q242329"
+    },
+    {
+      "label": "Wikipedia: Shonda Rhimes",
+      "url": "https://en.wikipedia.org/wiki/Shonda_Rhimes"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

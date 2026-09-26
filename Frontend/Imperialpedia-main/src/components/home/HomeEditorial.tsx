@@ -1,8 +1,7 @@
 import React from "react";
-import { LeadStory } from "@/components/landing/investopedia/LeadStory";
-import { TopicSection } from "@/components/landing/investopedia/TopicSection";
+import { LeadStory } from "@/components/landing/imperialpedia/LeadStory";
+import { TopicSection } from "@/components/landing/imperialpedia/TopicSection";
 import { LatestArticles } from "./LatestArticles";
-import { PersonalFinanceSpotlight } from "./PersonalFinanceSpotlight";
 import { PopularReads } from "./PopularReads";
 import { getHomeEditorial } from "./getHomeEditorial";
 
@@ -30,7 +29,6 @@ export async function HomeEditorial() {
         <TopicSection key={group.title} group={group} />
       ))}
       <LatestArticles articles={editorial.latestArticles} />
-      <PersonalFinanceSpotlight spotlight={editorial.personalFinance} />
       <PopularReads articles={editorial.popularReads} />
     </>
   );

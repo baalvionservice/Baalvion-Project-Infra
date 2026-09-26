@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,12 +30,14 @@ interface TreeNodeProps {
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
   onToggleActive: (id: string, nextActive: boolean) => void;
+  isLive?: (slug: string) => boolean;
 }
 
-function TreeNode({ node, depth, onEdit, onDelete, onAddChild, onToggleActive }: TreeNodeProps) {
+function TreeNode({ node, depth, onEdit, onDelete, onAddChild, onToggleActive, isLive }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(depth < 1);
   const hasChildren = node.children.length > 0;
   const isActive = node.status !== 'inactive';
+  const live = isLive?.(node.slug) ?? null;
 
   return (
     <div>
@@ -64,6 +67,15 @@ function TreeNode({ node, depth, onEdit, onDelete, onAddChild, onToggleActive }:
         )}
 
         <span className="flex-1 text-sm truncate">{node.name}</span>
+
+        {live !== null && (
+          <Badge
+            variant="outline"
+            className={`mr-2 text-[10px] ${live ? 'border-emerald-500 text-emerald-600' : 'border-amber-500 text-amber-600'}`}
+          >
+            {live ? 'Live' : 'Not live'}
+          </Badge>
+        )}
 
         <span className="text-xs text-muted-foreground mr-2">
           {node.contentCount}
@@ -117,6 +129,7 @@ function TreeNode({ node, depth, onEdit, onDelete, onAddChild, onToggleActive }:
               onDelete={onDelete}
               onAddChild={onAddChild}
               onToggleActive={onToggleActive}
+              isLive={isLive}
             />
           ))}
         </div>
@@ -132,9 +145,11 @@ interface Props {
   onAddChild: (parentId: string) => void;
   onToggleActive: (id: string, nextActive: boolean) => void;
   isLoading?: boolean;
+  /** When provided, renders a Live/Not live badge per row by checking each node's slug. */
+  isLive?: (slug: string) => boolean;
 }
 
-export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, onToggleActive, isLoading }: Props) {
+export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, onToggleActive, isLoading, isLive }: Props) {
   if (isLoading) {
     return (
       <div className="space-y-1 p-2">
@@ -164,6 +179,7 @@ export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, onTog
           onDelete={onDelete}
           onAddChild={onAddChild}
           onToggleActive={onToggleActive}
+          isLive={isLive}
         />
       ))}
     </div>

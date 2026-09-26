@@ -112,6 +112,12 @@ export const NAVIGATION: NavGroup[] = [
         roles: ['super_admin', 'owner', 'admin'],
       },
       {
+        title: 'Sign-in Activity',
+        href: '/login-activity',
+        iconName: 'LogIn',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
         title: 'Audit Center',
         href: '/audit-center',
         iconName: 'ShieldCheck',
@@ -258,7 +264,24 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'Ecosystem',
     items: [
-      { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
+      {
+        title: 'Law Elite', href: '/law', iconName: 'Scale',
+        children: [
+          { title: 'Overview', href: '/law',        iconName: 'Scale' },
+          { title: 'People',   href: '/law/people', iconName: 'Users' },
+          { title: 'Cases',    href: '/law/cases',  iconName: 'Gavel' },
+          { title: 'Courts',   href: '/law/courts', iconName: 'Landmark' },
+          { title: 'Entertainment', href: '/law/entertainment', iconName: 'Clapperboard' },
+          { title: 'Sports teams', href: '/law/sports-teams', iconName: 'Shield' },
+          { title: 'Competitions', href: '/law/sports-competitions', iconName: 'Trophy' },
+          { title: 'Topics', href: '/law/topics', iconName: 'Tag' },
+          { title: 'Videos', href: '/law/videos', iconName: 'Clapperboard' },
+          { title: 'Podcasts', href: '/law/podcasts', iconName: 'Mic' },
+          { title: 'Show people', href: '/law/show-people', iconName: 'Users' },
+          { title: 'Homepage', href: '/law/home-widgets', iconName: 'Image' },
+          { title: 'Images',   href: '/law/images', iconName: 'Image' },
+        ],
+      },
       // ControlTheMarket runs as its own deployment (controlthemarket.com) with its
       // own admin — open it directly rather than a (non-routable) console panel.
       { title: 'ControlTheMarket',  href: 'https://controlthemarket.com', iconName: 'Trophy', external: true },
@@ -437,6 +460,12 @@ export const NAVIGATION: NavGroup[] = [
         href: '/feature-flags',
         iconName: 'ToggleLeft',
         roles: ['super_admin', 'owner'],
+      },
+      {
+        title: 'Pending Features',
+        href: '/pending-features',
+        iconName: 'ListTodo',
+        roles: ['super_admin', 'owner', 'admin'],
       },
       {
         title: 'Settings',

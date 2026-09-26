@@ -168,7 +168,7 @@ export default function AppDetailPage({
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground">
-                        "{review.comment}"
+                        &quot;{review.comment}&quot;
                       </p>
                     </CardContent>
                   </Card>

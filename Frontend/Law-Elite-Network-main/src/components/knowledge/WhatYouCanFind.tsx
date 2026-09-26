@@ -4,7 +4,9 @@ import { ArrowUpRight } from 'lucide-react';
 
 // Every entry links to a section or route that already exists on the site --
 // no glossary/"research resources" page exists yet, so this deliberately
-// ships 4 items rather than inventing a 5th destination.
+// ships 3 items rather than inventing a 4th destination. "Legal News &
+// Developments" (-> /news) was dropped when /news was retired (AdSense
+// second-rejection finding: an eight-tab newsroom over 3 articles).
 const ITEMS = [
   {
     title: 'Legal Guides',
@@ -15,11 +17,6 @@ const ITEMS = [
     title: 'Legal Topics',
     body: 'Browse different areas of law and discover relevant educational resources.',
     href: '#practice-areas',
-  },
-  {
-    title: 'Legal News & Developments',
-    body: 'Follow important legal and regulatory developments.',
-    href: '/news',
   },
   {
     title: 'Sourcing & Editorial Standards',
@@ -52,7 +49,7 @@ export function WhatYouCanFind() {
             className="group grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[4rem_1fr_auto] items-center gap-4 sm:gap-6 py-5 border-b border-slate-200 hover:bg-slate-50/60 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6"
           >
             <span
-              className="font-serif text-2xl sm:text-4xl italic text-slate-200 group-hover:text-news-600 transition-colors tabular-nums"
+              className="font-serif text-2xl sm:text-4xl italic text-slate-500 group-hover:text-news-600 transition-colors tabular-nums"
               aria-hidden="true"
             >
               {String(i + 1).padStart(2, '0')}

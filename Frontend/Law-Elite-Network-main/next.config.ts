@@ -81,6 +81,8 @@ const securityHeaders = [
       // script, so allowing any https host carries no XSS risk, only a
       // hotlinking one we accept for this public content site).
       "img-src 'self' data: blob: https:",
+      // Admin-published audio briefings and video shorts are plain https files.
+      "media-src 'self' https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar) that
       // AdSense pings from the page; *.googlesyndication.com/*.doubleclick.net/*.google.com
@@ -93,7 +95,11 @@ const securityHeaders = [
       }`,
       // Ad creatives render in iframes served from googleads.g.doubleclick.net and
       // tpc.googlesyndication.com — without these, approved ads simply never paint.
-      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com",
+      // *.adtrafficquality.google (ep2.adtrafficquality.google specifically) also
+      // opens an iframe, not just fetch/XHR calls -- it was only in connect-src
+      // above, so the browser blocked the frame outright (caught via a live CSP
+      // violation report during a Lighthouse run, not a code read).
+      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://www.youtube-nocookie.com https://player.vimeo.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -132,6 +138,12 @@ const nextConfig: NextConfig = {
   // Docker/CI builds run on Linux where standalone is emitted correctly.
   output: process.platform === 'win32' ? undefined : 'standalone',
 
+  // The client bundle is already public (any browser can read the minified
+  // JS) -- a source map doesn't expose anything new, it just makes what's
+  // already shipped legible, which is what Lighthouse's valid-source-maps
+  // audit and any future error-tracking integration (Sentry etc.) both need.
+  productionBrowserSourceMaps: true,
+
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -153,11 +165,58 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // Retitled/re-slugged to drop a borrowed outlet's brand name from our
+      // own editorial byline -- the article itself didn't change.
+      { source: '/celebrity-news/page-six-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', destination: '/celebrity-news/law-elite-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', permanent: true },
+      { source: '/article/page-six-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', destination: '/celebrity-news/law-elite-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', permanent: true },
+      { source: '/galleries/page-six-spotted-celebrity-legal-desk', destination: '/galleries/law-elite-spotted-celebrity-legal-desk', permanent: true },
+      // The Television entertainment hub lives at /television (see
+      // cms-only-categories.ts) -- /tv is the shorter form readers actually
+      // type/link, so it redirects rather than existing as a second,
+      // competing route to the same content.
+      // /tv, /courts and /legal used to redirect into now-retired pages
+      // (/television, /legal/courts, /legal/cases -- all three fall under
+      // the third-retirement-pass block below and 308 to / themselves).
+      // Pointed straight at / to avoid a two-hop redirect chain; repoint
+      // these at their real destinations once that block comes out.
+      { source: '/tv', destination: '/', permanent: true },
+      { source: '/courts', destination: '/', permanent: true },
+      { source: '/legal', destination: '/', permanent: true },
       // /world pulled the exact same cmsGetNews() feed as /news with no real
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the
       // same search intent, consolidated the same way as the redirects above.
-      { source: '/world', destination: '/news', permanent: true },
+      // Destination changed from /news to / now that /news is retired too
+      // (see the four-section block below) -- redirecting into another dead
+      // section would just move the soft-404 one hop deeper.
+      { source: '/world', destination: '/', permanent: true },
+      // AdSense second-rejection finding: these "finished-looking" sections
+      // (two reference indexes pointing exclusively at articles whose
+      // practice areas were already retired above) read to a reviewer as the
+      // site under construction. retired-links.ts's RETIRED_SECTIONS already
+      // declared the intent to retire them and unwraps any in-prose link
+      // into one -- this is the redirect half of that fix, which had never
+      // been added. /news was un-retired 2026-09-25 (removed from this
+      // block and from RETIRED_SECTIONS) at the same explicit request as the
+      // legal categories above -- it currently has only 1 published article
+      // against 40 unapproved drafts, a real thin-section risk that was
+      // flagged and accepted anyway rather than silently fixed.
+      { source: '/case-law', destination: '/', permanent: true },
+      { source: '/legislation', destination: '/', permanent: true },
+      { source: '/law-changes', destination: '/', permanent: true },
+      // Synonym consolidation. "offshore injury lawyer" / "offshore accident
+      // lawyer", and the maritime and oil-rig pairs, are the same search intent
+      // with a swapped noun -- six pages competing for one query each. The text
+      // is genuinely distinct (13% shingle overlap, so not duplicate content),
+      // but distinct text serving one intent is what Google's doorway-page
+      // policy is aimed at, and on a 38-page site six of them is a sixth of the
+      // corpus. Each pair collapses into whichever page carries more of the
+      // substance. The retired pages' unique material still needs folding into
+      // the survivors in the CMS -- redirecting alone preserves the link equity
+      // but loses roughly 1,000 words per page until that is done.
+      { source: '/offshore-injury-lawyer', destination: '/offshore-accident-lawyer', permanent: true },
+      { source: '/maritime-injury-lawyer', destination: '/maritime-accident-lawyer', permanent: true },
+      { source: '/oil-rig-injury-lawyer', destination: '/oil-rig-accident-lawyer', permanent: true },
       // /plans advertised paid tiers with feature claims (AI case summaries,
       // predictive insights, document auditing, priority matching, etc.) that
       // don't exist anywhere in the backend, alongside false "PCI-DSS
@@ -241,6 +300,35 @@ const nextConfig: NextConfig = {
       { source: '/boating-accident-liability-and-fault', destination: '/', permanent: true },
       { source: '/best-car-accident-lawyer', destination: '/', permanent: true },
       { source: '/what-does-a-car-accident-lawyer-do', destination: '/', permanent: true },
+      // Third retirement pass, 2026-09-25 (see src/lib/category-slugs.ts's
+      // CURRENT_CATEGORY_SLUGS comment): narrowed the live site further,
+      // while still mid-AdSense-review. Of the previously-live set, the 5
+      // entertainment hubs stay retired; personal-injury-lawyer,
+      // maritime-offshore-injury-law, cruise-ship-passenger-vessel-accidents,
+      // and law-school-success were explicitly asked back in and are live
+      // again (removed from this redirect block, added back to
+      // CURRENT_CATEGORY_SLUGS). Their CMS content was never touched, these
+      // are 301s, and this block comes out entirely once AdSense approves
+      // the site and the rest is restored.
+      { source: '/movies/:path*', destination: '/', permanent: true },
+      { source: '/music/:path*', destination: '/', permanent: true },
+      { source: '/television/:path*', destination: '/', permanent: true },
+      { source: '/streaming/:path*', destination: '/', permanent: true },
+      { source: '/celebrity-news/:path*', destination: '/', permanent: true },
+      // Same pass: the standalone content pillars (people/entertainment/
+      // sports/countries/topics/legal cases+courts) also stay up but drop
+      // out of indexing/sitemap below -- these aren't
+      // CURRENT_CATEGORY_SLUGS-driven category hubs, so they need their own
+      // redirect rather than falling out of that list automatically.
+      // Videos and Podcasts were kept live (real content: Stuff You Should
+      // Know, Desert Island Discs, The Rest Is Football; real Bigg Boss
+      // episodes) -- not retired here, see sitemap.ts.
+      { source: '/entertainment/:path*', destination: '/', permanent: true },
+      { source: '/sports/:path*', destination: '/', permanent: true },
+      { source: '/people/:path*', destination: '/', permanent: true },
+      { source: '/countries/:path*', destination: '/', permanent: true },
+      { source: '/topics/:path*', destination: '/', permanent: true },
+      { source: '/legal/:path*', destination: '/', permanent: true },
     ];
   },
 

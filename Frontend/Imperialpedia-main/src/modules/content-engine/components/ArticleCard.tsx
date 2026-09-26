@@ -7,59 +7,95 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock } from 'lucide-react';
 
 interface ArticleCardProps {
   article: Article;
 }
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 
 /**
  * A sophisticated card component to display article previews in listings.
  */
 export const ArticleCard = ({ article }: ArticleCardProps) => {
   const href = article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
+  const publishedDate = article.publishedAt ? dateFormatter.format(new Date(article.publishedAt)) : null;
   return (
-    <Link href={href} className="group block h-full">
-      <Card className="glass-card flex flex-col h-full overflow-hidden transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/40">
-        <div className="relative aspect-video w-full overflow-hidden">
-          {article.featuredImage ? (
-            <Image
-              src={article.featuredImage}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground">No image</span>
-            </div>
-          )}
-          <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-primary font-bold">
-              {article.category}
-            </Badge>
+    <Card className="group relative flex flex-col h-full overflow-hidden glass-card transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/40">
+      {/* Stretched-link pattern: the whole card is clickable via this overlay,
+          while the author byline below stays its own focusable/clickable link
+          (an <a> can't nest inside another <a>). */}
+      <Link href={href} className="absolute inset-0 z-0" aria-label={article.title}>
+        <span className="sr-only">{article.title}</span>
+      </Link>
+
+      <div className="relative aspect-video w-full overflow-hidden">
+        {article.featuredImage ? (
+          <Image
+            src={article.featuredImage}
+            alt={article.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground">No image</span>
           </div>
+        )}
+        <div className="absolute top-3 left-3">
+          <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-primary font-bold">
+            {article.category}
+          </Badge>
         </div>
+      </div>
 
-        <CardHeader className="p-5 pb-2">
-          <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-            {article.title}
-          </CardTitle>
-        </CardHeader>
+      <CardHeader className="p-5 pb-2">
+        <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+          {article.title}
+        </CardTitle>
+      </CardHeader>
 
-        <CardContent className="p-5 pt-0 flex-grow">
-          <Text variant="bodySmall" className="text-muted-foreground line-clamp-3 mb-4">
-            {article.description}
-          </Text>
-        </CardContent>
+      <CardContent className="p-5 pt-0 flex-grow">
+        <Text variant="bodySmall" className="text-muted-foreground line-clamp-3 mb-4">
+          {article.description}
+        </Text>
+      </CardContent>
 
-        <CardFooter className="p-5 pt-0 border-t border-white/5 flex items-center justify-between text-muted-foreground">
+      <CardFooter className="p-5 pt-0 border-t border-white/5 flex flex-col gap-1.5 items-start text-muted-foreground">
+        <div className="flex items-center justify-between w-full">
           {article.authorName && (
-            <Text variant="caption">By {article.authorName}</Text>
+            article.authorSlug ? (
+              <Link
+                href={`/authors/${article.authorSlug}`}
+                className="relative z-10 hover:text-primary hover:underline"
+              >
+                <Text variant="caption">By {article.authorName}</Text>
+              </Link>
+            ) : (
+              <Text variant="caption">By {article.authorName}</Text>
+            )
           )}
           <ArrowRight className="w-4 h-4 text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 ml-auto" />
-        </CardFooter>
-      </Card>
-    </Link>
+        </div>
+        {(publishedDate || article.readingTime) && (
+          <div className="flex items-center gap-2 text-[11px]">
+            {publishedDate && <span>Published {publishedDate}</span>}
+            {publishedDate && article.readingTime ? <span aria-hidden>·</span> : null}
+            {article.readingTime ? (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {article.readingTime} min read
+              </span>
+            ) : null}
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 };

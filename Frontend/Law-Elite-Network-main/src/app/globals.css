@@ -1,3 +1,4 @@
+@import '@baalvion/design/base.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -115,33 +116,95 @@
   @apply transition-all duration-300 hover:scale-[1.01] active:scale-[0.98];
 }
 
-/* Investopedia-Grade Prose Hardening — Franklin display headings, serif body */
+/* Editorial-grade Prose — Libre Franklin display headings, Source Serif body */
 .prose-legal {
-  @apply max-w-none text-slate-700;
+  @apply max-w-none;
   overflow-wrap: break-word;
+  color: #1a1a1a;
 }
 /* CMS-authored HTML can contain arbitrary <img>/<table>/long URLs — without
    these, a fixed-width image or table pastes in wider than a phone viewport
    and either overflows or gets silently clipped by body's overflow-x-hidden. */
-.prose-legal img { @apply max-w-full h-auto rounded-lg; }
+.prose-legal img { @apply max-w-full h-auto; }
 .prose-legal table { @apply block max-w-full overflow-x-auto; }
 .prose-legal pre { @apply max-w-full overflow-x-auto; }
-.prose-legal h1 { @apply font-headline text-4xl md:text-6xl font-extrabold text-slate-900 mt-16 mb-8 tracking-tight leading-tight; }
-.prose-legal h2 { @apply font-headline text-2xl md:text-[2rem] font-extrabold text-slate-900 mt-16 mb-5 tracking-tight border-b border-slate-200 pb-3 leading-tight; }
-.prose-legal h3 { @apply font-headline text-xl md:text-2xl font-bold text-slate-800 mt-10 mb-4 tracking-tight; }
-.prose-legal p { @apply font-serif text-[1.175rem] md:text-[1.25rem] leading-[1.75] mb-7 font-normal text-slate-700; }
-.prose-legal ul, .prose-legal ol { @apply mb-8 pl-6 space-y-3; }
+/* Headline (h1) — only shown if CMS content generates one */
+.prose-legal h1 { @apply font-headline text-4xl md:text-5xl font-black text-slate-900 mt-12 mb-6 tracking-tight leading-[1.08]; }
+/* H2 subheadings: bold sans left-border rule style */
+.prose-legal h2 {
+  font-family: theme('fontFamily.headline');
+  font-size: 1.375rem; /* 22px */
+  font-weight: 800;
+  color: #111;
+  margin-top: 2.25rem;
+  margin-bottom: 0.875rem;
+  padding-left: 0.875rem;
+  border-left: 3px solid #E13131;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+@media (min-width: 768px) {
+  .prose-legal h2 { font-size: 1.5rem; /* 24px */ }
+}
+/* H3 subheadings */
+.prose-legal h3 {
+  font-family: theme('fontFamily.headline');
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+  margin-top: 1.75rem;
+  margin-bottom: 0.625rem;
+  line-height: 1.3;
+}
+/* Body paragraphs: 18px serif, 1.7 line-height, dark charcoal */
+.prose-legal p {
+  font-family: theme('fontFamily.serif');
+  font-size: 1.0625rem; /* 17px mobile */
+  line-height: 1.75;
+  margin-bottom: 1.375rem;
+  color: #1a1a1a;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .prose-legal p { font-size: 1.125rem; /* 18px desktop */ }
+}
+.prose-legal ul, .prose-legal ol { @apply mb-6 pl-6 space-y-2.5; }
 .prose-legal ul { @apply list-disc; }
 .prose-legal ol { @apply list-decimal; }
-.prose-legal li { @apply font-serif text-[1.1rem] md:text-[1.2rem] leading-[1.7] text-slate-700 pl-1; }
-.prose-legal a { @apply text-blue-700 font-semibold underline decoration-blue-200 underline-offset-2 hover:decoration-blue-600 transition-colors; }
-.prose-legal strong { @apply text-slate-900 font-bold; }
-.prose-legal blockquote { @apply border-l-4 border-news-600 pl-6 py-3 bg-slate-50 my-10 text-slate-800 text-xl font-serif italic; }
-.prose-legal h2:first-of-type { @apply mt-0; }
+.prose-legal li {
+  font-family: theme('fontFamily.serif');
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: #1a1a1a;
+}
+@media (min-width: 768px) {
+  .prose-legal li { font-size: 1.125rem; }
+}
+.prose-legal a { @apply text-blue-700 underline decoration-blue-300 underline-offset-2 hover:decoration-blue-700 transition-colors; }
+.prose-legal strong { color: #111; font-weight: 700; }
+/* Blockquote — tabloid-style pull quote */
+.prose-legal blockquote {
+  border-left: 4px solid #E13131;
+  padding: 0.75rem 1.25rem;
+  background: #f9f9f9;
+  margin: 1.75rem 0;
+  font-family: theme('fontFamily.serif');
+  font-size: 1.125rem;
+  font-style: italic;
+  color: #222;
+  line-height: 1.65;
+}
+.prose-legal h2:first-of-type { margin-top: 0; }
 
-/* Key Takeaways Investopedia Style */
+/* Key Takeaways — editorial summary panel */
 .key-takeaways {
-  @apply my-12 p-8 relative bg-white border-x border-slate-50 shadow-sm;
+  margin: 2rem 0;
+  padding: 0;
+  position: relative;
+  background: #fff;
+  border: 2px solid #111;
 }
 
 .key-takeaways::before {
@@ -149,31 +212,54 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 40%;
+  width: 100%;
   height: 3px;
-  background-color: #ff6b6b; /* signature coral */
+  background-color: #E13131; /* Law Elite signature red top rule */
 }
 
 .key-takeaways::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 40%;
-  height: 3px;
-  background-color: #ff6b6b;
+  content: none;
 }
 
 .key-takeaways h2 {
-  @apply text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900 mb-6 border-none;
+  font-family: theme('fontFamily.headline');
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: #fff;
+  background: #111;
+  margin: 0;
+  padding: 0.6rem 1.25rem;
+  border: none;
 }
 
 .key-takeaways ul {
-  @apply list-disc pl-5 space-y-4 my-0;
+  list-style: none;
+  padding: 1rem 1.25rem 1.25rem;
+  margin: 0;
+  space-y: 0;
 }
 
 .key-takeaways li {
-  @apply text-base md:text-lg text-slate-700 leading-relaxed font-medium italic;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-family: theme('fontFamily.serif');
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  font-weight: 400;
+  font-style: normal;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+.key-takeaways li:last-child {
+  border-bottom: none;
+}
+
+@media (min-width: 768px) {
+  .key-takeaways li { font-size: 1rem; }
 }
 
 /* Callout boxes — "what this means" style notes inside article bodies.
@@ -224,3 +310,8 @@
 .article-sources details[open] summary::after { transform: rotate(180deg); }
 .article-sources-intro { @apply mt-3 text-[14px] leading-relaxed text-slate-600; }
 .article-sources ol { @apply list-decimal pl-5 marker:text-slate-400 marker:font-normal; }
+
+/* Touch devices: footer links were ~14px tall. Grow the hit area without changing how the columns look on desktop. */
+@media (pointer: coarse) {
+  footer a { display: inline-flex; align-items: center; min-height: 40px; }
+}

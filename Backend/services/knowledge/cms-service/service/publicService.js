@@ -2,13 +2,14 @@
 const { Op } = require('sequelize');
 const { hmacSign, safeCompare } = require('@baalvion/crypto');
 const { decideAccess } = require('@baalvion/entitlements');
-const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention, CmsSeoRedirect } = require('../models');
+const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsAuthorMessage, CmsContentEntityMention, CmsSeoRedirect } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const contentService = require('./contentService');
 const contentEvents = require('./analytics/contentEvents');
 const entitlementClient = require('./entitlementClient');
+const mailer = require('./mailer');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 // In-process cache, mirrors entitlementClient.js's _subscriptionCache — a site's config
@@ -175,6 +176,12 @@ function _typoBudget(len) {
     return 2;
 }
 
+// The fuzzy pass costs O(query words x candidate words x word length) across up to 500
+// rows, on a public unauthenticated endpoint. Nothing longer than this is a typo of a
+// headline, so bound the query side rather than let one request burn minutes of CPU.
+const FUZZY_MAX_SEARCH_LEN = 80;
+const FUZZY_MAX_QUERY_WORDS = 8;
+
 const _WORD_RE = /[a-z0-9]+/g;
 function _words(text) {
     return (text || '').toLowerCase().match(_WORD_RE) || [];
@@ -261,8 +268,8 @@ async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
     // (see _fuzzyMatch above) before reporting a genuine zero-result search.
     // Scoped to `search && count === 0` only: every other query keeps using
     // the fast, index-backed exact match above untouched.
-    if (search && count === 0) {
-        const queryWords = _words(search);
+    if (search && count === 0 && String(search).length <= FUZZY_MAX_SEARCH_LEN) {
+        const queryWords = _words(search).slice(0, FUZZY_MAX_QUERY_WORDS);
         if (queryWords.length) {
             const fallbackWhere = { ...where };
             delete fallbackWhere[Op.or];
@@ -343,10 +350,35 @@ async function getPublicAuthor(websiteSlug, slug) {
     return author.toJSON();
 }
 
+// Deliberately does not require a matching CmsAuthor row: the site's byline
+// system currently resolves an author from either the live cms_authors table
+// OR the frontend's static roster (config/authors.ts) — see resolveAuthor() in
+// Frontend/Imperialpedia-main/src/services/data/cms-public.ts — and several
+// real, published authors only exist in the static half today. Gating this on
+// CmsAuthor would 404 for exactly those authors' own contact forms.
+//
+// The DB row is the durable record (visible in the admin console under
+// Websites → [site] → Author Messages) — the email is a best-effort, timely
+// notification on top of it, so a mail outage never loses a submission.
+async function contactAuthor(websiteSlug, authorSlug, { authorName, name, email, message }) {
+    const website = await _resolveWebsite(websiteSlug); // 404s for an unknown/inactive site
+    const row = await CmsAuthorMessage.create({
+        websiteId: website.id,
+        authorSlug,
+        authorName,
+        senderName: name,
+        senderEmail: email,
+        message,
+    });
+    const result = await mailer.sendAuthorContactMessage({ authorSlug, authorName, fromName: name, fromEmail: email, message });
+    if (result.sent) await row.update({ emailDelivered: true });
+    return { success: true, delivered: result.sent === true };
+}
+
 async function getPublicWebsiteInfo(websiteSlug) {
     const website = await _resolveWebsite(websiteSlug);
     const { id, name, slug, domain, description, config: cfg, branding, modules } = website.toJSON();
     return { id, name, slug, domain, description, config: cfg, branding, modules };
 }
 
-module.exports = { getPublicContent, getPreviewContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor };
+module.exports = { getPublicContent, getPreviewContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor, contactAuthor };

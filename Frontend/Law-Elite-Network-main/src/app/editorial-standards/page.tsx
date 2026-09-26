@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { List, BookOpen, ShieldCheck, Cpu } from 'lucide-react';
+import { List, BookOpen, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +20,6 @@ export default function EditorialStandardsPage() {
     { label: "Fact-Checking & Review", id: "fact-checking" },
     { label: "Who Reviews Our Work", id: "reviewers" },
     { label: "Update Cadence & Dating", id: "updates" },
-    { label: "Use of AI Tooling", id: "ai" },
     { label: "General Information, Not Legal Advice", id: "not-advice" },
     { label: "Independence & Advertising", id: "independence" },
     { label: "Corrections & Contact", id: "corrections" },
@@ -167,24 +166,6 @@ export default function EditorialStandardsPage() {
                 amendment, a major decision, or revised official guidance. Every page carries a clear &quot;last
                 updated&quot; date so readers can judge how current it is, and substantive changes are reflected in that
                 date.
-              </p>
-            </Block>
-
-            <Block id="ai" title="Use of AI Tooling">
-              <div className="not-prose mb-6 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-start gap-4">
-                <Cpu className="w-6 h-6 text-blue-600 shrink-0" />
-                <p className="text-sm text-slate-600 italic m-0">
-                  Automation supports our editors. It never replaces their judgment, and no AI-generated text reaches a
-                  reader without human review and verification.
-                </p>
-              </div>
-              <p>
-                We may use AI-assisted tools to help with tasks such as research triage, outlining, summarizing source
-                material, or improving readability. Where we do, the output is treated as a draft input, not a finished
-                product. A human editor reviews and verifies every such contribution against authoritative sources before
-                it is published, and our sourcing, fact-checking, and accountability standards apply in full. We do not
-                publish unreviewed machine-generated content, and the responsibility for what we publish always rests with
-                our editorial team.
               </p>
             </Block>
 

@@ -7,6 +7,7 @@ import {
 import { useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { cmsContentApi } from '@/lib/api/cms-content';
+import { websiteKeys } from './cms-websites.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type {
   CreateContentPayload,
@@ -20,6 +21,7 @@ export const contentKeys = {
   detail: (id: string) => [...contentKeys.all, 'detail', id] as const,
   revisions: (id: string) => [...contentKeys.all, 'revisions', id] as const,
   deletionRequests: (websiteId: string) => [...contentKeys.all, 'deletion-requests', websiteId] as const,
+  trash: (websiteId: string, params?: { page?: number }) => [...contentKeys.all, 'trash', websiteId, params] as const,
 };
 
 export const useContentList = (params: ContentListParams, options?: { refetchInterval?: number }) =>
@@ -51,6 +53,8 @@ export const useCreateContent = () => {
     mutationFn: (payload: CreateContentPayload) => cmsContentApi.create(payload),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      // New content changes the website dashboard's total/draft counts.
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Content created');
       return res.data.data;
     },
@@ -83,7 +87,8 @@ export const useDeleteContent = () => {
     mutationFn: (id: string) => cmsContentApi.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
-      toast.success('Content deleted');
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+      toast.success('Moved to Trash — restore it any time from the Trash view');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
@@ -95,6 +100,7 @@ export const useDuplicateContent = () => {
     mutationFn: (id: string) => cmsContentApi.duplicate(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Content duplicated');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -120,6 +126,7 @@ export const useBulkDeleteContent = () => {
     mutationFn: (ids: string[]) => cmsContentApi.bulkDelete(ids),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Items deleted');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -132,6 +139,7 @@ export const useImportWireNews = () => {
     mutationFn: (websiteId: string) => cmsContentApi.importWire(websiteId).then((r) => r.data.data),
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       if (!result.configured) {
         toast.error('Wire import is not configured on the server yet (missing INTERNAL_API_KEY on cms-service)');
       } else if (result.error) {
@@ -191,6 +199,40 @@ export const useRescheduleContent = () => {
       qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
       qc.invalidateQueries({ queryKey: contentKeys.all });
       toast.success('Rescheduled');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useTrashList = (websiteId: string, params: { page?: number; limit?: number } = {}) =>
+  useQuery({
+    queryKey: contentKeys.trash(websiteId, params),
+    queryFn: () => cmsContentApi.trash.list(websiteId, params).then((r) => r.data),
+    placeholderData: keepPreviousData,
+    enabled: !!websiteId,
+  });
+
+export const useRestoreContent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cmsContentApi.trash.restore(id),
+    onSuccess: (res) => {
+      qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+      toast.success('Restored');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const usePermanentlyDeleteContent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cmsContentApi.trash.permanentlyDelete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      toast.success('Permanently deleted');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

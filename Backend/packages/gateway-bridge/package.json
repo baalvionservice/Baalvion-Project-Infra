@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/gateway-bridge",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "private": true,
   "description": "Verify auth-gateway injected identity (signed v1 headers + v2 envelope).",

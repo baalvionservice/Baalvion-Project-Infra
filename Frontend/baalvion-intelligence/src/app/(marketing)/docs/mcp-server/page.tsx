@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MCP Server",
+  title: "Give Your AI Agent a Live News Feed in One Config Block",
   description: "Connect Claude or any MCP-compatible agent to the Baalvion Intelligence news API in one config block.",
+  alternates: { canonical: "/docs/mcp-server" },
 };
 
 const configExample = `{

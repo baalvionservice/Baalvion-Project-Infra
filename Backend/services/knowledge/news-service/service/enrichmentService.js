@@ -10,6 +10,7 @@
 
 const db = require('../models');
 const { Op } = require('sequelize');
+const config = require('../config/appConfig');
 
 // Compact finance/news sentiment lexicon. Deliberately small and domain-tuned (market/tech
 // news) rather than a general-purpose corpus — false precision from an oversized generic
@@ -87,6 +88,25 @@ function extractEntities(text) {
         .map(([name, count]) => ({ name, count }));
 }
 
+// Fire-and-forget notify to developer-service's alert-rule matcher. Fails open — a
+// down/misconfigured developer-service must never block article enrichment itself.
+async function notifyAlertRules(article) {
+    if (!config.developerService.internalApiKey) return;
+    try {
+        await fetch(`${config.developerService.baseUrl}/v1/alerts/evaluate`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'X-Internal-Key': config.developerService.internalApiKey },
+            body: JSON.stringify({
+                title: article.title, category: article.category, country: article.country,
+                sentiment: article.sentiment, entities: article.entities, published_at: article.published_at,
+            }),
+            signal: AbortSignal.timeout(5000),
+        });
+    } catch (err) {
+        console.error('[news-service] alert-rule notify failed:', err.message);
+    }
+}
+
 /** Enriches up to `limit` articles that have no sentiment yet. Idempotent (only touches
  *  rows where sentiment IS NULL), safe to run repeatedly (worker or on-demand admin call). */
 async function enrichUnprocessed(limit = 200) {
@@ -103,6 +123,7 @@ async function enrichUnprocessed(limit = 200) {
         const entities = extractEntities(text);
         await article.update({ sentiment: label, entities });
         updated += 1;
+        notifyAlertRules(article).catch(() => {});
     }
     return { processed: articles.length, updated };
 }

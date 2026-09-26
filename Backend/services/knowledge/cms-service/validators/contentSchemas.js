@@ -74,6 +74,14 @@ const updateContentSchema = z.object({
     seoMetadata: seoMetadataSchema.optional(),
     visibility: visibilityEnum.optional(),
     scheduledAt: z.string().datetime().optional().nullable(),
+    // Normally set once, automatically, by the "publish" workflow transition
+    // (workflowService.js) — stamped with the server's current time and never
+    // otherwise editable. This lets an editor backdate/correct an already-
+    // published item's date directly (e.g. de-clustering bulk-imported
+    // publish dates so they don't all land on the same day), same as any
+    // other field on this schema. Only meaningful on already-published
+    // content; it doesn't publish a draft on its own.
+    publishedAt: z.string().datetime().optional().nullable(),
     customFields: z.record(z.unknown()).optional(),
 });
 

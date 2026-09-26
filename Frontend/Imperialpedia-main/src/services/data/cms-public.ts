@@ -24,13 +24,19 @@ import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
 import { isRemovedArticlePath } from '@/lib/content/removed-article-paths';
 import { getEditorialGuide } from '@/lib/articles/editorial-guides';
+import { CREATOR_SLUGS, filterCreatorArticlesByTopic } from '@/lib/creator-economy-topics';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
+const rawCmsUrl = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 export const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  'https://api.baalvion.com/api/v1/public';
+  (rawCmsUrl && !(isProd && (rawCmsUrl.includes('localhost') || rawCmsUrl.includes('127.0.0.1'))))
+    ? rawCmsUrl
+    : (isProd
+        ? 'https://api.baalvion.com/api/v1/public'
+        : 'http://localhost:3018/api/v1/public');
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
@@ -235,9 +241,8 @@ async function cmsFetchOnce<T>(path: string): Promise<T> {
     return res.json() as Promise<T>;
   } catch (err) {
     if ((err as { status?: number })?.status === 404) throw err;
-    const fallbackErr = new Error('CMS_NOT_FOUND') as Error & { status?: number };
-    fallbackErr.status = 404;
-    throw fallbackErr;
+    // For non-404 errors, rethrow the original error to avoid masking underlying issues.
+    throw err;
   }
 }
 
@@ -752,6 +757,13 @@ export function blocksToHtml(blocks?: CmsBlock[], categoryMap?: ReadonlyMap<stri
     .join('\n');
 }
 
+// Standing rule: 120 words = 1 minute, everywhere reading time is computed or
+// displayed. The backend persists the authoritative value on every article at
+// save time (contentService's _estimateReadingTime, same constant) — this is
+// only the client-side fallback for rows saved before that existed, or for
+// list payloads that don't carry the full body.
+const WORDS_PER_MINUTE = 120;
+
 function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
   if (blocks?.length) {
     return blocks.reduce((n, b) => {
@@ -815,9 +827,29 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       correctIndex: Number(q.correctIndex),
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
+  const toolField = cf.tool as { type?: unknown } | undefined;
+  // Slug fallback for articles whose title/URL already promises an embedded
+  // calculator (built and wired below via ArticlePage's toolType switch) but
+  // whose CMS record predates the `customFields.tool.type` field ever being
+  // set — keeps the page's title an honest promise without needing a CMS edit.
+  const TOOL_TYPE_BY_SLUG: Record<string, string> = {
+    'rpm-and-cpm-calculator-for-youtube-and-web-creators': 'creator-rpm-calculator',
+    'sponsorship-rate-estimator-tool': 'sponsorship-rate-calculator',
+  };
+  const toolType =
+    (toolField && typeof toolField.type === 'string' ? toolField.type : undefined) ??
+    TOOL_TYPE_BY_SLUG[raw.slug];
+
   const guide = getEditorialGuide(raw.slug);
-  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || undefined;
-  const guideWords = guide ? guide.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : words;
+  const cfBody = typeof cf.bodyHtml === 'string' ? cf.bodyHtml : typeof cf.body === 'string' ? cf.body : undefined;
+  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || (raw as any).bodyHtml || (raw as any).body || cfBody || undefined;
+  const bodyText = (body || '').replace(/<[^>]+>/g, ' ');
+  const guideWords = bodyText.trim().split(/\s+/).filter(Boolean).length || words;
+  // Prefer the value the backend persisted at save time (real body, 120 wpm,
+  // present on every article going forward) — a client-side estimate off a
+  // list payload's word count (or worse, just its excerpt when contentBlocks
+  // wasn't included in the response) is only a fallback for legacy rows.
+  const readingTime = raw.readingTimeMinutes ?? Math.max(1, Math.round(guideWords / WORDS_PER_MINUTE));
 
   return {
     id: raw.id,
@@ -840,7 +872,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
     contentType: raw.contentType,
-    readingTime: Math.max(1, Math.round(guideWords / 200)),
+    readingTime,
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline
     // data-URI is only a safety net for rows that somehow still have none.
@@ -859,6 +891,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     faq: faq.length ? faq : undefined,
     entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
     quiz: quiz.length ? quiz : undefined,
+    toolType,
   };
 }
 
@@ -964,9 +997,9 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
     // The backend now computes this from the real article body (contentService's
-    // _estimateReadingTime) — only fall back to a client-side word-count estimate
-    // for rows written before that field existed.
-    readTimeMinutes: raw.readingTimeMinutes ?? Math.max(1, Math.round(words / 200)),
+    // _estimateReadingTime, 120 words/minute) — only fall back to a client-side
+    // word-count estimate for rows written before that field existed.
+    readTimeMinutes: raw.readingTimeMinutes ?? Math.max(1, Math.round(words / WORDS_PER_MINUTE)),
     imageUrl: safeImageUrl(
       raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
@@ -1045,6 +1078,19 @@ export async function getCategoryArticles(
   limit = 30,
 ): Promise<NewsArticle[]> {
   try {
+    // The 6 Creator Economy subtopics (youtube-monetization, etc.) aren't real
+    // CMS categories — every migrated article lives under the single
+    // "creator-economy" category — so fetch that category and narrow to the
+    // subtopic's genuinely on-topic articles client-side, same as the static
+    // fallback in static-content.ts does.
+    if (CREATOR_SLUGS.has(categorySlug)) {
+      const { items } = await listCmsContent({ categorySlug: 'creator-economy', limit: 100 });
+      const mapped = items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
+      return categorySlug === 'creator-economy'
+        ? mapped
+        : filterCreatorArticlesByTopic(mapped, categorySlug);
+    }
+
     const { items } = await listCmsContent({ categorySlug, limit });
     // Every category hub (CategoryFeed + the dedicated Investing/Reviews/etc.
     // hubs) reads its feed and featured card through this one function, so
@@ -1052,6 +1098,23 @@ export async function getCategoryArticles(
     // those ~10 callers — is what actually keeps a 410'd article from getting
     // picked as a hub's "featured" card (see removed-article-paths.ts; this
     // was previously only enforced for the sitemap and homepage editorial).
+    return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Recent published content of any type.
+ *
+ * getPublishedNews is news-only and getCategoryArticles needs a category that
+ * actually has content — on a desk that publishes news slowly, both come back
+ * with just the piece being read. This backs the "more from" rail with whatever
+ * the site genuinely has.
+ */
+export async function getRecentContent(limit = 24): Promise<NewsArticle[]> {
+  try {
+    const { items } = await listCmsContent({ limit });
     return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
   } catch {
     return [];

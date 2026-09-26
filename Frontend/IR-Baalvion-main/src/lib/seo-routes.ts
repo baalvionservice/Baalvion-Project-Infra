@@ -1,3 +1,5 @@
+import { isInviteGated } from "./invite-gate";
+
 /**
  * The one list of route prefixes that must never be indexed.
  *
@@ -28,3 +30,14 @@ export const GATED_PREFIXES = [
 /** True when a path is behind a gate and must be kept out of the sitemap and robots. */
 export const isGatedPath = (path: string): boolean =>
   GATED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+
+/**
+ * Invitation-gated investor routes and the founder-side routes that must stay indexable inside
+ * them. `isInviteGated` is the same predicate the middleware enforces, imported rather than
+ * restated so a route cannot end up gated but still advertised in the sitemap.
+ */
+export const INVITE_GATED_PREFIXES = ["/invest", "/onboarding"] as const;
+export const INVITE_OPEN_PATHS = ["/invest/list-your-business", "/onboarding/business"] as const;
+
+/** Everything that must stay out of the sitemap and out of the index, for either reason. */
+export const isNoIndexPath = (path: string): boolean => isGatedPath(path) || isInviteGated(path);

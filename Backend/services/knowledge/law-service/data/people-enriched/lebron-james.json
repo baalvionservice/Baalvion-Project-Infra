@@ -1,0 +1,136 @@
+{
+  "slug": "lebron-james",
+  "category": "athletes",
+  "wikidata_id": "Q36159",
+  "full_name": "LeBron James",
+  "description": "American basketball player (born 1984)",
+  "birth_date": "1984-12-30",
+  "birth_place": "Akron",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "basketball player",
+    "screenwriter",
+    "television actor"
+  ],
+  "education": [
+    {
+      "institution": "St. Vincent–St. Mary High School"
+    },
+    {
+      "institution": "Buchtel High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Bill Russell NBA Finals Most Valuable Player Award",
+      "year": 2012
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2009
+    },
+    {
+      "title": "NBA All-Star Game Kobe Bryant Most Valuable Player Award",
+      "year": 2006
+    },
+    {
+      "title": "NBA Rookie of the Year Award",
+      "year": 2004
+    },
+    {
+      "title": "NBA All-Rookie Team",
+      "year": 2004
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Bill Russell NBA Finals Most Valuable Player Award",
+      "year": 2013
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2010
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2012
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2013
+    },
+    {
+      "title": "NBA All-Star Game Kobe Bryant Most Valuable Player Award",
+      "year": 2008
+    },
+    {
+      "title": "Sports Illustrated Sportsperson of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Naismith Prep Player of the Year Award",
+      "year": 2003
+    },
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2001
+    },
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2002
+    },
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2003
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2009
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2010
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2011
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2012
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/KingJames",
+    "instagram": "https://www.instagram.com/kingjames",
+    "facebook": "https://www.facebook.com/LeBron"
+  },
+  "official_website": "http://www.lebronjames.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q36159"
+    }
+  ],
+  "photo": {
+    "file": "lebron-james.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1159,
+    "credit": "Erik Drost / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:LeBron_James_(51959977144)_(cropped2).jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:46.129Z"
+}

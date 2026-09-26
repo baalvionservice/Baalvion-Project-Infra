@@ -1,0 +1,110 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Build + push images for the Hostinger box (baalvion-prod, 200.234.44.65)
+#
+#   This is a DIFFERENT production target from box2 (deploy-consolidated-box2.yml,
+#   AWS EC2 13.207.108.167, ECR-backed) — the two never share images, secrets, or
+#   hosts. This box runs Amarisé, admin-web (admin.baalvion.com), and the other
+#   frontends straight from `/opt/baalvion/app/baalvion-box2/` via plain
+#   docker-compose, with NO CI/CD wired to it historically — every deploy so far
+#   has been a manual `docker build` run ON the live host itself.
+#
+#   That is the problem this workflow exists to remove. The Hostinger box has no
+#   AWS relationship at all (unlike box2), so pushing to GHCR — authenticated with
+#   the run's own GITHUB_TOKEN, no extra secret needed on the CI side — is the
+#   natural registry. The box then only ever does `docker pull` + restart; it
+#   never runs `next build` (or any other compiler) again. See the 2026-09-26
+#   incident this fixes: a `next build` for admin-platform run directly on the box
+#   drove it into full swap thrashing (load average 280+) while it was serving
+#   live traffic for every site on the host, not just this one.
+#
+#   One-time manual step this workflow can't do for you: after the first push,
+#   make the ghcr.io/<org>/baalvion-admin-web package public (Package settings →
+#   Change visibility) so `docker pull` on the box needs no registry login. If you
+#   prefer to keep it private, `docker login ghcr.io` on the box once with a PAT
+#   that has read:packages instead.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Build Hostinger images (GHCR)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Frontend/admin-platform/**'
+      - 'Backend/packages/**'
+      - '.github/workflows/build-hostinger-images.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-hostinger-images
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-admin-web:
+    name: build baalvion-admin-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/baalvion-admin-web
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Frontend/admin-platform/Dockerfile
+          push: false
+          load: true
+          provenance: false
+          tags: baalvion-admin-web:scan
+          cache-from: type=gha,scope=hostinger-admin-web
+          cache-to: type=gha,mode=max,scope=hostinger-admin-web
+
+      # Advisory, not a merge gate — same philosophy as box2's admin-web build
+      # ("admin console is a nice-to-have, never blocks"): scan results are visible
+      # in the Action log, but a finding here never stops the image from shipping.
+      - name: Trivy image scan (advisory)
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: baalvion-admin-web:scan
+          format: table
+          severity: CRITICAL,HIGH
+          vuln-type: os,library
+          ignore-unfixed: true
+
+      - name: Push to GHCR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion-admin-web:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"

@@ -24,18 +24,15 @@ import {
   TransactionStatus,
   CartItem,
   VipClient,
-  SupportTicket,
   MaisonMetric,
   MaisonAlert,
   SystemHealthScore,
-  FraudLog,
   DynamicPrice,
   CMSSection,
   Collection,
   Editorial,
   SEOMetadata,
   Appointment,
-  Invoice,
   Affiliate,
   ReturnRequest,
   MaisonError,
@@ -59,8 +56,6 @@ import {
 } from "./types";
 import {
   COUNTRIES as INITIAL_COUNTRIES,
-  SUPPORT_TICKETS as INITIAL_TICKETS,
-  INVOICES as INITIAL_INVOICES,
   EDITOR_INITIAL,
   BUYING_GUIDES,
   PAYMENT_PLANS,
@@ -94,7 +89,6 @@ interface AppContextType {
   wishlist: Product[];
   isCartOpen: boolean;
   activeVip: VipClient | null;
-  supportTickets: SupportTicket[];
   activeHub: CountryCode | "global";
   currentLanguage: SupportedLanguage;
   paymentPlans: PaymentPlan[];
@@ -113,7 +107,6 @@ interface AppContextType {
   scopedWorkflows: WorkflowTask[];
   scopedShipments: Shipment[];
   scopedAuditLogs: AuditLogEntry[];
-  scopedFraudLogs: FraudLog[];
   scopedPricingOptimizations: DynamicPrice[];
   scopedEvents: any[];
   scopedJobs: BackgroundJob[];
@@ -147,7 +140,6 @@ interface AppContextType {
   toggleWishlist: (p: Product) => void;
   topUpWallet: (amount: number) => void;
   requestLiveSession: (productId: string, productName: string) => boolean;
-  createInvoice: (inv: Invoice) => void;
   createTransaction: (tx: Transaction) => void;
   deleteProduct: (id: string) => void;
   resolveAlert: (id: string) => void;
@@ -159,7 +151,6 @@ interface AppContextType {
     reason: string
   ) => void;
   recordMetric: (m: Omit<MaisonMetric, "id" | "timestamp">) => void;
-  recordFraudLog: (l: Omit<FraudLog, "id">) => void;
   updateAIModule: (id: string, enabled: boolean, level: any) => void;
   addAILog: (log: AIActionLog) => void;
   upsertAISuggestion: (sug: AISuggestion) => void;
@@ -198,8 +189,6 @@ interface AppContextType {
     code: CountryCode,
     config: Partial<CountryConfig>
   ) => void;
-  addTicketMessage: (id: string, text: string, sender: string) => void;
-  updateTicketStatus: (id: string, status: any) => void;
   getLocalizedPrice: (price: number) => string;
   collections: Collection[];
   editorials: Editorial[];
@@ -300,15 +289,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (v) setMyVipClient(v);
     });
   }, []);
-  const [supportTickets, setSupportTickets] =
-    useState<SupportTicket[]>(INITIAL_TICKETS);
   const [globalSyncHistory, setGlobalSyncHistory] = useState<
     GlobalSyncSession[]
   >([]);
   const [maisonErrors, setMaisonErrors] = useState<MaisonError[]>([]);
   const [alerts, setAlerts] = useState<MaisonAlert[]>([]);
   const [metrics, setMetrics] = useState<MaisonMetric[]>([]);
-  const [fraudLogs, setFraudLogs] = useState<FraudLog[]>([]);
   const [pricingOptimizations, setPricingOptimizations] = useState<
     DynamicPrice[]
   >([]);
@@ -620,14 +606,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [auditLogs, activeHub]
   );
 
-  const scopedFraudLogs = useMemo(
-    () =>
-      activeHub === "global"
-        ? fraudLogs
-        : fraudLogs.filter((l) => l.metadata?.hub === activeHub),
-    [fraudLogs, activeHub]
-  );
-
   const scopedPricingOptimizations = useMemo(
     () =>
       activeHub === "global"
@@ -689,7 +667,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     wishlist,
     isCartOpen,
     activeVip,
-    supportTickets,
     activeHub,
     currentLanguage,
     paymentPlans: PAYMENT_PLANS,
@@ -706,7 +683,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     scopedWorkflows: [],
     scopedShipments: shipments,
     scopedAuditLogs,
-    scopedFraudLogs,
     scopedPricingOptimizations,
     scopedEvents,
     scopedJobs,
@@ -850,7 +826,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return false;
     },
-    createInvoice: (inv) => {},
     createTransaction: (tx) => setTransactions((prev) => [tx, ...prev]),
     deleteProduct: (id) =>
       setProducts((prev) => prev.filter((p) => p.id !== id)),
@@ -877,8 +852,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...prev,
         ].slice(0, 100)
       ),
-    recordFraudLog: (l) =>
-      setFraudLogs((prev) => [{ ...l, id: `f-${Date.now()}` }, ...prev]),
     updateAIModule: (id, enabled, level) =>
       setAiModules((prev) =>
         prev.map((m) => (m.id === id ? { ...m, enabled, level } : m))
@@ -981,29 +954,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateCountryConfig: (code, config) =>
       setCountryConfigs((prev) =>
         prev.map((c) => (c.code === code ? { ...c, ...config } : c))
-      ),
-    addTicketMessage: (id, t, s) =>
-      setSupportTickets((prev) =>
-        prev.map((tk) =>
-          tk.id === id
-            ? {
-                ...tk,
-                messages: [
-                  ...tk.messages,
-                  {
-                    id: `m-${Date.now()}`,
-                    sender: s,
-                    text: t,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              }
-            : tk
-        )
-      ),
-    updateTicketStatus: (id, s) =>
-      setSupportTickets((prev) =>
-        prev.map((tk) => (tk.id === id ? { ...tk, status: s } : tk))
       ),
     getLocalizedPrice: (p) => `$${p.toLocaleString()}`,
     executeSafeSync: (cats, targets) => {

@@ -1,0 +1,175 @@
+{
+  "slug": "bob-dylan",
+  "category": "musicians",
+  "wikidata_id": "Q392",
+  "full_name": "Bob Dylan",
+  "description": "American singer-songwriter (born 1941)",
+  "birth_date": "1941-05-24",
+  "birth_place": "Duluth",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "songwriter",
+    "film actor",
+    "poet",
+    "guitarist",
+    "autobiographer",
+    "painter",
+    "record producer",
+    "film director",
+    "lyricist",
+    "composer",
+    "screenwriter",
+    "disc jockey",
+    "actor",
+    "singer",
+    "radio personality",
+    "designer",
+    "writer",
+    "musician",
+    "director",
+    "author",
+    "artist",
+    "pianist"
+  ],
+  "education": [
+    {
+      "institution": "University of Minnesota System"
+    },
+    {
+      "institution": "Hibbing High School"
+    },
+    {
+      "institution": "Sidwell Friends School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "National Medal of Arts",
+      "year": 2009
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Lifetime Achievement Award",
+      "year": 1991
+    },
+    {
+      "title": "Princess of Asturias Award for the Arts",
+      "year": 2007
+    },
+    {
+      "title": "Rock and Roll Hall of Fame",
+      "year": 1988
+    },
+    {
+      "title": "Knight of the Legion of Honour"
+    },
+    {
+      "title": "Academy Award for Best Original Song",
+      "year": 2001
+    },
+    {
+      "title": "Nobel Prize in Literature",
+      "year": 2016
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 1997
+    },
+    {
+      "title": "honorary doctor of the University of St Andrews"
+    },
+    {
+      "title": "honorary doctorate from Princeton University"
+    },
+    {
+      "title": "Polar Music Prize"
+    },
+    {
+      "title": "Commandeur des Arts et des Lettres‎"
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 1973
+    },
+    {
+      "title": "Grammy Award for Best Male Rock Vocal Performance",
+      "year": 1980
+    },
+    {
+      "title": "Grammy Award for Best Rock Performance by a Duo or Group with Vocal",
+      "year": 1990
+    },
+    {
+      "title": "Grammy Award for Best Traditional Folk Album",
+      "year": 1995
+    },
+    {
+      "title": "Grammy Award for Best Contemporary Folk Album",
+      "year": 1998
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 1998
+    },
+    {
+      "title": "Grammy Award for Best Male Rock Vocal Performance",
+      "year": 1998
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Like a Rolling Stone"
+    },
+    {
+      "title": "Highway 61 Revisited"
+    },
+    {
+      "title": "Bringing It All Back Home"
+    },
+    {
+      "title": "Blonde on Blonde"
+    },
+    {
+      "title": "Blood on the Tracks"
+    },
+    {
+      "title": "Blowin' in the Wind"
+    },
+    {
+      "title": "Subterranean Homesick Blues"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/bobdylan",
+    "instagram": "https://www.instagram.com/bobdylan",
+    "facebook": "https://www.facebook.com/bobdylan"
+  },
+  "official_website": "https://www.bobdylan.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q392"
+    }
+  ],
+  "photo": {
+    "file": "bob-dylan.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1336,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:DylanYoungKilkenny140719v2_(50_of_52)_(52246124397)_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:23:18.214Z"
+}

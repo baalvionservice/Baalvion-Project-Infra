@@ -1,0 +1,139 @@
+{
+  "display_name": null,
+  "short_bio": "American tennis player with 23 Grand Slam singles titles, the most in the Open era.",
+  "biography": "Serena Williams was born in Saginaw, Michigan, and grew up in Compton, California, coached by her father Richard Williams. She won her first Grand Slam singles title at the 1999 US Open.\n\nShe finished with 23 Grand Slam singles titles, the most by any player in the Open era, the last at the 2017 Australian Open. She also won Olympic gold in singles at London in 2012 and in doubles with her sister Venus in 2000, 2008 and 2012.\n\nShe retired after the 2022 US Open. She founded the venture firm Serena Ventures in 2014.",
+  "awards": [
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2000
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2002
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2003
+    },
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2003
+    },
+    {
+      "title": "Best Female Athlete ESPY Award",
+      "year": 2003
+    },
+    {
+      "title": "NAACP Image Award – President's Award",
+      "year": 2003
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2004
+    },
+    {
+      "title": "Laureus World Sports Award for Comeback of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2009
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2009
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2010
+    },
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2010
+    },
+    {
+      "title": "California Hall of Fame",
+      "year": 2010
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2011
+    },
+    {
+      "title": "Michigan Women's Hall of Fame",
+      "year": 2012
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2013
+    },
+    {
+      "title": "Best Female Athlete ESPY Award",
+      "year": 2013
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2015
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2015
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "US Open singles",
+      "year": 1999,
+      "note": "First Grand Slam title"
+    },
+    {
+      "title": "Olympic singles gold",
+      "year": 2012,
+      "note": "London"
+    },
+    {
+      "title": "Australian Open singles",
+      "year": 2017,
+      "note": "Twenty-third Grand Slam title"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1981-09-26",
+      "title": "Born in Saginaw, Michigan"
+    },
+    {
+      "date": "1999",
+      "title": "Wins the US Open"
+    },
+    {
+      "date": "2012",
+      "title": "Wins Olympic singles gold in London"
+    },
+    {
+      "date": "2017",
+      "title": "Wins the Australian Open"
+    },
+    {
+      "date": "2022",
+      "title": "Retires after the US Open"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11459"
+    },
+    {
+      "label": "Wikipedia: Serena Williams",
+      "url": "https://en.wikipedia.org/wiki/Serena_Williams"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

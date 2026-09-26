@@ -56,27 +56,4 @@ export async function getPublicDocuments(): Promise<PublicDocument[]> {
     }));
 }
 
-export interface PublicMarket {
-  symbol: string | null; exchange: string | null; price: number | null; currency: string;
-  changePct: number | null; marketCap: number | null; volume: number | null;
-  week52High: number | null; week52Low: number | null; peRatio: number | null;
-  dividendYield: number | null; asOf: string | null;
-}
-export async function getPublicMarket(): Promise<PublicMarket | null> {
-  try {
-    const res = await fetch(`${IR_SERVICE_URL}/api/v1/market`, { next: { revalidate: 120 }, headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    const d = (await res.json())?.data;
-    if (!d || d.price == null) return null;
-    return {
-      symbol: d.symbol ?? null, exchange: d.exchange ?? null, price: d.price != null ? Number(d.price) : null,
-      currency: d.currency ?? 'USD', changePct: d.change_pct != null ? Number(d.change_pct) : null,
-      marketCap: d.market_cap != null ? Number(d.market_cap) : null, volume: d.volume != null ? Number(d.volume) : null,
-      week52High: d.week52_high != null ? Number(d.week52_high) : null, week52Low: d.week52_low != null ? Number(d.week52_low) : null,
-      peRatio: d.pe_ratio != null ? Number(d.pe_ratio) : null, dividendYield: d.dividend_yield != null ? Number(d.dividend_yield) : null,
-      asOf: d.as_of ?? null,
-    };
-  } catch { return null; }
-}
-
 export const labelize = (s: string) => (s || '').replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

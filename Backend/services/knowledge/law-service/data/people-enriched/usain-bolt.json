@@ -1,0 +1,74 @@
+{
+  "slug": "usain-bolt",
+  "category": "athletes",
+  "wikidata_id": "Q1189",
+  "full_name": "Usain Bolt",
+  "description": "Jamaican sprinter",
+  "birth_date": "1986-08-21",
+  "birth_place": "Sherwood Content",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "JM",
+  "citizenship": [
+    "Jamaica"
+  ],
+  "occupations": [
+    "athletics competitor",
+    "sprinter",
+    "association football player",
+    "athlete"
+  ],
+  "education": [],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Commander of the Order of Distinction",
+      "year": 2008
+    },
+    {
+      "title": "Member of the Order of Jamaica",
+      "year": 2009
+    },
+    {
+      "title": "Bislett medal",
+      "year": 2012
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2016
+    },
+    {
+      "title": "Laureus World Sports Award for Sportsman of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Best International Athlete ESPY Award",
+      "year": 2013
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/usainbolt",
+    "instagram": "https://www.instagram.com/usainbolt",
+    "facebook": "https://www.facebook.com/usainbolt"
+  },
+  "official_website": "https://usainbolt.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1189"
+    }
+  ],
+  "photo": {
+    "file": "usain-bolt.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1719,
+    "credit": "Fernando Frazão/Agência Brasil / Wikimedia Commons",
+    "license": "CC BY 3.0 br",
+    "license_url": "https://creativecommons.org/licenses/by/3.0/br/deed.en",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Usain_Bolt_Rio_100m_final_2016k.jpg"
+  },
+  "fetched_at": "2026-09-21T19:21:13.562Z"
+}

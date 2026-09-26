@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/money",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Exact monetary arithmetic in integer minor units — the platform's only sanctioned money representation. No floats, no implicit FX, no lost pennies.",
   "private": true,
@@ -21,9 +25,9 @@
     "clean": "rimraf dist"
   },
   "devDependencies": {
-    "@types/node": "^20.19.0",
+    "@types/node": "^24.13.4",
     "tsup": "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf": "^6.0.1"
   }
 }

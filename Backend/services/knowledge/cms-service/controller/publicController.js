@@ -97,7 +97,14 @@ const submitPollVote = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const contactAuthor = async (req, res, next) => {
+    try {
+        const result = await publicService.contactAuthor(req.params.websiteSlug, req.params.slug, req.validated);
+        return sendSuccess(req, res, result, 201);
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
     getWebsiteInfo, listContent, getContent, getPreviewContent, getCategory, listAuthors, getAuthor,
-    listComments, submitComment, getFeedback, submitFeedback, getPoll, submitPollVote,
+    listComments, submitComment, getFeedback, submitFeedback, getPoll, submitPollVote, contactAuthor,
 };

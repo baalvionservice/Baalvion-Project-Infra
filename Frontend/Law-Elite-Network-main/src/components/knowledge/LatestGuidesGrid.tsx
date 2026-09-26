@@ -8,7 +8,7 @@ function GuideCard({ article }: { article: any }) {
   const href = articleUrl(article);
   return (
     <Link href={href} className="group flex flex-col">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-slate-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
         <Image
           src={resolveArticleImage(article)}
           alt={article.title}

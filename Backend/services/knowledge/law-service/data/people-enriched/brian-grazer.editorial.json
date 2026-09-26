@@ -1,0 +1,72 @@
+{
+  "display_name": null,
+  "short_bio": "Film and television producer, co-founder of Imagine Entertainment and winner of the Best Picture Oscar for A Beautiful Mind.",
+  "biography": "Brian Grazer was born in Los Angeles and studied at the University of Southern California. In 1985 he and the director Ron Howard formed Imagine Entertainment.\n\nThe company’s films include Splash (1984), Parenthood (1989), Apollo 13 (1995) and 8 Mile (2002). A Beautiful Mind (2001) won the Academy Award for Best Picture.\n\nFor television it produced 24 and Arrested Development, and Grazer wrote A Curious Mind (2015) about the conversations he seeks out.",
+  "awards": [
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2002
+    },
+    {
+      "title": "Global Citizen Awards",
+      "year": 2019
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Splash",
+      "year": 1984,
+      "note": "Producer"
+    },
+    {
+      "title": "Apollo 13",
+      "year": 1995,
+      "note": "Producer"
+    },
+    {
+      "title": "A Beautiful Mind",
+      "year": 2001,
+      "note": "Won Best Picture"
+    },
+    {
+      "title": "Arrested Development",
+      "year": 2003,
+      "note": "Executive producer"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1951-07-12",
+      "title": "Born in Los Angeles, California"
+    },
+    {
+      "date": "1985",
+      "title": "Co-founds Imagine Entertainment with Ron Howard"
+    },
+    {
+      "date": "1995",
+      "title": "Produces Apollo 13"
+    },
+    {
+      "date": "2002-03-24",
+      "title": "A Beautiful Mind wins Best Picture"
+    },
+    {
+      "date": "2015",
+      "title": "Publishes A Curious Mind"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q320025"
+    },
+    {
+      "label": "Wikipedia: Brian Grazer",
+      "url": "https://en.wikipedia.org/wiki/Brian_Grazer"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

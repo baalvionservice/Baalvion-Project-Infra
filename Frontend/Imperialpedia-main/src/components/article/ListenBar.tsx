@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, {  useEffect, useRef, useState  } from "react";
 import { Headphones, Play, Pause, Square } from "lucide-react";
 
 // Real, working "Listen" player using the browser's native Web Speech API —

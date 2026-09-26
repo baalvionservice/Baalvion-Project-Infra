@@ -1,0 +1,40 @@
+{
+  "display_name": null,
+  "short_bio": "Senegalese-Italian TikTok creator known for wordless reaction videos.",
+  "biography": "Khaby Lame was born in Dakar, Senegal, and moved with his family to Chivasso, near Turin, as a child. He worked in a factory operating machine tools and lost the job at the start of 2020.\n\nHe began posting on TikTok that year. His videos are wordless: he watches an overcomplicated “life hack” and dismisses it with a shrug and an open-handed gesture at the obvious simple solution.\n\nIn June 2022 he passed Charli D’Amelio to become the most-followed person on TikTok, and he was granted Italian citizenship the same year.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Life-hack reaction videos on TikTok",
+      "year": 2020,
+      "note": "Signature format"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2000-03-09",
+      "title": "Born in Dakar, Senegal"
+    },
+    {
+      "date": "2020",
+      "title": "Begins posting on TikTok"
+    },
+    {
+      "date": "2022",
+      "title": "Becomes the most-followed account on TikTok and receives Italian citizenship"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q106839925"
+    },
+    {
+      "label": "Wikipedia: Khaby Lame",
+      "url": "https://en.wikipedia.org/wiki/Khaby_Lame"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

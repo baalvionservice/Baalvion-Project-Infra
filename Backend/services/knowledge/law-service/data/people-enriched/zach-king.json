@@ -1,0 +1,64 @@
+{
+  "slug": "zach-king",
+  "category": "influencers",
+  "wikidata_id": "Q15734051",
+  "full_name": "Zach King",
+  "description": "American filmmaker, voice actor and Internet personality",
+  "birth_date": "1990-02-04",
+  "birth_place": "Portland",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "actor",
+    "filmmaker",
+    "screenwriter",
+    "executive producer",
+    "film editor",
+    "YouTuber",
+    "manufacturer",
+    "television producer",
+    "film director",
+    "artist"
+  ],
+  "education": [
+    {
+      "institution": "Biola University"
+    }
+  ],
+  "positions": [],
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Zach King's Day Off"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/zachking",
+    "instagram": "https://www.instagram.com/zachking",
+    "facebook": "https://www.facebook.com/ZachKingVine"
+  },
+  "official_website": "https://www.zachkingmagic.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15734051"
+    }
+  ],
+  "photo": {
+    "file": "zach-king.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1304,
+    "credit": "Muhammad Ali Khalid / Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Zach_King_Photo.jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:55.765Z"
+}

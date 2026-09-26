@@ -1,0 +1,49 @@
+{
+  "display_name": null,
+  "short_bio": "17th Chief Justice of the United States, serving since 2005.",
+  "biography": "John Roberts was born in Buffalo, New York, and studied at Harvard College and Harvard Law School. He clerked for William Rehnquist on the Supreme Court, worked in the Reagan White House and the Justice Department, and later argued dozens of cases before the Court as an appellate lawyer.\n\nGeorge W. Bush placed him on the DC Circuit in 2003, and in 2005 nominated him to succeed Rehnquist as Chief Justice.\n\nHe wrote the controlling opinion in National Federation of Independent Business v. Sebelius (2012), which upheld the Affordable Care Act’s individual mandate as a tax.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "National Federation of Independent Business v. Sebelius",
+      "year": 2012,
+      "note": "Controlling opinion"
+    },
+    {
+      "title": "Trump v. United States",
+      "year": 2024,
+      "note": "Majority opinion"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1955-01-27",
+      "title": "Born in Buffalo, New York"
+    },
+    {
+      "date": "2003",
+      "title": "Appointed to the DC Circuit"
+    },
+    {
+      "date": "2005-09-29",
+      "title": "Sworn in as Chief Justice"
+    },
+    {
+      "date": "2012",
+      "title": "Writes the controlling opinion in NFIB v. Sebelius"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11153"
+    },
+    {
+      "label": "Wikipedia: John Roberts",
+      "url": "https://en.wikipedia.org/wiki/John_Roberts"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

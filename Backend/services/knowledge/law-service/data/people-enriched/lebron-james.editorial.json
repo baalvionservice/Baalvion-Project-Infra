@@ -1,0 +1,140 @@
+{
+  "display_name": null,
+  "short_bio": "American basketball player and the NBA’s all-time leading scorer.",
+  "biography": "LeBron James was born in Akron, Ohio, and attended St. Vincent–St. Mary High School. The Cleveland Cavaliers took him first overall in the 2003 NBA draft.\n\nHe won NBA championships with the Miami Heat in 2012 and 2013, the Cavaliers in 2016 and the Los Angeles Lakers in 2020. He has been named the league’s Most Valuable Player four times.\n\nIn February 2023 he passed Kareem Abdul-Jabbar as the league’s all-time leading scorer. He has won Olympic gold three times, in 2008, 2012 and 2024. In 2024 he and his son Bronny became the first father and son to play together in an NBA game.",
+  "awards": [
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2001
+    },
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2002
+    },
+    {
+      "title": "Naismith Prep Player of the Year Award",
+      "year": 2003
+    },
+    {
+      "title": "Ohio Mr. Basketball",
+      "year": 2003
+    },
+    {
+      "title": "NBA Rookie of the Year Award",
+      "year": 2004
+    },
+    {
+      "title": "NBA All-Rookie Team",
+      "year": 2004
+    },
+    {
+      "title": "NBA All-Star Game Kobe Bryant Most Valuable Player Award",
+      "year": 2006
+    },
+    {
+      "title": "NBA All-Star Game Kobe Bryant Most Valuable Player Award",
+      "year": 2008
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2009
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2009
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2010
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2010
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2011
+    },
+    {
+      "title": "Bill Russell NBA Finals Most Valuable Player Award",
+      "year": 2012
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2012
+    },
+    {
+      "title": "Sports Illustrated Sportsperson of the Year",
+      "year": 2012
+    },
+    {
+      "title": "NBA All-Defensive Team",
+      "year": 2012
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Bill Russell NBA Finals Most Valuable Player Award",
+      "year": 2013
+    },
+    {
+      "title": "NBA Most Valuable Player Award",
+      "year": 2013
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "NBA championship",
+      "year": 2016,
+      "note": "Cavaliers"
+    },
+    {
+      "title": "NBA all-time scoring record",
+      "year": 2023,
+      "note": "Passes Kareem Abdul-Jabbar"
+    },
+    {
+      "title": "Olympic gold medal",
+      "year": 2024,
+      "note": "USA basketball"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1984-12-30",
+      "title": "Born in Akron, Ohio"
+    },
+    {
+      "date": "2003",
+      "title": "Drafted first overall by the Cleveland Cavaliers"
+    },
+    {
+      "date": "2016",
+      "title": "Wins the NBA championship with Cleveland"
+    },
+    {
+      "date": "2020",
+      "title": "Wins the NBA championship with the Lakers"
+    },
+    {
+      "date": "2023-02-07",
+      "title": "Becomes the NBA’s all-time leading scorer"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q36159"
+    },
+    {
+      "label": "Wikipedia: LeBron James",
+      "url": "https://en.wikipedia.org/wiki/LeBron_James"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true,
+  "official_website": ""
+}

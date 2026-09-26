@@ -24,6 +24,16 @@ router.use('/case-referrals', require('./caseReferralRoutes'));
 router.use('/connections',    require('./connectionRoutes'));
 router.use('/groups',         require('./groupRoutes'));
 router.use('/complaints',     require('./complaintRoutes'));
+router.use('/topics',         require('./topicsRoutes'));
+router.use('/podcasts',       require('./podcastsRoutes'));
+router.use('/videos',         require('./videosRoutes'));
+router.use('/home-widgets',   require('./homeWidgetsRoutes'));
+router.use('/sports',         require('./sportsRoutes'));
+router.use('/photos',         require('./photoRoutes'));
+router.use('/entertainment',  require('./entertainmentRoutes'));
+router.use('/legal',          require('./legalProfilesRoutes'));
+router.use('/people',         require('./peopleRoutes'));
+router.use('/member',         require('./memberRoutes'));
 router.use('/admin',          require('./adminRoutes'));
 
 module.exports = router;

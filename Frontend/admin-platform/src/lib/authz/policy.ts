@@ -63,6 +63,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { path: '/security', minRole: 'admin', anyPlatformRole: ['platform_security_admin'], label: 'Administrators and platform security' },
   { path: '/audit-logs', minRole: 'admin', anyPlatformRole: ['platform_security_admin'], label: 'Administrators and platform security' },
   { path: '/audit-center', minRole: 'admin', anyPlatformRole: ['platform_security_admin'], label: 'Administrators and platform security' },
+  { path: '/login-activity', minRole: 'admin', anyPlatformRole: ['platform_security_admin'], label: 'Administrators and platform security' },
 
   // ── Money ─────────────────────────────────────────────────────────────────────
   { path: '/payments', minRole: 'admin', label: 'Administrators' },

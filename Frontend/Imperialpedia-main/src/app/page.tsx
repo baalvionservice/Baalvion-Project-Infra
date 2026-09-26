@@ -5,15 +5,12 @@ import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
 import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 
-import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
-import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
-import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
+import { NewsletterBand } from "@/components/landing/imperialpedia/NewsletterBand";
 
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
-import { Leadership } from "@/components/home/Leadership";
 import { ImperialpediaTalks } from "@/components/home/ImperialpediaTalks";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { EditorialStandards } from "@/components/home/EditorialStandards";
@@ -27,9 +24,9 @@ import { FeaturedKnowledge } from "@/components/home/FeaturedKnowledge";
 // description, canonical, OG, and Twitter card instead of the layout defaults.
 export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
-    title: "Imperialpedia — Financial Intelligence Knowledge Graph",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      "Explore countries and industries alongside live market data and reviewed articles on investing, the economy, and personal finance.",
+      "Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy — written by named contributors with cited sources.",
     canonical: "/",
     ogType: "website",
     absoluteTitle: true,
@@ -65,12 +62,6 @@ export default function Home() {
         <LabeledAdSlot slot="2039635661" />
       </div>
 
-      <TermOfDay
-        term={TERM_OF_DAY.term}
-        definition={TERM_OF_DAY.definition}
-        href={TERM_OF_DAY.href}
-      />
-
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <ImperialpediaTalks />
       </Suspense>
@@ -92,9 +83,9 @@ export default function Home() {
       </div>
 
       {/* Trust chapter — how it works, what we stand for, who makes it, and
-          what we cite — grouped under one tinted band (mirrors Leadership's
-          own band below) so it reads as one distinct section of the page
-          instead of more white rails continuing the scroll. */}
+          what we cite — grouped under one tinted band so it reads as one
+          distinct section of the page instead of more white rails
+          continuing the scroll. */}
       <div className="bg-muted/30 border-t border-border">
         <HowItWorks />
         <EditorialStandards />
@@ -105,8 +96,6 @@ export default function Home() {
       </div>
 
       <NewsletterBand />
-
-      <Leadership />
     </div>
   );
 }

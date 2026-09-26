@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import React, {  Suspense  } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -125,7 +125,7 @@ export async function generateStaticParams(): Promise<
   return [];
 }
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export default async function WorldCountryArticlePage({ params }: { params: Params }) {
   const { region, country, rest } = await params;

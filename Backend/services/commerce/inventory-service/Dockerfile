@@ -1,8 +1,8 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/commerce/inventory-service/Dockerfile -t inventory-service .
-FROM node:20-alpine AS base
-RUN corepack enable
+FROM node:26-alpine AS base
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
@@ -17,9 +17,18 @@ COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY); --no-frozen lets pnpm repair it in-image.
 RUN pnpm install --no-frozen-lockfile --filter inventory-service...
 COPY --from=pruner /repo/out/full/ ./
+# turbo prune carries neither the root tsconfig.base.json (which every package tsconfig
+# extends) nor any built output. Workspace packages like @baalvion/money point their
+# "exports" at dist/, which only exists after tsup runs — so without these two lines the
+# image builds clean, `pnpm deploy` copies a package with no dist/, and the container dies
+# at require() time with MODULE_NOT_FOUND and a health check that just says "unhealthy".
+# Cost production an outage on app-insiders 2026-09-09. The prune already scopes this to
+# the packages this service actually depends on.
+COPY tsconfig.base.json ./tsconfig.base.json
+RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=inventory-service --prod /out
 
-FROM node:20-alpine AS final
+FROM node:26-alpine AS final
 RUN apk add --no-cache dumb-init \
     && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production

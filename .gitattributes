@@ -11,7 +11,11 @@
 *.sh    text eol=lf
 
 # Treat lockfiles as generated (collapse diffs, still tracked).
-pnpm-lock.yaml   linguist-generated=true
+# merge=pnpm-lock routes conflicts to scripts/merge-pnpm-lock.mjs, which discards the
+# textual conflict and re-resolves from the merged manifests. Textually merging a 40k-line
+# resolution graph is unsafe: a plausible-looking manual fix can pin a version nobody chose.
+# The driver itself is per-clone (.git/config) and is wired by scripts/setup-git.mjs.
+pnpm-lock.yaml   linguist-generated=true merge=pnpm-lock
 package-lock.json linguist-generated=true
 yarn.lock        linguist-generated=true
 

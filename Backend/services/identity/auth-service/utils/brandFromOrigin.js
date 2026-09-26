@@ -93,4 +93,43 @@ function brandFromRequest(req) {
     }
 }
 
-module.exports = { brandForHost, brandFromRequest, DEFAULT_BRAND, HOST_BRAND, APEX_BRAND };
+/** Longest value auth.auth_audit_log.app_id accepts (VARCHAR(64)). */
+const APP_ID_MAX = 64;
+
+/**
+ * Which site a request came from, for attribution in the audit stream.
+ *
+ * Deliberately NOT brandFromRequest: that answers "how do I theme this email?", so falling back
+ * to the flagship brand is the right call there. An audit row is a record of what happened, and
+ * "baalvion" is a claim — a login attributed to baalvion.com because the caller sent no Origin
+ * (server-to-server, OAuth callbacks) would be indistinguishable from a real one. So:
+ *   • no Origin/Referer at all  → null   ("unknown", and the UI can say so)
+ *   • host in the registry      → the site id
+ *   • host NOT in the registry  → the bare hostname, because recording what we actually saw
+ *                                 beats recording a brand we guessed
+ * @param {import('express').Request} req
+ * @returns {string|null}
+ */
+function siteFromRequest(req) {
+    const raw = (req && typeof req.get === 'function' && (req.get('origin') || req.get('referer'))) || '';
+    if (!raw) return null;
+    let url;
+    try {
+        url = new URL(raw);
+    } catch {
+        return null;
+    }
+    // `host` carries the port, which is the only thing separating two local apps; `hostname`
+    // is what the production registries are keyed on. Same precedence as brandForHost.
+    const host = url.host.toLowerCase();
+    const hostname = url.hostname.toLowerCase();
+    if (HOST_OVERRIDES[host]) return HOST_OVERRIDES[host];
+    if (HOST_OVERRIDES[hostname]) return HOST_OVERRIDES[hostname];
+    if (HOST_BRAND[hostname]) return HOST_BRAND[hostname];
+    for (const apex of Object.keys(APEX_BRAND)) {
+        if (hostname === apex || hostname.endsWith(`.${apex}`)) return APEX_BRAND[apex];
+    }
+    return (host || hostname).slice(0, APP_ID_MAX);
+}
+
+module.exports = { brandForHost, brandFromRequest, siteFromRequest, DEFAULT_BRAND, HOST_BRAND, APEX_BRAND };

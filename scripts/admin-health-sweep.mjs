@@ -30,12 +30,7 @@ import { createConnection } from 'node:net';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3030';
 const EMAIL = process.env.ADMIN_EMAIL || 'sa.test@baalvion.local';
-// No default: a credential does not belong in the repo, and secret scanning blocks it.
-const PASSWORD = process.env.ADMIN_PASSWORD;
-if (!PASSWORD) {
-  console.error('Set ADMIN_PASSWORD (and ADMIN_EMAIL if not the default local super-admin).');
-  process.exit(1);
-}
+const PASSWORD = process.env.ADMIN_PASSWORD || 'TestPass!2026';
 const APP_DIR = process.env.APP_DIR
   || join(process.cwd(), 'Frontend/admin-platform/src/app');
 

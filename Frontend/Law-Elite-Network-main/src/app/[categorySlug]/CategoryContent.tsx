@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { articlesPublicApi } from '@/lib/api/client';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { getArticlesByCategorySlug } from '@/data/law-content';
 import { FileText } from 'lucide-react';
 
 interface CategoryContentProps {
@@ -11,6 +10,8 @@ interface CategoryContentProps {
   categoryId: string;
   /** CMS-authored articles for this category, fetched server-side by the parent page (see [categorySlug]/page.tsx). */
   cmsArticles?: any[];
+  /** Bundled articles for this category, resolved server-side: importing the article corpus here would ship every article body to the browser. */
+  bundledArticles?: any[];
   /** Slugs already shown in the page's lead+rail spotlight above this grid — excluded here so the same guide never appears twice on one page. */
   excludeSlugs?: string[];
 }
@@ -20,11 +21,20 @@ interface CategoryContentProps {
  * rendered server-side by the parent page — this piece stays client-only
  * because it merges in the live law-service article list on mount.
  */
-export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], excludeSlugs = [] }: CategoryContentProps) {
+export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], bundledArticles = [], excludeSlugs = [] }: CategoryContentProps) {
   const [apiArticles, setApiArticles] = useState<any[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
 
   useEffect(() => {
+    // CMS-only categories (entertainment pillar: movies, music, television, streaming,
+    // celebrity-news) use a synthetic string id like "cms-cat-movies" -- there is no
+    // matching numeric category_id in law-service's legacy Article model, so this
+    // fetch would always 500 there. Skip it; cmsArticles/bundledArticles already
+    // cover those categories.
+    if (!categoryId || !Number.isFinite(Number(categoryId))) {
+      setArticlesLoading(false);
+      return;
+    }
     articlesPublicApi
       .list({ categoryId, sortBy: 'views', order: 'desc', status: 'published' })
       .then((r) => setApiArticles(r.data?.data?.items || r.data?.data || []))
@@ -35,7 +45,7 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], ex
   // Bundled articles for this category are the baseline; CMS (admin-authored, incl.
   // uploaded featured images) wins on a slug collision, then law-service results.
   const articles = useMemo(() => {
-    const bundled = getArticlesByCategorySlug(categorySlug);
+    const bundled = bundledArticles;
     const seen = new Set<string>();
     const exclude = new Set(excludeSlugs);
     const combined = [...cmsArticles, ...apiArticles, ...bundled].filter((a) => {
@@ -44,19 +54,19 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], ex
       return true;
     });
     return combined;
-  }, [cmsArticles, apiArticles, categorySlug, excludeSlugs]);
+  }, [cmsArticles, apiArticles, bundledArticles, excludeSlugs]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl pt-10">
-      <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-8">
+      <div className="flex items-center justify-between border-b-4 border-[#E13131] pb-2.5 mb-8">
         <div className="flex items-center gap-3">
-          <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
-          <h2 className="font-headline text-xl md:text-2xl font-extrabold text-slate-900 m-0">
-            Guides &amp; Explainers
+          <span className="w-3 h-7 bg-[#E13131] inline-block" />
+          <h2 className="font-serif text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight m-0">
+            LATEST ARTICLES &amp; REPORTS
           </h2>
         </div>
-        <span className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
-          {articles.length} {articles.length === 1 ? 'article' : 'articles'}
+        <span className="text-[11px] font-black uppercase tracking-widest bg-slate-900 text-white px-3 py-1 rounded-sm">
+          {articles.length} {articles.length === 1 ? 'STORY' : 'STORIES'}
         </span>
       </div>
 

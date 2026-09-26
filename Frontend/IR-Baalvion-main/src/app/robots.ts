@@ -1,6 +1,6 @@
 import { AppConfig } from "@/config";
 import { MetadataRoute } from "next";
-import { GATED_PREFIXES } from "@/lib/seo-routes";
+import { GATED_PREFIXES, INVITE_GATED_PREFIXES, INVITE_OPEN_PATHS } from "@/lib/seo-routes";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = AppConfig.baseUrl;
@@ -15,11 +15,18 @@ export default function robots(): MetadataRoute.Robots {
     // Both forms on purpose: "Disallow: /dashboard/" does NOT match "/dashboard" itself, so the
     // bare path stayed crawlable. Emit the exact path and the subtree.
     ...GATED_PREFIXES.flatMap((p) => [p, `${p}/`]),
+    // Invitation-only under Companies Act s.42 — see lib/invite-gate.ts. The founder-side routes
+    // below are allowed back explicitly; robots.txt resolves by longest match, so they win.
+    ...INVITE_GATED_PREFIXES.flatMap((p) => [p, `${p}/`]),
     "/private/",
     "/_next/",
     "/static/",
     "*.json",
   ];
+
+  // /onboarding is both auth-gated and invitation-gated, so it lands in the list twice. Emit each
+  // path once — a duplicated directive is not wrong, just noise in a file people read.
+  const uniqueDisallow = [...new Set(disallow)];
 
   return {
     rules: [
@@ -28,6 +35,8 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           "/",
           "/why-invest",
+          ...INVITE_OPEN_PATHS,
+          "/invest/request-access",
           "/investment-thesis",
           "/market-opportunity",
           "/use-of-proceeds",
@@ -38,7 +47,7 @@ export default function robots(): MetadataRoute.Robots {
           "/news-and-events/",
           "/resources/",
         ],
-        disallow,
+        disallow: uniqueDisallow,
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

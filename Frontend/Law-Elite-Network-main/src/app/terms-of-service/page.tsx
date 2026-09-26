@@ -158,7 +158,7 @@ export default function TermsOfServicePage() {
               <ul>
                 <li>Maintaining the confidentiality of your login credentials and any authentication factors;</li>
                 <li>All activity that occurs under your account, whether or not authorized by you;</li>
-                <li>Notifying us promptly at <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a> of any unauthorized use or suspected breach of security;</li>
+                <li>Notifying us promptly at <a href="mailto:legal@baalvion.com">legal@baalvion.com</a> of any unauthorized use or suspected breach of security;</li>
                 <li>Ensuring that any content you submit complies with these Terms and applicable law.</li>
               </ul>
               <p>
@@ -189,7 +189,7 @@ export default function TermsOfServicePage() {
                 All content on the Service — including articles, text, graphics, logos, illustrations, the &quot;Law
                 Elite Network&quot; name and marks, page layouts, and the selection and arrangement of content — is owned
                 by or licensed to Law Elite Network and is protected by copyright, trademark, and other intellectual
-                property laws. Baalvion Industries Private Limited, part of the Baalvion Group, and its licensors retain all rights not
+                property laws. Baalvion Industries Private Limited and its licensors retain all rights not
                 expressly granted.
               </p>
               <p>
@@ -278,7 +278,7 @@ export default function TermsOfServicePage() {
             <Block id="contact" title="Contact">
               <p>If you have questions about these Terms, please contact us:</p>
               <ul>
-                <li>Email: <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a></li>
+                <li>Email: <a href="mailto:legal@baalvion.com">legal@baalvion.com</a></li>
                 <li>Mail: Law Elite Network, C/o Dilip Kumar Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN: U43121OD2025PTC048479)</li>
                 <li>Or visit our <Link href="/contact-us">Contact</Link> page.</li>
               </ul>

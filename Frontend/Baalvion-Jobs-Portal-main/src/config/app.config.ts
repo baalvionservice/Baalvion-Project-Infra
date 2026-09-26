@@ -1,5 +1,5 @@
 export const AppConfig = {
   appName: 'TalentOS',
-  companyName: 'Baalvion Industries Pvt Ltd',
+  companyName: 'Baalvion Industries Private Limited',
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://www.jobs.baalvion.com',
 };

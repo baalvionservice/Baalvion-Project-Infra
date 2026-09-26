@@ -1,5 +1,9 @@
 {
   "name": "audit-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Audit Log Service — immutable, append-only, hash-chained audit trail aggregated platform-wide from the event bus + direct writes.",
   "license": "ISC",

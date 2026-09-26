@@ -7,6 +7,24 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { notifySite } = require('../service/siteRevalidate');
+
+const PEOPLE_RESOURCES = new Set(['people', 'person_photos', 'person_links']);
+const LEGAL_RESOURCES = new Set(['court_profiles', 'case_profiles']);
+const ENTERTAINMENT_RESOURCES = new Set(['entertainment_entities', 'entity_photos']);
+const SPORTS_RESOURCES = new Set(['sports_teams', 'sports_competitions']);
+const TOPIC_RESOURCES = new Set(['topics']);
+const VIDEO_RESOURCES = new Set(['video_shows', 'video_items', 'show_participants']);
+const PODCAST_RESOURCES = new Set(['podcast_shows']);
+const HOME_WIDGET_RESOURCES = new Set(['home_widget_items']);
+const { validatePerson, validatePhoto, validateLink } = require('../utils/peopleValidation');
+const { validateCourt, validateCase } = require('../utils/legalValidation');
+const { validateEntertainment } = require('../utils/entertainmentValidation');
+const { validateTeam, validateCompetition } = require('../utils/sportsValidation');
+const { validateTopic } = require('../utils/topicValidation');
+const { validateVideoShow, validateVideoItem, validatePodcastShow, validateShowParticipant } = require('../utils/videoValidation');
+const { validateHomeWidgetItem } = require('../utils/homeWidgetValidation');
+const showcase = require('../utils/showcase');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
 const { maybeActivateLawyer } = require('../service/lawyerActivation');
@@ -52,6 +70,21 @@ const ADMIN_FIELDS = {
     cities:        ['state_id', 'country_code', 'name'],
     practice_areas: ['name', 'slug', 'is_active', 'order'],
     verification_documents: ['status', 'review_notes', 'reviewed_by', 'reviewed_at'],
+    people:        ['slug', 'full_name', 'display_name', 'category', 'country_code', 'status', 'birth_date', 'birth_place', 'death_date', 'short_bio', 'biography', 'career', 'education', 'awards', 'notable_works', 'timeline', 'social', 'sports_info', 'official_website', 'sources', 'wikidata_id', 'seo_title', 'seo_description', 'verified', 'source_note', 'published', 'indexable', 'featured', 'archived', 'last_reviewed_at'],
+    person_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
+    person_links:  ['person_id', 'kind', 'target_slug', 'relationship'],
+    podcast_shows: ['slug', 'title', 'host', 'publisher', 'description', 'category', 'country_code', 'language', 'listen_url', 'website_url', 'cover_url', 'cover_credit', 'rank', 'ranking_note', 'overview', 'first_aired', 'frequency', 'format', 'best_for', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'listen_links', 'hosts', 'related_article_slugs', 'videos', 'episodes', 'published', 'archived'],
+    show_participants: ['slug', 'show_slug', 'name', 'appearances', 'known_for', 'overview', 'facts', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'published', 'archived'],
+    video_shows: ['slug', 'name', 'description', 'scope', 'country_code', 'network', 'cover_url', 'cover_credit', 'overview', 'facts', 'seasons', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'sort_order', 'featured', 'published', 'archived'],
+    video_items: ['slug', 'title', 'description', 'video_url', 'thumbnail_url', 'thumbnail_credit', 'source_name', 'show_slug', 'category', 'scope', 'country_code', 'duration_seconds', 'published_at', 'people_slugs', 'sort_order', 'featured', 'published', 'archived'],
+    topics: ['slug', 'name', 'pillar', 'aliases', 'description', 'published', 'indexable', 'archived'],
+    home_widget_items: ['widget', 'title', 'summary', 'source_name', 'url', 'image_url', 'credit', 'value', 'extra', 'event_at', 'expires_at', 'sort_order', 'published', 'archived', 'region'],
+    sports_teams: ['slug', 'name', 'sport', 'country_code', 'description', 'url', 'verified', 'source_note', 'published', 'indexable', 'archived'],
+    sports_competitions: ['slug', 'name', 'sport', 'level', 'country_code', 'description', 'event_date', 'people_involved', 'related_article_slugs', 'videos', 'verified', 'source_note', 'published', 'indexable', 'archived'],
+    entity_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
+    entertainment_entities: ['slug', 'title', 'type', 'release_date', 'description', 'people_involved', 'related_entities', 'related_article_slugs', 'videos', 'interviews', 'seo_title', 'seo_description', 'verified', 'source_note', 'last_reviewed_at', 'published', 'indexable', 'archived'],
+    court_profiles: ['slug', 'name', 'level', 'country_code', 'description', 'url', 'appeals_from_court_slug', 'published', 'indexable', 'archived'],
+    case_profiles: ['slug', 'case_name', 'court_slug', 'jurisdiction', 'country_code', 'status', 'summary', 'parties', 'lawyers', 'judges', 'important_dates', 'timeline', 'documents', 'related_article_slugs', 'seo_title', 'seo_description', 'verified', 'source_note', 'last_reviewed_at', 'published', 'indexable', 'archived'],
 };
 
 // Extract only the allowed fields from a body object for a given resource.
@@ -93,6 +126,29 @@ const RESOURCES = {
     states:        { model: 'State',        search: ['name', 'code'], filters: ['country_code'], order: [['country_code', 'ASC'], ['name', 'ASC']] },
     cities:        { model: 'City',         search: ['name'], filters: ['state_id', 'country_code'], order: [['name', 'ASC']] },
     practice_areas: { model: 'PracticeArea', search: ['name', 'slug'], filters: ['is_active'], order: [['order', 'ASC']] },
+    // People pillar. Profiles are archived, never deleted; photos are created only through the upload route (they carry bytes and a licence).
+    people:        { model: 'Person',       search: ['full_name', 'display_name', 'slug'], filters: ['category', 'status', 'published', 'indexable', 'featured', 'archived', 'verified'], order: [['updated_at', 'DESC']], noDelete: true, validate: validatePerson },
+    person_photos: { model: 'PersonPhoto',  search: ['credit', 'alt_text'], filters: ['person_id', 'is_active', 'is_primary', 'license'], order: [['created_at', 'DESC']], noDelete: true, noCreate: true, validate: validatePhoto, afterSave: 'primaryPhoto' },
+    // Legal pillar: public case and court reference profiles (not a client's private legal.cases matter).
+    // Entertainment pillar: movies, TV, music, awards and events (editorial reference data only).
+    // Topics: cross-cutting tags the site matches in article text by name and alias.
+    // Homepage widgets: breaking bar, ticker, audio, docket, gallery, shorts. Archived, never deleted.
+    home_widget_items: { model: 'HomeWidgetItem', search: ['title', 'source_name'], filters: ['widget', 'region', 'published', 'archived'], order: [['updated_at', 'DESC']], noDelete: true, validate: validateHomeWidgetItem },
+    // Video hub (/videos): shows and their videos. Archived, never deleted.
+    podcast_shows: { model: 'PodcastShow', search: ['title', 'slug', 'host', 'publisher'], filters: ['category', 'country_code', 'published', 'archived'], order: [['rank', 'ASC NULLS LAST'], ['title', 'ASC']], noDelete: true, validate: validatePodcastShow },
+    show_participants: { model: 'ShowParticipant', search: ['name', 'slug'], filters: ['show_slug', 'published', 'indexable', 'archived'], order: [['name', 'ASC']], noDelete: true, validate: validateShowParticipant },
+    video_shows: { model: 'VideoShow', search: ['name', 'slug', 'network'], filters: ['scope', 'country_code', 'featured', 'published', 'archived'], order: [['sort_order', 'ASC'], ['name', 'ASC']], noDelete: true, validate: validateVideoShow },
+    video_items: { model: 'VideoItem', search: ['title', 'slug', 'source_name'], filters: ['scope', 'country_code', 'show_slug', 'category', 'featured', 'published', 'archived'], order: [['published_at', 'DESC NULLS LAST'], ['id', 'DESC']], noDelete: true, validate: validateVideoItem },
+    topics: { model: 'Topic', search: ['name', 'slug'], filters: ['pillar', 'published', 'indexable', 'archived'], order: [['name', 'ASC']], noDelete: true, validate: validateTopic },
+    // Sports pillar: team and competition reference profiles (no scores, standings or schedules).
+    sports_teams: { model: 'SportsTeam', search: ['name', 'slug', 'sport'], filters: ['sport', 'country_code', 'published', 'indexable', 'archived', 'verified'], order: [['name', 'ASC']], noDelete: true, validate: validateTeam },
+    sports_competitions: { model: 'SportsCompetition', search: ['name', 'slug', 'sport'], filters: ['sport', 'level', 'country_code', 'published', 'indexable', 'archived', 'verified'], order: [['updated_at', 'DESC']], noDelete: true, validate: validateCompetition },
+    // Photos for any entity, keyed by (type, slug). Created only through the upload route or the harvester; never deleted.
+    entity_photos: { model: 'EntityPhoto', search: ['entity_slug', 'credit'], filters: ['entity_type', 'entity_slug', 'is_active', 'is_primary', 'license'], order: [['created_at', 'DESC']], noDelete: true, noCreate: true, validate: validatePhoto, afterSave: 'primaryEntityPhoto', scopeWhere: showcase.entityPhotoWhere },
+    entertainment_entities: { model: 'EntertainmentEntity', search: ['title', 'slug'], filters: ['type', 'published', 'indexable', 'archived', 'verified'], order: [['updated_at', 'DESC']], noDelete: true, validate: validateEntertainment },
+    court_profiles: { model: 'CourtProfile', search: ['name', 'slug'], filters: ['level', 'country_code', 'published', 'indexable', 'archived'], order: [['name', 'ASC']], noDelete: true, validate: validateCourt },
+    case_profiles: { model: 'CaseProfile',  search: ['case_name', 'slug', 'jurisdiction'], filters: ['status', 'court_slug', 'country_code', 'published', 'indexable', 'archived', 'verified'], order: [['updated_at', 'DESC']], noDelete: true, validate: validateCase },
+    person_links:  { model: 'PersonLink',   search: ['target_slug', 'relationship'], filters: ['person_id', 'kind', 'target_slug'], order: [['created_at', 'DESC']], validate: validateLink },
     verification_documents: { model: 'VerificationDocument', search: [], filters: ['status', 'lawyer_id', 'doc_type'], include: [L('lawyer')], order: [['created_at', 'ASC']] },
 };
 
@@ -128,6 +184,7 @@ const listResource = async (req, res, next) => {
         (cfg.filters || []).forEach((f) => {
             if (req.query[f] !== undefined && req.query[f] !== '') where[f] = coerce(req.query[f]);
         });
+        if (cfg.scopeWhere) where[Op.and] = [cfg.scopeWhere()];
         const limitN = Math.min(Number(limit) || 20, 200);
         const offset = (Number(page) - 1) * limitN;
         const validSort = sort && cfg.Model.rawAttributes[sort];
@@ -146,7 +203,7 @@ const getResource = async (req, res, next) => {
     try {
         const cfg = resolve(req.params.resource);
         if (!cfg) return next(new AppError('NOT_FOUND', `Unknown resource '${req.params.resource}'`, 404));
-        const row = await cfg.Model.findByPk(req.params.id, { include: buildInclude(cfg) });
+        const row = await cfg.Model.findOne({ where: { [cfg.Model.primaryKeyAttribute]: req.params.id, ...(cfg.scopeWhere ? cfg.scopeWhere() : {}) }, include: buildInclude(cfg) });
         if (!row) return next(new AppError('NOT_FOUND', `${cfg.model} not found`, 404));
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
@@ -158,9 +215,19 @@ const createResource = async (req, res, next) => {
         if (!cfg) return next(new AppError('NOT_FOUND', `Unknown resource '${req.params.resource}'`, 404));
         if (cfg.readonly) return next(new AppError('FORBIDDEN', `${req.params.resource} is read-only`, 403));
         // Mass-assignment guard: strip any fields not in the resource's allowlist.
+        if (cfg.noCreate) return next(new AppError('FORBIDDEN', `${req.params.resource} cannot be created here`, 403));
         const data = pickAllowed(req.params.resource, req.body);
+        if (cfg.validate) cfg.validate(data, true);
         const row = await cfg.Model.create(data);
         await audit(req, 'create', req.params.resource, row.id, data);
+        if (PEOPLE_RESOURCES.has(req.params.resource)) notifySite(['/people']);
+        if (LEGAL_RESOURCES.has(req.params.resource)) notifySite(['/legal/cases', '/legal/courts']);
+        if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
+        if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
+        if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (HOME_WIDGET_RESOURCES.has(req.params.resource)) notifySite(['/']);
+        if (VIDEO_RESOURCES.has(req.params.resource)) notifySite(['/videos']);
+        if (PODCAST_RESOURCES.has(req.params.resource)) notifySite(['/podcasts']);
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 };
@@ -174,8 +241,24 @@ const updateResource = async (req, res, next) => {
         if (!row) return next(new AppError('NOT_FOUND', `${cfg.model} not found`, 404));
         // Mass-assignment guard: strip any fields not in the resource's allowlist.
         const data = pickAllowed(req.params.resource, req.body);
+        if (cfg.validate) cfg.validate(data, false);
+        if (cfg.afterSave === 'primaryEntityPhoto' && data.is_primary === true) {
+            await db.EntityPhoto.update({ is_primary: false }, { where: { entity_type: row.entity_type, entity_slug: row.entity_slug, id: { [Op.ne]: row.id } } });
+        }
+        if (cfg.afterSave === 'primaryPhoto' && data.is_primary === true) {
+            // One primary photo per person (a unique index enforces it): demote the rest first.
+            await db.PersonPhoto.update({ is_primary: false }, { where: { person_id: row.person_id, id: { [Op.ne]: row.id } } });
+        }
         await row.update(data);
         await audit(req, 'update', req.params.resource, row.id, data);
+        if (PEOPLE_RESOURCES.has(req.params.resource)) notifySite(['/people']);
+        if (LEGAL_RESOURCES.has(req.params.resource)) notifySite(['/legal/cases', '/legal/courts']);
+        if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
+        if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
+        if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (HOME_WIDGET_RESOURCES.has(req.params.resource)) notifySite(['/']);
+        if (VIDEO_RESOURCES.has(req.params.resource)) notifySite(['/videos']);
+        if (PODCAST_RESOURCES.has(req.params.resource)) notifySite(['/podcasts']);
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 };
@@ -184,7 +267,7 @@ const deleteResource = async (req, res, next) => {
     try {
         const cfg = resolve(req.params.resource);
         if (!cfg) return next(new AppError('NOT_FOUND', `Unknown resource '${req.params.resource}'`, 404));
-        if (cfg.readonly) return next(new AppError('FORBIDDEN', `${req.params.resource} is read-only`, 403));
+        if (cfg.readonly || cfg.noDelete) return next(new AppError('FORBIDDEN', `${req.params.resource} cannot be deleted; archive or deactivate it instead`, 403));
         const row = await cfg.Model.findByPk(req.params.id);
         if (!row) return next(new AppError('NOT_FOUND', `${cfg.model} not found`, 404));
         await row.destroy();

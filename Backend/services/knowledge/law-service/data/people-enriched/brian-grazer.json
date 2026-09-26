@@ -1,0 +1,80 @@
+{
+  "slug": "brian-grazer",
+  "category": "producers",
+  "wikidata_id": "Q320025",
+  "full_name": "Brian Grazer",
+  "description": "American film producer",
+  "birth_date": "1951-07-12",
+  "birth_place": "Los Angeles",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "entrepreneur",
+    "businessperson",
+    "screenwriter",
+    "executive producer",
+    "television producer",
+    "producer",
+    "filmmaker",
+    "actor"
+  ],
+  "education": [
+    {
+      "institution": "University of Southern California"
+    },
+    {
+      "institution": "USC Gould School of Law"
+    },
+    {
+      "institution": "USC School of Cinematic Arts"
+    },
+    {
+      "institution": "Chatsworth High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Daytime Emmy Award"
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2002
+    },
+    {
+      "title": "star on Hollywood Walk of Fame"
+    },
+    {
+      "title": "Global Citizen Awards",
+      "year": 2019
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/BrianGrazer"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q320025"
+    }
+  ],
+  "photo": {
+    "file": "brian-grazer.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1564,
+    "credit": "David Shankbone / Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Brian_Grazer_2011_Shankbone.JPG"
+  },
+  "fetched_at": "2026-09-21T19:18:54.578Z"
+}

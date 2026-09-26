@@ -48,6 +48,12 @@ export default function ContentClassificationPanel({
   const [newTag, setNewTag] = useState('');
   const [addingChildUnder, setAddingChildUnder] = useState<string | null>(null);
   const [newChildName, setNewChildName] = useState('');
+  // Sub-categories can already be added inline under any existing node (the "+" per
+  // row, below) — but a brand-new top-level category (e.g. a whole new "Fashion")
+  // had no path here at all and required leaving the article for the separate
+  // Categories page. `null` reuses that same add-child flow with no parentId.
+  const [addingRoot, setAddingRoot] = useState(false);
+  const [newRootName, setNewRootName] = useState('');
 
   const groups = useMemo(() => (tree ?? []) as CategoryTree[], [tree]);
   const nameById = useMemo(() => {
@@ -99,6 +105,15 @@ export default function ContentClassificationPanel({
     onCategoriesChange([...categoryIds, res.data.data.id]);
     setAddingChildUnder(null);
     setNewChildName('');
+  };
+
+  const addRootCategory = async () => {
+    const name = newRootName.trim();
+    if (!name) return;
+    const res = await createCategory.mutateAsync({ websiteId, name, slug: slugify(name) });
+    onCategoriesChange([...categoryIds, res.data.data.id]);
+    setAddingRoot(false);
+    setNewRootName('');
   };
 
   const CategoryRow = ({ id, name, depth, onAddChild }: { id: string; name: string; depth: number; onAddChild: () => void }) => {
@@ -197,13 +212,41 @@ export default function ContentClassificationPanel({
           category to add a new one nested under it.
         </p>
         <div className="max-h-56 space-y-0.5 overflow-y-auto rounded-md border p-1">
-          {groups.length === 0 && (
+          {groups.length === 0 && !addingRoot && (
             <p className="px-2 py-3 text-[11px] text-muted-foreground">No categories yet.</p>
           )}
           {groups.map((root) => (
             <CategoryNode key={root.id} node={root} depth={0} />
           ))}
+          {addingRoot && (
+            <div className="flex gap-1.5 p-1">
+              <Input
+                className="h-7 text-xs"
+                placeholder="New top-level category…"
+                value={newRootName}
+                onChange={(e) => setNewRootName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void addRootCategory(); } }}
+                autoFocus
+              />
+              <Button size="icon" variant="outline" className="h-7 w-7 shrink-0" disabled={!newRootName.trim() || createCategory.isPending} onClick={() => void addRootCategory()}>
+                {createCategory.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              </Button>
+              <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => setAddingRoot(false)}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
+        {!addingRoot && (
+          <button
+            type="button"
+            onClick={() => { setAddingRoot(true); setNewRootName(''); }}
+            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            <Plus className="h-3 w-3" />
+            New top-level category
+          </button>
+        )}
         {categoryIds.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
             {categoryIds.map((id, i) => (

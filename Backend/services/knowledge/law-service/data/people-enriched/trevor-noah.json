@@ -1,0 +1,113 @@
+{
+  "slug": "trevor-noah",
+  "category": "tv-personalities",
+  "wikidata_id": "Q7839350",
+  "full_name": "Trevor Noah",
+  "description": "South African comedian and television host",
+  "birth_date": "1984-02-20",
+  "birth_place": "Johannesburg",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "ZA",
+  "citizenship": [
+    "South Africa"
+  ],
+  "occupations": [
+    "actor",
+    "television presenter",
+    "writer",
+    "film producer",
+    "disc jockey",
+    "presenter",
+    "film actor",
+    "stand-up comedian",
+    "television actor",
+    "television producer",
+    "philanthropist",
+    "podcaster",
+    "television maker",
+    "satirist",
+    "autobiographer",
+    "comedian"
+  ],
+  "education": [
+    {
+      "institution": "Maryvale College"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "MTV Africa Music Awards",
+      "year": 2015
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work – Biography/Auto-biography",
+      "year": 2017
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work – Debut Author",
+      "year": 2017
+    },
+    {
+      "title": "Nickelodeon Kids' Choice Awards",
+      "year": 2017
+    },
+    {
+      "title": "GLAAD Media Award for Outstanding Talk Show Episode",
+      "year": 2017
+    },
+    {
+      "title": "MTV Movie & TV Award for Best Host",
+      "year": 2017
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Short Form Variety Series",
+      "year": 2017
+    },
+    {
+      "title": "Thurber Prize for American Humor",
+      "year": 2017
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Writing in a Comedy Series",
+      "year": 2019
+    },
+    {
+      "title": "Time 100",
+      "year": 2018
+    },
+    {
+      "title": "Audie Award for Best Male Narrator"
+    },
+    {
+      "title": "Erasmus Prize",
+      "year": 2023
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/TrevorNoah",
+    "instagram": "https://www.instagram.com/trevornoah",
+    "facebook": "https://www.facebook.com/TrevorNoah"
+  },
+  "official_website": "https://www.trevornoah.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q7839350"
+    }
+  ],
+  "photo": {
+    "file": "trevor-noah.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1335,
+    "credit": "Web Summit Qatar / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Trevor_Noah_(53554114243)_(portrait_crop).jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:18.719Z"
+}

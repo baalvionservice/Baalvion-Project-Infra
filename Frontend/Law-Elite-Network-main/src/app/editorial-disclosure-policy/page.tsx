@@ -169,7 +169,7 @@ export default function EditorialDisclosurePolicyPage() {
                 For permissions and licensing: <a href="mailto:permissions@lawelitenetwork.com" className="text-blue-600 hover:underline">permissions@lawelitenetwork.com</a>.
                 For advertising and referral relationships: <a href="mailto:advertise@lawelitenetwork.com" className="text-blue-600 hover:underline">advertise@lawelitenetwork.com</a>.
                 For anything about ownership or how the site is structured:{' '}
-                <a href="mailto:legal@lawelitenetwork.com" className="text-blue-600 hover:underline">legal@lawelitenetwork.com</a>{' '}
+                <a href="mailto:legal@baalvion.com" className="text-blue-600 hover:underline">legal@baalvion.com</a>{' '}
                 or our{' '}
                 <Link href="/about-us" className="text-blue-600 hover:underline">About Us</Link> page.
               </p>

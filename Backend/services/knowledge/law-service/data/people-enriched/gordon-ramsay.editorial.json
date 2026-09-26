@@ -1,0 +1,68 @@
+{
+  "display_name": null,
+  "short_bio": "Scottish chef and restaurateur, holder of three Michelin stars and host of Hell’s Kitchen and MasterChef.",
+  "biography": "Gordon Ramsay was born in Johnstone, Scotland, and grew up in Stratford-upon-Avon. A knee injury ended his hopes of a football career and he trained as a chef, working under Albert Roux and Marco Pierre White before training in France.\n\nHis restaurant Restaurant Gordon Ramsay opened in Chelsea in 1998 and earned three Michelin stars in 2001.\n\nOn television he fronted Ramsay’s Kitchen Nightmares from 2004, Hell’s Kitchen (UK 2004, US 2005) and the US version of MasterChef from 2010.",
+  "awards": [
+    {
+      "title": "Officer of the Order of the British Empire",
+      "year": 2006
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Restaurant Gordon Ramsay",
+      "year": 1998,
+      "note": "Founded"
+    },
+    {
+      "title": "Ramsay’s Kitchen Nightmares",
+      "year": 2004,
+      "note": "Host"
+    },
+    {
+      "title": "Hell’s Kitchen",
+      "year": 2005,
+      "note": "US host"
+    },
+    {
+      "title": "MasterChef (US)",
+      "year": 2010,
+      "note": "Judge and host"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1966-11-08",
+      "title": "Born in Johnstone, Scotland"
+    },
+    {
+      "date": "1998",
+      "title": "Opens Restaurant Gordon Ramsay in Chelsea"
+    },
+    {
+      "date": "2001",
+      "title": "Restaurant Gordon Ramsay is awarded three Michelin stars"
+    },
+    {
+      "date": "2004",
+      "title": "Ramsay’s Kitchen Nightmares premieres"
+    },
+    {
+      "date": "2010",
+      "title": "Begins hosting MasterChef in the US"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15280"
+    },
+    {
+      "label": "Wikipedia: Gordon Ramsay",
+      "url": "https://en.wikipedia.org/wiki/Gordon_Ramsay"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

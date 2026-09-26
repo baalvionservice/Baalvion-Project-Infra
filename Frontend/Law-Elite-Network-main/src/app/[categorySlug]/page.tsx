@@ -8,6 +8,7 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { fetchArticleForRender } from '@/lib/article-fetch';
+import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import { ArticleView } from '@/components/knowledge/ArticleView';
 import { ArticleJsonLd } from '@/lib/seo/article-seo';
 import seedData from '../../../docs/seed-data.json';
@@ -20,6 +21,23 @@ import { getKeyLegalTermsForCategory } from '@/lib/category-key-terms';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
+import { EntertainmentTypeHub } from '@/components/entertainment/EntertainmentTypeHub';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
+import type { EntertainmentTypeSlug } from '@/types/entertainment';
+
+// This is where /movies, /television, /streaming, /music actually live (they
+// are entertainment-pillar entries in CMS_ONLY_CATEGORIES, not separate
+// routes) -- mapping a category slug to the EntertainmentEntity `type`(s) it
+// covers lets this one page show "browse the movies/shows/albums themselves"
+// above the usual article list, satisfying the directory-page ask without a
+// second, competing route at the same URL. /celebrity-news intentionally has
+// no mapping -- it's news coverage, not a catalog of entities.
+const ENTERTAINMENT_ENTITY_TYPE_MAP: Record<string, EntertainmentTypeSlug[]> = {
+  movies: ['movie'],
+  television: ['tv-show'],
+  streaming: ['streaming-show'],
+  music: ['music-release', 'album', 'song'],
+};
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
@@ -127,6 +145,11 @@ export default async function CategoryPage(
   // cms.ts's env vars are server-only, then handed down as a prop.
   const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
 
+  const entityTypes = ENTERTAINMENT_ENTITY_TYPE_MAP[categorySlug];
+  const entities = entityTypes
+    ? (await getMergedEntertainmentEntities()).filter((e) => entityTypes.includes(e.type))
+    : [];
+
   // Investopedia-style "spotlight" split for this practice area: one lead
   // story with a full photo on the left, a thumbnail-led rail of the next
   // few most-viewed guides on the right -- same lead+rail pattern the
@@ -154,11 +177,18 @@ export default async function CategoryPage(
     .filter(Boolean)
     .map((a: any) => a.slug);
 
+  // Only the legal pillar's hubs are framed as a lawyer/practice-area
+  // resource -- an Entertainment hub (Movies, Music, ...) using the same
+  // "{name} Lawyers" wording would be nonsensical (see cms-only-categories.ts's
+  // `pillar` field).
+  const isEntertainment = category.pillar === 'entertainment';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${category.name} Lawyers`,
-    description: category.description || `Verified ${category.name} lawyers and legal resources.`,
+    name: isEntertainment ? category.name : `${category.name} Lawyers`,
+    description: category.description || (isEntertainment
+      ? `${category.name} coverage on Law Elite Network.`
+      : `Verified ${category.name} lawyers and legal resources.`),
     url: `${SITE}/${categorySlug}`,
     isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
   };
@@ -177,44 +207,53 @@ export default async function CategoryPage(
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <main className="pb-24">
         {/* Category masthead */}
-        <section className="border-b border-slate-200 bg-slate-50/60">
+        <section className="border-b-4 border-[#E13131] bg-slate-900 text-white shadow-md">
           <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
             <Link
               href="/"
-              className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-news-600 transition-colors group mb-4"
+              className="flex w-fit items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#E13131] hover:text-white transition-colors group mb-4 bg-slate-800 px-3 py-1 rounded-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> All Topics
             </Link>
-            {/* Orientation trail (Home > current practice area) -- the "All
-                Topics" link above already covers "how do I go back," this
-                covers "where am I right now," the same pairing article pages
-                already give readers via this same component. */}
             <Breadcrumbs
               category={{ name: category.name, slug: categorySlug }}
               categoryIsCurrentPage
               hideBackLink
             />
-            <span className="kicker">Practice Area</span>
-            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.02] mt-3">
+            <span className="inline-block bg-[#E13131] text-white text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-sm mb-3">
+              {isEntertainment ? 'LAW ELITE ENTERTAINMENT' : 'LAW ELITE COVERAGE'}
+            </span>
+            <h1 className="font-serif text-4xl md:text-6xl font-black tracking-tight leading-[1.02] text-white mt-2 uppercase">
               {category.pillarTitle || category.name}
             </h1>
             {category.description && (
-              <p className="text-lg md:text-xl text-slate-500 max-w-2xl leading-relaxed mt-4">
+              <p className="text-lg md:text-xl text-slate-300 max-w-2xl leading-relaxed mt-4 font-serif">
                 {category.description}
               </p>
             )}
           </div>
-          {/* Written pillar / "Complete Guide" body for hubs that also serve as a
-              standalone article at this same URL (see cms-only-categories.ts). */}
-          {category.descriptionHtml && (
-            <div className="container mx-auto px-4 sm:px-6 max-w-7xl pb-4">
-              <div
-                className="prose-legal max-w-3xl"
-                dangerouslySetInnerHTML={{ __html: category.descriptionHtml }}
-              />
-            </div>
-          )}
         </section>
+
+        {category.descriptionHtml && (
+          <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-10">
+            <div
+              className="prose-legal max-w-3xl"
+              dangerouslySetInnerHTML={{ __html: unwrapRetiredLinks(category.descriptionHtml) }}
+            />
+          </div>
+        )}
+
+        {entityTypes && (
+          <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-10 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-serif text-2xl font-black text-slate-900 tracking-tight uppercase">Browse {category.name} Catalog</h2>
+              <Link href="/entertainment" className="text-[12px] font-black uppercase tracking-wider text-[#E13131] hover:underline transition-colors">
+                Full Directory →
+              </Link>
+            </div>
+            <EntertainmentTypeHub entities={entities} />
+          </div>
+        )}
 
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6">
           <AdSlot slotId={CATEGORY_AD_SLOT_ID} format="horizontal" placement="category-hero" fullWidthResponsive minHeight="100px" />
@@ -222,15 +261,18 @@ export default async function CategoryPage(
 
         {spotlightLead && (
           <div className="container mx-auto px-4 sm:px-6 max-w-7xl pb-10">
-            <span className="inline-block bg-slate-100 text-slate-800 text-[11px] font-bold uppercase tracking-widest px-3 py-1 mb-6">
-              All About {category.name}
-            </span>
+            <div className="flex items-center gap-2 mb-6 border-b-2 border-slate-900 pb-2">
+              <span className="w-2.5 h-6 bg-[#E13131] inline-block" />
+              <span className="font-serif text-xl font-black uppercase tracking-tight text-slate-900">
+                FEATURED SPOTLIGHT · {category.name}
+              </span>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
               <div className="lg:col-span-7">
                 <StoryCard article={spotlightLead} variant="lead" priority />
               </div>
-              <div className="lg:col-span-5">
-                <LatestRail articles={spotlightSecondary} title="More in This Practice Area" />
+              <div className="lg:col-span-5 bg-slate-50 border border-slate-200 p-4 rounded-sm">
+                <LatestRail articles={spotlightSecondary} title={`More in ${category.name}`} />
               </div>
             </div>
           </div>
@@ -245,6 +287,7 @@ export default async function CategoryPage(
           categorySlug={categorySlug}
           categoryId={category.id}
           cmsArticles={cmsArticles}
+          bundledArticles={bundledForSpotlight.map(({ content, ...card }: any) => card)}
           excludeSlugs={spotlightExcludeSlugs}
         />
       </main>

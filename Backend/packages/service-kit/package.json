@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/service-kit",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "One-call service bootstrap — composes telemetry, identity, RBAC, the event bus, health/metrics endpoints and graceful shutdown into a production-ready Express service.",
   "private": true,
@@ -23,11 +27,11 @@
     "@baalvion/types": "workspace:*"
   },
   "peerDependencies": {
-    "express": "^4.19.0"
+    "express": "^4 || ^5"
   },
   "devDependencies": {
     "tsup": "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf": "^6.0.1",
     "@types/express": "^4.17.21"
   }

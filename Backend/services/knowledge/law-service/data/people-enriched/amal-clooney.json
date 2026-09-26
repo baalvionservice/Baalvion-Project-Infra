@@ -1,0 +1,69 @@
+{
+  "slug": "amal-clooney",
+  "category": "lawyers",
+  "wikidata_id": "Q16769592",
+  "full_name": "Amal Clooney",
+  "description": "Lebanese-British-French barrister and human right activist",
+  "birth_date": "1978-02-03",
+  "birth_place": "Beirut",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "LB",
+  "citizenship": [
+    "Lebanon",
+    "United Kingdom",
+    "France"
+  ],
+  "occupations": [
+    "barrister",
+    "human rights defender",
+    "writer",
+    "lawyer",
+    "jurist",
+    "prosecutor",
+    "public prosecutor general"
+  ],
+  "education": [
+    {
+      "institution": "Dr Challoner's High School"
+    },
+    {
+      "institution": "New York University School of Law"
+    },
+    {
+      "institution": "St Hugh's College"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "honorary doctor of the Katholieke Universiteit Leuven",
+      "year": 2023
+    },
+    {
+      "title": "BBC 100 Women",
+      "year": 2023
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q16769592"
+    }
+  ],
+  "photo": {
+    "file": "amal-clooney.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1360,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Amal_Clooney.jpg"
+  },
+  "fetched_at": "2026-09-21T19:21:21.705Z"
+}

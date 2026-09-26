@@ -1,0 +1,83 @@
+{
+  "display_name": null,
+  "short_bio": "Jamaican sprinter who holds the world records in the 100 m and 200 m.",
+  "biography": "Usain Bolt was born in Sherwood Content, in Trelawny Parish, Jamaica. He won the 200 m at the World Junior Championships in 2002 at age 15.\n\nAt the 2009 World Championships in Berlin he set the world records that still stand: 9.58 seconds for 100 m and 19.19 for 200 m. He won the 100 m, 200 m and 4×100 m relay at the Olympic Games of 2008, 2012 and 2016, though the 2008 relay medal was later stripped because a teammate was found to have doped.\n\nHe retired after the 2017 World Championships in London.",
+  "awards": [
+    {
+      "title": "Commander of the Order of Distinction",
+      "year": 2008
+    },
+    {
+      "title": "Member of the Order of Jamaica",
+      "year": 2009
+    },
+    {
+      "title": "Bislett medal",
+      "year": 2012
+    },
+    {
+      "title": "Laureus World Sports Award for Sportsman of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Best International Athlete ESPY Award",
+      "year": 2013
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2016
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "100 m world record",
+      "year": 2009,
+      "note": "9.58 seconds"
+    },
+    {
+      "title": "200 m world record",
+      "year": 2009,
+      "note": "19.19 seconds"
+    },
+    {
+      "title": "Olympic 100 m gold",
+      "year": 2008,
+      "note": "Beijing"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1986-08-21",
+      "title": "Born in Sherwood Content, Jamaica"
+    },
+    {
+      "date": "2008",
+      "title": "Wins three Olympic golds in Beijing"
+    },
+    {
+      "date": "2009-08-16",
+      "title": "Sets the 100 m world record in Berlin"
+    },
+    {
+      "date": "2016",
+      "title": "Wins a third consecutive Olympic 100 m title"
+    },
+    {
+      "date": "2017",
+      "title": "Retires"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1189"
+    },
+    {
+      "label": "Wikipedia: Usain Bolt",
+      "url": "https://en.wikipedia.org/wiki/Usain_Bolt"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

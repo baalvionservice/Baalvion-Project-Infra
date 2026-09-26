@@ -99,8 +99,10 @@ async function apiFetch(path: string, init: RequestInit = {}, retry = true): Pro
   return { res, json };
 }
 
-// Always-gateway fetch for endpoints that require identity (whoami, owner writes during signup).
-async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+// Always-gateway fetch for endpoints that require identity (whoami, owner writes during signup,
+// membership checkout). Exported so payment code reuses this exact path — cookie + CSRF header +
+// one silent refresh on 401 — instead of hand-rolling a second, subtly different auth flow.
+export async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method || "GET").toUpperCase();
   const headers: Record<string, string> = { ...(init.headers as Record<string, string>) };
   if (method !== "GET" && method !== "HEAD") headers["x-csrf-token"] = csrf();

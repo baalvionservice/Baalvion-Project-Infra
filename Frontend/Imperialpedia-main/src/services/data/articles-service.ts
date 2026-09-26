@@ -118,19 +118,8 @@ export const articlesService = {
         timestamp: nowIso(),
       };
     } catch (error) {
-      // Only a *confirmed* CMS 404 (already survived cmsFetch's own retries)
-      // means this slug genuinely doesn't exist — fall through to the legacy
-      // mock/static content so pre-existing internal links keep resolving.
-      // Anything else (timeout, 5xx, network drop) is a transient failure,
-      // not proof the article is gone: measured directly, a burst of concurrent
-      // requests produced dozens of these that resolved fine moments later on
-      // a plain re-check. Silently treating that as "not found" here is how a
-      // real, published article ends up rendering a hard 404 to Googlebot on a
-      // bad day — which risks de-indexing content that's actually fine.
-      // Rethrowing lets the page's render fail with a 5xx instead, which
-      // crawlers retry rather than delist.
-      if ((error as { status?: number })?.status !== 404) throw error;
-
+      // On any CMS failure (404 or transient backend error), return data: null
+      // so resolveArticleForDetail falls back to static/baked content.
       const appError = errorHandler.handleError(error);
       return {
         data: null,

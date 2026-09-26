@@ -15,6 +15,8 @@ function mapNotification(n: any): Notification {
     title: n.title ?? "",
     message: n.message ?? "",
     read: !!n.read,
+    // follow_update rows carry the article link; only same-site paths are honoured.
+    url: typeof n.data?.url === 'string' && n.data.url.startsWith('/') && !n.data.url.startsWith('//') ? n.data.url : undefined,
     createdAt: n.created_at ? new Date(n.created_at).getTime() : (n.createdAt ?? Date.now()),
   };
 }

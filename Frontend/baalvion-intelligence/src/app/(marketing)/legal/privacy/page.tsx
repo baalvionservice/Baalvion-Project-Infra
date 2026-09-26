@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "How Baalvion Intelligence collects, uses, and protects data.",
+  alternates: { canonical: "/legal/privacy" },
 };
 
 export default function PrivacyPage() {

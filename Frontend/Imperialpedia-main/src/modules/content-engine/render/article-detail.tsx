@@ -1,7 +1,7 @@
+import React, { Suspense } from "react";
 import { Metadata } from "next";
-import { Suspense } from "react";
 import { permanentRedirect } from "next/navigation";
-import { ArticlePage } from "@/modules/content-engine/components";
+import { ArticlePage } from "@/modules/content-engine/components/ArticlePage";
 import { ArticleMarketWidget, trackedCompaniesFromMentions } from "@/components/markets/ArticleMarketWidget";
 import { ArticleInlineChart } from "@/components/markets/ArticleInlineChart";
 import { FollowTopicButton } from "@/components/article/FollowTopicButton";
@@ -18,7 +18,13 @@ import { structuredData } from "@/lib/seo/structured-data";
 import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
+import { SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
+import { topicCopy } from "@/lib/topic-config";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
+import { isAllowedImageHost } from "@/lib/safe-image";
+import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
+import { env } from "@/config/env";
 
 /**
  * @fileOverview Shared article-detail resolution + rendering, used by both the
@@ -30,46 +36,72 @@ import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleC
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 
 export async function resolveArticleForDetail(slug: string): Promise<Article | null> {
-  const response = await articlesService.getArticleBySlug(slug);
-  // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
-  const article = (response.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
-  if (article) return article;
+  try {
+    const response = await articlesService.getArticleBySlug(slug).catch(() => ({ data: null }));
+    // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
+    const article = (response?.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
+    if (article) {
+      // Sanitize once, here, server-side. ArticlePage.tsx (a "use client"
+      // component) used to call sanitizeRichHtml() itself at render time —
+      // sanitize-html pulls in htmlparser2 + postcss, ~50KB gzipped of
+      // Node-oriented HTML parsing code with zero reason to ever reach a
+      // browser, and it was shipping on every article page as a result
+      // (confirmed via a live Lighthouse "reduce unused JavaScript" audit).
+      // Every resolveArticleForDetail() caller gets pre-sanitized HTML now.
+      return { ...article, body: article.body ? sanitizeRichHtml(article.body) : article.body };
+    }
 
-  // Check editorial masterclass guides
-  const editorial = getEditorialGuide(slug);
-  if (editorial) {
-    return {
-      id: slug,
-      slug: editorial.slug,
-      title: editorial.title,
-      description: editorial.description,
-      body: editorial.bodyHtml,
-      category: "Savings & Budgeting",
-      categorySlug: "savings",
-      tags: ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
-      readTime: "8 min read",
-      publishedAt: "2026-08-29T10:00:00Z",
-      updatedAt: "2026-08-29T14:30:00Z",
-      featuredImage: "/images/editorial/savings-budgeting.jpg",
-      imageCaption: "Financial planning, emergency reserves, and deposit safety.",
-      keyTakeaways: editorial.keyTakeaways,
-      citations: editorial.citations,
-      authorSlug: "nathan-reiff",
-      reviewerSlug: "julius-mansa",
-      factCheckerSlug: "yarilet-perez",
-      faq: [],
-    } as unknown as Article;
-  }
+    // Check editorial masterclass guides
+    const editorial = getEditorialGuide(slug);
+    if (editorial) {
+      return {
+        id: slug,
+        slug: editorial.slug,
+        title: editorial.title,
+        description: editorial.description,
+        body: editorial.bodyHtml ? sanitizeRichHtml(editorial.bodyHtml) : editorial.bodyHtml,
+        category: editorial.category ?? "Savings & Budgeting",
+        categorySlug: editorial.categorySlug ?? "savings",
+        tags: editorial.categorySlug
+          ? ["Creator Economy", "YouTube", "Monetization", "RPM", "CPM"]
+          : ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
+        readingTime: editorial.readingTime ?? 8,
+        publishedAt: editorial.publishedAt ?? "2026-08-29T10:00:00Z",
+        updatedAt: editorial.updatedAt ?? "2026-08-29T14:30:00Z",
+        featuredImage: "/images/editorial/savings-budgeting.jpg",
+        imageCaption: editorial.category
+          ? `${editorial.category} — Imperialpedia Editorial Guide`
+          : "Financial planning, emergency reserves, and deposit safety.",
+        keyTakeaways: editorial.keyTakeaways,
+        citations: editorial.citations,
+        authorSlug: "nathan-reiff",
+        reviewerSlug: "julius-mansa",
+        factCheckerSlug: "yarilet-perez",
+        faq: [],
+      } as unknown as Article;
+    }
 
-  // Not found under this slug — it may have been renamed. Follow the recorded
-  // redirect (one hop only; cms-service already collapses rename chains) rather
-  // than 404ing a link that's still valid, just moved.
-  const redirectSlug = await getContentRedirectSlug(slug);
-  if (redirectSlug && redirectSlug !== slug) {
-    const targetResponse = await articlesService.getArticleBySlug(redirectSlug);
-    const target = (targetResponse.data ?? staticArticleBySlug(redirectSlug)) as unknown as Article | null;
-    if (target) {
-      permanentRedirect(canonicalService.getCanonicalTag(target.slug, "article", target.categorySlug));
+    // Not found under this slug — it may have been renamed. Follow the recorded
+    // redirect (one hop only; cms-service already collapses rename chains) rather
+    // than 404ing a link that's still valid, just moved.
+    const redirectSlug = await getContentRedirectSlug(slug).catch(() => null);
+    if (redirectSlug && redirectSlug !== slug) {
+      const targetResponse = await articlesService.getArticleBySlug(redirectSlug).catch(() => ({ data: null }));
+      const target = (targetResponse?.data ?? staticArticleBySlug(redirectSlug)) as unknown as Article | null;
+      if (target) {
+        permanentRedirect(canonicalService.getCanonicalTag(target.slug, "article", target.categorySlug));
+      }
+    }
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
     }
   }
 
@@ -77,83 +109,210 @@ export async function resolveArticleForDetail(slug: string): Promise<Article | n
 }
 
 export async function buildArticleDetailMetadata(slug: string): Promise<Metadata> {
-  const article = await resolveArticleForDetail(slug);
-  if (!article) {
+  try {
+    const article = await resolveArticleForDetail(slug);
+    if (!article) {
+      return buildMetadata({
+        title: "Article Not Found",
+        description: "The requested financial article could not be found.",
+        noIndex: true,
+      });
+    }
+    const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
+    const base = buildMetadata({
+      title: article.title,
+      description: article.description,
+      keywords: article.tags,
+      ogImage: isAllowedImageHost(article.featuredImage) ? article.featuredImage : undefined,
+      ogType: "article",
+      canonical,
+    });
+
+    // buildMetadata() never sets `authors` — Next.js then inherits the root
+    // layout's hardcoded 3-person default (see app/layout.tsx) for every
+    // article, regardless of who actually wrote it. Overriding it here with
+    // the real byline is what makes <meta name="author">/rel="author" agree
+    // with the visible "By {name}" credit instead of always naming the
+    // site's original 3 house writers.
+    if (!article.authorName) return base;
+    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+    const authorUrl = article.authorSlug ? `${baseUrl}/authors/${article.authorSlug}` : undefined;
+    return {
+      ...base,
+      authors: [{ name: article.authorName, url: authorUrl }],
+      openGraph: {
+        ...base.openGraph,
+        type: "article",
+        authors: [article.authorName],
+      },
+    };
+  } catch {
     return buildMetadata({
       title: "Article Not Found",
       description: "The requested financial article could not be found.",
       noIndex: true,
     });
   }
-  const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
-  return buildMetadata({
-    title: article.title,
-    description: article.description,
-    keywords: article.tags,
-    ogImage: article.featuredImage,
-    ogType: "article",
-    canonical,
-  });
 }
 
 export async function ArticleDetailContent({ article }: { article: Article }) {
-  const [author, reviewer, factChecker, feedback, comments, poll] = await Promise.all([
-    article.authorSlug ? resolveAuthor(article.authorSlug) : Promise.resolve(null),
-    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
-    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug) : Promise.resolve(null),
-    getArticleFeedback(article.slug),
-    listArticleComments(article.slug),
-    getArticlePoll(article.slug),
-  ]);
+  try {
+    // Byline (author/reviewer/fact-checker) sits right under the H1, so it stays
+    // on the blocking path. Feedback tally, comments and the poll are below the
+    // fold and each their own CMS round trip — passed down as unawaited promises
+    // so ArticlePage can stream them in via Suspense instead of holding up the
+    // whole page (title, hero image, lead paragraph) until all three resolve.
+    const [author, reviewer, factChecker] = await Promise.all([
+      article.authorSlug ? resolveAuthor(article.authorSlug).catch(() => null) : Promise.resolve(null),
+      article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
+      article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
+    ]);
+    const feedback = getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 }));
+    const comments = listArticleComments(article.slug).catch(() => []);
+    const poll = getArticlePoll(article.slug).catch(() => null);
+    // Was a client-side fetch straight to the CMS's public API — that API only
+    // allow-lists server origins for CORS, so the browser call either fails
+    // outright or burns cmsFetch's 400ms+1200ms retry sequence for nothing,
+    // and kept these links out of the initial HTML entirely. Resolved
+    // server-side now, alongside the other below-the-fold Suspense slots.
+    const relatedArticles = getRelatedArticles(article.id, article.category, article.tags, article.categorySlug)
+      .then((res) => res.data)
+      .catch(() => []);
 
-  const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
-  const articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
-  const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
-  const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
-  const canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
+    let breadcrumbs: any = [];
+    try {
+      breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
+    } catch {
+      breadcrumbs = [];
+    }
 
-  const trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
-  const marketWidget =
-    trackedCompanies.length > 0 ? (
-      <Suspense fallback={null}>
-        <ArticleMarketWidget entityMentions={article.entityMentions} />
-      </Suspense>
-    ) : null;
-  const inlineChart =
-    trackedCompanies.length === 1 && trackedCompanies[0].ticker ? (
-      <Suspense fallback={null}>
-        <ArticleInlineChart symbol={trackedCompanies[0].ticker} name={trackedCompanies[0].name} />
-      </Suspense>
-    ) : null;
+    let articleSchema: any = null;
+    try {
+      articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
+    } catch {
+      articleSchema = null;
+    }
 
-  return (
-    <div className="bg-background min-h-screen">
-      <JsonLd data={articleSchema} />
-      {faqSchema && <JsonLd data={faqSchema} />}
-      <Container className="py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Breadcrumbs breadcrumb={breadcrumbs} />
-          {article.categorySlug && (
-            <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category} />
-          )}
-        </div>
-        <ArticlePage
-          slug={article.slug}
-          article={article}
-          author={author}
-          reviewer={reviewer}
-          factChecker={factChecker}
-          canonicalUrl={canonicalUrl}
-          feedback={feedback}
-          comments={comments}
-          poll={poll}
-          marketWidget={marketWidget}
-          inlineChart={inlineChart}
-          sidebar={
-            <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
-          }
-        />
-      </Container>
-    </div>
-  );
+    let faqSchema: any = null;
+    try {
+      const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
+      faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
+    } catch {
+      faqSchema = null;
+    }
+
+    let canonicalUrl: string | undefined = undefined;
+    try {
+      canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
+    } catch {
+      canonicalUrl = undefined;
+    }
+
+    // SoftwareApplication schema for the embedded calculator, if this article
+    // has one — points at this article's own URL (where the tool actually
+    // lives), not a separate /calculators/ route that doesn't exist.
+    let toolSchema: any = null;
+    try {
+      const toolMeta: Record<string, { name: string; description: string }> = {
+        "creator-rpm-calculator": {
+          name: "Creator RPM & CPM Calculator",
+          description: "Estimate YouTube, YouTube Shorts, and TikTok Creator Rewards earnings from monthly views using published 2026 RPM ranges.",
+        },
+        "sponsorship-rate-calculator": {
+          name: "Sponsorship Rate Estimator",
+          description: "Estimate a fair Instagram or YouTube sponsorship rate from follower count, platform, and content format using published 2026 benchmark ranges.",
+        },
+        "page-rpm-calculator": {
+          name: "Website Page RPM Calculator",
+          description: "Estimate monthly website ad revenue from session count and ad-network RPM ranges (Mediavine, Raptive).",
+        },
+      };
+      const meta = article.toolType ? toolMeta[article.toolType] : undefined;
+      toolSchema = meta && canonicalUrl
+        ? structuredData.softwareApp({ ...meta, url: canonicalUrl, category: "FinanceApplication" })
+        : null;
+    } catch {
+      toolSchema = null;
+    }
+
+    let trackedCompanies: any[] = [];
+    try {
+      trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
+    } catch {
+      trackedCompanies = [];
+    }
+
+    const marketWidget =
+      trackedCompanies.length > 0 ? (
+        <Suspense fallback={null}>
+          <ArticleMarketWidget entityMentions={article.entityMentions} />
+        </Suspense>
+      ) : null;
+    const inlineChart =
+      trackedCompanies.length === 1 && trackedCompanies[0]?.ticker ? (
+        <Suspense fallback={null}>
+          <ArticleInlineChart symbol={trackedCompanies[0].ticker} name={trackedCompanies[0].name} />
+        </Suspense>
+      ) : null;
+
+    // Computed server-side and passed down as plain props — ArticlePage.tsx
+    // is a "use client" component, so anything it imports directly (rather
+    // than receiving as a prop) ships to every visitor's browser. topic-mesh/
+    // topic-config hold every category's full editorial copy (~180KB
+    // gzipped); InlineTopicCallout only ever needed the small computed
+    // result, not the source data.
+    const meshTopicSlug = article.categorySlug || "creator-economy";
+    const inlineTopicGuides = SUBTOPIC_FEATURED_GUIDES[meshTopicSlug];
+    const inlineTopicLabel = article.category || topicCopy(meshTopicSlug).title;
+
+    return (
+      <div className="bg-background min-h-screen">
+        {articleSchema && <JsonLd data={articleSchema} />}
+        {faqSchema && <JsonLd data={faqSchema} />}
+        {toolSchema && <JsonLd data={toolSchema} />}
+        <Container className="py-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {breadcrumbs?.items?.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
+            {article.categorySlug && (
+              <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category || article.categorySlug} />
+            )}
+          </div>
+          <ArticlePage
+            slug={article.slug}
+            article={article}
+            author={author}
+            reviewer={reviewer}
+            factChecker={factChecker}
+            canonicalUrl={canonicalUrl}
+            feedback={feedback}
+            comments={comments}
+            poll={poll}
+            relatedArticles={relatedArticles}
+            marketWidget={marketWidget}
+            inlineChart={inlineChart}
+            inlineTopicGuides={inlineTopicGuides}
+            inlineTopicLabel={inlineTopicLabel}
+            inlineTopicHref={`/${meshTopicSlug}`}
+            sidebar={
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category || article.categorySlug || "Finance"} excludeSlug={article.slug} />
+            }
+          />
+        </Container>
+      </div>
+    );
+  } catch {
+    return (
+      <div className="bg-background min-h-screen">
+        <Container className="py-8">
+          <ArticlePage
+            slug={article.slug}
+            article={article}
+            sidebar={
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category || article.categorySlug || "Finance"} excludeSlug={article.slug} />
+            }
+          />
+        </Container>
+      </div>
+    );
+  }
 }

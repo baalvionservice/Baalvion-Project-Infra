@@ -1,5 +1,5 @@
 /**
- * Live data layer for the CNBC-style World page (/world/?region=).
+ * Live data layer for the Imperialpedia-style World page (/world/?region=).
  *
  * Real data, fetched server-side with ISR caching, with graceful fallback to the
  * static demo set (./worldRegions) on any failure — the page can never break:
@@ -152,11 +152,12 @@ export const MARKET_DATA_REVALIDATE_SECONDS = 86400;
 // the sidebar of every article, so this is the article template's ISR floor.
 const CMS_FEED_REVALIDATE_SECONDS = 3600;
 
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const isProd = process.env.NODE_ENV === "production";
 const IMPERIALPEDIA_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
-    : "http://localhost:3004/api/v1");
+  (envImpApi && !(isProd && (envImpApi.includes("localhost") || envImpApi.includes("127.0.0.1"))))
+    ? envImpApi
+    : (isProd ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1" : "http://localhost:3004/api/v1");
 
 interface WorldConfig {
   settings?: { newsFallback?: boolean; refreshSeconds?: number };
@@ -758,9 +759,11 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
 // Localhost is dev-only (port aligned with the rest of the app: 3018); production
 // resolves to the public API gateway, same default cms-public.ts's own CMS_PUBLIC_URL
 // uses — an empty string here silently 500s every server-side fetch below.
+const envCmsPublic = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
 const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === "production" ? "https://api.baalvion.com/api/v1/public" : "http://localhost:3018/api/v1/public");
+  (envCmsPublic && !(isProd && (envCmsPublic.includes("localhost") || envCmsPublic.includes("127.0.0.1"))))
+    ? envCmsPublic
+    : (isProd ? "https://api.baalvion.com/api/v1/public" : "http://localhost:3018/api/v1/public");
 const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 async function cmsList(params: {
@@ -799,9 +802,18 @@ function mapCmsCategory(name: string | null | undefined, title: string): string 
   if (/politic|policy|government/.test(n)) return "POLITICS";
   if (/personal.?finance|budget|saving|credit.?score/.test(n)) return "PERSONAL FINANCE";
   if (/invest|portfolio|\betf\b|brokers?\b|bonds?\b|stocks?\b/.test(n)) return "INVESTING";
-  if (/econom|inflation|\bfed\b|banking|monetary/.test(n)) return "FINANCE";
+  // "Finance" itself has to be listed: the CMS category is named exactly that,
+  // and without it the site's second-largest beat fell through to the headline
+  // heuristic and landed on whichever rail a keyword happened to hit.
+  if (/finance|econom|inflation|\bfed\b|banking|monetary/.test(n)) return "FINANCE";
   if (/business|company.?news|earnings/.test(n)) return "BUSINESS";
   if (/^world$|geopolit/.test(n)) return "WORLD";
+  // Region categories are prioritisation buckets, not topic rails — let them
+  // fall through to the headline heuristic rather than claiming MARKETS on the
+  // strength of the word "Markets" in "Emerging Markets".
+  if (/^(u\.?s\.?|europe|asia.?pacific|china|emerging markets|world)$/.test(n.trim())) {
+    return classifyCategory(title);
+  }
   if (/market/.test(n)) return "MARKETS";
   return classifyCategory(title);
 }
@@ -853,6 +865,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
       // Owned editorial content -- links to the real article page via storyHref().
       slug: c.slug,
       dateISO: c.publishedAt ?? undefined,
+      contentType: c.contentType,
+      categorySlug: c.category?.slug,
     };
   });
 
@@ -864,6 +878,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
     positive: classifyPositive(c.title),
     slug: c.slug,
     dateISO: c.publishedAt ?? undefined,
+    contentType: c.contentType,
+    categorySlug: c.category?.slug,
   }));
 
   const buckets = new Map<string, CmsContent[]>();
@@ -882,6 +898,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
         image: safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title), c.title),
         slug: c.slug,
         dateISO: c.publishedAt ?? undefined,
+        contentType: c.contentType,
+        categorySlug: c.category?.slug,
       }));
     return { section: def.section, color: "#0a2463", items: its };
   }).filter((s) => s.items.length > 0);
@@ -935,7 +953,15 @@ async function topUpNews(
   ].filter((i) => !seen.has(i.headline.toLowerCase()));
 
   const need = Math.max(0, target - newsCount(primary));
-  return { ...primary, latest: [...primary.latest, ...pool.slice(0, need)] };
+
+  // Re-key what we append. buildCmsNews and buildWireNews both number their
+  // `latest` items from 2000, so concatenating the two produced duplicate React
+  // keys the moment the CMS had content to top up — silent while the CMS was
+  // empty, because only one list ever existed. 6000+ is outside every range
+  // these builders assign (1000 featured, 2000 latest, 3000 sections, 4900 the
+  // promoted featured above).
+  const topped = pool.slice(0, need).map((item, i) => ({ ...item, id: 6000 + i }));
+  return { ...primary, latest: [...primary.latest, ...topped] };
 }
 
 // ── timestamp ───────────────────────────────────────────────────────────────

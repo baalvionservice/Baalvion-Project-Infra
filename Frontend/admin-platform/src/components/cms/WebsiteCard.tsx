@@ -43,15 +43,19 @@ export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
     <Card className="group hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
+          {/* The name/icon is the card's only obvious click target besides the "Manage
+              Content" button below — without this link, opening a website's overview
+              page is buried in the hover-only "⋮" menu's "Manage" item, so clicking
+              what looks like "open this website" always skipped straight to content. */}
+          <Link href={`/cms/websites/${website.slug}`} className="flex min-w-0 items-center gap-3 hover:opacity-80">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
               <Globe className="h-5 w-5 text-primary" />
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-sm truncate">{website.name}</p>
+              <p className="font-semibold text-sm truncate hover:underline">{website.name}</p>
               <p className="text-xs text-muted-foreground truncate">{website.domain}</p>
             </div>
-          </div>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

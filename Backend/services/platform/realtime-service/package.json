@@ -1,5 +1,9 @@
 {
     "name": "@baalvion/realtime-service",
+    "engines": {
+      "node": ">=24",
+      "pnpm": ">=9"
+    },
     "version": "1.0.0",
     "private": true,
     "description": "Realtime metrics + event fan-out over WebSocket for the admin console (hand-rolled RFC6455, no ws dependency).",

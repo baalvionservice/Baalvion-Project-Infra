@@ -1,0 +1,43 @@
+#!/bin/sh
+# Catches the two things that are cheap here and expensive in CI.
+#
+# Deliberately NOT husky/lint-staged: those are two more root dependencies and
+# another lockfile change in a repo where 50% of commits already touch the
+# lockfile. `git config core.hooksPath .githooks` costs nothing and is wired up
+# by the root `prepare` script, so a fresh clone gets it on first install.
+#
+# Skip with `git commit --no-verify` when you genuinely need to.
+
+set -e
+
+staged() { git diff --cached --name-only --diff-filter=ACM; }
+
+# 1. pnpm overrides drift — package.json's pnpm.overrides vs the lockfile's.
+#    Out of sync means every `pnpm install --frozen-lockfile` in CI fails before
+#    it runs anything, so it is worth 200ms here.
+if staged | grep -qE '^(package\.json|pnpm-lock\.yaml)$'; then
+  if ! node scripts/check-lockfile-overrides.mjs; then
+    echo ""
+    echo "pre-commit: pnpm overrides drifted. Fix with:"
+    echo "    pnpm run lockfile:fix && git add package.json"
+    exit 1
+  fi
+fi
+
+# 2. Staged secrets / local env backups. .gitignore already covers the usual
+#    names, but *.bak and timestamped copies slip past it.
+# .env.example / .env.sample / .env.template are templates and are MEANT to be
+# committed — matching them was a false positive that blocked a legitimate file from
+# main on the very first real use.
+LEAKY=$(staged \
+  | grep -E '(^|/)\.env($|\.)|\.env\..*\.bak|\.bak-[0-9]+$|\.pem$|\.p12$|id_rsa' \
+  | grep -vE '\.(example|sample|template|dist)$' || true)
+if [ -n "$LEAKY" ]; then
+  echo "pre-commit: refusing to commit what look like secrets or env backups:"
+  echo "$LEAKY" | sed 's/^/    /'
+  echo ""
+  echo "If one of these is genuinely safe, commit with --no-verify."
+  exit 1
+fi
+
+exit 0

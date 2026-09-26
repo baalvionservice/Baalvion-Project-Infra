@@ -79,8 +79,8 @@ export default function AboutUsPage() {
               <p>
                 Law Elite Network was founded on March 11, 2025 with the mission of helping people understand the law and improve
                 their professional and legal outcomes. We are a legal knowledge platform operated by{' '}
-                <strong>Baalvion Industries Private Limited</strong>, part of the Baalvion Group — that publishes clear, well-sourced legal
-                explainers and operates a directory through which readers can discover qualified practitioners.
+                <strong>Baalvion Industries Private Limited</strong> that publishes clear, well-sourced legal
+                explainers, and is building a directory of qualified practitioners readers can connect with as it grows.
               </p>
               <p>
                 Our readers come to us from all over the world and from all walks of life. Some are encountering a legal
@@ -131,9 +131,7 @@ export default function AboutUsPage() {
               <p>
                 We treat the law as a living thing. Statutes are amended, cases are decided, and guidance is revised, so
                 we revisit and update our material on a recurring basis and date our pages so readers can see how current
-                a piece is. Where we use AI-assisted tooling to help with research or drafting, that output is always
-                reviewed and verified by a human editor before it is published — automation supports our team, it does
-                not replace its judgment. The full details of this process are set out in our{' '}
+                a piece is. The full details of this process are set out in our{' '}
                 <Link href="/editorial-standards">Editorial Standards</Link>.
               </p>
             </Block>
@@ -179,7 +177,7 @@ export default function AboutUsPage() {
                 explained.
               </p>
               <p>
-                Law Elite Network is operated by Baalvion Industries Private Limited, part of the Baalvion Group, which
+                Law Elite Network is operated by Baalvion Industries Private Limited, which
                 supports our editorial independence and gives our team the resources to maintain a large and growing
                 library to a consistent standard.
               </p>

@@ -24,6 +24,10 @@ const ledgerOutbox = require('../service/ledgerOutbox');
 // on every call, and dotenv has already run by this point, so setting it here is authoritative.
 // This is the "provider stubbed" the test header refers to — the mock refund always succeeds locally.
 process.env.PAYMENT_PROVIDER = 'mock';
+// Mock is no longer reachable by omission — naming it is not enough, it must also be opted into.
+// That rule exists so a service with PAYMENT_PROVIDER unset can never silently capture orders
+// against a provider that verifies nothing; a test that genuinely wants it says so here.
+process.env.ALLOW_MOCK_PAYMENTS = 'true';
 
 const STORE = '11111111-1111-1111-1111-111111111111';
 const ledgerCalls = [];

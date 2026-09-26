@@ -27,9 +27,17 @@ spec:
   apis: ["/v1/cases", "/v1/communities", "/v1/posts", "/v1/comments", "/v1/resources", "/v1/moderation", "/v1/admin"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }
-  # C8 has landed with this change, so the runtime block the note here asked for is now
-  # declared. CanWeMarry runs under the root ecosystem.config.js on :3070 but is not in the
-  # consolidated production deploy, so `not-deployed` is the honest answer — the console
-  # reports it as "not set up" rather than as an outage.
+  # CanWeMarry is deployed. It runs on the production box as two of its OWN containers, not
+  # inside an app-* pm2 group: app-canwemarry (:3070, the service) and app-canwemarry-web
+  # (:3071, the Next standalone image) — hence `standalone`, per this schema's own wording.
+  #
+  # NOTE for whoever maintains derive-runtime.mjs: this block is hand-written because the
+  # deriver reads deploy/consolidated/, and CanWeMarry is not declared there. The stack that
+  # actually runs in production is /opt/baalvion/stack/docker-compose.app.yml on the box,
+  # which is NOT in version control. Until that is reconciled, deriving this service would
+  # regress it back to `not-deployed` while it is serving traffic.
   runtime:
-    deployment: not-deployed
+    deployment: standalone
+    port: 3070
+    container: app-canwemarry
+    healthPath: /health

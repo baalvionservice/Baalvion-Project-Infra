@@ -1,33 +1,57 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, use, Suspense } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { sanitizeRichHtml } from "@/lib/sanitize";
+// sanitize-html (via @/lib/sanitize) pulls in htmlparser2 + postcss —
+// ~50KB gzipped of Node-oriented HTML parsing with no reason to reach a
+// browser. resolveArticleForDetail() (article-detail.tsx, server-side)
+// already sanitizes article.body before this component ever sees it, for
+// every real page load. The only path that could still hand this component
+// unsanitized HTML is the client-side fetch fallback below (used only when
+// no initialArticle was provided at all) — that path lazy-imports the
+// sanitizer itself instead of a static import here, so the common case
+// ships none of it.
 import { Container } from "@/design-system/layout/container";
 import { Article } from "../types";
 import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
-import { RelatedArticles } from "./RelatedArticles";
 import { SourcesCited } from "./SourcesCited";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { ResolvedAuthor, ArticleFeedbackSummary, ArticleComment, ArticlePoll as ArticlePollData } from "@/services/data/cms-public";
-import { HelpfulVote } from "@/components/article/HelpfulVote";
-import { CommentsSection } from "@/components/article/CommentsSection";
 import { RelatedCalculators } from "@/components/article/RelatedCalculators";
-import { WeeklyDigestSignup } from "@/components/article/WeeklyDigestSignup";
-import { ArticleQuiz } from "@/components/article/ArticleQuiz";
-import { ArticlePoll } from "@/components/article/ArticlePoll";
-import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
-import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { TableOfContents } from "@/components/article/TableOfContents";
-import { SavingsGoalWidget } from "@/components/article/SavingsGoalWidget";
 import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
+import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
+import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
+import { StickyShareBar } from "@/components/article/StickyShareBar";
+import { AuthorBioCard } from "@/components/article/AuthorBioCard";
+import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
+import type { FeaturedGuide } from "@/lib/topic-mesh";
+
+// Below-the-fold / purely-interactive widgets: not needed for first paint or
+// LCP, so they're split out of the article route's initial JS chunk. Grouped
+// into 3 bundles by where they sit in the page rather than one chunk per
+// component — 9 separate chunks for components under ~150 lines each was
+// mostly per-chunk request/parse/hydrate overhead, not payload savings, and
+// measurably increased Total Blocking Time (verified via a live Lighthouse
+// run: 670ms -> 1580ms after the 9-way split).
+const ArticleQuiz = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticleQuiz));
+const ArticlePoll = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticlePoll));
+const HelpfulVote = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.HelpfulVote));
+const CommentsSection = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.CommentsSection));
+const RelatedArticles = dynamic(() => import("./ArticleFooterBundle").then((m) => m.RelatedArticles));
+const WeeklyDigestSignup = dynamic(() => import("./ArticleFooterBundle").then((m) => m.WeeklyDigestSignup));
+const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
+const CreatorEarningsCalculator = dynamic(() => import("@/components/tools/CreatorEarningsCalculator").then((m) => m.CreatorEarningsCalculator));
+const SponsorshipRateCalculator = dynamic(() => import("@/components/tools/SponsorshipRateCalculator").then((m) => m.SponsorshipRateCalculator));
+const PageRpmCalculator = dynamic(() => import("@/components/tools/PageRpmCalculator").then((m) => m.PageRpmCalculator));
 
 interface ArticlePageProps {
   slug: string;
@@ -36,12 +60,48 @@ interface ArticlePageProps {
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
   canonicalUrl?: string;
-  feedback?: ArticleFeedbackSummary;
-  comments?: ArticleComment[];
-  poll?: ArticlePollData | null;
+  // Below-the-fold sections stream in independently via Suspense instead of
+  // gating the whole page on their (slower, per-article) CMS round trips.
+  feedback?: Promise<ArticleFeedbackSummary>;
+  comments?: Promise<ArticleComment[]>;
+  poll?: Promise<ArticlePollData | null>;
+  relatedArticles?: Promise<Article[]>;
   marketWidget?: React.ReactNode;
   inlineChart?: React.ReactNode;
+  // Computed server-side in article-detail.tsx and passed down as plain
+  // data — this file is "use client", so importing topic-mesh/topic-config
+  // directly here (rather than receiving their already-computed output)
+  // would ship every category's full editorial copy to every visitor.
+  inlineTopicGuides?: FeaturedGuide[];
+  inlineTopicLabel?: string;
+  inlineTopicHref?: string;
   sidebar?: React.ReactNode;
+}
+
+const DEFAULT_FEEDBACK = Promise.resolve<ArticleFeedbackSummary>({ helpful: 0, notHelpful: 0 });
+const DEFAULT_COMMENTS = Promise.resolve<ArticleComment[]>([]);
+const DEFAULT_POLL = Promise.resolve<ArticlePollData | null>(null);
+const DEFAULT_RELATED: Promise<Article[]> = Promise.resolve([]);
+
+function RelatedArticlesSlot({ promise }: { promise: Promise<Article[]> }) {
+  const articles = use(promise);
+  return <RelatedArticles articles={articles} />;
+}
+
+function FeedbackSlot({ promise, slug, categoryName }: { promise: Promise<ArticleFeedbackSummary>; slug: string; categoryName?: string }) {
+  const feedback = use(promise);
+  return <HelpfulVote slug={slug} initialSummary={feedback} categoryName={categoryName} />;
+}
+
+function CommentsSlot({ promise, slug }: { promise: Promise<ArticleComment[]>; slug: string }) {
+  const comments = use(promise);
+  return <CommentsSection slug={slug} initialComments={comments} />;
+}
+
+function PollSlot({ promise, slug, categoryName }: { promise: Promise<ArticlePollData | null>; slug: string; categoryName?: string }) {
+  const poll = use(promise);
+  if (!poll) return null;
+  return <ArticlePoll slug={slug} initialPoll={poll} categoryName={categoryName} />;
 }
 
 const DEFAULT_TAKEAWAYS: Record<string, string[]> = {
@@ -94,7 +154,7 @@ function splitLeadAndBody(html?: string): { leadHtml: string; restHtml: string }
 }
 
 /**
- * Main article page component with Investopedia layout & typography:
+ * Main article page component with Imperialpedia layout & typography:
  * [Sticky Left Table of Contents] | [Center Editorial Content] | [Right Sidebar]
  * Sequence: Title & Byline -> Photo -> 2 Lead Paragraphs -> Key Takeaways -> Body -> Tools
  */
@@ -105,11 +165,15 @@ export const ArticlePage = ({
   reviewer,
   factChecker,
   canonicalUrl,
-  feedback,
-  comments,
-  poll,
+  feedback = DEFAULT_FEEDBACK,
+  comments = DEFAULT_COMMENTS,
+  poll = DEFAULT_POLL,
+  relatedArticles = DEFAULT_RELATED,
   marketWidget,
   inlineChart,
+  inlineTopicGuides,
+  inlineTopicLabel,
+  inlineTopicHref,
   sidebar,
 }: ArticlePageProps) => {
   const [article, setArticle] = useState<Article | null>(
@@ -131,7 +195,15 @@ export const ArticlePage = ({
         const response = await getArticleBySlug(slug);
 
         if (response.data) {
-          setArticle(response.data);
+          // This client-fetched article bypassed article-detail.tsx's
+          // server-side sanitizeRichHtml() call — lazy-import it only for
+          // this rare fallback path (no initialArticle from SSR at all)
+          // instead of a static top-level import, so the common SSR case
+          // never pays for it.
+          const body = response.data.body
+            ? (await import("@/lib/sanitize")).sanitizeRichHtml(response.data.body)
+            : response.data.body;
+          setArticle({ ...response.data, body });
         } else {
           setError(response.message || "Article not found");
         }
@@ -269,9 +341,20 @@ export const ArticlePage = ({
                   prose-p:text-[17px] sm:prose-p:text-[17.5px] prose-p:leading-[1.85] prose-p:text-[#222222] dark:prose-p:text-gray-200 prose-p:mb-6
                   prose-a:text-[#1d4fc4] dark:prose-a:text-blue-400 prose-a:font-semibold prose-a:underline-offset-2 hover:prose-a:underline
                   prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold"
-                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(leadHtml) }}
+                dangerouslySetInnerHTML={{ __html: leadHtml }}
               />
             ) : null}
+
+            {/* Top-of-article ad unit — after the opening paragraphs, never
+                interrupting the lede itself. */}
+            <LabeledAdSlot slot="8086915093" className="my-8" />
+
+            {/* WIN 3: Inline "Read more on [Topic]" callout — injected mid-article after lead */}
+            <InlineTopicCallout
+              guides={inlineTopicGuides}
+              label={inlineTopicLabel || effectiveArticle.category || "Imperialpedia"}
+              topicHref={inlineTopicHref || `/${effectiveArticle.categorySlug || ""}`}
+            />
 
             {/* 3. KEY TAKEAWAYS CALLOUT BOX (Positioned after first 2 paragraphs) */}
             {takeaways && takeaways.length > 0 && (
@@ -283,7 +366,16 @@ export const ArticlePage = ({
               <SavingsGoalWidget defaultGoal={5000} defaultMonths={12} className="my-8" />
             )}
 
-            {/* 4. REMAINING ARTICLE BODY WITH INVESTOPEDIA-GRADE PROSE TYPOGRAPHY */}
+            {/* CREATOR ECONOMY TOOLS — opt-in via CMS customFields.tool.type */}
+            {effectiveArticle.toolType === "creator-rpm-calculator" && <CreatorEarningsCalculator />}
+            {effectiveArticle.toolType === "sponsorship-rate-calculator" && <SponsorshipRateCalculator />}
+            {effectiveArticle.toolType === "page-rpm-calculator" && <PageRpmCalculator />}
+
+            {/* Mid-article ad unit — between the opening section and the
+                remaining body, roughly the article's midpoint. */}
+            {restHtml ? <LabeledAdSlot slot="4123172240" className="my-8" /> : null}
+
+            {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (
               <div
                 className="article-body prose prose-lg dark:prose-invert max-w-none mb-12
@@ -296,11 +388,15 @@ export const ArticlePage = ({
                   prose-ul:my-5 prose-ul:space-y-3 prose-li:text-[17px] prose-li:leading-[1.78] prose-li:marker:text-gray-800
                   prose-ol:my-5 prose-ol:space-y-3 prose-ol:text-[17px]
                   prose-img:rounded-xl prose-img:border prose-img:border-gray-100 dark:prose-img:border-gray-800"
-                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(restHtml) }}
+                dangerouslySetInnerHTML={{ __html: restHtml }}
               />
             ) : !leadHtml ? (
               <ArticleBody sections={[]} />
             ) : null}
+
+            {/* Bottom-of-article ad unit — right after the core body ends,
+                before the supplementary tools/citations/comments sections. */}
+            <LabeledAdSlot slot="7967495593" className="my-8" />
 
             {/* KEY FINANCIAL TERMS DEFINED */}
             <KeyTermsCallout categorySlug={effectiveArticle.categorySlug || "savings"} />
@@ -311,19 +407,24 @@ export const ArticlePage = ({
             {/* TOOLS & QUIZZES */}
             <div className="mb-8 space-y-4">
               <RelatedCalculators categorySlug={effectiveArticle.categorySlug} />
-              {poll && <ArticlePoll slug={effectiveArticle.slug} initialPoll={poll} categoryName={effectiveArticle.category} />}
+              <Suspense fallback={null}>
+                <PollSlot promise={poll} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+              </Suspense>
               <ArticleQuiz quiz={effectiveArticle.quiz} categoryName={effectiveArticle.category} />
             </div>
 
             {/* HELPFUL VOTE & COMMENTS */}
-            <HelpfulVote
-              slug={effectiveArticle.slug}
-              initialSummary={feedback ?? { helpful: 0, notHelpful: 0 }}
-              categoryName={effectiveArticle.category}
-            />
+            <Suspense fallback={null}>
+              <FeedbackSlot promise={feedback} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+            </Suspense>
+
+            {/* ABOUT THE AUTHOR — E-E-A-T: who wrote this, and who reviewed/fact-checked it */}
+            <AuthorBioCard author={author} reviewer={reviewer} factChecker={factChecker} />
 
             <div className="mt-16 ml-4 lg:ml-8 xl:ml-12">
-              <CommentsSection slug={effectiveArticle.slug} initialComments={comments ?? []} />
+              <Suspense fallback={null}>
+                <CommentsSlot promise={comments} slug={effectiveArticle.slug} />
+              </Suspense>
             </div>
           </div>
 
@@ -335,12 +436,9 @@ export const ArticlePage = ({
           )}
         </div>
 
-        <RelatedArticles
-          currentArticleId={effectiveArticle.id}
-          category={effectiveArticle.category}
-          tags={effectiveArticle.tags}
-          categorySlug={effectiveArticle.categorySlug}
-        />
+        <Suspense fallback={null}>
+          <RelatedArticlesSlot promise={relatedArticles} />
+        </Suspense>
 
         <div className="mt-12">
           <WeeklyDigestSignup categoryName={effectiveArticle.category} />
