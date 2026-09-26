@@ -1,0 +1,9 @@
+{
+  "_comment": "Single source of truth for the shared runtime layer (Node, pnpm, Turbo) across every service and Dockerfile. Nothing else belongs here — per-product dependencies (React, Next.js, business libraries) stay independent in each package.json. See docs/VERSIONS.md. Bump here, then run: node scripts/check-version-drift.mjs --fix",
+  "node": {
+    "canonical": "26.9-alpine",
+    "engineRange": ">=24"
+  },
+  "pnpm": "9.15.0",
+  "turbo": "2.9.16"
+}

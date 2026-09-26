@@ -12,14 +12,14 @@
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://yourdomain.com \
 #     .
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune law-elite-network-web --docker
+RUN pnpm dlx turbo@2.9.16 prune law-elite-network-web --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots from the pruned lockfile, which a frozen install rejects.
@@ -55,7 +55,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.14 run build --filter=law-elite-network-web
+RUN pnpm dlx turbo@2.9.16 run build --filter=law-elite-network-web
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner

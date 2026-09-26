@@ -1,13 +1,13 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/knowledge/cms-service/Dockerfile -t cms-service .
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune cms-service --docker
+RUN pnpm dlx turbo@2.9.16 prune cms-service --docker
 
 FROM base AS installer
 COPY .npmrc ./
@@ -31,10 +31,10 @@ RUN pnpm -r --filter "./Backend/packages/*" run build
 # The shared tsconfig chain (root base + Backend shim) is not part of the pruned output → copy it.
 COPY tsconfig.base.json ./tsconfig.base.json
 COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
-RUN pnpm dlx turbo@2.9.14 run build --filter=cms-service...
+RUN pnpm dlx turbo@2.9.16 run build --filter=cms-service...
 RUN pnpm deploy --filter=cms-service --prod /out
 
-FROM node:26-alpine AS final
+FROM node:26.9-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \

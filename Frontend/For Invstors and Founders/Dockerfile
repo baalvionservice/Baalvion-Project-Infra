@@ -7,13 +7,13 @@
 # to same-origin paths (/insiders-api, /auth-bff) which Caddy resolves to app-insiders on this
 # box, so there is nothing to bake in — and nothing to get silently wrong the way a bare ARG
 # does when it has no matching ENV.
-FROM node:20.12-alpine AS base
+FROM node:26.9-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune investors-and-founders-web --docker
+RUN pnpm dlx turbo@2.9.16 prune investors-and-founders-web --docker
 
 FROM base AS builder
 COPY .npmrc ./
