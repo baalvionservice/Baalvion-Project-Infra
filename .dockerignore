@@ -79,3 +79,9 @@ Frontend/baalvion-stack/.env.*.local
 e2e
 docs
 *.md
+# insiders directory SPA (www.marketunderworld.com), built from the repo root like the two
+# above. Without this re-include its source never enters the context and `turbo prune
+# investors-and-founders-web` fails "package.json not found".
+!Frontend/For Invstors and Founders
+Frontend/For Invstors and Founders/node_modules
+Frontend/For Invstors and Founders/dist
