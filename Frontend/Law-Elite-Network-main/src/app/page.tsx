@@ -16,19 +16,17 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
-  MediaRail,
   PillarColumn,
   TrendingList,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
-import { getAllMedia } from '@/lib/media-server';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-const TITLE = 'Law Elite Network | News on People, Entertainment, Sports and the Law';
+const TITLE = 'Law Elite Network | Legal Guides & News';
 const DESCRIPTION =
-  'Law Elite Network covers the people, entertainment, sports and legal stories that matter, with profiles, cases, courts and interviews in one place.';
+  'Law Elite Network publishes in-depth guides on personal injury, maritime and offshore injury law, cruise ship accidents, and law school success.';
 
 // Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
 const AD_SLOT_ID = '4123514154';
@@ -102,7 +100,7 @@ export default async function KnowledgeHomePage() {
   const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
   const feed = await getHomeFeed(pool);
-  const [videos, interviews, widgets] = await Promise.all([getAllMedia('video'), getAllMedia('interview'), getHomeWidgets()]);
+  const widgets = await getHomeWidgets();
 
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
@@ -129,7 +127,7 @@ export default async function KnowledgeHomePage() {
       <BreakingStrip articles={feed.breaking} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        <h1 className="sr-only">Law Elite Network: people, entertainment, sports and legal news</h1>
+        <h1 className="sr-only">Law Elite Network: legal guides and news</h1>
 
 
         <AudioBriefing items={widgets.audio} />
@@ -144,12 +142,7 @@ export default async function KnowledgeHomePage() {
 
 
         {/* Multi-Tab Interactive Media Box */}
-        <TabbedStoryBox
-          popular={feed.trending}
-          exclusives={feed.celebrity}
-          legal={feed.legal}
-          profiles={feed.latest.slice(0, 4)}
-        />
+        <TabbedStoryBox popular={feed.trending} legal={feed.legal} />
 
 
         {/* ⚡ 100% Free Daily Scoop & Breaking Alerts Card */}
@@ -185,8 +178,6 @@ export default async function KnowledgeHomePage() {
             <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
           </section>
         )}
-        <MediaRail title="Videos & Law Elite TV" href="/videos" items={videos.slice(0, 4)} />
-        <MediaRail title="Interviews & Exclusives" href="/interviews" items={interviews.slice(0, 4)} />
         {/* PopularTopics dropped in the same pass as above -- /topics still
             301s to /, and each topic card links to /topics/{slug}. */}
 

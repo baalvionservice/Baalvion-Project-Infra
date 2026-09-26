@@ -57,7 +57,7 @@ export function FrontPage({ articles }: { articles: Article[] }) {
   const rail = rest.slice(2, 7);
   return (
     <section className="py-8 md:py-10">
-      <SectionHeader id="latest" title="Top Stories & Celebrity Coverage" />
+      <SectionHeader id="latest" title="Top Stories" />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         <div className="lg:col-span-8 space-y-9">
           <StoryCard article={lead} variant="lead" priority />

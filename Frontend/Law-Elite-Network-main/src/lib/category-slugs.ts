@@ -39,8 +39,16 @@ export function toNewCategorySlug(oldSlug: string): string {
 // next.config.ts / sitemap.ts). Every slug removed here still exists with
 // real content -- this list controls indexing/nav/sitemap eligibility, not
 // deletion -- and gets restored once AdSense approves the site as it stands.
+//
+// 2026-09-27, follow-up after the third rejection: Fashion removed too --
+// despite being the very first category kept above, it never got real
+// content and is still a "DESIGN PREVIEW... every story below is
+// placeholder content" page with fake headlines. That's fine unlinked, but
+// this pass is specifically about not shipping the accumulated gap between
+// this branch and what's live, so it comes out alongside Videos/Podcasts/
+// Interviews (see next.config.ts) rather than going live as a real nav item
+// pointing at placeholder copy. Restore once it has real articles.
 export const CURRENT_CATEGORY_SLUGS = [
-  'fashion',
   'personal-injury-lawyer',
   'maritime-offshore-injury-law',
   'cruise-ship-passenger-vessel-accidents',
