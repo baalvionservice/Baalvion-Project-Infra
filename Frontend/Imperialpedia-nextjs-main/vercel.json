@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "npx turbo-ignore imperialpedia-web",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=imperialpedia-web",
+  "env": {
+    "NEXT_PUBLIC_GA_ID": "G-5WVH95P61Z",
+    "NEXT_PUBLIC_GTM_ID": "GTM-MFDQSXT5",
+    "NEXT_PUBLIC_ADSENSE_CLIENT": "ca-pub-8968452296456450"
+  },
+  "headers": [
+    {
+      "source": "/_next/image",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
+      ]
+    }
+  ]
+}
