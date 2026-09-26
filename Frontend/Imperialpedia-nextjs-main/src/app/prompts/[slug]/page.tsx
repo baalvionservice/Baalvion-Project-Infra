@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { CopyPromptButton } from '@/components/prompts/CopyPromptButton';
 import { PromptCard } from '@/components/prompts/PromptCard';
 import { PromptSubNav } from '@/components/prompts/PromptSubNav';
-import { fetchPromptBySlug, fetchRelatedPrompts, fetchPromptCategories, promptRealImage } from '@/lib/data/prompts-live';
+import { fetchPromptBySlug, fetchRelatedPrompts, fetchPromptCategories, promptRealImage, isPlaceholderPromptImage } from '@/lib/data/prompts-live';
 import { categoryLabel } from '@/config/prompt-categories';
 import { buildMetadata } from '@/lib/seo';
 import { structuredData } from '@/lib/seo/structured-data';
@@ -16,7 +16,7 @@ import { Breadcrumbs } from '@/modules/seo-engine/components/Breadcrumbs';
 import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-service';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
-import { Flame, ExternalLink, Lightbulb } from 'lucide-react';
+import { Flame, ExternalLink, Lightbulb, ImageOff } from 'lucide-react';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -73,7 +73,7 @@ export default async function PromptDetailPage({ params }: Props) {
       })} />
       <PromptSubNav categories={categories} active={prompt.category ?? undefined} />
       <Section spacing="md">
-        <Container className="max-w-3xl">
+        <Container isNarrow>
           <Breadcrumbs breadcrumb={breadcrumb} />
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -129,16 +129,30 @@ export default async function PromptDetailPage({ params }: Props) {
                   <p className="text-muted-foreground mb-4">{item.subtitle}</p>
                 )}
 
-                <div className="grid gap-3 mb-4">
+                <div className={`grid gap-3 mb-4 ${item.images.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                   {item.images.map((img, j) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={j}
-                      src={img.url}
-                      alt={img.alt || item.heading}
-                      className="w-full rounded-xl border border-gray-200 dark:border-gray-800 object-cover"
-                      loading={i === 0 && j === 0 ? 'eager' : 'lazy'}
-                    />
+                    isPlaceholderPromptImage(img.url) ? (
+                      <div
+                        key={j}
+                        className="w-full aspect-[4/3] rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-muted/40 flex flex-col items-center justify-center gap-2 text-center px-6"
+                      >
+                        <ImageOff size={24} className="text-muted-foreground" />
+                        <p className="text-sm font-medium text-muted-foreground">Example image coming soon</p>
+                      </div>
+                    ) : (
+                      <div
+                        key={j}
+                        className="w-full max-h-[640px] rounded-xl border border-gray-200 dark:border-gray-800 bg-muted/20 flex items-center justify-center overflow-hidden"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.url}
+                          alt={img.alt || item.heading}
+                          className="max-h-[640px] w-auto max-w-full object-contain"
+                          loading={i === 0 && j === 0 ? 'eager' : 'lazy'}
+                        />
+                      </div>
+                    )
                   ))}
                 </div>
                 {item.images.some((img) => img.credit) && (
