@@ -30,6 +30,20 @@ const money = (n) => {
     return `$${v}`;
 };
 const place = (r) => [r.city, r.state, r.country].filter(Boolean).join(', ') || r.location || '';
+// The filing taxonomy prefixes its catch-alls with "Other" ("Other Technology", "Other Energy"),
+// and a bare "Other" for no sector at all — together ~47% of companies. Rendered verbatim that
+// produced "is a other company". Strip the prefix and keep the sector that survives it; only a
+// bare "Other" leaves nothing, and then the sentence stands on the place and the filings.
+const sectorLabel = (g) => {
+    const s = String(g || '').toLowerCase().trim().replace(/^other\s+/, '');
+    return !s || s === 'other' ? '' : s;
+};
+const sentenceCase = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const sectorPhrase = (g, noun) => {
+    const s = sectorLabel(g);
+    return s ? `${/^[aeiou]/.test(s) ? 'an' : 'a'} ${s} ${noun}` : `a ${noun}`;
+};
+const plural = (n, word) => `${n} ${word}${Number(n) === 1 ? '' : 's'}`;
 
 function page({ title, description, canonical, jsonLd, h1, lede, facts = [], sections = [], noIndex = false }) {
     const factHtml = facts.length
@@ -203,7 +217,7 @@ async function renderPath(path) {
         ]);
         return page({
             title: `${i.name} — ${i.firm_type || 'Investor'} in ${place(i)} | Baalvion`,
-            description: `${i.name} is a ${(i.firm_type || 'investment').toLowerCase()} firm in ${place(i)} with ${i.fund_count || funds.length} funds on record${i.total_raised_usd ? `, ${money(i.total_raised_usd)} raised` : ''}.`,
+            description: `${i.name} is ${sectorPhrase(i.firm_type || 'investment', 'firm')} in ${place(i)} with ${plural(i.fund_count || funds.length, 'fund')} on record${i.total_raised_usd ? `, ${money(i.total_raised_usd)} raised` : ''}.`,
             canonical: `${SITE}/investors/${withSlug(i.firm || i.name, i.id)}`,
             h1: i.name,
             lede: [i.firm_type, i.entity_type, place(i)].filter(Boolean).join(' · '),
@@ -236,10 +250,10 @@ async function renderPath(path) {
         ]);
         const registry = c.source !== 'sec_form_d';
         return page({
-            title: `${c.name} — ${c.industry_group || 'Company'} in ${place(c)} | Baalvion`,
+            title: `${c.name} — ${sentenceCase(sectorLabel(c.industry_group)) || 'Company'} in ${place(c)} | Baalvion`,
             description: registry
-                ? `${c.name} is a company registered in ${c.country}, based in ${place(c)}${c.industry_group ? `, working in ${c.industry_group.toLowerCase()}` : ''}.`
-                : `${c.name} is a ${(c.industry_group || 'private').toLowerCase()} company in ${place(c)} with ${c.filing_count || filings.length} capital-raising filings on record${c.total_raised_usd ? `, ${money(c.total_raised_usd)} raised` : ''}.`,
+                ? `${c.name} is a company registered in ${c.country}, based in ${place(c)}${sectorLabel(c.industry_group) ? `, working in ${sectorLabel(c.industry_group)}` : ''}.`
+                : `${c.name} is ${sectorPhrase(c.industry_group, 'company')} in ${place(c)} with ${plural(c.filing_count || filings.length, 'capital-raising filing')} on record${c.total_raised_usd ? `, ${money(c.total_raised_usd)} raised` : ''}.`,
             canonical: `${SITE}/founders/${withSlug(c.name, c.id)}`,
             h1: c.name,
             lede: [c.industry_group, c.entity_type || c.legal_form, place(c)].filter(Boolean).join(' · '),
