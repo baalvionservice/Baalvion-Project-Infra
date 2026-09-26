@@ -394,7 +394,7 @@ export const NETWORK_DETAILS: Record<string, NetworkDetail> = {
       { q: 'What happens if the CMS or backend is unreachable?', a: 'Pages fall back to bundled static JSON (or a legacy mock set) so nothing renders blank; real content resumes once the source is reachable again.' },
       { q: 'Is the AI-Analyst suite always on?', a: 'No — it requires a GEMINI_API_KEY. Without one, a templated fallback is used instead of a live model.' },
     ],
-    sourceNote: 'Sourced from the Imperialpedia-main repository README and the live site at imperialpedia.com.',
+    sourceNote: 'Sourced from the Imperialpedia-nextjs-main repository README and the live site at imperialpedia.com.',
   },
 
   'amarise-maison-avenue': {

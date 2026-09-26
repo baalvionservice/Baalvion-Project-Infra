@@ -1,6 +1,6 @@
 # Imperialpedia Admin Panel Standard v1
 
-**Scope note, read first:** Imperialpedia-main has no admin panel of its own.
+**Scope note, read first:** Imperialpedia-nextjs-main has no admin panel of its own.
 Its local `/admin` route is retired and redirects to `NEXT_PUBLIC_ADMIN_CONSOLE_URL`
 (see [`src/middleware.ts`](../src/middleware.ts)), which points at the
 centralized `admin-platform` app (`Frontend/admin-platform`, port 3030 in
@@ -12,7 +12,7 @@ backed by `imperialpedia-service`) and
 `src/app/(dashboard)/cms/websites/[websiteId]/**` for the `imperialpedia`
 tenant (editorial content, backed by `cms-service`).
 
-**Do not build a second, local admin UI inside Imperialpedia-main.** Doing so
+**Do not build a second, local admin UI inside Imperialpedia-nextjs-main.** Doing so
 duplicates `admin-platform`'s existing entity/content editors and RBAC, and
 gives editors two disagreeing places to change the same data.
 
@@ -25,7 +25,7 @@ gives editors two disagreeing places to change the same data.
   `industry`, `image`, `tags`) plus a flexible `attributes` JSONB column that
   the API serializer flattens back to top-level fields (competitors,
   technologies, founded_year, ticker, founders, etc. — see `CompanyEntity` in
-  Imperialpedia-main's `src/types/entity.ts`).
+  Imperialpedia-nextjs-main's `src/types/entity.ts`).
 - **Glossary terms** — `imperialpedia-service` `/glossary`.
 - **Editorial content** (articles/news/pages/authors/categories/media) — the
   shared multi-tenant `cms-service`, scoped to the `imperialpedia` website

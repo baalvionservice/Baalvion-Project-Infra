@@ -4,7 +4,7 @@ set -u
 ROOT="d:/Baalvion Projects/Frontend"
 APPS=(
   "Baalvion-Jobs-Portal-main"
-  "Imperialpedia-main"
+  "Imperialpedia-nextjs-main"
   "brand-connector-main"
   "company-unified-Dashboard-main"
   "controlthemarket-main"

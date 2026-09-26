@@ -5,7 +5,7 @@
  * entry's `researchNote`) replacing the old formulaic AI-generated body for
  * these specific articles. Each body is a single `html` content block (the
  * CMS's existing block-renderer already passes raw html blocks through as-is
- * via blocksToHtml's 'html' case — see Frontend/Imperialpedia-main's
+ * via blocksToHtml's 'html' case — see Frontend/Imperialpedia-nextjs-main's
  * cms-public.ts), which keeps this a straightforward whole-body replacement
  * rather than requiring per-paragraph block decomposition.
  *

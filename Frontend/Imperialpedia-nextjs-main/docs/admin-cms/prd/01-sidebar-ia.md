@@ -6,7 +6,7 @@
 > **Grounds on:** the rationalized 9-group IA in [`../07-uiux-roadmap-scaling.md` §A.2](../07-uiux-roadmap-scaling.md#a2-sidebar-navigation-information-architecture),
 > the role matrix in [`../04-rbac-and-workflow.md` §A.2](../04-rbac-and-workflow.md#a2-permission-matrix),
 > the content types in [`../02-content-cms.md` §B](../02-content-cms.md#b-content-types-2), and the real
-> scaffolded routes under `Frontend/Imperialpedia-main/src/app/admin/*`.
+> scaffolded routes under `Frontend/Imperialpedia-nextjs-main/src/app/admin/*`.
 > **Authority rule:** the sidebar **hides or disables** items, but the *server* (rbac-service `/v1/authorize`)
 > is the only authority. Nav visibility is a UX affordance derived from `GET /me/permissions`, never a security boundary.
 
@@ -417,7 +417,7 @@ The Super Admin sees every group/leaf enabled. Lower roles render the same tree 
 | Top-bar shell, mobile subset, design direction, accessibility bars | [`../07` §A](../07-uiux-roadmap-scaling.md#a-uiux-15) |
 | Enforcement (route group + BFF + rbac-service + RLS); `/me/permissions` | [`../04` §A.3](../04-rbac-and-workflow.md#a3-enforcement-model-defense-in-depth) |
 
-> **Implementation note.** The live placeholder `Frontend/Imperialpedia-main/src/components/admin/AdminSidebar.tsx`
+> **Implementation note.** The live placeholder `Frontend/Imperialpedia-nextjs-main/src/components/admin/AdminSidebar.tsx`
 > (4 ad-hoc groups: Governance/Index Control/Operations/System) is **superseded** by the 12-entry tree above. The nav
 > config should be a single typed structure (`navTree: NavGroup[]`) whose every leaf carries `{ label, href, icon,
 > requiredCapability, scopeHint }`; visibility is computed from `/me/permissions` at render (§C.2), and `usePathname()`

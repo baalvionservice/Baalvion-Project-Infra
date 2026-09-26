@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   // before) made Next trace dependencies as if this app's own folder were the workspace root —
   // harmless for `next dev`/Vercel, but it breaks standalone output in a real pnpm monorepo
   // build: pnpm's node_modules symlinks are relative and computed assuming the true repo-root
-  // depth (Frontend/Imperialpedia-main/node_modules/next -> ../../../node_modules/.pnpm/...,
+  // depth (Frontend/Imperialpedia-nextjs-main/node_modules/next -> ../../../node_modules/.pnpm/...,
   // 3 levels up to repo root). With __dirname as the trace root, `next build` still copies
   // node_modules at that same nested relative depth into .next/standalone, but Docker then
   // has nowhere to put the matching 3-level-up target unless the image preserves that same

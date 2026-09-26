@@ -28,7 +28,7 @@ The `seo_review` / `legal_review` states, the gate reviewer columns, and `cms.co
 on an additive column it is called out so backend and frontend land together.
 
 **Route reality.** Only `/admin/scheduler` is scaffolded today; the `/admin/editorial/*` routes below are
-**new** and must be added to `Frontend/Imperialpedia-main/src/app/admin/`. The Revisions surface reuses the
+**new** and must be added to `Frontend/Imperialpedia-nextjs-main/src/app/admin/`. The Revisions surface reuses the
 existing `/admin/content/[slug]/...` segment. The Editorial Calendar **reuses** `/admin/scheduler` (we do
 not invent a second calendar route).
 

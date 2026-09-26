@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const projectRoot = '/Users/wade/Desktop/Baalvion-Project-Infra-main/Frontend/Imperialpedia-main';
+const projectRoot = '/Users/wade/Desktop/Baalvion-Project-Infra-main/Frontend/Imperialpedia-nextjs-main';
 const appDir = path.join(projectRoot, 'src', 'app');
 const componentsDir = path.join(projectRoot, 'src', 'components', 'pages');
 const templatePath = path.join(componentsDir, 'BankingHub.tsx');

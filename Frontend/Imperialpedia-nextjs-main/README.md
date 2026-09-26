@@ -35,7 +35,7 @@ Baalvion CMS** and **structured entities from the `imperialpedia-service` backen
 back to bundled static data so pages never break during cutover. Audience: retail investors,
 analysts, finance learners, and search/AI crawlers.
 
-Within the Baalvion monorepo it lives at `Frontend/Imperialpedia-main/`, is the CMS "website"
+Within the Baalvion monorepo it lives at `Frontend/Imperialpedia-nextjs-main/`, is the CMS "website"
 with slug `imperialpedia`, authenticates against the central `auth-service` (RS256), and is
 administered from the central **admin-platform** console (the in-app admin/editor/writer panels
 are retired and redirect there).
@@ -151,7 +151,7 @@ SEO is a first-class subsystem built for large-scale indexing:
 ## Project Structure
 
 ```
-Imperialpedia-main/
+Imperialpedia-nextjs-main/
 ├─ src/
 │  ├─ app/             → Next.js App Router routes, API handlers, layout, sitemap/robots
 │  ├─ components/      → Shared UI: landing, layout, home, world, search, review, ui (Radix)

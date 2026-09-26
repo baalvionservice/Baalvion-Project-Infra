@@ -72,7 +72,7 @@ The spec reuses, rather than reinvents, the platform's existing primitives:
 - **Cache:** `@baalvion/cache` — read-through Redis, single-flight, tenant-scoped keys.
 - **CMS core:** `cms-service` (`cms` schema) — content, revisions, workflow, taxonomy, media, redirects.
 - **Domain:** `imperialpedia-service` — entities, assets, community, calculators, portfolio, AI.
-- **Admin UI:** Next.js 15 App Router, `Frontend/Imperialpedia-main/src/app/admin/*` (~80 routes scaffolded).
+- **Admin UI:** Next.js 15 App Router, `Frontend/Imperialpedia-nextjs-main/src/app/admin/*` (~80 routes scaffolded).
 
 ## How to read this
 

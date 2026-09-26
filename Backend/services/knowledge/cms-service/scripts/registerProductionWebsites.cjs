@@ -22,7 +22,7 @@ const CREATED_BY = Number(process.env.CMS_CREATED_BY || 67);
 // domain, name, slug, plan, modules, linkedFrontend, linkedService, linkedSchema, confirmed
 const SITES = [
   ['amarisemaisonavenue.com', 'Amarise Maison Avenue', 'amarise-maison-avenue', 'enterprise', ['pages','portfolio_item','news'], 'AmariseMaisonAvenue-main', 'real-estate-service', 'real_estate', true],
-  ['imperialpedia.com',       'Imperialpedia',          'imperialpedia',         'enterprise', ['pages','article','doc'],       'Imperialpedia-main',      'imperialpedia-service','imperialpedia', true],
+  ['imperialpedia.com',       'Imperialpedia',          'imperialpedia',         'enterprise', ['pages','article','doc'],       'Imperialpedia-nextjs-main',      'imperialpedia-service','imperialpedia', true],
   ['lawelitenetwork.com',     'Law Elite Network',      'law-elite-network',     'enterprise', ['pages','article','news'],      'Law-Elite-Network-main',  'law-service',          'legal',  true],
   ['controlthemarket.com',    'Control The Market',     'control-the-market',    'enterprise', ['pages','post','news'],         'controlthemarket-main',   'ctm-service',          'ctm',    true],
   ['mining.baalvion.com',     'Baalvion Mining',        'baalvion-mining',       'enterprise', ['pages','news'],                'Mining.Baalvion-main',    'mining-service',       'mining', true],

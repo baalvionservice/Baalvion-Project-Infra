@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 
 // These are the entity `type` values the public Imperialpedia site actually
-// reads content back out of (see Imperialpedia-main's src/lib/data/site-content.ts).
+// reads content back out of (see Imperialpedia-nextjs-main's src/lib/data/site-content.ts).
 // Free-text `type` on entities is technically possible at the API level, but a
 // typo here just as silently produces a row nothing ever reads — same failure
 // mode EntityForm.tsx already documents for company/country/industry/technology
