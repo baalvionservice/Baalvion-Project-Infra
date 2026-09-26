@@ -110,9 +110,14 @@ export const billingApi = {
   // Optional amount/interval let the backend record an invoice with the exact charged total.
   activate: (planSlug: string, amount?: number, interval?: "monthly" | "yearly") =>
     post<Subscription>("/billing/activate", { planSlug, amount, interval }),
-  // Bank/wire: create a PENDING order (settled offline) — returns the pending invoice.
-  createOrder: (payload: { planSlug: string; method: "bank" | "wire"; interval?: "monthly" | "yearly"; amount?: number }) =>
-    post<{ invoice: Invoice; subscription: Subscription; method: string; planSlug: string }>("/billing/orders", payload),
+  // Bank/wire: create a PENDING order (settled offline) — returns the pending invoice plus
+  // remittance instructions (our Razorpay international receiving account for that currency)
+  // so the customer knows where to actually send the money.
+  createOrder: (payload: { planSlug: string; method: "bank" | "wire"; interval?: "monthly" | "yearly"; amount?: number; currency?: "USD" | "GBP" | "EUR" | "CAD" | "DKK" }) =>
+    post<{
+      invoice: Invoice; subscription: Subscription; method: string; planSlug: string;
+      remittance: { currency: string; rail: string; accountNumber: string; routingCode: string } | null;
+    }>("/billing/orders", payload),
   // Server-generated invoice document (real data, for download).
   getInvoiceDocument: (id: string) =>
     get<{ filename: string; contentType: string; content: string }>(`/billing/invoices/${id}/document`),

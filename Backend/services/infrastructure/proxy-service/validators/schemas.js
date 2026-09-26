@@ -59,6 +59,8 @@ const orderSchema = z.object({
     method: z.enum(['bank', 'wire']),
     interval: z.enum(['monthly', 'yearly']).optional(),
     amount: z.coerce.number().nonnegative().max(1000000).optional(),
+    // Which of our receiving accounts to remit the wire/bank transfer into. Defaults to USD.
+    currency: z.enum(['USD', 'GBP', 'EUR', 'CAD', 'DKK']).optional(),
 });
 const paymentMethodSchema = z.object({ type: z.string(), brand: z.string(), last4: z.string().min(4).max(4), expiry: z.string(), isDefault: z.boolean().optional() }).passthrough();
 const orgUpdateSchema = z.object({ name: z.string().optional(), slug: z.string().optional(), status: z.string().optional() }).passthrough();

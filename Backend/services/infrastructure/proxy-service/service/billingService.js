@@ -175,10 +175,19 @@ const activateSubscription = async (auth, planSlug, opts = {}) => {
     return activeSub;
 };
 
+// Our Razorpay international receiving accounts (their "International Bank Transfer" /
+// MoneySaver Export Account product) — for a customer to REMIT a bank transfer / wire
+// into. Not the card gateways (paying IN by card) and not RazorpayX (paying OUT).
+const remittanceInstructionsFor = (currency) => {
+    const acct = config.remittanceAccounts && config.remittanceAccounts[currency];
+    if (!acct || !acct.accountNumber) return null; // not configured — omit rather than show blanks
+    return { currency, rail: acct.rail, accountNumber: acct.accountNumber, routingCode: acct.routingCode };
+};
+
 // Create a PENDING order for offline settlement (bank transfer / wire). Does NOT
 // activate the plan — records a pending subscription (only if none exists) + a pending
 // invoice. The subscription flips to active when the payment is later confirmed.
-const createPendingOrder = async (auth, { planSlug, method, interval = 'monthly', amount } = {}) => {
+const createPendingOrder = async (auth, { planSlug, method, interval = 'monthly', amount, currency = 'USD' } = {}) => {
     if (method !== 'bank' && method !== 'wire') {
         throw new AppError('INVALID_METHOD', 'method must be "bank" or "wire"', 400);
     }
@@ -215,7 +224,7 @@ const createPendingOrder = async (auth, { planSlug, method, interval = 'monthly'
     });
 
     authService.issueEvent('order.pending', auth.orgId, { planSlug, method, invoiceId: invoice.id });
-    return { invoice, subscription, method, planSlug };
+    return { invoice, subscription, method, planSlug, remittance: remittanceInstructionsFor(currency) };
 };
 
 // Build a real, server-generated invoice document from the stored invoice + org + plan.

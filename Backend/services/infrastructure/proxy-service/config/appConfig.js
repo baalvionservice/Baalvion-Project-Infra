@@ -42,6 +42,18 @@ module.exports = {
         webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
         priceDefaultCurrency: process.env.BILLING_CURRENCY || 'usd',
     },
+    // Razorpay multi-currency receiving accounts (their "International Bank Transfer" /
+    // MoneySaver Export Account product). These are OUR accounts for RECEIVING a customer's
+    // wire — shown as remittance instructions on the bank/wire checkout path. Not to be
+    // confused with the Razorpay/PayU/Cashfree card gateways (paying IN by card) or
+    // RazorpayX payouts (paying money OUT) — this is a third, separate rail.
+    remittanceAccounts: {
+        USD: { rail: 'ACH', accountNumber: process.env.REMIT_USD_ACCOUNT || '', routingCode: process.env.REMIT_USD_ROUTING || '' },
+        GBP: { rail: 'FPS', accountNumber: process.env.REMIT_GBP_ACCOUNT || '', routingCode: process.env.REMIT_GBP_SORT_CODE || '' },
+        EUR: { rail: 'SEPA', accountNumber: process.env.REMIT_EUR_IBAN || '', routingCode: process.env.REMIT_EUR_BIC || '' },
+        CAD: { rail: 'EFT', accountNumber: process.env.REMIT_CAD_ACCOUNT || '', routingCode: process.env.REMIT_CAD_ROUTING || '' },
+        DKK: { rail: 'DKK', accountNumber: process.env.REMIT_DKK_ACCOUNT || '', routingCode: process.env.REMIT_DKK_BIC || '' },
+    },
     redis: {
         url: process.env.REDIS_URL || '',
     },

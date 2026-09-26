@@ -86,6 +86,9 @@ export default function BillingCheckout() {
   const [errorMessage, setErrorMessage] = useState("");
   const [processing, setProcessing] = useState(false);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  // Our Razorpay international receiving account for a bank/wire order — where the
+  // customer actually sends the money. Null until the pending order is created.
+  const [remittance, setRemittance] = useState<{ currency: string; rail: string; accountNumber: string; routingCode: string } | null>(null);
 
   const { data: plans, isLoading: loadingPlans } = usePlans();
 
@@ -193,8 +196,10 @@ export default function BillingCheckout() {
           method: payment.method,
           interval,
           amount: total,
+          currency: "USD",
         });
         if (order?.invoice?.id) setInvoiceId(String(order.invoice.id));
+        setRemittance(order?.remittance ?? null);
         queryClient.invalidateQueries({ queryKey: ["billing"] });
         setResult(payment.method === "bank" ? "bank_pending" : "wire_submitted");
       } catch (e: unknown) {
@@ -340,8 +345,8 @@ Thank you for your business!
                   <Landmark className="w-16 h-16 text-primary mx-auto" />
                   <h2 className="text-2xl font-bold">Order Received</h2>
                   <p className="text-muted-foreground">
-                    We've emailed a pro-forma invoice with Baalvion's receiving bank details and your
-                    unique reference. Your subscription activates once we confirm your transfer —
+                    Send the amount below to our receiving account using your bank's transfer, quoting
+                    the reference. Your subscription activates once the transfer is confirmed —
                     typically 1-2 business days.
                   </p>
                   <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-4">
@@ -351,6 +356,16 @@ Thank you for your business!
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Method</span><span>Bank transfer</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="warning">Pending</Badge></div>
                   </div>
+                  {remittance ? (
+                    <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-2 bg-muted/30">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Send to ({remittance.currency})</p>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rail</span><span className="font-medium">{remittance.rail}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Account number</span><span className="font-mono">{remittance.accountNumber}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">{remittance.rail === "SEPA" ? "BIC" : remittance.currency === "GBP" ? "Sort code" : "Routing code"}</span><span className="font-mono">{remittance.routingCode}</span></div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-2">Our billing team will follow up by email with the receiving account details.</p>
+                  )}
                   <div className="flex gap-3 justify-center pt-2">
                     {invoiceId && <Button variant="outline" onClick={handleDownloadInvoice}>Download Invoice</Button>}
                     <Button onClick={() => navigate("/app/billing")}>View Billing</Button>
@@ -363,8 +378,8 @@ Thank you for your business!
                   <Building2 className="w-16 h-16 text-primary mx-auto" />
                   <h2 className="text-2xl font-bold">Request Submitted</h2>
                   <p className="text-muted-foreground">
-                    Thank you. Our enterprise team will contact you within 1 business day to set up
-                    your {payment.wire.terms === "net60" ? "Net 60" : "Net 30"} terms and wire transfer details.
+                    Wire the amount below quoting the reference, on {payment.wire.terms === "net60" ? "Net 60" : "Net 30"} terms.
+                    Our enterprise team will follow up within 1 business day.
                   </p>
                   <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-4">
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{orderId}</span></div>
@@ -373,6 +388,16 @@ Thank you for your business!
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Terms</span><span>{payment.wire.terms === "net60" ? "Net 60" : "Net 30"}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="info"><Clock className="w-3 h-3 mr-1" />Awaiting setup</Badge></div>
                   </div>
+                  {remittance ? (
+                    <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-2 bg-muted/30">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Wire to ({remittance.currency})</p>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rail</span><span className="font-medium">{remittance.rail}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Account number</span><span className="font-mono">{remittance.accountNumber}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">{remittance.rail === "SEPA" ? "BIC" : remittance.currency === "GBP" ? "Sort code" : "Routing code"}</span><span className="font-mono">{remittance.routingCode}</span></div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-2">Our enterprise team will follow up by email with the receiving account details.</p>
+                  )}
                   <div className="flex gap-3 justify-center pt-2">
                     <Button onClick={() => navigate("/app")}>Go to Dashboard</Button>
                   </div>
