@@ -25,9 +25,10 @@ export interface NavSection extends NavLink {
 // (2026-09-27, after the third rejection): the content behind it was real
 // but entirely off-topic for a legal-guides site (general entertainment
 // clips/podcasts), so the whole Media pillar is retired, not just relabeled
-// -- see next.config.ts redirects and sitemap.ts. Restore the removed
-// sections alongside CURRENT_CATEGORY_SLUGS once AdSense approves the site
-// as it stands.
+// -- see next.config.ts redirects and sitemap.ts. Fashion dropped in the same
+// pass -- it never got real content and is still a placeholder page (see
+// category-slugs.ts). Restore the removed sections alongside
+// CURRENT_CATEGORY_SLUGS once AdSense approves the site as it stands.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'News',
@@ -42,9 +43,5 @@ export const PRIMARY_NAV: NavSection[] = [
       { label: 'Cruise Ship Accidents', href: '/cruise-ship-passenger-vessel-accidents' },
       { label: 'Law School Success', href: '/law-school-success' },
     ],
-  },
-  {
-    label: 'Fashion',
-    href: '/fashion',
   },
 ];

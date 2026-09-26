@@ -336,6 +336,12 @@ const nextConfig: NextConfig = {
       { source: '/videos/:path*', destination: '/', permanent: true },
       { source: '/podcasts/:path*', destination: '/', permanent: true },
       { source: '/interviews/:path*', destination: '/', permanent: true },
+      // Same pass: Fashion never got real content -- still a "DESIGN
+      // PREVIEW" placeholder page with fake headlines (see
+      // category-slugs.ts) -- so it's out of CURRENT_CATEGORY_SLUGS but
+      // still needs its own redirect since /fashion isn't a
+      // ROOT_FLAT_ARTICLE_SLUGS-style article route.
+      { source: '/fashion/:path*', destination: '/', permanent: true },
     ];
   },
 
