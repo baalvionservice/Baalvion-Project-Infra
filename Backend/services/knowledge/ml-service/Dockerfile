@@ -1,5 +1,9 @@
 # Baalvion ML service — slim multi-stage build.
-FROM python:3.14-slim AS base
+# Pinned to 3.12: numpy/scipy/scikit-learn/statsmodels/psycopg2-binary all ship
+# prebuilt wheels for it. 3.14 has none yet, so pip falls back to compiling every
+# one of them from source (extremely slow, and psycopg2-binary's source build
+# additionally needs pg_config/libpq-dev, which this image never installed).
+FROM python:3.12-slim AS base
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

@@ -12,14 +12,14 @@
 #     --build-arg VITE_API_AUTH_BASE_URL=https://api.baalvion.com/api/v1/identity/auth/v1/auth \
 #     --build-arg VITE_GATEWAY_URL=https://api.baalvion.com \
 #     .
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune proxy-baalvionstack-web --docker
+RUN pnpm dlx turbo@2.9.16 prune proxy-baalvionstack-web --docker
 
 # 2) Install pruned deps (--no-frozen-lockfile: turbo prune may drop override snapshots).
 FROM base AS installer
@@ -40,7 +40,7 @@ ARG VITE_PAYU_ACTION_URL
 ENV NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.14 run build --filter=proxy-baalvionstack-web
+RUN pnpm dlx turbo@2.9.16 run build --filter=proxy-baalvionstack-web
 
 # 4) Static runner — non-root nginx (uid 101), listens on 8080.
 FROM nginxinc/nginx-unprivileged:1.31-alpine AS runner
