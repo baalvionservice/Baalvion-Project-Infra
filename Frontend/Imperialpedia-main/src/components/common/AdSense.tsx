@@ -15,14 +15,16 @@ interface AdSenseUnitProps {
   format?: 'auto' | 'horizontal' | 'vertical' | 'rectangle';
   responsive?: boolean;
   className?: string;
+  /** Reports the fill state (null = undecided, true = filled, false = collapsed) to a wrapper like LabeledAdSlot so it can hide itself too. */
+  onFilledChange?: (filled: boolean | null) => void;
 }
 
 /**
  * Reusable AdSense Ad Unit Component
- * 
+ *
  * Usage:
  * <AdSenseUnit slot="1234567890" format="auto" />
- * 
+ *
  * @param slot - AdSense ad slot ID
  * @param format - Ad format type (default: 'auto')
  * @param responsive - Enable responsive ads (default: true)
@@ -33,6 +35,7 @@ export function AdSenseUnit({
   format = 'auto',
   responsive = true,
   className = '',
+  onFilledChange,
 }: AdSenseUnitProps) {
   // Real, CMS-managed publisher ID threaded down from app/layout.tsx via
   // AdSenseClientProvider — see AdSenseClientContext.tsx for why this
@@ -121,6 +124,10 @@ export function AdSenseUnit({
 
     return () => { observer.disconnect(); clearTimeout(giveUp); };
   }, [slot, requested]);
+
+  useEffect(() => {
+    onFilledChange?.(clientId ? filled : false);
+  }, [filled, clientId, onFilledChange]);
 
   if (!clientId) {
     if (process.env.NODE_ENV === 'development') {
