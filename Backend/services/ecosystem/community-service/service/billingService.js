@@ -58,6 +58,14 @@ async function checkout(community, userId, email, provider, asset) {
     const orderRef = `community:${community.slug}:${userId}`;
     const url = `${PAYMENT_SERVICE_URL}/v1/gateway/payments${isCrypto ? '' : `?site=${encodeURIComponent(SITE_SLUG)}`}`;
 
+    // This Cashfree account is domestic-only (no IPG/international approval yet), so a USD-priced
+    // community must be charged in INR through Cashfree specifically — Razorpay/PayU stay USD.
+    // The rate is an operator-set env var, not fabricated; drop this once IPG is approved.
+    const CASHFREE_USD_TO_INR_RATE = Number(process.env.CASHFREE_USD_TO_INR_RATE || 88);
+    const isCashfree = normalizedProvider === 'cashfree';
+    const chargeAmount = isCashfree ? Math.round(community.price_usd_cents * CASHFREE_USD_TO_INR_RATE) : community.price_usd_cents;
+    const chargeCurrency = isCashfree ? 'INR' : 'USD';
+
     let response;
     try {
         response = await fetch(url, {
@@ -70,8 +78,8 @@ async function checkout(community, userId, email, provider, asset) {
             },
             body: JSON.stringify({
                 provider: normalizedProvider,
-                amount: community.price_usd_cents,
-                currency: 'USD',
+                amount: chargeAmount,
+                currency: chargeCurrency,
                 method: isCrypto ? 'CRYPTO' : 'CARD',
                 orderRef,
                 metadata: {
@@ -79,6 +87,9 @@ async function checkout(community, userId, email, provider, asset) {
                     userId,
                     email: email || '',
                     communitySlug: community.slug,
+                    // The webhook reports what the community actually earns in USD, never re-derived
+                    // from the INR conversion (which would drift from the price the member saw).
+                    ...(isCashfree ? { usdMinor: String(community.price_usd_cents) } : {}),
                     ...(isCrypto ? { cryptoAsset: normalizedAsset } : {}),
                 },
             }),
@@ -114,11 +125,16 @@ async function checkout(community, userId, email, provider, asset) {
 // crypto webhook. Mirrors proxy-service/controller/internalFulfillController.js's contract:
 // verify secret -> durable idempotency claim -> apply -> mark-applied. 200 = applied/duplicate
 // (no retry); 400 = permanently malformed (no retry); 503 = transient (payment-service retries).
-async function fulfill({ provider, eventId, metadata, amountMinor, currency, providerRef }) {
+async function fulfill({ provider, eventId, metadata, amountMinor: rawAmountMinor, currency: rawCurrency, providerRef }) {
     if (!eventId) {
         throw new AppError('VALIDATION_ERROR', 'eventId is required', 400);
     }
     const normalizedProvider = String(provider || 'crypto').toLowerCase();
+    // Cashfree charged the INR conversion, not the community's marketed USD price — report the
+    // original amount (carried through as metadata.usdMinor) rather than the converted figure.
+    const usdMinor = metadata && metadata.usdMinor;
+    const amountMinor = normalizedProvider === 'cashfree' && usdMinor != null ? Number(usdMinor) : rawAmountMinor;
+    const currency = normalizedProvider === 'cashfree' && usdMinor != null ? 'USD' : rawCurrency;
     const userId = metadata && metadata.userId;
     const communitySlug = metadata && metadata.communitySlug;
     if (!userId || !communitySlug) {
