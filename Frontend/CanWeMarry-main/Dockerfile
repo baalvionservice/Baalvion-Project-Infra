@@ -14,14 +14,14 @@
 # GATEWAY_ORIGIN is the opposite: server-side only, read per request, so it stays a runtime
 # variable and points at the gateway over the docker network — no TLS handshake, no trip out
 # to the public internet and back.
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune canwemarry-web --docker
+RUN pnpm dlx turbo@2.9.16 prune canwemarry-web --docker
 
 # 2) Install the pruned dependency set.
 #    --no-frozen-lockfile: turbo prune can drop catalog/override snapshots that a frozen
@@ -47,7 +47,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 #
 # NEXT_PUBLIC_* is exempt from that filtering, which is why the SITE_URL guard passed while
 # BUILD_STANDALONE was being dropped.
-RUN pnpm dlx turbo@2.9.14 run build --filter=canwemarry-web --env-mode=loose
+RUN pnpm dlx turbo@2.9.16 run build --filter=canwemarry-web --env-mode=loose
 
 # 4) Minimal runner.
 FROM base AS runner
