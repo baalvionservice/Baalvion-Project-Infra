@@ -118,7 +118,6 @@ Backend/services/
 | `about-service` | 3020 | `about` | ✅ | about.baalvion.com (CMS-backed) |
 | `insiders-service` | 3050 | `insiders` | ✅ | For Investors & Founders (+ Protocol sub-app) |
 | `elite-circle-service` | 3051 | `elite_circle` | ✅ | baalvion-elite-circle twin (+ Protocol) |
-| `law-elite` | — | (own) | ✅ | acquired multi-service legal sub-stack (own gateway+services) |
 | `agent-service` | 3044 | `agent` | ✅ | agents/hierarchy, commission plans+tracker, leaderboard, training |
 
 ### 3.7 commerce/financial-services-java ☕ — the Java/Spring finance suite
