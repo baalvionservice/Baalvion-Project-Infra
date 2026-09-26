@@ -1,72 +1,51 @@
-# Imperialpedia web — Next 15 standalone image (pnpm + Turborepo monorepo).
-#
-# imperialpedia-web is a pnpm workspace member (no package-lock.json) depending on
-# @baalvion/auth-sdk (workspace:*), so a plain `npm ci` cannot build it. This image is
-# monorepo-aware (turbo prune + pnpm). NEXT_PUBLIC_* are inlined at BUILD time — pass them
-# as --build-arg and point them at the PUBLIC prod origins, NOT the localhost dev defaults.
-#
-# Build context = REPO ROOT:
-#   docker build -f Frontend/Imperialpedia-main/Dockerfile -t imperialpedia-web \
-#     --build-arg NEXT_PUBLIC_API_URL=https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1 \
-#     --build-arg NEXT_PUBLIC_IMPERIALPEDIA_API_URL=https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1 \
-#     --build-arg NEXT_PUBLIC_CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public \
-#     --build-arg NEXT_PUBLIC_SITE_URL=https://imperialpedia.com \
-#     .
-FROM node:26.9-alpine AS base
-RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
-WORKDIR /app
+FROM php:8.2-apache
 
-# 1) Prune the monorepo to just this app + its workspace deps.
-FROM base AS pruner
-COPY . .
-RUN pnpm dlx turbo@2.9.16 prune imperialpedia-web --docker
+# Install required system dependencies and PHP extensions
+RUN apt-get update && apt-get install -y \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libzip-dev \
+    libonig-dev \
+    libicu-dev \
+    zip \
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) gd mysqli pdo_mysql zip mbstring intl \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2) Install pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
-#    snapshots from the pruned lockfile, which a frozen install rejects.
-FROM base AS installer
-COPY .npmrc* ./
-COPY --from=pruner /app/out/json/ ./
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --no-frozen-lockfile
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# 3) Build (NEXT_PUBLIC_* must be present here — they are inlined into the client bundle).
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_API_BASE_URL
-ARG NEXT_PUBLIC_IMPERIALPEDIA_API_URL
-ARG NEXT_PUBLIC_CMS_PUBLIC_URL
-ARG NEXT_PUBLIC_CMS_SITE_SLUG=imperialpedia
-ARG NEXT_PUBLIC_SITE_URL
-ARG NEXT_PUBLIC_ADMIN_PLATFORM_URL
-ARG NEXT_PUBLIC_GA_ID
-ARG NEXT_PUBLIC_GTM_ID
-ARG NEXT_PUBLIC_ADSENSE_CLIENT
-# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
-# destinations into routes-manifest.json, so setting these on the running container is a
-# no-op. Unset, the config silently falls back to its hardcoded default.
-ARG AUTH_PROXY_TARGET
-ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
-ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
-COPY --from=pruner /app/out/full/ ./
-# Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
-# Backend/tsconfig.base.json is a SEPARATE file (different compiler target) that
-# @baalvion/design, @baalvion/company and @baalvion/illustrations extend from — without
-# it the pruned build fails with "Cannot read file '/app/Backend/tsconfig.base.json'".
-COPY tsconfig.base.json ./tsconfig.base.json
-COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=imperialpedia-web
+# Configure Apache DocumentRoot
+ENV APACHE_DOCUMENT_ROOT /var/www/html
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 4) Minimal runner (Next standalone server).
-FROM base AS runner
-ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3029 HOSTNAME=0.0.0.0
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Imperialpedia-main/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Imperialpedia-main/.next/static ./Frontend/Imperialpedia-main/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Imperialpedia-main/public ./Frontend/Imperialpedia-main/public
-USER nextjs
-EXPOSE 3029
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3029),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Standalone server entrypoint is nested under the app path in a monorepo build (see
-# outputFileTracingRoot in next.config.ts — it now correctly points at the repo root).
-CMD ["node", "Frontend/Imperialpedia-main/server.js"]
+# Allow .htaccess overrides
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+# Uploads (post/author/user/resume images) get written by the Apache worker
+# (www-data), not root. Default upload_max_filesize (2M) also rejects most
+# real phone/camera photos before they ever reach the app's own checks.
+RUN { \
+      echo 'upload_max_filesize = 20M'; \
+      echo 'post_max_size = 25M'; \
+      echo 'memory_limit = 256M'; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
+# Set default working directory
+WORKDIR /var/www/html
+
+# Local dev (docker-compose.yml) bind-mounts the app over this; production images need the
+# code baked in since there's no bind mount there.
+COPY . /var/www/html/
+
+# uploads/ is also mounted as a volume in production (see docker-compose) so
+# new uploads survive image rebuilds — this just makes sure whatever lands in
+# the container, freshly built or already-mounted, is writable by www-data.
+RUN mkdir -p uploads application/cache application/logs \
+ && chown -R www-data:www-data /var/www/html/uploads application/cache application/logs
+
+EXPOSE 80

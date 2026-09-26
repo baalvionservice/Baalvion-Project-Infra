@@ -67,7 +67,7 @@ async function sendContributorInvitation({
 }
 
 // Same real inbox every "mailto:" link on the public site already points at
-// (Frontend/Imperialpedia-main/src/config/env.ts's contactEmail default) — kept
+// (Frontend/Imperialpedia-nextjs-main/src/config/env.ts's contactEmail default) — kept
 // separately configurable here since the recipient is a business decision, not
 // a code constant.
 const AUTHOR_CONTACT_RECIPIENT = process.env.AUTHOR_CONTACT_EMAIL || 'Founder@baalvion.com';

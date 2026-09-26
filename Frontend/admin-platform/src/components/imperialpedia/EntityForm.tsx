@@ -30,7 +30,7 @@ export interface EntityValue {
   /**
    * Long-form editorial profile (several paragraphs) — distinct from `description`,
    * which is a single short overview rendered as one pull-quote-style paragraph on
-   * the public entity page (see Imperialpedia-main's EntityOverview.tsx) and was
+   * the public entity page (see Imperialpedia-nextjs-main's EntityOverview.tsx) and was
    * never meant to hold real article-length depth. Rendered as its own "About"
    * section on the public page. Stored in `attributes.editorialOverview` (not a
    * base entities column) via the same passthrough every other type-specific

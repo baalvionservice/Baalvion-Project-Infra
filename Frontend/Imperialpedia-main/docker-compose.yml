@@ -1,0 +1,47 @@
+services:
+  web:
+    build: .
+    container_name: imperial_web
+    restart: always
+    ports:
+      - "8000:80"
+    environment:
+      - CI_ENV=development
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - CI_ENCRYPTION_KEY=${CI_ENCRYPTION_KEY:-dev-only-local-encryption-key-change-me}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6
+    container_name: imperial_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/init-db:/docker-entrypoint-initdb.d
+      - imperial_db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: imperial_pma
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PASSWORD: rootpassword
+    depends_on:
+      - db
+
+volumes:
+  imperial_db_data:

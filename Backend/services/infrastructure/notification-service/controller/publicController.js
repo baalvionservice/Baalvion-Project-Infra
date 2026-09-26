@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Public (UNAUTHENTICATED) lead-capture endpoint. Reached from separately-deployed Vercel
- * frontends (Mining.Baalvion-main, about-baalvion-main, Imperialpedia-main, …) that have no
+ * frontends (Mining.Baalvion-main, about-baalvion-main, Imperialpedia-nextjs-main, …) that have no
  * shared secret with the backend network — unlike /v1/notifications/email, this route needs
  * no internalAuth. Exposed at api.baalvion.com/v1/public/lead via a Caddy carve-out (same
  * pattern as the existing public CMS delivery routes).

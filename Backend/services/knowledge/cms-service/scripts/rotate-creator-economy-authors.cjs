@@ -4,7 +4,7 @@
  * (a mix of unset authorId=1 and a fictional house persona that was never a
  * real cms_authors record) to the three real, named contributors who actually
  * write this vertical: Vishal Mankare, Sasmita Gamel, Bismita Kar (see
- * Frontend/Imperialpedia-main/src/config/authors.ts for their verified
+ * Frontend/Imperialpedia-nextjs-main/src/config/authors.ts for their verified
  * name/title/LinkedIn — nothing else about them is asserted).
  *
  * Per instruction, this vertical does NOT get a reviewer/fact-checker byline —
