@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const items = await getAllMedia('interview');
   return {
     title: 'Interviews',
-    description: 'Law Elite Network interviews on the people, entertainment, sports and legal figures we profile.',
+    description: 'Interviews curated by Law Elite Network alongside our legal guides and news coverage.',
     alternates: { canonical: `${SITE}/interviews` },
     // No thin pages: stay out of the index until there is something to list.
     robots: { index: items.length > 0, follow: true },

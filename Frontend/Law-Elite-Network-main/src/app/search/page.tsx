@@ -150,7 +150,7 @@ function SearchContent() {
                 <div className="space-y-2">
                   <h4 className="text-2xl font-bold text-slate-900">No results found</h4>
                   <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    We couldn't find anything matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try a different term, or browse People, Entertainment, Legal, or Sports instead.
+                    We couldn't find anything matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try a different term, or browse our legal guides instead.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
