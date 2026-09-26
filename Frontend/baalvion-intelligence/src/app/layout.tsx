@@ -11,38 +11,37 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Baalvion Intelligence | Real-Time Global News Intelligence",
+    default: "Baalvion Intelligence — Turn Every Headline on Earth Into an API Call",
     template: "%s | Baalvion Intelligence",
   },
   description:
-    "Monitor companies, competitors, industries, and world events in real time with AI-powered summaries, trends, sentiment, and alerts. The news API built for AI agents and businesses.",
+    "One API, every major news source, AI summaries and sentiment already attached. Free tier, no credit card — see why developers are wiring this into their agents instead of scraping.",
   keywords: [
     "news API",
-    "news intelligence",
+    "real-time news API",
+    "news intelligence platform",
     "AI agent news",
     "trend detection",
     "sentiment analysis",
-    "real-time alerts",
+    "competitor monitoring API",
     "Baalvion Intelligence",
   ],
   authors: [{ name: "Baalvion Intelligence" }],
   metadataBase: new URL("https://signal.baalvion.com"),
-  // Next emits no canonical link unless one is declared, so this page shipped without one and
-  // left search engines to decide for themselves which URL is authoritative.
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "Baalvion Intelligence",
-    title: "Baalvion Intelligence | Real-Time Global News Intelligence",
+    title: "Baalvion Intelligence — Turn Every Headline on Earth Into an API Call",
     description:
-      "Turn global news into actionable intelligence. AI summaries, entity extraction, trend detection, and sub-60-second alerts.",
+      "Monitor companies, competitors, and world events with one API call. AI summaries, entity extraction, trend detection, and alerts within minutes of publication.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Baalvion Intelligence | Real-Time Global News Intelligence",
+    title: "Baalvion Intelligence — Turn Every Headline on Earth Into an API Call",
     description:
-      "Turn global news into actionable intelligence. AI summaries, entity extraction, trend detection, and sub-60-second alerts.",
+      "Monitor companies, competitors, and world events with one API call. AI summaries, entity extraction, trend detection, and alerts within minutes of publication.",
   },
   robots: {
     index: true,
@@ -63,7 +62,7 @@ const organizationJsonLd = {
   name: "Baalvion Intelligence",
   url: "https://signal.baalvion.com",
   description:
-    "Real-time global news intelligence infrastructure — AI summaries, entity extraction, trend detection, and sub-60-second alerts for developers and businesses.",
+    "Real-time global news intelligence infrastructure — AI summaries, entity extraction, trend detection, and alerts within minutes of publication, for developers and businesses.",
 };
 
 const websiteJsonLd = {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Terms governing use of the Baalvion Intelligence API and dashboard.",
+  alternates: { canonical: "/legal/terms" },
 };
 
 export default function TermsPage() {

@@ -5,6 +5,8 @@ const keys = require('../controllers/keyController');
 const hooks = require('../controllers/webhookController');
 const catalog = require('../controllers/catalogController');
 const billing = require('../controllers/billingController');
+const usage = require('../controllers/usageController');
+const alerts = require('../controllers/alertController');
 const asyncHandler = require('../utils/asyncHandler');
 const { internalOrUser, requireInternal } = require('../middleware/authMiddleware');
 const { requireDeveloper } = require('../middleware/guards');
@@ -32,6 +34,9 @@ const dispatchRateLimit = rateLimit({
 // ── internal hot-path (gateway → key verify): strictly service principal ──
 router.post('/keys/verify', requireInternal, asyncHandler(keys.verify));
 
+// ── internal hot-path (news-service → alert matching, called per enriched article) ──
+router.post('/alerts/evaluate', requireInternal, asyncHandler(alerts.evaluate));
+
 // ── public: launch-offer banner state (no auth — read-only, no secrets) ──
 router.get('/billing/launch-offer', asyncHandler(billing.getLaunchOfferStatus));
 
@@ -48,6 +53,17 @@ router.patch('/keys/:id/scopes', asyncHandler(keys.updateScopes));
 
 // Self-serve billing (baalvion-intelligence): create a Razorpay order for the caller's own org.
 router.post('/billing/checkout/:plan', asyncHandler(billing.createCheckoutOrder));
+
+// Real usage report for the caller's org — reads news-service's Redis quota counters
+// (see services/usageService.js). No mocked numbers.
+router.get('/usage', asyncHandler(usage.getUsage));
+
+// Condition-based alert rules — matched against every newly-enriched article and
+// delivered as a signed webhook POST (see services/alertRuleService.js).
+router.post('/alerts',            asyncHandler(alerts.create));
+router.get('/alerts',             asyncHandler(alerts.list));
+router.patch('/alerts/:id',       asyncHandler(alerts.update));
+router.delete('/alerts/:id',      asyncHandler(alerts.remove));
 
 // Webhook endpoints
 router.post('/webhooks',                  asyncHandler(hooks.create));

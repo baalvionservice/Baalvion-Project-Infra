@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { legalEntity } from "@/lib/legal-entity";
 
 export const metadata: Metadata = {
-  title: "About",
-  description: "Baalvion Intelligence builds the real-time news intelligence infrastructure for AI and business.",
+  title: "Why We're Building the Infrastructure Layer for AI-Era News",
+  description:
+    "The team, the mission, and the bet behind Baalvion Intelligence — real-time news infrastructure for AI agents and businesses.",
+  alternates: { canonical: "/company/about" },
 };
 
 const values = [

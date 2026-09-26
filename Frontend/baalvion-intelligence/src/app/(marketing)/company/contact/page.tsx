@@ -4,8 +4,9 @@ import { ContactForm } from "./contact-form";
 import { legalEntity } from "@/lib/legal-entity";
 
 export const metadata: Metadata = {
-  title: "Contact",
-  description: "Get in touch with the Baalvion Intelligence team about sales, partnerships, or support.",
+  title: "Talk to a Human, Not a Bot — Get in Touch",
+  description: "Sales, partnerships, and support — reach the Baalvion Intelligence team directly.",
+  alternates: { canonical: "/company/contact" },
 };
 
 export default function ContactPage() {

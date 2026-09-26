@@ -4,12 +4,12 @@ import { ArrowRight, Bot, LineChart, Megaphone, Plug, Radar, Sparkles } from "lu
 import { Hero } from "@/components/hero";
 import { LiveDemoWidget } from "@/components/live-demo-widget";
 import { ComparisonTable } from "@/components/comparison-table";
-import { TrendLeaderboard } from "@/components/trend-leaderboard";
 import { PricingCards } from "@/components/pricing-cards";
 import { StatBar } from "@/components/stat-bar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { trends } from "@/lib/mock-data";
+import { fetchNewsService } from "@/lib/news-api.server";
+import type { TrendingResponse } from "@/lib/types";
 
 const personas = [
   {
@@ -47,26 +47,38 @@ const useCases = [
 ];
 
 const socialProof = [
-  { value: "10M+", label: "Articles indexed" },
-  { value: "50,000+", label: "Sources" },
-  { value: "99.95%", label: "API uptime" },
-  { value: "<300ms", label: "Avg. API response" },
+  { value: "53", label: "Live news & government sources" },
+  { value: "$0", label: "To start — no credit card" },
+  { value: "SHA-256", label: "Hashed API keys, never stored in plaintext" },
+  { value: "RS256", label: "Centralized auth, no second issuer" },
 ];
 
+// Matches the real /v1/news response shape (see Article model + newsController.js) —
+// no fabricated fields like "trend_score" or an AI-written summary that isn't wired up yet.
 const apiExample = `{
-  "entity": "OpenAI",
-  "mentions": 3512,
+  "title": "OpenAI ships GPT Enterprise with
+    agentic workflow tools",
+  "source": "TechCrunch",
+  "category": "AI",
+  "country": "US",
   "sentiment": "positive",
-  "trend_score": 91,
-  "summary": "OpenAI dominated AI news after shipping
-    GPT Enterprise and opening a new safety-focused
-    research hub."
+  "entities": [{ "name": "OpenAI", "count": 4 }],
+  "published_at": "2026-09-24T14:02:00Z"
 }`;
 
-const alertExample = `Alert me when:
-  - OpenAI is mentioned
-  - Tesla sentiment turns negative
-  - AI funding news appears`;
+// Real webhook event-dispatch payload shape (developer-service webhookController.js) —
+// rule-based alert conditions aren't built yet, so this shows what's actually live: your
+// endpoint gets called with the matching article the moment it's ingested.
+const alertExample = `POST https://your-app.com/webhooks/baalvion
+
+{
+  "eventType": "article.ingested",
+  "payload": {
+    "title": "OpenAI ships GPT Enterprise...",
+    "category": "AI",
+    "sentiment": "positive"
+  }
+}`;
 
 const mcpConfigExample = `{
   "mcpServers": {
@@ -78,15 +90,27 @@ const mcpConfigExample = `{
   }
 }`;
 
-export default function HomePage() {
+export default async function HomePage() {
+  let trendingCategories: TrendingResponse["items"] = [];
+  try {
+    const trending = (await fetchNewsService(
+      "/v1/news/trending",
+      new URLSearchParams({ dimension: "category" })
+    )) as TrendingResponse;
+    trendingCategories = trending.items.slice(0, 5);
+  } catch {
+    // NEWS_API_KEY not configured in this environment, or the request failed — render
+    // the empty state below rather than fabricated numbers.
+  }
+
   return (
     <>
       <Hero />
 
       <section className="section-container section-y" id="live-demo">
         <div className="mx-auto mb-10 max-w-2xl text-center">
-          <span className="eyebrow mx-auto w-fit justify-center">See it work</span>
-          <h2>Search any company. Get structured intelligence back.</h2>
+          <span className="eyebrow mx-auto w-fit justify-center">See the shape of it</span>
+          <h2>This is what structured intelligence looks like</h2>
         </div>
         <LiveDemoWidget />
       </section>
@@ -140,7 +164,7 @@ export default function HomePage() {
             </Card>
             <Card className="glow-card lg:col-span-1">
               <CardHeader>
-                <h3 className="text-base font-semibold text-foreground">Real-Time Alerts</h3>
+                <h3 className="text-base font-semibold text-foreground">Webhook Delivery</h3>
               </CardHeader>
               <CardContent>
                 <pre className="overflow-x-auto rounded-md border border-border bg-background p-4 font-mono text-xs leading-relaxed text-foreground/90">
@@ -148,8 +172,28 @@ export default function HomePage() {
                 </pre>
               </CardContent>
             </Card>
-            <div className="lg:col-span-1">
-              <TrendLeaderboard title="Fastest growing topics today" items={trends.slice(0, 5)} />
+            <div className="lg:col-span-1 glow-card rounded-xl p-6">
+              <p className="eyebrow mb-4">Fastest-growing categories, last 24h</p>
+              {trendingCategories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No ranked volume yet — this fills in live once articles are ingested.
+                </p>
+              ) : (
+                <ol className="space-y-1">
+                  {trendingCategories.map((item, index) => (
+                    <li
+                      key={item.value ?? index}
+                      className="flex items-center justify-between rounded-md px-2 py-2.5 hover:bg-secondary/40"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="metric w-5 text-sm text-muted-foreground">{index + 1}</span>
+                        <span className="font-medium text-foreground">{item.value}</span>
+                      </span>
+                      <span className="metric text-sm font-semibold text-foreground">{item.count} articles</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
           </div>
         </div>

@@ -5,8 +5,9 @@ import { ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Careers",
-  description: "Open roles at Baalvion Intelligence.",
+  title: "We're Hiring the Engineers Behind the Next Layer of the Internet",
+  description: "Open roles at Baalvion Intelligence — remote-first, high-ownership, building real-time news infrastructure at scale.",
+  alternates: { canonical: "/company/careers" },
 };
 
 const openRoles = [
