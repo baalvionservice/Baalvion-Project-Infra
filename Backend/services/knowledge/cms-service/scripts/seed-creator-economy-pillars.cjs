@@ -142,7 +142,7 @@ async function main() {
   await runner.run(docs);
 
   // Sync to frontend static JSON fallback for immediate localhost preview
-  const frontendPath = path.resolve(process.cwd(), 'Frontend/Imperialpedia-main/src/generated/creator-economy-content.json');
+  const frontendPath = path.resolve(process.cwd(), 'Frontend/Imperialpedia-nextjs-main/src/generated/creator-economy-content.json');
   fs.writeFileSync(frontendPath, JSON.stringify(docs, null, 2), 'utf8');
   console.log(`✓ Synced ${docs.length} docs to ${frontendPath}`);
 }

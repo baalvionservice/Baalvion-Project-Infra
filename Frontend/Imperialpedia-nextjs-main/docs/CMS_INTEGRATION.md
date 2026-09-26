@@ -93,8 +93,8 @@ With these, the real transition endpoint publishes reliably (verified HTTP 200 p
 ```
 # backends run under pm2 (auth, session, oauth, admin, commerce, cms, realtime …); Postgres/Redis in Docker
 pm2 restart cms-service
-pm2 start <repo>/Frontend/Imperialpedia-main/node_modules/next/dist/bin/next \
-    --name imperialpedia-web --cwd <repo>/Frontend/Imperialpedia-main -- dev -p 3029
+pm2 start <repo>/Frontend/Imperialpedia-nextjs-main/node_modules/next/dist/bin/next \
+    --name imperialpedia-web --cwd <repo>/Frontend/Imperialpedia-nextjs-main -- dev -p 3029
 
 curl http://localhost:3018/api/v1/public/imperialpedia/content?contentType=article   # published list
 # → http://localhost:3029/articles  and  /articles/<slug>  render the live content

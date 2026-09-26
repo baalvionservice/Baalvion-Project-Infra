@@ -25,7 +25,7 @@
 const SITE = process.env.WEBSITE_SLUG || 'imperialpedia';
 const TARGET_BASE = process.env.TARGET_CMS_BASE || 'https://admin.baalvion.com/api-bff/knowledge/cms/api/v1';
 
-// Mirrors Frontend/Imperialpedia-main/src/config/authors.ts — the real editorial
+// Mirrors Frontend/Imperialpedia-nextjs-main/src/config/authors.ts — the real editorial
 // roster. Kept in sync manually; there are only three entries today.
 const ROSTER = [
   { slug: 'allen-krewzz', name: 'Allen Krewzz', title: 'Financial Writer & Analyst' },

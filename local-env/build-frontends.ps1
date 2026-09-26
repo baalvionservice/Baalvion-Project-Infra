@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
 $apps = @(
-  @{ name = 'Imperialpedia'; dir = "$root\Frontend\Imperialpedia-main" },
+  @{ name = 'Imperialpedia'; dir = "$root\Frontend\Imperialpedia-nextjs-main" },
   @{ name = 'Admin Platform'; dir = "$root\Frontend\admin-platform" },
   @{ name = 'IR Baalvion';   dir = "$root\Frontend\IR-Baalvion-main" }
 )

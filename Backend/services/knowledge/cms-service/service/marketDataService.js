@@ -9,7 +9,7 @@
 // Provider assignment is split to stay inside each free tier's daily request budget.
 // Zero-traffic cost-saving policy (2026-08-26): the newsroom dashboard is the only
 // live consumer right now (Imperialpedia has no public traffic and these pages
-// aren't even indexed yet — see Frontend/Imperialpedia-main/config/market-quotes.ts),
+// aren't even indexed yet — see Frontend/Imperialpedia-nextjs-main/config/market-quotes.ts),
 // so every TTL below is stretched to once a day (DAY_TTL) instead of the previous
 // per-provider tuning (Finnhub/Binance 60s, Twelve Data 30min, Alpha Vantage 6h,
 // FRED 1h) — that means the dashboard can show up to a day-old price while someone

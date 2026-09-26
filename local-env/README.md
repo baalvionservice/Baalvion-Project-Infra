@@ -83,7 +83,7 @@ Caddy replaces it.
 
 Each `.env.local` was backed up to `.env.local.localhost.bak`:
 ```powershell
-"Imperialpedia-main","admin-platform","IR-Baalvion-main" | ForEach-Object {
+"Imperialpedia-nextjs-main","admin-platform","IR-Baalvion-main" | ForEach-Object {
   $p = "D:\Baalvion Projects\Frontend\$_\.env.local"
   Copy-Item "$p.localhost.bak" $p -Force
 }

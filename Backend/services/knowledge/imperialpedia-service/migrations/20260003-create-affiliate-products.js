@@ -1,7 +1,7 @@
 'use strict';
 
 // Affiliate product catalog — e.g. the "best insurance/mortgage/broker" review-page CTAs
-// (see Imperialpedia-main's src/data/reviews/*, currently hardcoded TS with an untracked
+// (see Imperialpedia-nextjs-main's src/data/reviews/*, currently hardcoded TS with an untracked
 // ctaUrl). This table makes those entries admin-manageable and click-attributable, with an
 // optional loose link to a specific article (no FK constraint, same pattern as
 // Article -> CreatorProfile / votes.target_id — see models/index.js).
