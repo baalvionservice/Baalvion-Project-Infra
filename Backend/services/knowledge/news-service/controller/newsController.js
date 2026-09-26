@@ -10,6 +10,7 @@ const SENTIMENTS = ['positive', 'neutral', 'negative'];
 
 const listQuerySchema = z.object({
     keyword: z.string().trim().min(1).max(200).optional(),
+    entity: z.string().trim().min(1).max(200).optional(),
     country: z.string().trim().length(2).optional(),
     category: z.enum(CATEGORIES).optional(),
     language: z.string().trim().max(10).optional(),
@@ -27,7 +28,7 @@ async function listArticles(req, res, next) {
         if (!parsed.success) {
             throw new AppError('INVALID_QUERY', 'Invalid query parameters', 400, parsed.error.flatten());
         }
-        const { keyword, country, category, language, sentiment, source, from, to, page, limit } = parsed.data;
+        const { keyword, entity, country, category, language, sentiment, source, from, to, page, limit } = parsed.data;
 
         const where = {};
         if (country) where.country = country.toUpperCase();
@@ -35,6 +36,10 @@ async function listArticles(req, res, next) {
         if (language) where.language = language;
         if (sentiment) where.sentiment = sentiment;
         if (keyword) where.title = { [Op.iLike]: `%${keyword}%` };
+        // JSONB array containment: entities @> '[{"name": "OpenAI"}]' matches any element
+        // whose "name" key equals the given value, ignoring its "count" — exact name match,
+        // case-sensitive (entities are stored as extracted, e.g. "OpenAI").
+        if (entity) where.entities = { [Op.contains]: [{ name: entity }] };
         if (from || to) {
             where.published_at = {};
             if (from) where.published_at[Op.gte] = from;
@@ -131,6 +136,53 @@ async function getTrending(req, res, next) {
     }
 }
 
+const entitiesQuerySchema = z.object({
+    windowHours: z.coerce.number().int().min(1).max(720).default(168),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+// Real frequency ranking over recently ingested articles' extracted entities (proper-noun
+// phrases, see service/enrichmentService.js). Not a curated "trending people/companies"
+// list — just an honest count of what's actually been mentioned in the window.
+async function getEntities(req, res, next) {
+    try {
+        const parsed = entitiesQuerySchema.safeParse(req.query);
+        if (!parsed.success) {
+            throw new AppError('INVALID_QUERY', 'Invalid query parameters', 400, parsed.error.flatten());
+        }
+        const { windowHours, limit } = parsed.data;
+        const windowStart = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+
+        const rows = await db.Article.findAll({
+            where: { published_at: { [Op.gte]: windowStart }, entities: { [Op.not]: null } },
+            attributes: ['entities', 'published_at'],
+            order: [['published_at', 'DESC']],
+            raw: true,
+        });
+
+        // Map preserves insertion order; rows are already DESC by published_at, so the
+        // first time we see a name is genuinely its most recent real mention.
+        const counts = new Map();
+        const lastMentionedAt = new Map();
+        for (const row of rows) {
+            for (const e of row.entities || []) {
+                if (!e?.name) continue;
+                counts.set(e.name, (counts.get(e.name) || 0) + (e.count || 1));
+                if (!lastMentionedAt.has(e.name)) lastMentionedAt.set(e.name, row.published_at);
+            }
+        }
+
+        const items = Array.from(counts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, limit)
+            .map(([name, count]) => ({ name, count, lastMentionedAt: lastMentionedAt.get(name) }));
+
+        return sendSuccess(req, res, { windowHours, items });
+    } catch (err) {
+        return next(err);
+    }
+}
+
 async function getArticle(req, res, next) {
     try {
         const article = await db.Article.findByPk(req.params.id, {
@@ -143,4 +195,4 @@ async function getArticle(req, res, next) {
     }
 }
 
-module.exports = { listArticles, getTrending, getArticle };
+module.exports = { listArticles, getTrending, getEntities, getArticle };

@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import { BlogList } from "./blog-list";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Engineering deep-dives and product updates from the Baalvion Intelligence team.",
+  title: "The Blog Where We Show Our Work (and Our Mistakes)",
+  description:
+    "Engineering deep-dives, product updates, and the real story behind building a real-time news intelligence engine — no fluff.",
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogPage() {

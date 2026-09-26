@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { blogPosts, type BlogPost } from "@/lib/mock-data";
+import { blogPosts, type BlogPost } from "@/lib/blog-posts";
 
 const categories: Array<BlogPost["category"] | "All"> = [
   "All",
@@ -47,23 +48,25 @@ export function BlogList() {
 
       <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {visiblePosts.map((post) => (
-          <Card key={post.id} className="glow-card">
-            <CardHeader className="space-y-3">
-              <Badge variant="secondary" className="w-fit">
-                {post.category}
-              </Badge>
-              <h2 className="text-lg font-semibold leading-snug text-foreground">{post.title}</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-              <div className="mt-4 flex items-center justify-between text-xs font-mono text-muted-foreground">
-                <span>
-                  {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                </span>
-                <span>{post.readTime} read</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Link key={post.slug} href={`/blog/${post.slug}`} className="block">
+            <Card className="glow-card h-full transition-colors hover:border-primary/50">
+              <CardHeader className="space-y-3">
+                <Badge variant="secondary" className="w-fit">
+                  {post.category}
+                </Badge>
+                <h2 className="text-lg font-semibold leading-snug text-foreground">{post.title}</h2>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{post.excerpt}</p>
+                <div className="mt-4 flex items-center justify-between text-xs font-mono text-muted-foreground">
+                  <span>
+                    {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </span>
+                  <span>{post.readTime} read</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
         {visiblePosts.length === 0 && (
           <p className="col-span-full text-sm text-muted-foreground">No posts in this category yet.</p>

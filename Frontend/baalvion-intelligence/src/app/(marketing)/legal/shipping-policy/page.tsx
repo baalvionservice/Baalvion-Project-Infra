@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Shipping & Delivery Policy",
   description: "How access to Baalvion Intelligence is delivered after purchase.",
+  alternates: { canonical: "/legal/shipping-policy" },
 };
 
 export default function ShippingPolicyPage() {

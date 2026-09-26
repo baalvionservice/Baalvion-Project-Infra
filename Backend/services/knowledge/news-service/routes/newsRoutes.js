@@ -8,6 +8,7 @@ router.use(apiKeyAuth, quota);
 
 router.get('/', ctrl.listArticles);
 router.get('/trending', ctrl.getTrending);
+router.get('/entities', ctrl.getEntities);
 router.get('/:id', ctrl.getArticle);
 
 module.exports = router;

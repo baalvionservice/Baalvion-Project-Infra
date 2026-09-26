@@ -1,26 +1,33 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Getting Started",
-  description: "Make your first request to the Baalvion Intelligence News API in under five minutes.",
+  title: "Your First API Call Is 5 Minutes Away — Here's Exactly How",
+  description: "Copy, paste, run: make your first request to the Baalvion Intelligence News API in under five minutes.",
+  alternates: { canonical: "/docs/getting-started" },
 };
 
-const requestExample = `curl https://news.baalvion.com/v1/news?entity=OpenAI \\
+const requestExample = `curl https://news.baalvion.com/v1/news?keyword=OpenAI \\
   -H "Authorization: Bearer YOUR_API_KEY"`;
 
 const responseExample = `{
-  "entity": "OpenAI",
-  "mentions": 3512,
-  "sentiment": "positive",
-  "trend_score": 91,
-  "articles": [
-    {
-      "title": "OpenAI ships GPT Enterprise...",
-      "source": "Reuters",
-      "sentiment": "positive",
-      "published_at": "2026-07-10T08:12:00Z"
-    }
-  ]
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "title": "OpenAI ships GPT Enterprise with
+          agentic workflow tools",
+        "source": { "name": "TechCrunch", "type": "rss" },
+        "category": "AI",
+        "country": "US",
+        "sentiment": "positive",
+        "entities": [{ "name": "OpenAI", "count": 4 }],
+        "published_at": "2026-07-10T08:12:00Z"
+      }
+    ],
+    "page": 1,
+    "limit": 20,
+    "total": 1
+  }
 }`;
 
 export default function GettingStartedPage() {
@@ -30,8 +37,8 @@ export default function GettingStartedPage() {
       <h1>Make your first request</h1>
       <p>
         Every request to the Baalvion Intelligence API is authenticated with a bearer token tied
-        to your account&apos;s API key. Create a free account to get a key, then query any entity,
-        topic, or country.
+        to your account&apos;s API key. Create a free account to get a key, then filter articles by
+        keyword, category, country, source, or sentiment.
       </p>
 
       <h2 className="mt-10 text-2xl">1. Get an API key</h2>

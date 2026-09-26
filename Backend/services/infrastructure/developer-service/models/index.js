@@ -18,6 +18,7 @@ db.WebhookEndpoint = require('./webhookEndpoint')(sequelize, DataTypes);
 db.WebhookDelivery = require('./webhookDelivery')(sequelize, DataTypes);
 db.ApiSpec         = require('./apiSpec')(sequelize, DataTypes);
 db.EventType       = require('./eventType')(sequelize, DataTypes);
+db.AlertRule       = require('./alertRule')(sequelize, DataTypes);
 
 db.WebhookEndpoint.hasMany(db.WebhookDelivery, { foreignKey: 'endpoint_id', as: 'deliveries' });
 db.WebhookDelivery.belongsTo(db.WebhookEndpoint, { foreignKey: 'endpoint_id', as: 'endpoint' });

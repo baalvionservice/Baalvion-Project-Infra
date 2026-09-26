@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Refund & Cancellation Policy",
   description: "Refund and cancellation terms for Baalvion Intelligence paid plans.",
+  alternates: { canonical: "/legal/refund-policy" },
 };
 
 export default function RefundPolicyPage() {

@@ -2,13 +2,11 @@
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { usageSummary } from "@/lib/mock-data";
-
-export function UsageChart() {
+export function UsageChart({ data }: { data: Array<{ day: string; requests: number }> }) {
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={usageSummary.dailySeries}>
+        <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
           <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
