@@ -13,7 +13,7 @@ WORKDIR /repo
 # turbo prune emits out/json (manifests), out/full (source), out/pnpm-lock.yaml.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune about-service --docker
+RUN pnpm dlx turbo@2.9.16 prune about-service --docker
 
 # ── installer: deterministic install from the pruned lockfile, then deploy ────
 FROM base AS installer

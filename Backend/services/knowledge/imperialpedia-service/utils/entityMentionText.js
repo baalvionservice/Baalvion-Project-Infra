@@ -3,7 +3,7 @@
  * Text extraction + whole-word matching for entity-mention detection
  * (service/entityMentionDetectionService.js). Whole-word/case-insensitive
  * regex-escape matching mirrors mentionsCompany() in
- * Frontend/Imperialpedia-main/src/components/markets/ArticleMarketWidget.tsx
+ * Frontend/Imperialpedia-nextjs-main/src/components/markets/ArticleMarketWidget.tsx
  * (same \b-boundary pattern) so backend detection and the existing frontend
  * scan agree on what counts as a "mention" of a name.
  */

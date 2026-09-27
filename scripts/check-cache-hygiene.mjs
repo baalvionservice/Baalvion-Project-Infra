@@ -49,7 +49,7 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const MIN_REVALIDATE_SECONDS = 900;
 
 const APPS = [
-  'Frontend/Imperialpedia-main',
+  'Frontend/Imperialpedia-nextjs-main',
   'Frontend/Law-Elite-Network-main',
   'Frontend/AmariseMaisonAvenue-main',
 ];
@@ -63,12 +63,12 @@ const APPS = [
 const ALLOW = {
   // Per-creator dashboard reads. These routes are user-scoped and dynamic by
   // design; they are not reachable from any cached page.
-  'Frontend/Imperialpedia-main/src/services/data/creators-service.ts': 'no-store',
+  'Frontend/Imperialpedia-nextjs-main/src/services/data/creators-service.ts': 'no-store',
   // Search runs in a route handler, not a render tree, so it cannot make a page
   // dynamic.
-  'Frontend/Imperialpedia-main/src/services/data/search-service.ts': 'no-store',
+  'Frontend/Imperialpedia-nextjs-main/src/services/data/search-service.ts': 'no-store',
   // Google News wants a fresh sitemap; one route on a short window is fine.
-  'Frontend/Imperialpedia-main/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
+  'Frontend/Imperialpedia-nextjs-main/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
   'Frontend/AmariseMaisonAvenue-main/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
   // Opt-in only: `revalidate: false` is passed explicitly by the draft-preview
   // caller, and preview is confined to /article/:slug*, which is dynamic anyway.

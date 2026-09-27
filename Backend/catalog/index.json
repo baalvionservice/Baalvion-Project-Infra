@@ -35,7 +35,6 @@
     "inventory-service",
     "ir-service",
     "jobs-service",
-    "law-elite",
     "law-service",
     "ledger-service",
     "market-service",
@@ -171,9 +170,6 @@
       "auth-service"
     ],
     "jobs-service": [
-      "auth-service"
-    ],
-    "law-elite": [
       "auth-service"
     ],
     "law-service": [
@@ -665,15 +661,6 @@
       "port": 3002,
       "healthPath": "/health",
       "container": "app-ecosystem",
-      "tier": "tier-2",
-      "domain": "ecosystem",
-      "lifecycle": "production",
-      "datastores": [
-        "postgres"
-      ]
-    },
-    "law-elite": {
-      "deployment": "not-deployed",
       "tier": "tier-2",
       "domain": "ecosystem",
       "lifecycle": "production",

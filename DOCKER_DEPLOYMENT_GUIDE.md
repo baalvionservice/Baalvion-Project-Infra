@@ -55,7 +55,7 @@ docker build -f Frontend/Law-Elite-Network-main/Dockerfile -t law-elite-web \
   .
 
 # Imperialpedia
-docker build -f Frontend/Imperialpedia-main/Dockerfile -t imperialpedia-web \
+docker build -f Frontend/Imperialpedia-nextjs-main/Dockerfile -t imperialpedia-web \
   --build-arg NEXT_PUBLIC_IMPERIALPEDIA_API_URL=https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1 \
   --build-arg NEXT_PUBLIC_CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public \
   --build-arg NEXT_PUBLIC_SITE_URL=https://imperialpedia.com \

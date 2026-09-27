@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const hub = await getPodcastHub();
   return {
     title: 'Podcasts',
-    description: 'Podcasts on people, entertainment, sports and the law, listed by Law Elite Network.',
+    description: 'Podcasts curated by Law Elite Network alongside our legal guides and news coverage.',
     alternates: { canonical: `${SITE}/podcasts` },
     // No thin pages: unindexed until at least one show is listed.
     robots: { index: hub.length + getAllPodcasts().length > 0, follow: true },

@@ -1,12 +1,12 @@
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/trade/quality-inspection-service/Dockerfile -t quality-inspection-service .
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune quality-inspection-service --docker
+RUN pnpm dlx turbo@2.9.16 prune quality-inspection-service --docker
 
 FROM base AS installer
 COPY .npmrc ./
@@ -27,7 +27,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=quality-inspection-service --prod /out
 
-FROM node:26-alpine AS final
+FROM node:26.9-alpine AS final
 RUN apk add --no-cache dumb-init \
     && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production

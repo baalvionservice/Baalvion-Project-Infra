@@ -25,7 +25,7 @@ const LINKABLE_TYPES = ['company', 'industry', 'technology', 'country'];
 
 // Route each entity type resolves to on the public site. Every route here
 // must correspond to a real page — never add a type without confirming
-// Frontend/Imperialpedia-main has a live /[type]/[slug] route for it first.
+// Frontend/Imperialpedia-nextjs-main has a live /[type]/[slug] route for it first.
 // Known drift risk: nothing automatically checks this map stays in sync with
 // the frontend's actual route files (tracked as tech debt).
 const ENTITY_TYPE_ROUTES = {

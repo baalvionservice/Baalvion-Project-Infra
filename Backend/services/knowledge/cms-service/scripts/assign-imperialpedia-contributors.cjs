@@ -87,7 +87,7 @@ async function slugToCategorySlugMap() {
 
 // Manually curated: category slug -> keywords to match against author.expertise.
 // Built from the real 56 category slugs in use and the real expertise vocabulary
-// on file for the 34 live authors. See ../../../../Frontend/Imperialpedia-main
+// on file for the 34 live authors. See ../../../../Frontend/Imperialpedia-nextjs-main
 // content-service.ts getRelatedArticles for the same real-topic-matching approach
 // applied to the Related Articles box.
 const CATEGORY_KEYWORDS = {

@@ -90,7 +90,9 @@ export default async function AdvertisePage() {
                 </div>
                 <div className="space-y-2">
                   <p className="text-4xl font-bold text-blue-600 font-serif">{contributorCount}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contributing Authors</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    {contributorCount === 1 ? 'Contributing Author' : 'Contributing Authors'}
+                  </p>
                 </div>
               </div>
               <p className="text-sm text-slate-500 max-w-2xl">

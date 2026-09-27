@@ -11,14 +11,14 @@
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.baalvion.com/api/v1/commerce/trade/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://trade.baalvion.com \
 #     .
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat openssl && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune baalvion-eternal-absolute-singularity --docker
+RUN pnpm dlx turbo@2.9.16 prune baalvion-eternal-absolute-singularity --docker
 
 # 2) Install pruned deps. --ignore-scripts skips GTI's `postinstall: prisma generate`,
 #    which would fail here (the prisma schema lives in out/full, not out/json). Prisma is
@@ -45,7 +45,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.14 run build --filter=baalvion-eternal-absolute-singularity
+RUN pnpm dlx turbo@2.9.16 run build --filter=baalvion-eternal-absolute-singularity
 
 # 4) Minimal runner (Next standalone server). Prisma query engine (linux-musl) matches the
 #    alpine builder/runner pair; the generated client is traced into the standalone bundle.

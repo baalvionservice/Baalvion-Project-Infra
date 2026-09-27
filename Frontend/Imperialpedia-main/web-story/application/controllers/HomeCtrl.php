@@ -1,0 +1,44 @@
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed'); 
+
+class HomeCtrl extends CI_Controller{ 
+    public function __construct(){ 
+		parent::__construct(); 
+		$this->load->model('Category_model'); 
+		$this->load->model('SubCategory_model'); 
+		$this->load->model('Meta_model'); 
+		$this->load->model('Post_model'); 
+		$this->load->model('Quots_model'); 
+		$this->load->library('session');
+	}
+
+
+
+	public function index(){ 
+        $data['meta'] = $this->Meta_model->meta_details('index.php');
+        $data['quots'] = $this->Quots_model->page_wise_quots(uri_string());   
+        $data['cat_list'] = $this->Category_model->cat_list(); 
+        $data['subcat_list'] = $this->SubCategory_model->subcat_list(); 
+        // $data['latest_post'] = $this->Post_model->latest_post(); 
+        // $data['six_simillar_post'] = $this->Post_model->six_simillar_post(); 
+        // $data['unique_latest_posts'] = $this->Post_model->unique_latest_posts(); 
+		// $data['web_story'] = '';
+		// debug($data);exit;
+        // echo'<pre/>'; print_r($data['unique_latest_posts']);die;  
+		$this->load->view('includes/header', $data); 
+		$this->load->view('home_view'); 
+		$this->load->view('includes/footer'); 
+	}
+
+public function get_sub_category($cat_id){
+	$data = $this->SubCategory_model->get_subcat($cat_id);
+	return $data;
+}
+
+public function get_recent_post($cat_id, $limit = ''){
+	$data = $this->Post_model->get_recent_post($cat_id ,$limit);
+	return $data;
+}
+
+}

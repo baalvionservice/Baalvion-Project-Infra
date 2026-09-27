@@ -22,7 +22,7 @@ The single most important finding: **this is a consolidation, not a greenfield b
 | Product | Frontend (real folder) | Backend service(s) | Admin size (routes) | Migration disposition |
 |---------|------------------------|--------------------|---------------------|-----------------------|
 | **Platform (target shell)** | `admin-platform` (`baalvion-admin-platform`) | admin-service, dashboard-service, tenant-service, rbac-service | 70 modules | **TARGET** — reuse as the unified shell |
-| **Imperialpedia** | `Imperialpedia-main` | imperialpedia-service, cms-service | ~80 | Refactor → `/admin/products/imperialpedia/*` (deep slice already designed in `Frontend/Imperialpedia-main/docs/admin-cms/prd/`) |
+| **Imperialpedia** | `Imperialpedia-nextjs-main` | imperialpedia-service, cms-service | ~80 | Refactor → `/admin/products/imperialpedia/*` (deep slice already designed in `Frontend/Imperialpedia-nextjs-main/docs/admin-cms/prd/`) |
 | **Baalvion Jobs** | `Baalvion-Jobs-Portal-main` | jobs-service | ~25 (full ATS) | Refactor → `/admin/products/jobs/*` |
 | **Baalvion Connect** | `brand-connector-main` (`brand-connector-web`) | brand-connector-service | ~28 | Refactor → `/admin/products/connect/*` |
 | **LawEliteNetwork** | `Law-Elite-Network-main` | law-service, ecosystem/law-elite | ~6 | Refactor → `/admin/products/law/*` |
@@ -59,4 +59,4 @@ The single most important finding: **this is a consolidation, not a greenfield b
 | [05-unified-structure-and-sidebar.md](./05-unified-structure-and-sidebar.md) | Final IA (`Platform→Category→Subcategory→Pages→Features`) + the unified sidebar in the requested order, role-gated, with ASCII. |
 | [06-implementation-tasks-roadmap.md](./06-implementation-tasks-roadmap.md) | Per-module task (reuse/refactor/merge/deprecate/build-new) + phased migration roadmap + risks. |
 
-> The **Imperialpedia product slice** (every page, editor blocks, workflow, wireframes, RBAC matrix) is fully specified in `Frontend/Imperialpedia-main/docs/admin-cms/prd/` and is referenced rather than duplicated here.
+> The **Imperialpedia product slice** (every page, editor blocks, workflow, wireframes, RBAC matrix) is fully specified in `Frontend/Imperialpedia-nextjs-main/docs/admin-cms/prd/` and is referenced rather than duplicated here.

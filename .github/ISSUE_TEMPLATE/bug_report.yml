@@ -12,7 +12,7 @@ body:
     id: area
     attributes:
       label: Affected area
-      description: Which service, package, or app? (e.g. `auth-service`, `Frontend/Imperialpedia-main`)
+      description: Which service, package, or app? (e.g. `auth-service`, `Frontend/Imperialpedia-nextjs-main`)
       placeholder: Backend/services/identity/auth-service
     validations:
       required: true

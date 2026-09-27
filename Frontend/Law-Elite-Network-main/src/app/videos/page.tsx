@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const [hub, attached] = await Promise.all([getVideoHub(), getAllMedia('video')]);
   return {
     title: 'Video',
-    description: 'Shows, interviews and clips from Law Elite Network: national and international coverage of the people, entertainment, sports and legal figures we profile.',
+    description: 'Video clips curated by Law Elite Network alongside our legal guides and news coverage.',
     alternates: { canonical: `${SITE}/videos` },
     // No thin pages: stay out of the index until there is something to list.
     robots: { index: hub.videos.length + attached.length > 0, follow: true },

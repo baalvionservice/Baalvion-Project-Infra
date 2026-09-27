@@ -6,7 +6,7 @@
  * World > Region > Country tree.
  *
  * The region slugs MUST match the RegionId values in
- * Frontend/Imperialpedia-main/src/lib/data/worldRegions.ts (e.g. "asia", not
+ * Frontend/Imperialpedia-nextjs-main/src/lib/data/worldRegions.ts (e.g. "asia", not
  * "asia-pacific") — the frontend derives an article's worldRegion/worldCountry
  * by finding a checked category whose slug matches a known region id, then
  * finding whichever other checked category has that region as its parent (see

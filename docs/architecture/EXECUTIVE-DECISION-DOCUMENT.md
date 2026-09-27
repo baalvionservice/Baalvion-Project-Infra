@@ -71,7 +71,7 @@
 | founders.baalvion.com | `For Invstors and Founders` | `Baalvion-Insiders` | Product (Insiders sub-eco) | Founder↔investor networking app |
 | insiders.baalvion.com | `insiders-seo` | `Baalvion-Insiders-SEO` | Product (Insiders sub-eco) | Public SEO discovery surface for Insiders |
 | amarisemaisonavenue.com | `AmariseMaisonAvenue-main` | `AmariseMaisonAvenue` | Independent (silent ownership) | Luxury maison retail brand |
-| imperialpedia.com | `Imperialpedia-main` | `Imperialpedia` | Independent | Financial knowledge & AI market intelligence |
+| imperialpedia.com | `Imperialpedia-nextjs-main` | `Imperialpedia` | Independent | Financial knowledge & AI market intelligence |
 | lawelitenetwork.com | `Law-Elite-Network-main` | `LawEliteNetwork` | Independent | Legal knowledge & practitioner discovery |
 | controlthemarket.com | `testrank-baalvion` | `ControlTheMarket` | Independent | Proof-of-skill hiring platform |
 | proxy.baalvionstack.com (baalvionstack.com) | `Proxy-BaalvionStack` | `BaalvionStack-Web` | Independent (own root domain) | BaalvionStack proxy/infrastructure product UI |

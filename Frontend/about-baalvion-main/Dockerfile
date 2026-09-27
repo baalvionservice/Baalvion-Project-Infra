@@ -4,14 +4,14 @@
 # This app is CMS-driven and reads the CMS public delivery API server-side at runtime,
 # so it needs no NEXT_PUBLIC_* baked in beyond the public app URL. CMS_PUBLIC_URL /
 # CMS_WEBSITE_SLUG are read at request time (server components), passed as runtime env.
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps
 FROM base AS pruner
 COPY . .
-RUN npx turbo prune about-baalvion-web --docker
+RUN npx turbo@2.9.16 prune about-baalvion-web --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile: the root pins a version-selector pnpm override and `turbo prune`

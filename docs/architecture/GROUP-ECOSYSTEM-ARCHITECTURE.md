@@ -65,7 +65,7 @@ Three concentric tiers. Each app belongs to **exactly one** tier — this is the
 | `controlthemarket.com` | Independent | testrank-baalvion | ctm-service | Standalone brand |
 | `amarisemaisonavenue.com` | Independent | AmariseMaisonAvenue-main | crm-service, cms-service | Standalone brand |
 | `lawelitenetwork.com` | Independent | Law-Elite-Network-main | law-service, law-elite | Standalone brand |
-| `imperialpedia.com` | Independent | Imperialpedia-main | imperialpedia-service | Knowledge brand |
+| `imperialpedia.com` | Independent | Imperialpedia-nextjs-main | imperialpedia-service | Knowledge brand |
 | `proxy.baalvion.com` | Independent | Proxy-BaalvionStack | proxy-service + Go gateway | Infra product |
 
 Supporting infra subdomains (no public front door, single-purpose): `files.baalvion.com` (uploads/S3), `meet.baalvion.com`, `support.baalvion.com`, `metrics.baalvion.com`, `blog.baalvion.com` → folds into `about.baalvion.com/blog` via CMS (do not stand up a separate blog app).

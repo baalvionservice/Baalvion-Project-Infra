@@ -7,7 +7,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune giftcard-service --docker
+RUN pnpm dlx turbo@2.9.16 prune giftcard-service --docker
 
 # The @baalvion/* packages this service depends on are TypeScript and compile to dist/, which
 # is .gitignored and therefore never in the build context. turbo prune's filtered install cannot

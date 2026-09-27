@@ -84,4 +84,4 @@ Order by value/leverage: **Imperialpedia** (deep slice ready) → **Jobs** → *
 
 ## 4. Deliverables index (this folder)
 
-`00-MIGRATION-PRD.md` (master) · `01-module-inventory.md` · `02-platform-architecture.md` · `03-duplicates-consolidation.md` · `04-route-migration-and-redirects.md` · `05-unified-structure-and-sidebar.md` · `06-implementation-tasks-roadmap.md` (this file). Imperialpedia product slice: `Frontend/Imperialpedia-main/docs/admin-cms/prd/`.
+`00-MIGRATION-PRD.md` (master) · `01-module-inventory.md` · `02-platform-architecture.md` · `03-duplicates-consolidation.md` · `04-route-migration-and-redirects.md` · `05-unified-structure-and-sidebar.md` · `06-implementation-tasks-roadmap.md` (this file). Imperialpedia product slice: `Frontend/Imperialpedia-nextjs-main/docs/admin-cms/prd/`.

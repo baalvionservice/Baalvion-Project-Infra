@@ -353,7 +353,7 @@ async function getPublicAuthor(websiteSlug, slug) {
 // Deliberately does not require a matching CmsAuthor row: the site's byline
 // system currently resolves an author from either the live cms_authors table
 // OR the frontend's static roster (config/authors.ts) — see resolveAuthor() in
-// Frontend/Imperialpedia-main/src/services/data/cms-public.ts — and several
+// Frontend/Imperialpedia-nextjs-main/src/services/data/cms-public.ts — and several
 // real, published authors only exist in the static half today. Gating this on
 // CmsAuthor would 404 for exactly those authors' own contact forms.
 //

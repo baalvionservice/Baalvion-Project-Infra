@@ -6,14 +6,14 @@
 # (see ARGs below), pointed at the PUBLIC prod origin. The /auth-bff + /api-bff rewrite target
 # (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at SERVER START, so it stays a RUNTIME env
 # (set it to the internal gateway, e.g. http://auth-gateway:3099, in docker-compose).
-FROM node:26-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).
 FROM base AS pruner
 COPY . .
-RUN npx turbo prune company-unified-dashboard-web --docker
+RUN npx turbo@2.9.16 prune company-unified-dashboard-web --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override

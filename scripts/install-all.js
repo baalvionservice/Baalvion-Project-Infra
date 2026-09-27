@@ -19,7 +19,7 @@ const frontends = [
     'Frontend/brand-connector-main',
     'Frontend/company-unified-Dashboard-main',
     'Frontend/testrank-baalvion',
-    'Frontend/Imperialpedia-main',
+    'Frontend/Imperialpedia-nextjs-main',
     'Frontend/IR-Baalvion-main',
     'Frontend/Mining.Baalvion-main',
     'Frontend/Proxy-BaalvionStack',

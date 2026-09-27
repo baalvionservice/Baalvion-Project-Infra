@@ -53,12 +53,9 @@ const ALLOW = [
   '/article/',
   '/law/',
   ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
-  // Kept live through the 2026-09-25 Fashion-only narrowing (see
-  // category-slugs.ts) -- real content (Stuff You Should Know, Desert
-  // Island Discs, The Rest Is Football; real Bigg Boss episodes), not
-  // retired alongside the other pillars.
-  '/podcasts',
-  '/videos',
+  // Podcasts/Videos/Interviews retired 2026-09-27 (see next.config.ts) --
+  // real content, but off-topic for a legal-guides site under AdSense
+  // review. Now 301s to /, so no Allow entry needed.
   '/authors',
   '/author/',
 ];

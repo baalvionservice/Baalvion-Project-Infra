@@ -7,7 +7,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune mining-service --docker
+RUN pnpm dlx turbo@2.9.16 prune mining-service --docker
 
 FROM base AS installer
 COPY .npmrc ./

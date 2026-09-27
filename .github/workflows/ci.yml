@@ -58,6 +58,12 @@ jobs:
       - name: Check pnpm overrides are in sync
         run: node scripts/check-lockfile-overrides.mjs
 
+      # Fails the build on any drift between versions.json and the Dockerfiles/
+      # .nvmrc/package.json it governs. Safe to run --strict as of this PR: the
+      # migration commit in this same PR brought every file into sync first.
+      - name: Check runtime version drift (Node/pnpm/Turbo)
+        run: node scripts/check-version-drift.mjs --strict
+
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
@@ -296,10 +302,10 @@ jobs:
         working-directory: Frontend/${{ matrix.app }}
         env:
           # This job compiles each app to prove it builds; the artifact is never deployed
-          # (Vercel builds its own from source). CanWeMarry refuses an unset SITE_URL because
-          # a real deploy would bake localhost canonicals into its prerendered pages — and the
-          # escape hatch its own error names is exactly this case. Apps that do not read the
-          # flag are unaffected.
+          # (deployment builds its own image on the Hostinger VPS). CanWeMarry refuses an
+          # unset SITE_URL because a real deploy would bake localhost canonicals into its
+          # prerendered pages — and the escape hatch its own error names is exactly this
+          # case. Apps that do not read the flag are unaffected.
           ALLOW_LOCALHOST_ORIGIN: '1'
         
       - name: Upload Build Artifacts

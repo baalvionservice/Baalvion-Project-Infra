@@ -2,28 +2,22 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Flame, Star, Gavel, UserCheck } from 'lucide-react';
+import { Flame, Gavel } from 'lucide-react';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { articleUrl } from '@/lib/article-url';
 
 export function TabbedStoryBox({
   popular,
-  exclusives,
   legal,
-  profiles,
 }: {
   popular: any[];
-  exclusives: any[];
   legal: any[];
-  profiles: any[];
 }) {
-  const [activeTab, setActiveTab] = useState<'popular' | 'exclusives' | 'legal' | 'profiles'>('popular');
+  const [activeTab, setActiveTab] = useState<'popular' | 'legal'>('popular');
 
   const tabs = [
     { id: 'popular', label: 'MOST READ', icon: Flame, items: popular },
-    { id: 'exclusives', label: 'LAW ELITE EXCLUSIVES', icon: Star, items: exclusives },
     { id: 'legal', label: 'LEGAL SCOOP', icon: Gavel, items: legal },
-    { id: 'profiles', label: 'FEATURED PROFILES', icon: UserCheck, items: profiles },
   ] as const;
 
   const currentItems = tabs.find((t) => t.id === activeTab)?.items || [];
