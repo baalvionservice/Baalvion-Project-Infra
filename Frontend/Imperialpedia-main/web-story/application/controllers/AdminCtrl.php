@@ -19,10 +19,13 @@ class AdminCtrl extends CI_Controller{
     public function dashboard(){
         $this->check_login();
         $data['catss'] = $this->Admin_model->cat_list();
+        $data['cat_sub'] = $this->Admin_model->cat_and_subcat();
         $this->load->view('admin/includes/header',$data);
-        $this->load->view('admin/includes/sidebar');    
-        $this->load->view('admin/view_dashboard');
+        $this->load->view('admin/includes/sidebar');
+        $this->load->view('admin/view_dashboard',$data);
         $this->load->view('admin/includes/footer');
+        // duplicate load removed
+        
     }
 
 
