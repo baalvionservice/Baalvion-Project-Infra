@@ -136,6 +136,5 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow, disallow: DISALLOW })),
     ],
     sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
-    host: BASE_URL,
   };
 }
