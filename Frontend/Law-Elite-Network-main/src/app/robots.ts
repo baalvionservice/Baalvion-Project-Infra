@@ -27,10 +27,9 @@ const ALLOW = [
   // "blocked by robots.txt"). More specific Allow wins over the shorter
   // Disallow regardless of list order, per the robots.txt spec Google follows.
   '/api/image',
-  // /news un-retired 2026-09-25 (see next.config.ts) -- /case-law,
-  // /legislation and /law-changes stay retired and are still not in this
-  // list.
-  '/news',
+  // /news was briefly un-retired 2026-09-25, then re-retired 2026-09-27 (no
+  // real published news content) -- it 301s to / like /case-law,
+  // /legislation and /law-changes, and none of the four are Allow-listed.
   '/search',
   '/plans',
   '/about-us',
@@ -137,7 +136,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       { userAgent: '*', allow, disallow: DISALLOW },
       ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow, disallow: DISALLOW })),
     ],
-    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
+    sitemap: [`${BASE_URL}/sitemap.xml`],
     host: BASE_URL,
   };
 }

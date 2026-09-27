@@ -16,11 +16,8 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
-  MediaRail,
-  PillarColumn,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
-import { getAllMedia } from '@/lib/media-server';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
@@ -100,7 +97,7 @@ export default async function KnowledgeHomePage() {
   const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
   const feed = await getHomeFeed(pool);
-  const [videos, interviews, widgets] = await Promise.all([getAllMedia('video'), getAllMedia('interview'), getHomeWidgets()]);
+  const widgets = await getHomeWidgets();
 
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
@@ -190,17 +187,10 @@ export default async function KnowledgeHomePage() {
             2026-09-25 (third AdSense-readiness retirement pass, see
             category-slugs.ts) -- /entertainment, /sports, and /people all
             now 301 to /. Restore alongside CURRENT_CATEGORY_SLUGS.
-            Legal Battles (feed.legal -- articles in the practice-area
-            categories, not the still-retired /legal/cases directory) added
-            back in the same pass its 4 categories were, pointed at
-            /personal-injury-lawyer instead of the retired /legal/cases. */}
-        {feed.legal.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
-          </section>
-        )}
-        <MediaRail title="Videos & Law Elite TV" href="/videos" items={videos.slice(0, 4)} />
-        <MediaRail title="Interviews & Exclusives" href="/interviews" items={interviews.slice(0, 4)} />
+            The "Practice Area Guides" rail (feed.legal, linking to the
+            retired /personal-injury-lawyer redirect) and the Videos/
+            Interviews media rails were removed 2026-09-27 -- owner request,
+            no videos/podcasts/legal-practice surfaces on the homepage. */}
         {/* PopularTopics dropped in the same pass as above -- /topics still
             301s to /, and each topic card links to /topics/{slug}. */}
 

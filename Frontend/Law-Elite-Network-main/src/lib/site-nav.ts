@@ -18,14 +18,15 @@ export interface NavSection extends NavLink {
 // a publication about the history, culture, language and technology
 // surrounding law (see docs/editorial -- the YMYL practice-area categories
 // were archived the same pass, not just delinked). These five categories
-// are newly created in the CMS with zero articles as of this nav change --
-// see category-slugs.ts's CURRENT_CATEGORY_SLUGS comment before treating
-// them as launch-ready; each needs real published content before the site
-// is shown to AdSense or crawled in earnest. Videos/Podcasts keep their real
-// content and stay as secondary nav, unchanged by this pass. Fashion was
-// pulled from nav 2026-09-27 (not part of the history/culture repositioning
-// and not needed right now); the /fashion route and its data still exist,
-// just unlinked -- see category-slugs.ts and category-visibility.ts.
+// started empty at creation and now each carry real, non-fabricated
+// published articles (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment for current counts -- re-verify before treating any section as
+// AdSense-ready). Videos and Podcasts were pulled from nav 2026-09-27
+// (owner request: not needed) -- the routes and their content still exist,
+// just unlinked. Fashion was pulled from nav the same day (not part of the
+// history/culture repositioning and not needed right now); the /fashion
+// route and its data still exist, just unlinked -- see category-slugs.ts
+// and category-visibility.ts.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Stories on Screen',
@@ -50,12 +51,5 @@ export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Law School Life',
     href: '/law-school-success',
-  },
-  {
-    label: 'Videos',
-    href: '/videos',
-    children: [
-      { label: 'Podcasts', href: '/podcasts' },
-    ],
   },
 ];

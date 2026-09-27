@@ -31,13 +31,13 @@ export function toNewCategorySlug(oldSlug: string): string {
 // about the history, culture, language and technology around law"
 // direction (law-and-popular-culture, history-and-civilization,
 // language-and-literature, technology-and-digital-culture,
-// law-culture-and-society). THESE ARE EMPTY as of this change -- zero
-// published articles in any of them. They're listed here (and in
-// site-nav.ts's PRIMARY_NAV) so the pages render instead of 404ing, per the
-// [categorySlug]/page.tsx fetchCategory() gate below, not because they're
-// launch-ready. Do not resubmit to AdSense or treat this site as fully live
-// until each has real, non-fabricated published articles -- an empty-but-
-// linked category was exactly the failure mode in the prior rejections.
+// law-culture-and-society). Started EMPTY at creation; each now has real,
+// non-fabricated published articles (5-10+ per category as of the cluster
+// publishing passes later the same day -- see recent "feat(law-elite):
+// publish ... cluster articles" commits). Before resubmitting to AdSense,
+// re-verify actual live counts rather than trusting this comment, since it
+// was already stale once (it said "empty" while the pass above shows these
+// were already populated).
 export const CURRENT_CATEGORY_SLUGS = [
   'law-school-success',
   'law-and-popular-culture',

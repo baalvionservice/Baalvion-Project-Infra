@@ -103,11 +103,12 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/` },
-    // /case-law, /legislation, /law-changes still 301 to / (next.config.ts)
-    // -- see retired-links.ts's RETIRED_SECTIONS. /news un-retired
-    // 2026-09-25 at explicit request (1 published article today, more
-    // expected as drafts get approved).
-    { url: `${BASE_URL}/news` },
+    // /case-law, /legislation, /law-changes, and /news all 301 to /
+    // (next.config.ts) -- see retired-links.ts's RETIRED_SECTIONS. /news
+    // was briefly un-retired 2026-09-25 then re-retired 2026-09-27 (no real
+    // published news content) -- not listed here since submitting a URL
+    // that immediately redirects is exactly what this comment's neighbors
+    // below exist to avoid.
     { url: `${BASE_URL}/about-us` },
     // /people, /entertainment, /legal/cases, /legal/courts, /sports (+
     // /sports/teams, /sports/competitions), /topics, /countries dropped
