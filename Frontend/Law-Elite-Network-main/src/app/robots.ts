@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { getLiveCategorySlugs } from '@/lib/category-visibility';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -52,7 +52,9 @@ const ALLOW = [
   '/policies',
   '/article/',
   '/law/',
-  ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
+  // Live category slugs (category-visibility.ts) spread in below at
+  // request time -- a category isn't explicitly Allow-listed until it's
+  // actually live, same threshold as nav/sitemap.
   // Kept live through the 2026-09-25 Fashion-only narrowing (see
   // category-slugs.ts) -- real content (Stuff You Should Know, Desert
   // Island Discs, The Rest Is Football; real Bigg Boss episodes), not
@@ -121,7 +123,9 @@ const AI_USER_AGENTS = [
   'meta-externalagent',
 ];
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const liveSlugs = await getLiveCategorySlugs();
+  const allow = [...ALLOW, ...Array.from(liveSlugs).map((slug) => `/${slug}`)];
   return {
     rules: [
       // Google's AdSense ad-serving crawler needs full access to read page
@@ -130,8 +134,8 @@ export default function robots(): MetadataRoute.Robots {
       // '*' group's DISALLOW list, which is Google's documented cause of
       // "couldn't verify your site" / ads not serving.
       { userAgent: 'Mediapartners-Google', allow: '/' },
-      { userAgent: '*', allow: ALLOW, disallow: DISALLOW },
-      ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow: ALLOW, disallow: DISALLOW })),
+      { userAgent: '*', allow, disallow: DISALLOW },
+      ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow, disallow: DISALLOW })),
     ],
     sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
     host: BASE_URL,

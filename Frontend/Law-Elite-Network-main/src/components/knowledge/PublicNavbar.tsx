@@ -15,7 +15,18 @@ import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { useAuth } from '@/hooks/useAuth';
 import { sharedSignInUrl } from '@/lib/shared-auth';
-import { PRIMARY_NAV } from '@/lib/site-nav';
+import { PRIMARY_NAV, type NavSection } from '@/lib/site-nav';
+
+/**
+ * Sections guaranteed live regardless of article count -- see
+ * category-visibility.ts's ALWAYS_LIVE. Used as the initial render so SSR
+ * and the first client paint match exactly (no hydration mismatch); the
+ * live-nav fetch below swaps in the real, count-based set right after
+ * mount, promoting a new pillar automatically once it crosses the
+ * threshold without any manual nav edit.
+ */
+const ALWAYS_LIVE_HREFS = new Set(['/law-school-success', '/fashion']);
+const INITIAL_NAV = PRIMARY_NAV.filter((s) => ALWAYS_LIVE_HREFS.has(s.href));
 
 /**
  * @fileOverview Public masthead. Two tiers: a white brand/utility row over a
@@ -27,6 +38,23 @@ export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [navSections, setNavSections] = useState<NavSection[]>(INITIAL_NAV);
+
+  // Promotes a category into nav automatically once it crosses
+  // category-visibility.ts's LIVE_THRESHOLD published articles -- see
+  // /api/live-nav. Starts from the always-live subset (matches SSR) and
+  // swaps in the real set once this resolves; a failed fetch just keeps
+  // the always-live subset rather than showing nothing.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/live-nav')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.sections)) setNavSections(data.sections);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Full-screen overlay: lock background scroll while it's open.
   useEffect(() => {
@@ -143,7 +171,7 @@ export function PublicNavbar() {
       {/* ── Tier 2: black section bar (desktop) ─────────────────────── */}
       <nav className="hidden lg:block bg-black text-white" aria-label="Sections">
         <ul className="container mx-auto px-6 max-w-7xl h-10 flex items-stretch gap-7">
-          {PRIMARY_NAV.map((section) => (
+          {navSections.map((section) => (
             <li key={section.label} className="group relative flex items-stretch">
               <Link
                 href={section.href}
@@ -205,7 +233,7 @@ export function PublicNavbar() {
               >
                 Home
               </Link>
-              {PRIMARY_NAV.map((section) =>
+              {navSections.map((section) =>
                 section.children ? (
                   <details key={section.label} className="group border-b border-slate-100">
                     <summary className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 cursor-pointer list-none active:bg-slate-50 [&::-webkit-details-marker]:hidden">
