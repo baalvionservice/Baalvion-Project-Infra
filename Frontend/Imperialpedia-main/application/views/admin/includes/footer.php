@@ -9,7 +9,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.11/js/jquery.dataTables.min.js"></script>
-<script src="https://kit.fontawesome.com/0fa3aab205.js"></script><!--Font Awesome CDN-->
 <script src="https://cdn.datatables.net/1.13.11/js/dataTables.bootstrap4.min.js"></script>
 
 
