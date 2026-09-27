@@ -24,7 +24,15 @@ module.exports = {
 
   cookie: {
     accessName:    process.env.COOKIE_ACCESS_NAME  || 'access_token',
-    refreshName:   process.env.COOKIE_REFRESH_NAME || 'refresh_token',
+    // MUST match auth-service's own refresh cookie name (REFRESH_COOKIE_NAME, default
+    // 'baalvion_refresh') — this same value is used both to pick the token out of
+    // auth-service's Set-Cookie response (authService()/pickSetCookie) and to re-issue it to
+    // the browser. A mismatch here means pickSetCookie never finds it, so `establish()` never
+    // sets a refresh cookie at all: the browser is left with only a 15-minute access_token,
+    // and any edge middleware gating on the refresh cookie's presence treats every session as
+    // logged out. Also the name every consuming frontend's middleware checks by default
+    // (NEXT_PUBLIC_REFRESH_COOKIE_NAME).
+    refreshName:   process.env.COOKIE_REFRESH_NAME || 'baalvion_refresh',
     csrfName:      process.env.CSRF_COOKIE_NAME    || 'csrf_token',   // NON-HttpOnly (double-submit)
     secure:        process.env.NODE_ENV === 'production',
     sameSite:      process.env.COOKIE_SAMESITE || 'lax',
