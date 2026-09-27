@@ -11,11 +11,15 @@ try {
 }
 
 const LOG_API_CALLS = process.env.LOG_API_CALLS === 'true';
+// PROXY_-prefixed names take priority: this shared .env is also read by ctm/law/signal/order/
+// order-execution-service, so bare RAZORPAY_KEY_ID resolves identically for all of them.
+const RAZORPAY_KEY_ID = process.env.PROXY_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.PROXY_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
 let razorpay = null;
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
     razorpay = new Razorpay({
-        key_id: process.env.RAZORPAY_KEY_ID,
-        key_secret: process.env.RAZORPAY_KEY_SECRET,
+        key_id: RAZORPAY_KEY_ID,
+        key_secret: RAZORPAY_KEY_SECRET,
     });
 }
 

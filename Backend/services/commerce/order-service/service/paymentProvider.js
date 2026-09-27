@@ -72,10 +72,15 @@ const mockProvider = {
 // a client can never self-mark an order paid by forging a confirm call.
 const RAZORPAY_API = 'https://api.razorpay.com/v1';
 
+// AMARISE_-prefixed names take priority over the bare ones in the env fallback: app-commerce's
+// shared .env also backs commerce/inventory/fulfillment/market/marketplace/trade-service, and the
+// SAME shared .env is what ctm/proxy/order-execution-service read too — a bare RAZORPAY_KEY_ID
+// would resolve to whichever site's key happens to be set, identically across every one of them,
+// once the vault above has nothing.
 async function razorpayKeys() {
   const v = await getPaymentCreds('razorpay');
-  const keyId = (v && v.secrets.keyId) || process.env.RAZORPAY_KEY_ID;
-  const keySecret = (v && v.secrets.keySecret) || process.env.RAZORPAY_KEY_SECRET;
+  const keyId = (v && v.secrets.keyId) || process.env.AMARISE_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const keySecret = (v && v.secrets.keySecret) || process.env.AMARISE_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
   if (!keyId || !keySecret) {
     throw new Error("payment provider 'razorpay' is not configured (set keys in the admin panel, or RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET)");
   }
@@ -416,9 +421,9 @@ function timingSafeHex(a, b) {
 }
 async function payuCreds() {
   const v = await getPaymentCreds('payu');
-  const key = (v && v.secrets.merchantKey) || process.env.PAYU_MERCHANT_KEY;
-  const salt = (v && v.secrets.merchantSalt) || process.env.PAYU_MERCHANT_SALT;
-  const base = ((v && v.config && v.config.baseUrl) || process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
+  const key = (v && v.secrets.merchantKey) || process.env.AMARISE_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY;
+  const salt = (v && v.secrets.merchantSalt) || process.env.AMARISE_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT;
+  const base = ((v && v.config && v.config.baseUrl) || process.env.AMARISE_PAYU_BASE_URL || process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
   if (!key || !salt) throw new Error("payment provider 'payu' is not configured (set keys in the admin panel, or PAYU_MERCHANT_KEY + PAYU_MERCHANT_SALT)");
   return { key, salt, base };
 }
@@ -500,9 +505,9 @@ function safeCashfreeBase(baseUrl, fallback) {
 }
 async function cashfreeCreds() {
   const v = await getPaymentCreds('cashfree');
-  const clientId = (v && v.secrets.clientId) || process.env.CASHFREE_CLIENT_ID;
-  const clientSecret = (v && v.secrets.clientSecret) || process.env.CASHFREE_CLIENT_SECRET;
-  const baseUrl = safeCashfreeBase((v && v.config && v.config.baseUrl) || process.env.CASHFREE_BASE_URL, 'https://api.cashfree.com');
+  const clientId = (v && v.secrets.clientId) || process.env.AMARISE_CASHFREE_CLIENT_ID || process.env.CASHFREE_CLIENT_ID;
+  const clientSecret = (v && v.secrets.clientSecret) || process.env.AMARISE_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET;
+  const baseUrl = safeCashfreeBase((v && v.config && v.config.baseUrl) || process.env.AMARISE_CASHFREE_BASE_URL || process.env.CASHFREE_BASE_URL, 'https://api.cashfree.com');
   if (!clientId || !clientSecret) {
     throw new Error("payment provider 'cashfree' is not configured (set keys in the admin panel, or CASHFREE_CLIENT_ID + CASHFREE_CLIENT_SECRET)");
   }

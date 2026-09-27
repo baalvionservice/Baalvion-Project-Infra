@@ -70,8 +70,11 @@ const RAZORPAY_API = 'https://api.razorpay.com/v1';
 
 async function razorpayKeys() {
   const v = await getPaymentCreds('razorpay');
-  const keyId = (v && v.secrets.keyId) || process.env.RAZORPAY_KEY_ID;
-  const keySecret = (v && v.secrets.keySecret) || process.env.RAZORPAY_KEY_SECRET;
+  // GTI_-prefixed names take priority over the bare ones: app-trade's shared .env is also read
+  // by ctm/law/signal/proxy/order-service, so a bare RAZORPAY_KEY_ID resolves identically for all
+  // of them once the vault above has nothing.
+  const keyId = (v && v.secrets.keyId) || process.env.GTI_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const keySecret = (v && v.secrets.keySecret) || process.env.GTI_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
   if (!keyId || !keySecret) {
     throw new Error("payment provider 'razorpay' is not configured (set keys in the admin panel, or RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET)");
   }
@@ -319,9 +322,9 @@ function timingSafeHex(a, b) {
 }
 async function payuCreds() {
   const v = await getPaymentCreds('payu');
-  const key = (v && v.secrets.merchantKey) || process.env.PAYU_MERCHANT_KEY;
-  const salt = (v && v.secrets.merchantSalt) || process.env.PAYU_MERCHANT_SALT;
-  const base = ((v && v.config && v.config.baseUrl) || process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
+  const key = (v && v.secrets.merchantKey) || process.env.GTI_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY;
+  const salt = (v && v.secrets.merchantSalt) || process.env.GTI_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT;
+  const base = ((v && v.config && v.config.baseUrl) || process.env.GTI_PAYU_BASE_URL || process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
   if (!key || !salt) throw new Error("payment provider 'payu' is not configured (set keys in the admin panel, or PAYU_MERCHANT_KEY + PAYU_MERCHANT_SALT)");
   return { key, salt, base };
 }
@@ -403,9 +406,9 @@ const CASHFREE_BASES = ['https://api.cashfree.com', 'https://sandbox.cashfree.co
 
 async function cashfreeCreds() {
   const v = await getPaymentCreds('cashfree');
-  const clientId = (v && v.secrets.clientId) || process.env.CASHFREE_CLIENT_ID;
-  const clientSecret = (v && v.secrets.clientSecret) || process.env.CASHFREE_CLIENT_SECRET;
-  const mode = (v && v.mode) || process.env.CASHFREE_MODE || 'test';
+  const clientId = (v && v.secrets.clientId) || process.env.GTI_CASHFREE_CLIENT_ID || process.env.CASHFREE_CLIENT_ID;
+  const clientSecret = (v && v.secrets.clientSecret) || process.env.GTI_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET;
+  const mode = (v && v.mode) || process.env.GTI_CASHFREE_MODE || process.env.CASHFREE_MODE || 'test';
   const fallback = (mode === 'live' || mode === 'production') ? 'https://api.cashfree.com' : 'https://sandbox.cashfree.com';
   const requested = ((v && v.config && v.config.baseUrl) || process.env.CASHFREE_BASE_URL || '').replace(/\/+$/, '');
   const base = requested && CASHFREE_BASES.includes(requested) ? requested : fallback;

@@ -17,8 +17,8 @@ const validateFundAccount = async (accountType, accountDetails) => {
         data,
         {
             auth: {
-                username: process.env.RAZORPAY_KEY_ID,
-                password: process.env.RAZORPAY_KEY_SECRET
+                username: process.env.PROXY_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+                password: process.env.PROXY_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET
             }
         }
     );
@@ -40,8 +40,8 @@ const createPayout = async (payoutData) => {
         payoutData,
         {
             auth: {
-                username: process.env.RAZORPAY_KEY_ID,
-                password: process.env.RAZORPAY_KEY_SECRET
+                username: process.env.PROXY_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+                password: process.env.PROXY_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET
             }
         }
     );

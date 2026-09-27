@@ -19,7 +19,7 @@ const logger = require('../service/logger');
 const cmsVault = require('../service/cmsVault');
 const dedup = require('../service/webhookDedup');
 // Cashfree's webhook secret IS the client secret. Vault (central admin panel) first; env fallback.
-const CASHFREE_SECRET_ENV = process.env.CASHFREE_CLIENT_SECRET || '';
+const CASHFREE_SECRET_ENV = process.env.PROXY_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET || '';
 // Replay freshness window. The signature covers (timestamp+body) so a captured payload is replayable
 // verbatim; rejecting a stale x-webhook-timestamp bounds that window (the DB dedup is the second guard).
 // Clamp to [60, 600]s so a misconfigured/hostile env var can't widen the replay window to

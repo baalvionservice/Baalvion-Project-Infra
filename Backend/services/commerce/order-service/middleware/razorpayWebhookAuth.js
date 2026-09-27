@@ -9,7 +9,7 @@
 const crypto = require('crypto');
 const { AppError } = require('../utils/errors');
 
-const SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || '';
+const SECRET = process.env.AMARISE_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
 function timingSafeEqualHex(a, b) {
     const ba = Buffer.from(String(a), 'utf8');

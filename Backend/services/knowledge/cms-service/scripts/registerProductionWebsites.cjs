@@ -21,7 +21,10 @@ const CREATED_BY = Number(process.env.CMS_CREATED_BY || 67);
 
 // domain, name, slug, plan, modules, linkedFrontend, linkedService, linkedSchema, confirmed
 const SITES = [
-  ['amarisemaisonavenue.com', 'Amarise Maison Avenue', 'amarise-maison-avenue', 'enterprise', ['pages','portfolio_item','news'], 'AmariseMaisonAvenue-main', 'real-estate-service', 'real_estate', true],
+  // linkedService corrected 2026-09-27: the live storefront (cart/checkout/payments) is
+  // order-service, not real-estate-service — this is also the slug order-service's cmsVault.js
+  // now defaults to for its payment-vault lookup (PAYMENT_SITE_SLUG), so it must match exactly.
+  ['amarisemaisonavenue.com', 'Amarise Maison Avenue', 'amarise-maison-avenue', 'enterprise', ['pages','portfolio_item','news'], 'AmariseMaisonAvenue-main', 'order-service', 'commerce', true],
   ['imperialpedia.com',       'Imperialpedia',          'imperialpedia',         'enterprise', ['pages','article','doc'],       'Imperialpedia-nextjs-main',      'imperialpedia-service','imperialpedia', true],
   ['lawelitenetwork.com',     'Law Elite Network',      'law-elite-network',     'enterprise', ['pages','article','news'],      'Law-Elite-Network-main',  'law-service',          'legal',  true],
   ['controlthemarket.com',    'Control The Market',     'control-the-market',    'enterprise', ['pages','post','news'],         'controlthemarket-main',   'ctm-service',          'ctm',    true],
@@ -32,6 +35,12 @@ const SITES = [
   ['connect.baalvion.com',    'Baalvion Connect',       'baalvion-connect',      'enterprise', ['pages','post'],                'brand-connector-main',    'brand-connector-service','brand', true],
   ['about.baalvion.com',      'About Baalvion',         'about-baalvion',        'enterprise', ['pages','news'],                'about-baalvion-main',     'about-service',        'about',  true],
   ['proxy.baalvionstack.com', 'Proxy by BaalvionStack', 'proxy-baalvionstack',   'enterprise', ['pages','doc'],                 'Proxy-BaalvionStack',     'proxy-service',        'os',     true],
+  // Added 2026-09-27: these two payment-taking sites (@baalvion/sites registry, owner-confirmed
+  // 2026-09-06) had no CMS website row at all, so their payment vault ("Integrations & Keys" in
+  // the admin panel) had nothing to attach to. Slugs match the defaults order-execution-service's
+  // and developer-service's cmsVault.js now fall back to (PAYMENT_SITE_SLUG).
+  ['trade.baalvion.com',      'Global Trade Infrastructure','gti',               'enterprise', ['pages','product'],             'Global-Trade-Infrastructure-main','order-execution-service','trade', true],
+  ['signal.baalvion.com',     'Baalvion Intelligence',  'signal',                'enterprise', ['pages'],                       'baalvion-intelligence',   'developer-service',    'developer', true],
   // ── pending user confirmation (best guess) ──
   ['baalvion.com',            'Baalvion',               'baalvion',              'enterprise', ['pages','news'],                'about-baalvion-main',     'about-service',        'about',  false],
   ['baalvionstack.com',       'BaalvionStack',          'baalvionstack',         'enterprise', ['pages'],                       'Proxy-BaalvionStack',     'proxy-service',        'os',     false],

@@ -58,8 +58,13 @@ async function resolveConfig() {
         const cfg = row.config || {};
         return { source: 'vault', clientId: row.secrets.clientId, clientSecret: row.secrets.clientSecret, baseUrl: cfg.baseUrl || '', mode: cfg.mode || 'live' };
     }
-    if (process.env.CASHFREE_CLIENT_ID && process.env.CASHFREE_CLIENT_SECRET) {
-        return { source: 'env', clientId: process.env.CASHFREE_CLIENT_ID, clientSecret: process.env.CASHFREE_CLIENT_SECRET, baseUrl: process.env.CASHFREE_BASE_URL || '', mode: 'env' };
+    // LAW_-prefixed names take priority: app-platform runs law-service and developer-service in
+    // the same container/process env, so the bare CASHFREE_CLIENT_ID would resolve identically
+    // for both sites otherwise.
+    const clientId = process.env.LAW_CASHFREE_CLIENT_ID || process.env.CASHFREE_CLIENT_ID;
+    const clientSecret = process.env.LAW_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET;
+    if (clientId && clientSecret) {
+        return { source: 'env', clientId, clientSecret, baseUrl: process.env.LAW_CASHFREE_BASE_URL || process.env.CASHFREE_BASE_URL || '', mode: 'env' };
     }
     return null;
 }

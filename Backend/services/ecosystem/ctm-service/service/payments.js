@@ -103,10 +103,26 @@ async function resolveConfig(provider) {
         if (provider === 'payu' && s.merchantKey && s.merchantSalt) return { source: 'vault', merchantKey: s.merchantKey, merchantSalt: s.merchantSalt, baseUrl, webhookSecret, mode };
         if (provider === 'cashfree' && s.clientId && s.clientSecret) return { source: 'vault', clientId: s.clientId, clientSecret: s.clientSecret, baseUrl, webhookSecret, mode };
     }
+    // CTM_-prefixed names take priority: app-ecosystem's shared .env also backs mining/real-estate/
+    // brand-connector/about, and the SAME shared .env is what proxy/order/order-execution read too —
+    // a bare RAZORPAY_KEY_ID would resolve to whichever site's key happens to be set, identically
+    // across every one of them, once the vault above has nothing.
     if (provider === 'stripe' && process.env.STRIPE_SECRET_KEY) return { source: 'env', secretKey: process.env.STRIPE_SECRET_KEY, webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '', mode: 'env' };
-    if (provider === 'razorpay' && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) return { source: 'env', keyId: process.env.RAZORPAY_KEY_ID, keySecret: process.env.RAZORPAY_KEY_SECRET, webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '', mode: 'env' };
-    if (provider === 'payu' && process.env.PAYU_MERCHANT_KEY && process.env.PAYU_MERCHANT_SALT) return { source: 'env', merchantKey: process.env.PAYU_MERCHANT_KEY, merchantSalt: process.env.PAYU_MERCHANT_SALT, baseUrl: process.env.PAYU_BASE_URL || '', webhookSecret: '', mode: 'env' };
-    if (provider === 'cashfree' && process.env.CASHFREE_CLIENT_ID && process.env.CASHFREE_CLIENT_SECRET) return { source: 'env', clientId: process.env.CASHFREE_CLIENT_ID, clientSecret: process.env.CASHFREE_CLIENT_SECRET, baseUrl: process.env.CASHFREE_BASE_URL || '', webhookSecret: '', mode: 'env' };
+    {
+        const keyId = process.env.CTM_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+        const keySecret = process.env.CTM_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
+        if (provider === 'razorpay' && keyId && keySecret) return { source: 'env', keyId, keySecret, webhookSecret: process.env.CTM_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '', mode: 'env' };
+    }
+    {
+        const merchantKey = process.env.CTM_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY;
+        const merchantSalt = process.env.CTM_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT;
+        if (provider === 'payu' && merchantKey && merchantSalt) return { source: 'env', merchantKey, merchantSalt, baseUrl: process.env.CTM_PAYU_BASE_URL || process.env.PAYU_BASE_URL || '', webhookSecret: '', mode: 'env' };
+    }
+    {
+        const clientId = process.env.CTM_CASHFREE_CLIENT_ID || process.env.CASHFREE_CLIENT_ID;
+        const clientSecret = process.env.CTM_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET;
+        if (provider === 'cashfree' && clientId && clientSecret) return { source: 'env', clientId, clientSecret, baseUrl: process.env.CTM_CASHFREE_BASE_URL || process.env.CASHFREE_BASE_URL || '', webhookSecret: '', mode: 'env' };
+    }
     return null;
 }
 
@@ -123,7 +139,7 @@ async function resolveWebhookSecret(provider) {
         if (ws) return ws;
     }
     if (provider === 'stripe') return process.env.STRIPE_WEBHOOK_SECRET || '';
-    if (provider === 'razorpay') return process.env.RAZORPAY_WEBHOOK_SECRET || '';
+    if (provider === 'razorpay') return process.env.CTM_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '';
     return '';
 }
 
