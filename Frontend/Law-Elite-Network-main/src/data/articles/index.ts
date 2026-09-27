@@ -36,6 +36,12 @@ import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
 import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
 import { lawSchoolSuccessArticles } from './law-school-success';
+import { articleHollywoodLawyers } from './law-and-popular-culture';
+import { articleLawAndPopularCultureExtra } from './law-and-popular-culture-extra';
+import { articleHistoryAndCivilizationDrafts } from './history-and-civilization';
+import { articleLanguageAndLiteratureDrafts } from './language-and-literature';
+import { articleTechnologyAndDigitalCultureDrafts } from './technology-and-digital-culture';
+import { articleLawCultureAndSocietyDrafts } from './law-culture-and-society';
 import { highProfileNewsArticles } from './high-profile-cases-news';
 import { entertainmentNewsArticles } from './entertainment-news';
 import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
@@ -47,6 +53,12 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...celebrityProfilesNewsArticles,
   ...sportsNewsArticles,
   ...lawSchoolSuccessArticles,
+  ...articleHollywoodLawyers,
+  ...articleLawAndPopularCultureExtra,
+  ...articleHistoryAndCivilizationDrafts,
+  ...articleLanguageAndLiteratureDrafts,
+  ...articleTechnologyAndDigitalCultureDrafts,
+  ...articleLawCultureAndSocietyDrafts,
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,
   ...businessCorporateExtra2Articles,
