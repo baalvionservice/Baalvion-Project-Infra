@@ -4,9 +4,10 @@ import { getAllArticles, mergeArticles } from '@/data/law-content';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
+import { newsUrl } from '@/lib/news-url';
 import { toNewCategorySlug } from '@/lib/category-slugs';
 import { getLiveCategorySlugs } from '@/lib/category-visibility';
-import { cmsGetArticles } from '@/lib/cms';
+import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 // People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
 // 2026-09-25 alongside the routes below -- see the retirement comment
@@ -99,10 +100,11 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
     (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
-  const [articles, categories, cmsArticles] = await Promise.all([
+  const [articles, categories, cmsArticles, cmsNews] = await Promise.all([
     safeFetch<ArticleEntry>(`${apiBase}/articles?limit=1000`),
     safeFetch<CategoryEntry>(`${apiBase}/categories`),
     cmsGetArticles().catch(() => []),
+    cmsGetNews(1000).catch(() => []),
   ]);
 
   // No lastModified on these: they're hardcoded marketing/policy routes with
@@ -311,14 +313,30 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // to prevent for articles. Restore this block once AdSense approves the
   // Fashion-only site. Podcasts and Videos sitemap entries removed
   // 2026-09-27 (owner request, alongside their nav/homepage links) -- the
-  // sitemap is now scoped to the static pages, the 6 live categories, and
-  // article/author pages only.
+  // sitemap is now scoped to the static pages, the 6 live categories,
+  // article/author pages, and News.
+
+  // News (contentType: 'news', see news-url.ts): every published item, not
+  // just the last 2 days Google News wants (news-sitemap.xml handles that
+  // window) -- an item older than 2 days ages out of the News feed but must
+  // stay discoverable somewhere, or it becomes an orphan page the moment it
+  // stops being "breaking." newsUrl() returns null for an item with no real
+  // published date, which is filtered out here rather than ever fabricated.
+  const newsRoutes: MetadataRoute.Sitemap = cmsNews
+    .map((n) => {
+      const path = newsUrl(n);
+      if (!path) return null;
+      const lastModified = parseRealDate(n.updatedAt);
+      return { url: `${BASE_URL}${path}`, ...(lastModified && { lastModified }) };
+    })
+    .filter((entry): entry is { url: string; lastModified?: Date } => entry !== null);
 
   return [
     ...staticRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
+    ...newsRoutes,
   ];
 }
 
