@@ -28,6 +28,7 @@ import { formatArticleDate } from '@/lib/format-date';
 import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
+import { newsUrl } from '@/lib/news-url';
 import { cmsGetArticles } from '@/lib/cms';
 import { getMergedAuthorByName } from '@/lib/authors-server';
 import { isNonPersonByline } from '@/lib/seo/author-ld';
@@ -103,7 +104,10 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
   const connectedEntities = await resolveEntityReferences(await getEntitiesForArticle(article));
-  const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
+  // News (contentType: 'news') resolves to /news/{date}/{geo}/{slug}, not
+  // the category-based URL every other article uses -- see news-url.ts.
+  const canonicalPath = article.contentType === 'news' ? newsUrl({ ...article, slug }) : null;
+  const canonicalUrl = `${SITE}${canonicalPath || articleUrl({ slug, category })}`;
 
   const readAlsoArticle = relatedArticles.length > 0 ? relatedArticles[0] : {
     title: 'How Many Hours Should You Actually Study in Law School?',
