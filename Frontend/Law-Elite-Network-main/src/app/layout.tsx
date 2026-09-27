@@ -74,23 +74,19 @@ export const metadata: Metadata = {
     shortcut: '/brand/icon.svg',
   },
   title: {
-    default: 'Law Elite Network | Legal Guides & News',
+    default: 'Law Elite Network | History, Culture, Technology & Education',
     template: '%s | Law Elite Network',
   },
   description:
-    'Law Elite Network — plain-language legal guides, court news, and expert analysis organized by practice area and jurisdiction. Understand your rights before you call a lawyer.',
+    'Law Elite Network explores the history, culture, language, entertainment, education, and technology surrounding law through informative stories, research, and accessible analysis.',
   keywords: [
+    'legal history',
+    'law and popular culture',
+    'legal language',
     'legal education',
-    'legal guides',
-    'law news',
-    'court cases',
-    'maritime injury law',
-    'personal injury lawyer',
-    'cruise ship accidents',
-    'plain-language legal guides',
-    'legal guides by jurisdiction',
-    'understand your rights',
-    'law firm directory',
+    'history of law',
+    'law and technology',
+    'law and society',
     'Law Elite Network',
   ],
   authors: [{ name: 'Law Elite Network', url: SITE_URL }],
@@ -102,9 +98,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: 'Law Elite Network',
-    title: 'Law Elite Network | Legal Guides & News',
+    title: 'Law Elite Network | History, Culture, Technology & Education',
     description:
-      'Plain-language legal guides, court news, and expert analysis — organized by practice area and jurisdiction.',
+      'Exploring the history, culture, language, entertainment, education, and technology surrounding law.',
     images: [
       {
         url: `${SITE_URL}/logo.jpg`,
@@ -119,9 +115,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@lawelitenetwork',
     creator: '@lawelitenetwork',
-    title: 'Law Elite Network | Legal Guides & News',
+    title: 'Law Elite Network | History, Culture, Technology & Education',
     description:
-      'Plain-language legal guides, court news, and expert analysis — organized by practice area and jurisdiction.',
+      'Exploring the history, culture, language, entertainment, education, and technology surrounding law.',
     images: [`${SITE_URL}/logo.jpg`],
   },
   robots: {

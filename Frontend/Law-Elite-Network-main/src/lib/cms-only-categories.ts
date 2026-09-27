@@ -315,6 +315,60 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
     metaDescription: 'Sourced, practical guides for law students -- study hours, casebook reading, and the skills that actually matter, backed by real data instead of generic advice.',
   },
 
+  // 2026-09-27 repositioning pillar: LEN's new identity as a publication
+  // about the history, culture, language and technology surrounding law
+  // (replacing the legal-lead-gen/practice-area identity -- see
+  // category-slugs.ts). Same pattern as the entertainment hubs below:
+  // category infrastructure live, zero articles published under them yet.
+  // `pillar: 'entertainment'` reuses the existing non-legal-copy branch in
+  // [categorySlug]/page.tsx and layout.tsx (no "Practice Area"/"Lawyers"
+  // copy) -- there's no dedicated pillar value for this yet.
+  'law-and-popular-culture': {
+    id: 'cms-cat-law-and-popular-culture',
+    name: 'Law & Popular Culture',
+    slug: 'law-and-popular-culture',
+    description: 'How Hollywood, television and popular culture portray lawyers, courts, trials, and legal institutions.',
+    metaTitle: 'Law & Popular Culture',
+    metaDescription: 'How movies, television, books and popular culture portray lawyers, courts, trials and legal institutions.',
+    pillar: 'entertainment',
+  },
+  'history-and-civilization': {
+    id: 'cms-cat-history-and-civilization',
+    name: 'History & Civilization',
+    slug: 'history-and-civilization',
+    description: 'The people, traditions, institutions and historical events that shaped the world’s legal cultures.',
+    metaTitle: 'History & Civilization',
+    metaDescription: 'The people, traditions, institutions and historical events that shaped the world’s legal cultures.',
+    pillar: 'entertainment',
+  },
+  'language-and-literature': {
+    id: 'cms-cat-language-and-literature',
+    name: 'Language & Literature',
+    slug: 'language-and-literature',
+    description: 'The origins of legal vocabulary, expressions, writing traditions, and the relationship between law and literature.',
+    metaTitle: 'Language & Literature',
+    metaDescription: 'The origins of legal vocabulary, expressions, writing traditions, and the relationship between law and literature.',
+    pillar: 'entertainment',
+  },
+  'technology-and-digital-culture': {
+    id: 'cms-cat-technology-and-digital-culture',
+    name: 'Technology & Digital Culture',
+    slug: 'technology-and-digital-culture',
+    description: 'Digital documents, OCR, eDiscovery, research tools, and the evolution of technology in the legal industry.',
+    metaTitle: 'Technology & Digital Culture',
+    metaDescription: 'Digital documents, OCR, eDiscovery, research tools, and the evolution of technology in the legal industry.',
+    pillar: 'entertainment',
+  },
+  'law-culture-and-society': {
+    id: 'cms-cat-law-culture-and-society',
+    name: 'Law, Culture & Society',
+    slug: 'law-culture-and-society',
+    description: 'The symbols, customs, journalism, stories and cultural ideas that have grown around courts and legal institutions.',
+    metaTitle: 'Law, Culture & Society',
+    metaDescription: 'The symbols, customs, journalism, stories and cultural ideas that have grown around courts and legal institutions.',
+    pillar: 'entertainment',
+  },
+
   // Entertainment pillar (LEN master IA) -- new hubs, launched with the
   // category infrastructure live but no articles published under them yet.
   // Descriptions describe editorial scope only, not content that exists yet.

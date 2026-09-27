@@ -17,11 +17,12 @@ export function NewsPublisherSchema() {
     ethicsPolicy: 'https://lawelitenetwork.com/sponsored-content-policy',
     diversityPolicy: 'https://lawelitenetwork.com/about-us',
     knowsAbout: [
-      'Legal News',
-      'Supreme Court Dockets',
-      'Celebrity Legal Disputes',
-      'Corporate Governance Litigation',
-      'Public Figure Biographies',
+      'Legal History',
+      'Law and Popular Culture',
+      'Legal Language',
+      'Law and Technology',
+      'Law and Society',
+      'Law School Education',
     ],
     sameAs: [
       'https://twitter.com/LawEliteNet',
