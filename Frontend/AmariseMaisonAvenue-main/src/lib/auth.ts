@@ -87,13 +87,18 @@ export const authClient = {
     return applySession(json.data ?? json, email);
   },
 
-  /** Passwordless login — step 1: email a one-time code. */
-  async emailOtpRequest(email: string): Promise<{ sentTo: string; expiresAt: string; resendAvailableInSeconds: number }> {
+  /**
+   * Passwordless login — step 1: email a one-time code. auth-service binds first/last name to
+   * the issued code at request time (so a brand-new account is provisioned with the right name
+   * and it can never be spoofed at verify) — both fields are required by the backend schema even
+   * for a returning customer, not optional metadata.
+   */
+  async emailOtpRequest(email: string, firstName: string, lastName: string): Promise<{ sentTo: string; expiresAt: string; resendAvailableInSeconds: number }> {
     const res = await fetch(`${AUTH_URL}/email/otp/request`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, firstName, lastName }),
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok || json.success === false) {
