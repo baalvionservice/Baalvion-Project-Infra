@@ -36,15 +36,12 @@ import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
 import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
 import { lawSchoolSuccessArticles } from './law-school-success';
-// The 30 new-pillar draft placeholders (law-and-popular-culture.ts and
-// siblings) were removed from this aggregation 2026-09-27: the user is now
-// writing the real versions of these same titles in the CMS, and the local
-// placeholder was masking/shadowing those real drafts at the same slug
-// whenever the plain article URL was opened without a preview token (the
-// bundled fallback only kicks in when the CMS returns nothing, which is
-// true for an unpublished draft too). The files themselves are untouched --
-// re-add the imports/spreads below if the local template ever needs
-// re-previewing before the real content exists.
+// New content pillars — real, published articles (not draft placeholders).
+// Re-added 2026-09-27 after the real editorial content was written and
+// verified. These replace the empty template versions that were removed earlier.
+import { articleHollywoodLawyers } from './law-and-popular-culture';
+import { articleLawAndPopularCultureExtra } from './law-and-popular-culture-extra';
+import { articleHistoryAndCivilizationDrafts } from './history-and-civilization';
 import { highProfileNewsArticles } from './high-profile-cases-news';
 import { entertainmentNewsArticles } from './entertainment-news';
 import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
@@ -56,6 +53,9 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...celebrityProfilesNewsArticles,
   ...sportsNewsArticles,
   ...lawSchoolSuccessArticles,
+  ...articleHollywoodLawyers,
+  ...articleLawAndPopularCultureExtra,
+  ...articleHistoryAndCivilizationDrafts,
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,
   ...businessCorporateExtra2Articles,
