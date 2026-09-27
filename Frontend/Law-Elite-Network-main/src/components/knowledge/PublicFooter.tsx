@@ -30,15 +30,17 @@ const PRACTICE_AREA_LINKS = [
   { href: '/law-school-success', label: 'Law School Success' },
 ];
 
+// Trimmed from 8 to 4 (2026-09-27, owner request): About/Contributors/
+// Editorial Standards/Contact cover what Google's AdSense checklist and a
+// reader actually need (active About + Contact, a visible trust signal).
+// Editorial Process, Corrections, Careers, and Advertise still exist as
+// real pages (linked from /policies and /about-us, still in the sitemap)
+// -- just not repeated in the footer anymore.
 const ABOUT_LINKS = [
   { href: '/about-us', label: 'About Us' },
   { href: '/authors', label: 'Contributors' },
   { href: '/editorial-standards', label: 'Editorial Standards' },
-  { href: '/editorial-process', label: 'Editorial Process' },
-  { href: '/corrections', label: 'Corrections' },
   { href: '/contact-us', label: 'Contact Us' },
-  { href: '/careers', label: 'Careers' },
-  { href: '/advertise', label: 'Advertise' },
 ];
 
 const LEGAL_LINKS = [
