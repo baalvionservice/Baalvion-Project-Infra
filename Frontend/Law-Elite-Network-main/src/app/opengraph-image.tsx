@@ -49,19 +49,19 @@ export default function OpenGraphImage() {
             {/* SVG scales — rendered as inline element in ImageResponse */}
             <svg viewBox="0 0 64 64" width="110" height="110">
               {/* Beam */}
-              <rect x="10" y="20" width="44" height="4" fill={WHITE} />
+              <rect x="8" y="18" width="48" height="5" fill={WHITE} />
               {/* Post */}
-              <rect x="30" y="24" width="4" height="20" fill={WHITE} />
+              <rect x="29" y="22" width="6" height="24" fill={WHITE} />
               {/* Base */}
-              <rect x="24" y="46" width="16" height="4" fill={WHITE} />
+              <rect x="21" y="46" width="22" height="5" fill={WHITE} />
               {/* Left chain */}
-              <rect x="13.5" y="24" width="2" height="9" fill={WHITE} />
+              <rect x="12" y="23" width="2.5" height="9" fill={WHITE} />
               {/* Right chain */}
-              <rect x="48.5" y="24" width="2" height="9" fill={WHITE} />
+              <rect x="49.5" y="23" width="2.5" height="9" fill={WHITE} />
               {/* Left pan */}
-              <circle cx="15.5" cy="33" r="7.5" fill="none" stroke={WHITE} strokeWidth="2" />
+              <circle cx="13" cy="34" r="10" fill={WHITE} />
               {/* Right pan */}
-              <circle cx="50.5" cy="33" r="7.5" fill="none" stroke={WHITE} strokeWidth="2" />
+              <circle cx="51" cy="34" r="10" fill={WHITE} />
             </svg>
           </div>
 
