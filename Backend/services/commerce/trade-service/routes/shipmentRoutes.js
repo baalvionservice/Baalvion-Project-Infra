@@ -1,6 +1,6 @@
 'use strict';
 const router = require('express').Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware, requireOrgType } = require('../middleware/authMiddleware');
 const {
     listShipments, getShipment, createShipment, updateShipment,
     addMilestone, addException, updateShipmentStatus,
@@ -18,8 +18,10 @@ router.get('/:id',                 authMiddleware, getShipment);
 router.post('/',                   authMiddleware, createShipment);
 router.put('/:id',                 authMiddleware, updateShipment);
 router.patch('/:id',               authMiddleware, updateShipment);
-router.post('/:id/milestones',     authMiddleware, addMilestone);
-router.post('/:id/exceptions',     authMiddleware, addException);
-router.patch('/:id/status',        authMiddleware, updateShipmentStatus);
+// Booking a shipment can plausibly be initiated by whoever needs the cargo moved (buyer or
+// seller); recording an operational milestone/exception/status change is the carrier's own event.
+router.post('/:id/milestones',     authMiddleware, requireOrgType('logistics_provider'), addMilestone);
+router.post('/:id/exceptions',     authMiddleware, requireOrgType('logistics_provider'), addException);
+router.patch('/:id/status',        authMiddleware, requireOrgType('logistics_provider'), updateShipmentStatus);
 
 module.exports = router;

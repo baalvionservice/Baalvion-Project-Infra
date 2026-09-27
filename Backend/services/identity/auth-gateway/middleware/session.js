@@ -70,6 +70,7 @@ function attachUser(req, _res, next) {
     req.user = {
       userId:      c.sub,
       orgId:       c.org_id ?? null,
+      orgType:     c.org_type ?? null,
       roles:       Array.isArray(c.roles) ? c.roles : (c.role != null ? [c.role] : []),
       permissions: Array.isArray(c.permissions) ? c.permissions : [],
       sessionId:   c.sid,

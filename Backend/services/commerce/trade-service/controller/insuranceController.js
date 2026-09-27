@@ -86,9 +86,18 @@ function remainingCapacity(limit, used, currency) {
 
 
 // ── Tenant helpers ────────────────────────────────────────────────────────────
+// `admin`/`owner`/`super_admin` are per-ORG membership roles, not platform-wide ones — a buyer's
+// own admin has 'owner' on their own org exactly like an insurer's admin does on theirs. Checking
+// the role alone (as this used to) skipped the tenant-scope check below for ANY org's admin, so
+// a buyer's admin could fetch and act on (approve/pay!) another org's insurance claim. The
+// cross-tenant bypass below is only correct for the org that actually underwrites — i.e. the
+// insurer itself, or a genuine platform operator — never a policyholder's own admin.
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
-    return roles.some((r) => r === 'admin' || r === 'super_admin' || r === 'owner');
+    const hasAdminRole = roles.some((r) => r === 'admin' || r === 'super_admin' || r === 'owner');
+    if (!hasAdminRole) return false;
+    const orgType = req.auth && req.auth.orgType;
+    return orgType === 'insurance_provider' || orgType === 'platform_owner';
 }
 
 function callerTenantId(req) {
