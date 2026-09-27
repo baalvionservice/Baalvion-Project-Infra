@@ -31,17 +31,7 @@ export interface NavSection extends NavLink {
 // CURRENT_CATEGORY_SLUGS once AdSense approves the site as it stands.
 export const PRIMARY_NAV: NavSection[] = [
   {
-    label: 'News',
-    href: '/news',
-  },
-  {
-    label: 'Legal',
-    href: '/personal-injury-lawyer',
-    children: [
-      { label: 'Personal Injury', href: '/personal-injury-lawyer' },
-      { label: 'Maritime Injury', href: '/maritime-offshore-injury-law' },
-      { label: 'Cruise Ship Accidents', href: '/cruise-ship-passenger-vessel-accidents' },
-      { label: 'Law School Success', href: '/law-school-success' },
-    ],
+    label: 'Law School Success',
+    href: '/law-school-success',
   },
 ];

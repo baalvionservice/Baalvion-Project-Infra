@@ -204,6 +204,15 @@ const nextConfig: NextConfig = {
       { source: '/case-law', destination: '/', permanent: true },
       { source: '/legislation', destination: '/', permanent: true },
       { source: '/law-changes', destination: '/', permanent: true },
+      // 2026-09-27: /news, personal-injury-lawyer, maritime-offshore-injury-law
+      // and cruise-ship-passenger-vessel-accidents re-retired -- their content
+      // was archived (YMYL/legal-lead-gen risk), not deleted, so this follows
+      // the same pattern as the block above rather than leaving a now-empty
+      // section directly reachable by URL.
+      { source: '/news', destination: '/', permanent: true },
+      { source: '/personal-injury-lawyer', destination: '/', permanent: true },
+      { source: '/maritime-offshore-injury-law', destination: '/', permanent: true },
+      { source: '/cruise-ship-passenger-vessel-accidents', destination: '/', permanent: true },
       // Synonym consolidation. "offshore injury lawyer" / "offshore accident
       // lawyer", and the maritime and oil-rig pairs, are the same search intent
       // with a swapped noun -- six pages competing for one query each. The text

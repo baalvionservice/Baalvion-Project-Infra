@@ -49,9 +49,7 @@ export function toNewCategorySlug(oldSlug: string): string {
 // Interviews (see next.config.ts) rather than going live as a real nav item
 // pointing at placeholder copy. Restore once it has real articles.
 export const CURRENT_CATEGORY_SLUGS = [
-  'personal-injury-lawyer',
-  'maritime-offshore-injury-law',
-  'cruise-ship-passenger-vessel-accidents',
+  'fashion',
   'law-school-success',
 ] as const;
 
