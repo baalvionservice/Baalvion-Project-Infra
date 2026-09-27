@@ -18,6 +18,8 @@ export function EmailOtpLogin({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>('trigger');
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [code, setCode] = useState('');
   const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export function EmailOtpLogin({ redirectTo }: { redirectTo: string }) {
     setError(null);
     setBusy(true);
     try {
-      const res = await authClient.emailOtpRequest(email.trim());
+      const res = await authClient.emailOtpRequest(email.trim(), firstName.trim(), lastName.trim());
       setSentTo(res.sentTo);
       setResendIn(res.resendAvailableInSeconds || 60);
       setStep('code');
@@ -76,8 +78,33 @@ export function EmailOtpLogin({ redirectTo }: { redirectTo: string }) {
       {step === 'email' ? (
         <>
           <p className="text-[12px] text-gray-500 font-light italic leading-relaxed">
-            Enter your email and we&apos;ll send a one-time login code — no password needed.
+            Enter your details and we&apos;ll send a one-time login code — no password needed.
           </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="otp-first-name" className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">
+                First Name
+              </Label>
+              <Input
+                id="otp-first-name"
+                autoFocus
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="h-12 rounded-none border-gray-200 bg-white text-sm font-light focus:ring-0 focus:border-black transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="otp-last-name" className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">
+                Last Name
+              </Label>
+              <Input
+                id="otp-last-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="h-12 rounded-none border-gray-200 bg-white text-sm font-light focus:ring-0 focus:border-black transition-all"
+              />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="otp-email" className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">
               Email Address
@@ -85,10 +112,9 @@ export function EmailOtpLogin({ redirectTo }: { redirectTo: string }) {
             <Input
               id="otp-email"
               type="email"
-              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && email.trim()) sendCode(); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && email.trim() && firstName.trim() && lastName.trim()) sendCode(); }}
               className="h-12 rounded-none border-gray-200 bg-white text-sm font-light focus:ring-0 focus:border-black transition-all"
             />
           </div>
@@ -97,7 +123,7 @@ export function EmailOtpLogin({ redirectTo }: { redirectTo: string }) {
             <Button
               type="button"
               variant="outline"
-              disabled={busy || !email.trim()}
+              disabled={busy || !email.trim() || !firstName.trim() || !lastName.trim()}
               onClick={sendCode}
               className="w-full max-w-[200px] h-12 border-black text-black hover:bg-black hover:text-white rounded-none text-[10px] font-bold tracking-[0.25em] uppercase transition-all shadow-sm disabled:opacity-60"
             >
