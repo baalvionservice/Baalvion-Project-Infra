@@ -43,6 +43,7 @@ import { articleHollywoodLawyers } from './law-and-popular-culture';
 import { articleLawAndPopularCultureExtra } from './law-and-popular-culture-extra';
 import { articleHistoryAndCivilizationDrafts } from './history-and-civilization';
 import { articleLanguageAndLiterature } from './language-and-literature';
+import { articleTechnologyAndDigitalCulture } from './technology-and-digital-culture';
 import { highProfileNewsArticles } from './high-profile-cases-news';
 import { entertainmentNewsArticles } from './entertainment-news';
 import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
@@ -58,6 +59,7 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...articleLawAndPopularCultureExtra,
   ...articleHistoryAndCivilizationDrafts,
   ...articleLanguageAndLiterature,
+  ...articleTechnologyAndDigitalCulture,
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,
   ...businessCorporateExtra2Articles,
