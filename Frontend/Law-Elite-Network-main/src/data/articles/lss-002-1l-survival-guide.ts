@@ -71,7 +71,7 @@ export const article1LSurvivalGuide: LawArticle[] = [
 <h3>When should I actually start thinking about 1L summer jobs?</h3>
 <p>Career offices typically start general programming -- resume workshops, and later initial advising meetings -- in the fall (individual advising for first-semester 1Ls often waits until November under NALP's guidelines), and formal applications for many 1L summer positions open December 1st. Public-interest and government fair sign-ups often close in mid-January for a February fair, so "early spring" is already late for those tracks.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-24T11:20:00.000Z',
     modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,

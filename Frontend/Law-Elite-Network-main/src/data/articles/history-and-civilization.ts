@@ -67,7 +67,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <p>These codes were fundamentally designed to preserve social stability and state authority, not individual equality. They codified slavery, institutionalized gender subordination, and enforced brutal class hierarchies. A silver fine that was a minor inconvenience for a wealthy Babylonian merchant could ruin a free peasant, forcing his family into bondage.</p>
 <p>Yet despite their cruelty and inequality, these early codes accomplished a critical shift in human governance. They replaced private vendettas with public adjudication and proved that written words could outlast the ruling monarch who commissioned them.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 2026',
+    updatedAt: '2026-09-10T19:15:00.000Z',
     readingTime: 6,
     views: 142,
     featured: true,
@@ -147,7 +147,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <p>When twelve citizens gather in a deliberation room today, they are participating in an institution shaped by millennia of trial and error. They carry forward the mass votes of Athenian <em>dikasteria</em>, the public notice of Roman courts, the sworn inquests of Norman kings, and the hard-won independence of Edward Bushel.</p>
 <p>If you were accused of a crime tomorrow, would you choose to have your fate decided by a single professional judge employed by the state, or by twelve strangers drawn from your own community?</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 2026',
+    updatedAt: '2026-09-21T16:25:00.000Z',
     readingTime: 7,
     views: 118,
     featured: true,
@@ -214,7 +214,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <p>Yet as soon as the judge called the room to order and the plaintiff stood up to speak, the ancient observer would recognize the proceeding instantly.</p>
 <p>The marble pillars and digital records are new. But the underlying human conflict—one person standing before the community and declaring, <em>"You wronged me, and the law must make it right"</em>—is as old as civilization itself.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 2026',
+    updatedAt: '2026-09-20T14:50:00.000Z',
     readingTime: 7,
     views: 135,
     featured: true,
@@ -281,7 +281,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <p>The strange survival of courtroom robes and wigs persists because a courthouse is not merely an office building where people debate rules. It is a ritual space.</p>
 <p>When advocates don historic robes and step before a robed bench, the costume sends a clear visual signal to everyone present: the participants are not engaged in a private quarrel. They are operating inside an ancient, structured institution designed to elevate impartial law above personal desire.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 2026',
+    updatedAt: '2026-09-25T17:40:00.000Z',
     readingTime: 7,
     views: 152,
     featured: true,
@@ -390,7 +390,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <p>Yet as soon as the accuser stood up to speak, the core human struggle would be instantly recognizable.</p>
 <p>People 2,000 years ago asked the exact same questions we ask in courtrooms today: Who is telling the truth? Who was harmed? What is the fair way to fix it?</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 2026',
+    updatedAt: '2026-09-24T18:05:00.000Z',
     readingTime: 7,
     views: 165,
     featured: true,
@@ -425,7 +425,7 @@ export const articleHistoryAndCivilizationDrafts: LawArticle[] = [
 <h2>Sources</h2>
 <p>[Placeholder -- real, checkable sources go here before publication.]</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'Draft',
+    updatedAt: '2026-09-04T12:30:00.000Z',
     readingTime: 1,
     views: 0,
     featured: false,

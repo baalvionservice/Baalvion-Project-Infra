@@ -74,7 +74,7 @@ export const lawSchoolSuccessArticles: LawArticle[] = [
 <h3>Do 2L and 3L students study as much as 1Ls?</h3>
 <p>The 2023 Law School Survey of Student Engagement data cited here covers first-year students specifically; it doesn't report a 2L/3L breakdown, so there isn't a directly comparable sourced figure for upper-level students in this dataset.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-27T13:35:00.000Z',
     modifiedAt: '2026-09-21',
     readingTime: 6,
     views: 0,

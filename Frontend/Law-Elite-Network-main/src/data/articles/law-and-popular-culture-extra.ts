@@ -118,7 +118,7 @@ export const articleLawAndPopularCultureExtra: LawArticle[] = [
   <li>[Internal Link: Article 4] - Explore how screen lawyers evolved from moral heroes into complex antiheroes.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: new Date().toISOString().split('T')[0],
+    updatedAt: '2026-09-13T12:30:00.000Z',
     readingTime: 7,
     views: 1120,
     featured: false,
@@ -218,7 +218,7 @@ export const articleLawAndPopularCultureExtra: LawArticle[] = [
   <li>[Internal Link: Article 5] - Explore how television series changed public views of courts and attorneys.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: new Date().toISOString().split('T')[0],
+    updatedAt: '2026-09-04T15:10:00.000Z',
     readingTime: 8,
     views: 1250,
     featured: false,
@@ -321,7 +321,7 @@ export const articleLawAndPopularCultureExtra: LawArticle[] = [
   <li>[Internal Link: Article 3] - Discover the history of courtroom cinema from the 1930s to the modern era.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: new Date().toISOString().split('T')[0],
+    updatedAt: '2026-09-23T10:05:00.000Z',
     readingTime: 8,
     views: 1380,
     featured: false,
@@ -422,7 +422,7 @@ export const articleLawAndPopularCultureExtra: LawArticle[] = [
   <li>[Internal Link: Article 2] - Explore the filmmaking tricks used to make courtroom scenes dramatic.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: new Date().toISOString().split('T')[0],
+    updatedAt: '2026-09-18T20:05:00.000Z',
     readingTime: 8,
     views: 1290,
     featured: false,

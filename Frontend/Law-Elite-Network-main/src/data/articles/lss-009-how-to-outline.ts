@@ -84,7 +84,7 @@ export const articleHowToOutline: LawArticle[] = [
 <h3>Do open-book exams make outlining less important?</h3>
 <p>No -- if anything it raises the bar. A professor grading an open-book exam expects you to move faster and go deeper, not spend exam time searching a disorganized document for the rule. A well-structured outline is what makes the format an advantage instead of a time trap.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-09T13:35:00.000Z',
     readingTime: 7,
     views: 0,
     featured: false,

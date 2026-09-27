@@ -74,7 +74,7 @@ export const articleHowToBriefACase: LawArticle[] = [
 <h3>Do I need to include dissenting opinions in my brief?</h3>
 <p>Only when the dissent explains why the case is taught, the way Andrews's dissent in Palsgraf does -- it's the alternative rule that shows up in later exam hypotheticals. A dissent that just disagrees on the facts usually isn't worth the space.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-07T11:20:00.000Z',
     modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,

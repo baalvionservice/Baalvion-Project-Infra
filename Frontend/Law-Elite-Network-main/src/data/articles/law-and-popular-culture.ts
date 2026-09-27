@@ -135,7 +135,7 @@ export const articleHollywoodLawyers: LawArticle[] = [
   <li>[Internal Link: Article 4] - Discover how fictional lawyer characters evolved from heroes to antiheroes on screen.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: new Date().toISOString().split('T')[0],
+    updatedAt: '2026-09-10T20:05:00.000Z',
     readingTime: 8,
     views: 1420,
     featured: true,

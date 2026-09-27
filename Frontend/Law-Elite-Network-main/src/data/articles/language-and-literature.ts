@@ -62,7 +62,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Oxford English Dictionary. Etymological entries for <em>subpoena</em>, <em>habeas corpus</em>, and <em>affidavit</em>.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-08T17:40:00.000Z',
     readingTime: 8,
     views: 1420,
     featured: true,
@@ -133,7 +133,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Mellinkoff, David. <em>The Language of the Law</em>. Little, Brown and Company, 1963.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-27T20:05:00.000Z',
     readingTime: 9,
     views: 1280,
     featured: false,
@@ -201,7 +201,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Bowers, Frederick. <em>Linguistic Aspects of Legislative Expression</em>. University of British Columbia Press, 1989.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-06T10:05:00.000Z',
     readingTime: 9,
     views: 1150,
     featured: false,
@@ -282,7 +282,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Berman, Harold J. <em>Law and Revolution: The Formation of the Western Legal Tradition</em>. Harvard University Press, 1983.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-22T15:10:00.000Z',
     readingTime: 9,
     views: 1340,
     featured: false,
@@ -353,7 +353,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Garner, Bryan A. <em>Garner\'s Dictionary of Legal Usage</em>. Oxford University Press, 2011.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-13T15:10:00.000Z',
     readingTime: 8,
     views: 1090,
     featured: false,
@@ -405,7 +405,7 @@ export const articleLanguageAndLiterature: LawArticle[] = [
   <li>Ward, Ian. <em>Law and Literature: Possibilities and Perspectives</em>. Cambridge University Press, 1995.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-16T18:05:00.000Z',
     readingTime: 8,
     views: 980,
     featured: false,

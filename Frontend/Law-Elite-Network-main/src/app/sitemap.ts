@@ -39,6 +39,18 @@ interface ArticleEntry {
 }
 interface CategoryEntry { slug: string; updated_at?: string; updatedAt?: string }
 
+// Parses a real date or returns undefined -- never Date.now() as a fallback.
+// A missing/invalid date means we genuinely don't know when the page last
+// changed; reporting "right now" on every cache rebuild would be a
+// fabricated freshness signal, exactly what this file's header comment
+// already says to avoid. Omitting lastModified is valid per the sitemap
+// spec.
+function parseRealDate(value?: string): Date | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 // law-service wraps lists as { data: { items: [...] } } and singles as { data: [...] }.
 async function safeFetch<T>(url: string): Promise<T[]> {
   // No absolute base URL configured (production with an unset API env) → fail closed
@@ -180,26 +192,26 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     return !!a.slug && ROOT_FLAT_ARTICLE_SLUGS.has(a.slug);
   };
 
-  const articleEntries = new Map<string, { url: string; lastModified: Date }>();
+  const articleEntries = new Map<string, { url: string; lastModified?: Date }>();
   getAllArticles().forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updatedAt),
     });
   });
   articles.forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updated_at || a.updatedAt),
     });
   });
   cmsArticles.forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updatedAt),
     });
   });
 
@@ -207,7 +219,7 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
 
   const articleRoutes: MetadataRoute.Sitemap = Array.from(articleEntries.values()).map((entry) => ({
     url: entry.url,
-    lastModified: entry.lastModified,
+    ...(entry.lastModified && { lastModified: entry.lastModified }),
   }));
 
   // Subcategories no longer have a dedicated URL -- they're a filter chip on
@@ -233,7 +245,7 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       .filter((c) => liveSlugs.has(toNewCategorySlug(c.slug)))
       .map((c) => ({
         url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
-        lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
+        ...(parseRealDate(c.updated_at || c.updatedAt) && { lastModified: parseRealDate(c.updated_at || c.updatedAt) }),
       })),
     // No lastModified here: the API didn't return this slug, so there's no
     // real updated_at to report -- omit rather than fabricate "now".

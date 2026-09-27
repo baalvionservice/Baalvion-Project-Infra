@@ -48,7 +48,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Federal Judicial Center. <em>History of Court Administration and Electronic Case Management</em>. FJC Historical Series, 2018.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-08T18:05:00.000Z',
     readingTime: 8,
     views: 1350,
     featured: true,
@@ -99,7 +99,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Computer History Museum. "Oral History of John Warnock and Charles Geschke." CHM Reference no. X5891.2011.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-16T17:40:00.000Z',
     readingTime: 8,
     views: 1210,
     featured: false,
@@ -159,7 +159,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Smith, Ray. "An Overview of the Tesseract OCR Engine." <em>Proceedings of the Ninth International Conference on Document Analysis and Recognition</em>, IEEE, 2007.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-14T10:05:00.000Z',
     readingTime: 8,
     views: 1140,
     featured: false,
@@ -212,7 +212,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Amazon Web Services. "Amazon S3 Architectural Overview and Release Documentation." AWS Technical Whitepapers, 2006.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-11T14:50:00.000Z',
     readingTime: 8,
     views: 1260,
     featured: false,
@@ -265,7 +265,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Surden, Harry. "Machine Learning and Law." <em>Washington Law Review</em>, vol. 89, no. 1, 2014, pp. 87–115.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-22T08:15:00.000Z',
     readingTime: 9,
     views: 1410,
     featured: false,
@@ -330,7 +330,7 @@ export const articleTechnologyAndDigitalCulture: LawArticle[] = [
   <li>Computer History Museum. "Pioneers of Information Retrieval: Gerard Salton Historical Retrospective." CHM Archives.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-21T12:30:00.000Z',
     readingTime: 8,
     views: 1050,
     featured: false,
