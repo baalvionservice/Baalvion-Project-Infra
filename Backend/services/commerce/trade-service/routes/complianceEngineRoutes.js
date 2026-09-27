@@ -5,7 +5,7 @@
 // requires a gateway identity; tenant scoping is enforced in the controller
 // (ownership) + RLS at the DB.
 const router = require('express').Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware, requireOrgType } = require('../middleware/authMiddleware');
 const ctrl = require('../controller/complianceEngineController');
 
 // Static / non-:id routes FIRST so they are not shadowed by parameterised paths.
@@ -14,10 +14,11 @@ router.get('/definition', ctrl.getDefinition); // public screening-model descrip
 router.post('/screen', authMiddleware, ctrl.screenAdhoc); // ad-hoc stateless screen
 
 // Tenant blacklist / whitelist management.
+// The watchlist itself (e.g. sanctions entries) is the compliance agency's own list to maintain.
 router.get('/lists',        authMiddleware, ctrl.listEntries);
-router.post('/lists',       authMiddleware, ctrl.createEntry);
-router.patch('/lists/:id',  authMiddleware, ctrl.updateEntry);
-router.delete('/lists/:id', authMiddleware, ctrl.deleteEntry);
+router.post('/lists',       authMiddleware, requireOrgType('compliance_agency'), ctrl.createEntry);
+router.patch('/lists/:id',  authMiddleware, requireOrgType('compliance_agency'), ctrl.updateEntry);
+router.delete('/lists/:id', authMiddleware, requireOrgType('compliance_agency'), ctrl.deleteEntry);
 
 // Operation-scoped (persisted) screening + history.
 router.get('/operations/:operationId',          authMiddleware, ctrl.getOperationLatest);

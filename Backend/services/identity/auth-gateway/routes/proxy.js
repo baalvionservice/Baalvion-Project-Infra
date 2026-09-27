@@ -124,6 +124,7 @@ const proxy = createProxyMiddleware({
       // defensively strip any client-supplied identity headers before we inject ours
       proxyReq.removeHeader('x-user-id');
       proxyReq.removeHeader('x-org-id');
+      proxyReq.removeHeader('x-org-type');
       proxyReq.removeHeader('x-roles');
       proxyReq.removeHeader('x-session-id');
       proxyReq.removeHeader('x-gateway-signature');
@@ -143,6 +144,12 @@ const proxy = createProxyMiddleware({
       // v1 identity headers — kept for backends that have not yet upgraded to v2 envelope.
       proxyReq.setHeader('x-user-id', String(u.userId));
       proxyReq.setHeader('x-org-id', u.orgId ? String(u.orgId) : '');
+      // v1 compat only — NOT covered by x-gateway-signature (changing that HMAC's message format
+      // would require updating every consuming service's independent signature-verify copy in
+      // lockstep, or auth breaks platform-wide on restart). The v2 envelope below signs orgType
+      // as part of its whole-payload HMAC and is the authoritative path; this header is a
+      // best-effort fallback for islands that haven't adopted the v2 envelope.
+      proxyReq.setHeader('x-org-type', u.orgType ? String(u.orgType) : '');
       // X-Tenant-ID for the financial-services-java resource servers: their TenantContext reads
       // the tenant from the RS256 JWT when secured, and falls back to this header in dev. Harmless
       // to Node backends (ignored). Resolved server-side from the session org — never client-supplied.
