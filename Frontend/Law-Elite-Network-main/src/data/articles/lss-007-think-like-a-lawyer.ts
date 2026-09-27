@@ -60,7 +60,7 @@ export const articleThinkLikeALawyer: LawArticle[] = [
 <h3>Does the Hadley rule still apply the same way in modern contract law?</h3>
 <p>The foreseeability principle from Hadley remains foundational and shows up in the Restatement (Second) of Contracts and the UCC's treatment of consequential damages, though modern courts and statutes have refined how explicit the communication of special circumstances needs to be. The core structure -- ordinary damages versus damages that required advance notice -- traces directly back to this case.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-18T19:15:00.000Z',
     modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,

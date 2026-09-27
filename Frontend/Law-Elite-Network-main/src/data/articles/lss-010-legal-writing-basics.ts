@@ -62,7 +62,7 @@ export const articleLegalWritingBasics: LawArticle[] = [
 <h3>When is it fine to skip the Explanation step and use CRAC instead?</h3>
 <p>When the rule is narrow enough that its meaning is not in dispute and does not need unpacking from case law -- a clear statutory deadline, for instance. If the rule has room for interpretation, keep the Explanation step; that is where you show the reader where the rule's meaning actually comes from.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-07T07:50:00.000Z',
     readingTime: 7,
     views: 0,
     featured: false,

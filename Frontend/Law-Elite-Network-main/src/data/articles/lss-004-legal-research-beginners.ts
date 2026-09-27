@@ -63,7 +63,7 @@ export const articleLegalResearchBeginners: LawArticle[] = [
 <h3>Do I need to create an account on any of these?</h3>
 <p>No account is required to search or read on any of them. CourtListener is the one exception worth setting up, since a free account lets you save search alerts so you don't have to re-run the same search manually every week.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-11T16:25:00.000Z',
     modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,

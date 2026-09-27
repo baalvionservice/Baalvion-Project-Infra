@@ -56,7 +56,7 @@ export const articleColdCalling: LawArticle[] = [
 <h3>What if the professor keeps pushing after I answer?</h3>
 <p>That's often intentional. Professors frequently keep pressing, including arguing the opposite side, to see whether you can hold and refine a position under follow-up questions -- which is closer to what happens in an actual courtroom exchange than a single question with a single right answer.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-17T09:40:00.000Z',
     readingTime: 6,
     views: 0,
     featured: false,

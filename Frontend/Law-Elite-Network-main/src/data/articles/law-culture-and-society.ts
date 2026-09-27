@@ -48,7 +48,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Warburg Institute Archive. "Iconography of Justitia in Renaissance Art." University of London.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-15T07:50:00.000Z',
     readingTime: 8,
     views: 1480,
     featured: true,
@@ -101,7 +101,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Judicial Office for England and Wales. "Guidance on Courtroom Dress and Traditions." Official Press Statement, 2014.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-15T11:20:00.000Z',
     readingTime: 8,
     views: 1390,
     featured: false,
@@ -158,7 +158,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Bar Council of England and Wales. <em>Court Dress Guidance and Dispensations</em>. Bar Council Regulations, 2022.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-17T13:35:00.000Z',
     readingTime: 9,
     views: 1310,
     featured: false,
@@ -210,7 +210,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Ellmann, Richard. <em>Oscar Wilde</em>. Alfred A. Knopf, 1987.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-14T08:15:00.000Z',
     readingTime: 9,
     views: 1250,
     featured: false,
@@ -259,7 +259,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Old Bailey Online. "History of the Old Bailey Proceedings." Humanities Research Institute, University of Sheffield.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-23T07:50:00.000Z',
     readingTime: 8,
     views: 1180,
     featured: false,
@@ -310,7 +310,7 @@ export const articleLawCultureAndSociety: LawArticle[] = [
   <li>Machura, Stefan, and Peter Robson. <em>Law and Film</em>. Wiley-Blackwell, 2001.</li>
 </ul>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 27, 2026',
+    updatedAt: '2026-09-25T09:40:00.000Z',
     readingTime: 8,
     views: 1120,
     featured: false,
