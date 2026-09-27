@@ -16,7 +16,6 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
-  PillarColumn,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
 import type { Metadata } from 'next';
@@ -167,7 +166,7 @@ export default async function KnowledgeHomePage() {
 
 
         {/* Multi-Tab Interactive Media Box */}
-        <TabbedStoryBox popular={feed.trending} legal={feed.legal} />
+        <TabbedStoryBox popular={feed.trending} exclusives={feed.celebrity} legal={feed.legal} profiles={feed.latest.slice(0, 4)} />
 
 
         <NewsPublisherSchema />
@@ -183,15 +182,10 @@ export default async function KnowledgeHomePage() {
             2026-09-25 (third AdSense-readiness retirement pass, see
             category-slugs.ts) -- /entertainment, /sports, and /people all
             now 301 to /. Restore alongside CURRENT_CATEGORY_SLUGS.
-            Legal Battles (feed.legal -- articles in the practice-area
-            categories, not the still-retired /legal/cases directory) added
-            back in the same pass its 4 categories were, pointed at
-            /personal-injury-lawyer instead of the retired /legal/cases. */}
-        {feed.legal.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
-          </section>
-        )}
+            The "Practice Area Guides" rail (feed.legal, linking to the
+            retired /personal-injury-lawyer redirect) and the Videos/
+            Interviews media rails were removed 2026-09-27 -- owner request,
+            no videos/podcasts/legal-practice surfaces on the homepage. */}
         {/* PopularTopics dropped in the same pass as above -- /topics still
             301s to /, and each topic card links to /topics/{slug}. */}
 

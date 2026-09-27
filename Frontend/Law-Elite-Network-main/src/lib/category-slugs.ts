@@ -35,11 +35,12 @@ export function toNewCategorySlug(oldSlug: string): string {
 // around law" direction (law-and-popular-culture, history-and-civilization,
 // language-and-literature, technology-and-digital-culture,
 // law-culture-and-society). Started EMPTY at creation; each now has real,
-// non-fabricated published articles -- re-verify actual live counts before
-// resubmitting to AdSense rather than trusting this comment, since it was
-// already stale once before. Fashion listed here temporarily so the page
-// renders instead of 404ing; it stays unlinked from nav until it has real
-// articles (see site-nav.ts).
+// non-fabricated published articles (5-10+ per category as of the cluster
+// publishing passes later the same day -- see recent "feat(law-elite):
+// publish ... cluster articles" commits). Before resubmitting to AdSense,
+// re-verify actual live counts rather than trusting this comment, since it
+// was already stale once (it said "empty" while the pass above shows these
+// were already populated).
 export const CURRENT_CATEGORY_SLUGS = [
   'law-school-success',
   'law-and-popular-culture',

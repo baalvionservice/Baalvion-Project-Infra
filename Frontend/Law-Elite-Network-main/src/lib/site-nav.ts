@@ -14,19 +14,19 @@ export interface NavSection extends NavLink {
   children?: NavLink[];
 }
 
-// 2026-09-27 repositioning: LEN moved from a legal-news/lead-gen identity to
-// a publication about the history, culture, language and technology
 // surrounding law (see docs/editorial -- the YMYL practice-area categories,
 // including personal-injury/maritime/cruise-ship, were archived the same
 // pass, not just delinked, and are not coming back regardless of any
-// earlier note about restoring them). These five categories are newly
-// created in the CMS -- see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment for current article counts before treating them as launch-ready.
-// Videos/Podcasts keep their real content and stay as secondary nav,
-// unchanged by this pass. Fashion was pulled from nav 2026-09-27 (not part
-// of the history/culture repositioning and not needed right now); the
-// /fashion route and its data still exist, just unlinked -- see
-// category-slugs.ts and category-visibility.ts.
+// earlier note about restoring them). These five categories started empty
+// at creation and now each carry real, non-fabricated published articles
+// (see category-slugs.ts's CURRENT_CATEGORY_SLUGS comment for current
+// counts -- re-verify before treating any section as AdSense-ready).
+// Videos and Podcasts were pulled from nav 2026-09-27 (owner request: not
+// needed) -- the routes and their content still exist, just unlinked.
+// Fashion was pulled from nav the same day (not part of the history/
+// culture repositioning and not needed right now); the /fashion route and
+// its data still exist, just unlinked -- see category-slugs.ts and
+// category-visibility.ts.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Stories on Screen',
@@ -51,12 +51,5 @@ export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Law School Life',
     href: '/law-school-success',
-  },
-  {
-    label: 'Videos',
-    href: '/videos',
-    children: [
-      { label: 'Podcasts', href: '/podcasts' },
-    ],
   },
 ];
