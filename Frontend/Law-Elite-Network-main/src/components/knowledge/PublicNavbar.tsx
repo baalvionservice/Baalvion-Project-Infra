@@ -25,7 +25,15 @@ import { PRIMARY_NAV, type NavSection } from '@/lib/site-nav';
  * mount, promoting a new pillar automatically once it crosses the
  * threshold without any manual nav edit.
  */
-const ALWAYS_LIVE_HREFS = new Set(['/law-school-success', '/fashion']);
+const ALWAYS_LIVE_HREFS = new Set([
+  '/law-school-success',
+  '/fashion',
+  '/law-and-popular-culture',
+  '/history-and-civilization',
+  '/language-and-literature',
+  '/technology-and-digital-culture',
+  '/law-culture-and-society',
+]);
 const INITIAL_NAV = PRIMARY_NAV.filter((s) => ALWAYS_LIVE_HREFS.has(s.href));
 
 /**

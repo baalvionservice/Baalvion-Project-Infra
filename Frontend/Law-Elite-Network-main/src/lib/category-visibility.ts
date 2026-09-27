@@ -6,7 +6,15 @@ import { cmsGetArticles } from '@/lib/cms';
  * "new pillar, empty until written" set). See category-slugs.ts's
  * CURRENT_CATEGORY_SLUGS comment for the full history.
  */
-const ALWAYS_LIVE = new Set(['law-school-success', 'fashion']);
+const ALWAYS_LIVE = new Set([
+  'law-school-success',
+  'fashion',
+  'law-and-popular-culture',
+  'history-and-civilization',
+  'language-and-literature',
+  'technology-and-digital-culture',
+  'law-culture-and-society',
+]);
 
 /**
  * A category goes live automatically (appears in nav, sitemap, and search
