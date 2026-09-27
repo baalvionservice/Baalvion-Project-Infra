@@ -17,22 +17,17 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
 // RETIRED_SECTIONS) -- the "Explore" link column that pointed at them is
 // gone rather than left linking into redirects.
 
-// Third AdSense-readiness retirement pass, 2026-09-25 (see
-// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): narrowed further to
-// Fashion, Videos, Podcasts, and (added back in the same pass) the original
-// Practice Areas -- Entertainment, Sports, People, Topics, Countries, and
-// Legal Cases/Courts stay retired (301 to / via next.config.ts), so linking
-// them here would send readers straight into a redirect instead of a page.
-// Videos/Podcasts retired too in a follow-up pass (2026-09-27, after the
-// third rejection) -- real but off-topic content for a legal-guides site
-// under review. Fashion dropped in the same pass -- never got real content,
-// still a placeholder page (see category-slugs.ts). Restore everything
-// alongside CURRENT_CATEGORY_SLUGS once AdSense approves the site as it
-// stands.
+// 2026-09-27: the legal-lead-gen practice areas (personal injury, maritime,
+// cruise ship) were archived outright, not just delinked, and are not
+// coming back -- see category-slugs.ts. This list is the site's new
+// identity: law as history, culture, language, technology and society,
+// not legal advice.
 const PRACTICE_AREA_LINKS = [
-  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
-  { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
-  { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
+  { href: '/law-and-popular-culture', label: 'Law & Popular Culture' },
+  { href: '/history-and-civilization', label: 'History & Civilization' },
+  { href: '/language-and-literature', label: 'Language & Literature' },
+  { href: '/technology-and-digital-culture', label: 'Technology & Digital Culture' },
+  { href: '/law-culture-and-society', label: 'Law, Culture & Society' },
   { href: '/law-school-success', label: 'Law School Success' },
 ];
 
@@ -109,8 +104,8 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-3"
-              title="Practice Areas"
-              sections={[{ heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS }]}
+              title="Sections"
+              sections={[{ heading: 'Sections', links: PRACTICE_AREA_LINKS }]}
             />
 
             <FooterLinkColumn

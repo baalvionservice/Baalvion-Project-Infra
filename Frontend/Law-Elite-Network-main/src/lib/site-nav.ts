@@ -14,24 +14,40 @@ export interface NavSection extends NavLink {
   children?: NavLink[];
 }
 
-// Third AdSense-readiness retirement pass, 2026-09-25 (see
-// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): People, Entertainment,
-// Sports, and Topics sections removed -- every link they held now 301s to /
-// (next.config.ts). The Legal section is back to its original 3-category
-// form (personal injury, maritime injury, cruise ship accidents) plus Law
-// School Success -- no Cases/Courts/Lawyers/Judges children, since that
-// directory is still retired. News un-retired at explicit request (see
-// next.config.ts). Videos/Podcasts nav section removed in a follow-up pass
-// (2026-09-27, after the third rejection): the content behind it was real
-// but entirely off-topic for a legal-guides site (general entertainment
-// clips/podcasts), so the whole Media pillar is retired, not just relabeled
-// -- see next.config.ts redirects and sitemap.ts. Fashion dropped in the same
-// pass -- it never got real content and is still a placeholder page (see
-// category-slugs.ts). Restore the removed sections alongside
-// CURRENT_CATEGORY_SLUGS once AdSense approves the site as it stands.
+// 2026-09-27 repositioning: LEN moved from a legal-news/lead-gen identity to
+// a publication about the history, culture, language and technology
+// surrounding law (see docs/editorial -- the YMYL practice-area categories,
+// including personal-injury/maritime/cruise-ship, were archived the same
+// pass, not just delinked, and are not coming back regardless of any
+// earlier note about restoring them). These five categories are newly
+// created in the CMS -- see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment for current article counts before treating them as launch-ready.
+// Fashion and Videos/Podcasts are dropped from this nav (later commits the
+// same day remove them from the sitemap/footer too) -- unlinked, not
+// deleted.
 export const PRIMARY_NAV: NavSection[] = [
   {
-    label: 'Law School Success',
+    label: 'Stories on Screen',
+    href: '/law-and-popular-culture',
+  },
+  {
+    label: 'History & Heritage',
+    href: '/history-and-civilization',
+  },
+  {
+    label: 'Language & Ideas',
+    href: '/language-and-literature',
+  },
+  {
+    label: 'Technology & Innovation',
+    href: '/technology-and-digital-culture',
+  },
+  {
+    label: 'Culture & Society',
+    href: '/law-culture-and-society',
+  },
+  {
+    label: 'Law School Life',
     href: '/law-school-success',
   },
 ];
