@@ -9,7 +9,8 @@
       <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"> 
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"  type="text/css"> 
       <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" >  
-      <link rel="stylesheet" href="<?php echo base_url()?>assets/css/admin/AdminLTE.min.css"> 
+      <link rel="stylesheet" href="<?php echo base_url()?>assets/css/admin/AdminLTE.min.css">
+      <link rel="stylesheet" href="<?php echo base_url()?>assets/vendor/fa/css/all.min.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.2.0/css/skins/_all-skins.min.css"/> 
       <!-- Google Font --> 
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic"> 

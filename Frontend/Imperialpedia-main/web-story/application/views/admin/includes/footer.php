@@ -8,7 +8,6 @@
 <!-- jQuery 3 -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="https://kit.fontawesome.com/0fa3aab205.js"></script><!--Font Awesome CDN-->
 <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 
 
