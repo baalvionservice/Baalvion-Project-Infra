@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Flame, Star, Gavel, UserCheck } from 'lucide-react';
+import { Flame, Star, BookOpen, UserCheck } from 'lucide-react';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { articleUrl } from '@/lib/article-url';
 
@@ -21,8 +21,8 @@ export function TabbedStoryBox({
 
   const tabs = [
     { id: 'popular', label: 'MOST READ', icon: Flame, items: popular },
-    { id: 'exclusives', label: 'LAW ELITE EXCLUSIVES', icon: Star, items: exclusives },
-    { id: 'legal', label: 'LEGAL SCOOP', icon: Gavel, items: legal },
+    { id: 'exclusives', label: 'EDITOR’S PICKS', icon: Star, items: exclusives },
+    { id: 'legal', label: 'LAW SCHOOL LIFE', icon: BookOpen, items: legal },
     { id: 'profiles', label: 'FEATURED PROFILES', icon: UserCheck, items: profiles },
   ] as const;
 

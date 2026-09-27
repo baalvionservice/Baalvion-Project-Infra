@@ -29,20 +29,20 @@ export function FreeNewsAlertCard() {
     <div className="my-8 rounded-2xl overflow-hidden border border-red-900/60 bg-gradient-to-r from-slate-950 via-slate-900 to-black text-white p-8 shadow-2xl">
       <div className="max-w-3xl mx-auto text-center space-y-4">
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-red-600/20 text-red-400 border border-red-500/40 text-xs font-mono font-bold tracking-widest uppercase">
-          ⚡ 100% FREE DAILY SCOOP & BREAKING ALERTS
+          ⚡ FREE STORIES, DELIVERED WEEKLY
         </span>
 
         <h3 className="text-2xl sm:text-3xl font-black font-serif text-white leading-tight">
-          Never Miss a Law Elite Scoop or SCOTUS Ruling
+          Never Miss a New Story on Law Elite Network
         </h3>
 
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl mx-auto">
-          Get direct email digests covering high-profile trials, celebrity legal battles, and Supreme Court dockets. Free forever. No paywalls.
+          Get direct email digests covering the history, culture, language and technology of law. Free forever. No paywalls.
         </p>
 
         {subscribed ? (
           <div className="p-4 bg-emerald-950/80 border border-emerald-500/60 rounded-xl text-emerald-400 font-bold text-sm max-w-md mx-auto animate-fadeIn">
-            ✓ Thanks — we've got your email. We'll be in touch once the daily scoop is live.
+            ✓ Thanks — we've got your email. We'll be in touch once the digest is live.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">

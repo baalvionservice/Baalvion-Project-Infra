@@ -32,16 +32,16 @@ export function NewsletterBanner() {
         
         <div className="flex-1 space-y-3 text-center md:text-left">
           <div className="inline-flex items-center gap-2 bg-[#E13131] text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-sm shadow-sm">
-            <Mail className="w-3.5 h-3.5" /> LAW ELITE DAILY SCOOP
+            <Mail className="w-3.5 h-3.5" /> LAW ELITE DIGEST
           </div>
           <h2 className="font-serif text-3xl md:text-4xl font-black uppercase tracking-tight text-white leading-none">
-            GET THE EXCLUSIVE SCOOP IN YOUR INBOX
+            NEW STORIES, STRAIGHT TO YOUR INBOX
           </h2>
           <p className="text-slate-300 font-serif text-base max-w-xl">
-            Get breaking court decisions, celebrity sightings, and exclusive high-stakes legal reports every morning.
+            Stories on the history, culture, language and technology of law, plus new Law School Life guides, delivered regularly.
           </p>
           <div className="flex items-center justify-center md:justify-start gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-1">
-            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Free Daily Briefing</span>
+            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Free Digest</span>
             <span>·</span>
             <span>No Spam Ever</span>
             <span>·</span>
@@ -54,7 +54,7 @@ export function NewsletterBanner() {
             <div className="bg-emerald-950/80 border-2 border-emerald-500 p-6 rounded-sm text-center space-y-2">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
               <h3 className="font-serif text-xl font-bold text-white">THANKS — WE'VE GOT YOUR EMAIL</h3>
-              <p className="text-xs text-emerald-200">We'll be in touch once the daily scoop is live.</p>
+              <p className="text-xs text-emerald-200">We'll be in touch once the digest is live.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">

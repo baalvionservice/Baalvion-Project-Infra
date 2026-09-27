@@ -145,7 +145,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                     </Link>
                   )}
                   <span className="bg-black text-white font-black text-[11px] uppercase tracking-wider px-2.5 py-1">
-                    EXCLUSIVE
+                    FEATURED
                   </span>
                 </div>
 
