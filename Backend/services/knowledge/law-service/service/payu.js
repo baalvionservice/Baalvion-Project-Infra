@@ -64,8 +64,13 @@ async function resolveConfig() {
         const cfg = row.config || {};
         return { source: 'vault', merchantKey: row.secrets.merchantKey, merchantSalt: row.secrets.merchantSalt, baseUrl: cfg.baseUrl || '', mode: cfg.mode || 'live' };
     }
-    if (process.env.PAYU_MERCHANT_KEY && process.env.PAYU_MERCHANT_SALT) {
-        return { source: 'env', merchantKey: process.env.PAYU_MERCHANT_KEY, merchantSalt: process.env.PAYU_MERCHANT_SALT, baseUrl: process.env.PAYU_BASE_URL || '', mode: 'env' };
+    // LAW_-prefixed names take priority: app-platform runs law-service and developer-service in
+    // the same container/process env, so the bare PAYU_MERCHANT_KEY would resolve identically
+    // for both sites otherwise.
+    const merchantKey = process.env.LAW_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY;
+    const merchantSalt = process.env.LAW_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT;
+    if (merchantKey && merchantSalt) {
+        return { source: 'env', merchantKey, merchantSalt, baseUrl: process.env.LAW_PAYU_BASE_URL || process.env.PAYU_BASE_URL || '', mode: 'env' };
     }
     return null;
 }

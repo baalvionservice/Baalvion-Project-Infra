@@ -110,8 +110,11 @@ function createRazorpayProvider(deps = {}) {
     const configured = REQUIRED.every((n) => env(n) !== undefined);
 
     function creds() {
-        const keyId = env('RAZORPAY_KEY_ID');
-        const keySecret = env('RAZORPAY_KEY_SECRET');
+        // GTI_-prefixed names take priority: app-trade's shared .env is also read by
+        // ctm/law/signal/proxy/order-service, so bare RAZORPAY_KEY_ID resolves identically for
+        // all of them.
+        const keyId = env('GTI_RAZORPAY_KEY_ID') || env('RAZORPAY_KEY_ID');
+        const keySecret = env('GTI_RAZORPAY_KEY_SECRET') || env('RAZORPAY_KEY_SECRET');
         if (!keyId || !keySecret) {
             throw new IntegrationRequiredError(
                 `Razorpay not configured (missing ${REQUIRED.filter((n) => !env(n)).join(', ')})`,

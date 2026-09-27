@@ -63,12 +63,18 @@ async function resolveConfig() {
             webhookSecret: row.secrets.webhookSecret || cfg.webhookSecret || '',
         };
     }
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    // LAW_-prefixed names take priority over the bare ones: app-platform runs law-service and
+    // developer-service in the SAME container, sharing one process env, so the bare
+    // RAZORPAY_KEY_ID would otherwise resolve to whichever site's key happened to be set last —
+    // exactly the "one shared key across sites" gap the vault above exists to prevent.
+    const keyId = process.env.LAW_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.LAW_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
+    if (keyId && keySecret) {
         return {
             source: 'env',
-            keyId: process.env.RAZORPAY_KEY_ID,
-            keySecret: process.env.RAZORPAY_KEY_SECRET,
-            webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+            keyId,
+            keySecret,
+            webhookSecret: process.env.LAW_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '',
         };
     }
     return null;

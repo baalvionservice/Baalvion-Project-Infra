@@ -2,9 +2,14 @@ const crypto = require('crypto');
 const https = require('https');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
-const PAYU_KEY = process.env.PAYU_KEY;
-const PAYU_SALT = process.env.PAYU_SALT;
-const PAYU_BASE_URL = process.env.PAYU_BASE_URL || 'https://test.payu.in';
+// PAYU_MERCHANT_KEY/PAYU_MERCHANT_SALT is the name every other service (order-service,
+// law-service, developer-service) and this service's own payuWebhookController.js use.
+// PAYU_KEY/PAYU_SALT is kept only as a fallback for any environment still set that way —
+// without it, createOrder() silently hashed with undefined credentials whenever only the
+// standard names were configured, and PayU rejected every checkout with no clear signal.
+const PAYU_KEY = process.env.PROXY_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY || process.env.PAYU_KEY;
+const PAYU_SALT = process.env.PROXY_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT || process.env.PAYU_SALT;
+const PAYU_BASE_URL = process.env.PROXY_PAYU_BASE_URL || process.env.PAYU_BASE_URL || 'https://test.payu.in';
 
 // ─── Circuit Breaker ──────────────────────────────────────────────────────────
 let failureCount = 0;

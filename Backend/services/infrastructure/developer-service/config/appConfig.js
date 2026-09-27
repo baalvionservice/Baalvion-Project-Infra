@@ -47,10 +47,13 @@ module.exports = {
     // scope. See services/razorpayBillingService.js. Unset RAZORPAY_KEY_ID/KEY_SECRET means
     // checkout order creation fails closed (503); unset RAZORPAY_WEBHOOK_SECRET means the webhook
     // route rejects everything (401) rather than silently no-op'ing on a real charge.
+    // SIGNAL_-prefixed names take priority: app-platform runs developer-service and law-service
+    // in the same container/process env, so bare RAZORPAY_KEY_ID would resolve identically for
+    // both sites when the CMS vault has nothing configured (its own fallback, one level up).
     razorpay: {
-        keyId:         process.env.RAZORPAY_KEY_ID || '',
-        keySecret:     process.env.RAZORPAY_KEY_SECRET || '',
-        webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+        keyId:         process.env.SIGNAL_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || '',
+        keySecret:     process.env.SIGNAL_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || '',
+        webhookSecret: process.env.SIGNAL_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '',
         currency:      process.env.RAZORPAY_CURRENCY || 'USD',
     },
 

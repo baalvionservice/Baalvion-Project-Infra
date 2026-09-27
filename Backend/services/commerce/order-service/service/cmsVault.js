@@ -14,7 +14,11 @@
  */
 const CMS_URL = (process.env.CMS_INTERNAL_URL || process.env.CMS_BASE_URL || 'http://localhost:3011').replace(/\/+$/, '');
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
-const DEFAULT_SLUG = process.env.PAYMENT_SITE_SLUG || '';
+// 'amarise-maison-avenue' is this site's slug in cms.cms_websites (amarisemaisonavenue.com) —
+// without a default here the vault lookup below is a silent no-op (slug='' short-circuits it),
+// same class of gap ctm-service/law-service/proxy-service already guard against with their own
+// hardcoded defaults.
+const DEFAULT_SLUG = process.env.PAYMENT_SITE_SLUG || 'amarise-maison-avenue';
 const TTL_MS = Number(process.env.CMS_VAULT_TTL_MS || 60000);
 const SERVICE = process.env.SERVICE_NAME || 'order-payments';
 

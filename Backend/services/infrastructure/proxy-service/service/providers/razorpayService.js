@@ -2,8 +2,10 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
-const keyId = process.env.RAZORPAY_KEY_ID;
-const keySecret = process.env.RAZORPAY_KEY_SECRET;
+// PROXY_-prefixed names take priority: this shared .env is also read by ctm/law/signal/order/
+// order-execution-service, so bare RAZORPAY_KEY_ID resolves identically for all of them.
+const keyId = process.env.PROXY_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+const keySecret = process.env.PROXY_RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
 
 const razorpay = (keyId && keySecret)
     ? new Razorpay({ key_id: keyId, key_secret: keySecret })

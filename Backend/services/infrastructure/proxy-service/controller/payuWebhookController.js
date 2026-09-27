@@ -22,8 +22,8 @@ const logger = require('../service/logger');
 const cmsVault = require('../service/cmsVault');
 const dedup = require('../service/webhookDedup');
 // merchantKey/salt come from the CMS vault (the central admin panel) first; env is a dev fallback.
-const PAYU_KEY_ENV = process.env.PAYU_MERCHANT_KEY || '';
-const PAYU_SALT_ENV = process.env.PAYU_MERCHANT_SALT || '';
+const PAYU_KEY_ENV = process.env.PROXY_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY || '';
+const PAYU_SALT_ENV = process.env.PROXY_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT || '';
 const APP_URL = process.env.PUBLIC_APP_URL || (config.corsOrigins && config.corsOrigins[0]) || 'http://localhost:8080';
 // Idempotency + replay protection is now DURABLE + instance-shared via
 // public.payment_webhook_events keyed on the (hash-verified) txnid. PayU carries no

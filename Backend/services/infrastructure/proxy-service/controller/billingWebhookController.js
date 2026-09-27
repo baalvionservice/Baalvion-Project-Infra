@@ -25,7 +25,7 @@ const logger = require('../service/logger');
 const cmsVault = require('../service/cmsVault');
 const dedup = require('../service/webhookDedup');
 // Secret comes from the CMS vault (the central admin panel) first; env is a local/dev fallback.
-const WEBHOOK_SECRET_ENV = process.env.RAZORPAY_WEBHOOK_SECRET || '';
+const WEBHOOK_SECRET_ENV = process.env.PROXY_RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
 const ACTIONABLE = new Set(['payment.captured', 'order.paid']);
 // Idempotency is now DURABLE + instance-shared via public.payment_webhook_events keyed on the

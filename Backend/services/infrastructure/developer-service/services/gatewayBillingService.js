@@ -32,13 +32,18 @@ const payuRequestHash = ({ key, txnid, amount, productinfo, firstname, email, sa
 const payuResponseHash = ({ salt, status, email, firstname, productinfo, amount, txnid, key }) =>
     sha512Hex(`${salt}|${status}${PAYU_UDF}${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`);
 
+// SIGNAL_-prefixed names take priority over the bare ones: app-platform runs developer-service
+// and law-service in the same container/process env, so a bare PAYU_MERCHANT_KEY/CASHFREE_
+// CLIENT_ID env-fallback would resolve identically for both sites once the vault has nothing.
 async function payuCreds() {
     const vault = await cmsVault.getPaymentCreds('payu').catch(() => null);
     if (vault && vault.secrets.merchantKey && vault.secrets.merchantSalt) {
         return { merchantKey: vault.secrets.merchantKey, merchantSalt: vault.secrets.merchantSalt, baseUrl: vault.config.baseUrl || '', mode: vault.mode };
     }
-    if (process.env.PAYU_MERCHANT_KEY && process.env.PAYU_MERCHANT_SALT) {
-        return { merchantKey: process.env.PAYU_MERCHANT_KEY, merchantSalt: process.env.PAYU_MERCHANT_SALT, baseUrl: process.env.PAYU_BASE_URL || '', mode: 'env' };
+    const merchantKey = process.env.SIGNAL_PAYU_MERCHANT_KEY || process.env.PAYU_MERCHANT_KEY;
+    const merchantSalt = process.env.SIGNAL_PAYU_MERCHANT_SALT || process.env.PAYU_MERCHANT_SALT;
+    if (merchantKey && merchantSalt) {
+        return { merchantKey, merchantSalt, baseUrl: process.env.SIGNAL_PAYU_BASE_URL || process.env.PAYU_BASE_URL || '', mode: 'env' };
     }
     return null;
 }
@@ -48,8 +53,10 @@ async function cashfreeCreds() {
     if (vault && vault.secrets.clientId && vault.secrets.clientSecret) {
         return { clientId: vault.secrets.clientId, clientSecret: vault.secrets.clientSecret, baseUrl: vault.config.baseUrl || '', mode: vault.mode };
     }
-    if (process.env.CASHFREE_CLIENT_ID && process.env.CASHFREE_CLIENT_SECRET) {
-        return { clientId: process.env.CASHFREE_CLIENT_ID, clientSecret: process.env.CASHFREE_CLIENT_SECRET, baseUrl: process.env.CASHFREE_BASE_URL || '', mode: 'env' };
+    const clientId = process.env.SIGNAL_CASHFREE_CLIENT_ID || process.env.CASHFREE_CLIENT_ID;
+    const clientSecret = process.env.SIGNAL_CASHFREE_CLIENT_SECRET || process.env.CASHFREE_CLIENT_SECRET;
+    if (clientId && clientSecret) {
+        return { clientId, clientSecret, baseUrl: process.env.SIGNAL_CASHFREE_BASE_URL || process.env.CASHFREE_BASE_URL || '', mode: 'env' };
     }
     return null;
 }
