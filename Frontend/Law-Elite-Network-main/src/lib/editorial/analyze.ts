@@ -166,6 +166,11 @@ export function analyzeDraft(draft: DraftInput, catalog: Catalog): Analysis {
     originality.overlapPct > 5 ? `${originality.overlapPct}% of runs match “${originality.source}”. Reword` : 'No copied passages found in LEN’s own library');
   const dup = catalog.articles.find((a) => jaccard(words(a.title), words(draft.title)) >= 0.8 && draft.title.trim());
   if (dup) add('duplicate', 'error', `Title is almost the same as an existing article: “${dup.title}”`);
+  const formulaicHeading = (body.match(/^##+\s*(introduction|overview|in summary|summary|conclusion)\s*$/gim) || [])[0];
+  add('formulaic-headings', formulaicHeading ? 'warn' : 'ok',
+    formulaicHeading ? `Heading "${formulaicHeading.replace(/^##+\s*/, '')}" is a formulaic label — describe what the section says instead` : 'No formulaic section labels');
+  const metaIntro = /^(in this (article|piece|post)|this (article|piece) (will|explores|discusses)|we('ll| will) (explore|discuss|cover|examine))/i.test(plain.trim());
+  add('meta-intro', metaIntro ? 'warn' : 'ok', metaIntro ? 'Opens with a meta-introduction — lead with the central fact instead' : 'Opens directly');
 
   return {
     words: wordCount,
