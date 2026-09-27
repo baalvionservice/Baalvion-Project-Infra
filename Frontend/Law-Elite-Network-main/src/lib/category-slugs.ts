@@ -41,9 +41,6 @@ export function toNewCategorySlug(oldSlug: string): string {
 // deletion -- and gets restored once AdSense approves the site as it stands.
 export const CURRENT_CATEGORY_SLUGS = [
   'fashion',
-  'personal-injury-lawyer',
-  'maritime-offshore-injury-law',
-  'cruise-ship-passenger-vessel-accidents',
   'law-school-success',
 ] as const;
 
