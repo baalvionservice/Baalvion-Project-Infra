@@ -13,6 +13,9 @@ import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+import { AdSlot } from '@/components/ads/AdSlot';
+
+const AUTHOR_AD_SLOT_ID = '4123514154';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -322,6 +325,8 @@ export default async function AuthorProfilePage(
                 </div>
               </div>
             </div>
+
+            <AdSlot slotId={AUTHOR_AD_SLOT_ID} format="horizontal" placement="author-mid-page" fullWidthResponsive minHeight="100px" />
 
             {/* ─── ARTICLES LIST ─── */}
             <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black pb-4">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useState, CSSProperties } from 'react';
+import { useEffect, useRef, useState, CSSProperties } from 'react';
 
 export interface ResponsiveDisplayAdProps {
   /**
@@ -47,13 +47,25 @@ export interface ResponsiveDisplayAdProps {
    * @default "250px"
    */
   minHeight?: string;
+
+  /**
+   * Reports the fill state up (null = undecided, true = filled, false =
+   * collapsed) so a wrapper like AdSlot can hide its "Advertisement" label
+   * along with the ad itself. See the collapse effect below for why this
+   * exists: the AdSense account is unapproved as of this writing, so every
+   * slot on the site is guaranteed unfilled, and reserving 250px+ of blank
+   * space per slot reads as a broken layout, not an ad. Once AdSense
+   * approves the site, `data-ad-status` starts coming back "filled" and ads
+   * appear automatically — no code change needed then.
+   */
+  onFilledChange?: (filled: boolean | null) => void;
 }
 
 /**
  * Production-ready Google AdSense responsive display ad component
  *
  * Features:
- * - Prevents layout shift with reserved space
+ * - Prevents layout shift with reserved space, collapses cleanly if unfilled
  * - Lazy loading with Intersection Observer
  * - Analytics tracking for impressions/clicks
  * - Error handling and graceful fallback
@@ -78,73 +90,93 @@ export function ResponsiveDisplayAd({
   onAdLoaded,
   onAdError,
   minHeight = '250px',
+  onFilledChange,
 }: ResponsiveDisplayAdProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const hasInitialized = useRef(false);
-  const [skeletonVisible, setSkeletonVisible] = useState(true);
+  const insRef = useRef<HTMLModElement | null>(null);
+  // null = undecided (reserve space), true = filled, false = collapse.
+  const [filled, setFilled] = useState<boolean | null>(null);
+  const [requested, setRequested] = useState(false);
 
-  const initializeAd = useCallback(() => {
-    // Only initialize once per component instance
-    if (hasInitialized.current) return;
-    if (!containerRef.current) return;
-
-    try {
-      // Check if adsbygoogle is available (loaded from parent layout)
-      if (typeof window !== 'undefined' && 'adsbygoogle' in window) {
-        hasInitialized.current = true;
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-        // There's no reliable cross-origin load event for the ad iframe, so we drop
-        // the loading placeholder once the push is issued rather than leaving it
-        // rendered indefinitely (it has no other exit condition).
-        setSkeletonVisible(false);
-
-        // Track impression
-        if (placement) {
-          trackAdImpression(placement, slotId);
-        }
-
-        onAdLoaded?.();
-      } else {
-        // AdSense script not yet loaded
-        console.warn(
-          'AdSense script not initialized. Ensure adsbygoogle is loaded in layout.'
-        );
-        setSkeletonVisible(false);
-        onAdError?.(new Error('AdSense script not available'));
-      }
-    } catch (error) {
-      const err =
-        error instanceof Error ? error : new Error('Failed to initialize ad');
-      console.error('AdSense initialization error:', err);
-      setSkeletonVisible(false);
-      onAdError?.(err);
-    }
-  }, [slotId, placement, onAdLoaded, onAdError]);
-
+  // Request the ad only once the slot is near the viewport.
   useEffect(() => {
-    // Use Intersection Observer for lazy loading
-    if (!containerRef.current) return;
+    const el = insRef.current;
+    if (!el) return undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let pushed = false;
 
-    const observer = new IntersectionObserver(
+    const loadAd = () => {
+      try {
+        if (typeof window !== 'undefined' && 'adsbygoogle' in window) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          if (placement) trackAdImpression(placement, slotId);
+          onAdLoaded?.();
+        } else {
+          timer = setTimeout(loadAd, 100);
+        }
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error('Failed to initialize ad');
+        console.error('AdSense initialization error:', err);
+        onAdError?.(err);
+      }
+    };
+
+    const start = () => {
+      if (pushed) return;
+      pushed = true;
+      setRequested(true);
+      timer = setTimeout(loadAd, 50);
+    };
+
+    if (typeof IntersectionObserver === 'undefined') {
+      start();
+      return () => clearTimeout(timer);
+    }
+    const io = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          initializeAd();
-          observer.disconnect();
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          start();
         }
       },
-      {
-        rootMargin: '50px', // Load ads 50px before they come into view
-        threshold: 0.1,
-      }
+      { rootMargin: '400px 0px' },
     );
+    io.observe(el);
+    return () => { io.disconnect(); clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotId]);
 
-    observer.observe(containerRef.current);
+  // Collapse the reserved space when no ad arrives. AdSense stamps
+  // data-ad-status="filled" | "unfilled" on the <ins> once it has decided;
+  // the timeout covers the cases where that never happens (script blocked,
+  // request failed, no approved account), where the honest outcome is also
+  // to collapse rather than hold the placeholder forever.
+  useEffect(() => {
+    const el = insRef.current;
+    if (!el) return undefined;
 
-    return () => observer.disconnect();
-  }, [initializeAd]);
+    const read = () => {
+      const status = el.getAttribute('data-ad-status');
+      if (status === 'unfilled') setFilled(false);
+      else if (status === 'filled') setFilled(true);
+    };
 
-  // Get display style based on format
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
+
+    const giveUp = requested ? setTimeout(() => {
+      if (!el.getAttribute('data-ad-status')) setFilled(false);
+    }, 4000) : undefined;
+
+    return () => { observer.disconnect(); clearTimeout(giveUp); };
+  }, [slotId, requested]);
+
+  useEffect(() => {
+    onFilledChange?.(filled);
+  }, [filled, onFilledChange]);
+
   const getDisplayStyle = (): CSSProperties => {
+    if (filled === false) return { display: 'none' };
     switch (format) {
       case 'horizontal':
         return { display: 'block', textAlign: 'center' };
@@ -157,9 +189,10 @@ export function ResponsiveDisplayAd({
     }
   };
 
+  if (filled === false) return null;
+
   return (
     <div
-      ref={containerRef}
       className={`ad-container ad-placement-${placement} ${className}`}
       style={{
         position: 'relative',
@@ -172,32 +205,8 @@ export function ResponsiveDisplayAd({
       role="region"
       aria-label={`Advertisement - ${placement}`}
     >
-      {/* Placeholder while ad loads */}
-      {skeletonVisible && (
-        <div
-          style={{
-            position: 'absolute',
-            background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-            backgroundSize: '200% 100%',
-            animation: 'loading 1.5s infinite',
-            width: '100%',
-            height: '100%',
-            minHeight,
-            borderRadius: '4px',
-          }}
-          className="ad-skeleton"
-        >
-          <style>{`
-            @keyframes loading {
-              0% { background-position: 200% 0; }
-              100% { background-position: -200% 0; }
-            }
-          `}</style>
-        </div>
-      )}
-
-      {/* AdSense ad unit */}
       <ins
+        ref={insRef}
         className="adsbygoogle"
         style={getDisplayStyle()}
         data-ad-client={`ca-pub-8968452296456450`}
@@ -218,7 +227,6 @@ function trackAdImpression(placement: string, slotId: string) {
   if (typeof window === 'undefined') return;
 
   try {
-    // Google Analytics 4 event
     if ('gtag' in window) {
       (window as any).gtag('event', 'ad_impression', {
         ad_slot: slotId,
@@ -227,7 +235,6 @@ function trackAdImpression(placement: string, slotId: string) {
       });
     }
 
-    // Store in sessionStorage for monitoring
     const adMetrics = JSON.parse(
       sessionStorage.getItem('ad_impressions') || '{}'
     );
