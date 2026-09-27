@@ -17,43 +17,37 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
 // RETIRED_SECTIONS) -- the "Explore" link column that pointed at them is
 // gone rather than left linking into redirects.
 
-// Third AdSense-readiness retirement pass, 2026-09-25 (see
-// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): narrowed further to
-// Fashion, Videos, Podcasts, and (added back in the same pass) the original
-// Practice Areas -- Entertainment, Sports, People, Topics, Countries, and
-// Legal Cases/Courts stay retired (301 to / via next.config.ts), so linking
-// them here would send readers straight into a redirect instead of a page.
-// Videos/Podcasts retired too in a follow-up pass (2026-09-27, after the
-// third rejection) -- real but off-topic content for a legal-guides site
-// under review. Fashion dropped in the same pass -- never got real content,
-// still a placeholder page (see category-slugs.ts). Restore everything
-// alongside CURRENT_CATEGORY_SLUGS once AdSense approves the site as it
-// stands.
+// 2026-09-27: the legal-lead-gen practice areas (personal injury, maritime,
+// cruise ship) were archived outright, not just delinked, and are not
+// coming back -- see category-slugs.ts. This list is the site's new
+// identity: law as history, culture, language, technology and society,
+// not legal advice.
 const PRACTICE_AREA_LINKS = [
-  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
-  { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
-  { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
+  { href: '/law-and-popular-culture', label: 'Law & Popular Culture' },
+  { href: '/history-and-civilization', label: 'History & Civilization' },
+  { href: '/language-and-literature', label: 'Language & Literature' },
+  { href: '/technology-and-digital-culture', label: 'Technology & Digital Culture' },
+  { href: '/law-culture-and-society', label: 'Law, Culture & Society' },
   { href: '/law-school-success', label: 'Law School Success' },
 ];
 
+// Trimmed from 8 to 4 (2026-09-27, owner request): About/Contributors/
+// Editorial Standards/Contact cover what Google's AdSense checklist and a
+// reader actually need (active About + Contact, a visible trust signal).
+// Editorial Process, Corrections, Careers, and Advertise still exist as
+// real pages (linked from /policies and /about-us, still in the sitemap)
+// -- just not repeated in the footer anymore.
 const ABOUT_LINKS = [
   { href: '/about-us', label: 'About Us' },
   { href: '/authors', label: 'Contributors' },
   { href: '/editorial-standards', label: 'Editorial Standards' },
-  { href: '/editorial-process', label: 'Editorial Process' },
-  { href: '/corrections', label: 'Corrections' },
   { href: '/contact-us', label: 'Contact Us' },
-  { href: '/careers', label: 'Careers' },
-  { href: '/advertise', label: 'Advertise' },
 ];
 
 const LEGAL_LINKS = [
   { href: '/privacy-policy', label: 'Privacy Policy' },
   { href: '/terms-of-service', label: 'Terms of Service' },
-  { href: '/terms-of-service#disclaimers', label: 'Disclaimer' },
   { href: '/cookie-policy', label: 'Cookie Policy' },
-  { href: '/editorial-disclosure-policy', label: 'DMCA' },
-  { href: '/sponsored-content-policy', label: 'Advertising Disclosure' },
   { href: '/sitemap.xml', label: 'Sitemap' },
 ];
 
@@ -69,16 +63,15 @@ export function PublicFooter() {
             <div className="md:col-span-4 space-y-6 md:space-y-10">
               <Link href="/" className="flex items-center gap-2.5 group" aria-label="Law Elite Network – Home">
                 {/* Scales of Justice mark */}
-                <svg viewBox="0 0 64 64" className="h-10 w-10 flex-shrink-0" aria-hidden="true">
-                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
-                  <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
-                  <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
-                  <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
-                  <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
-                  <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
-                  <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
-                  <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
-                  <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+                <svg viewBox="0 0 64 64" className="h-12 w-12 flex-shrink-0" aria-hidden="true">
+                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="12"/>
+                  <rect x="8" y="18" width="48" height="5" fill="#F6F4EF"/>
+                  <rect x="29" y="22" width="6" height="24" fill="#F6F4EF"/>
+                  <rect x="21" y="46" width="22" height="5" fill="#F6F4EF"/>
+                  <rect x="12" y="23" width="2.5" height="9" fill="#F6F4EF"/>
+                  <rect x="49.5" y="23" width="2.5" height="9" fill="#F6F4EF"/>
+                  <path d="M3,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
+                  <path d="M41,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
                 </svg>
                 {/* Wordmark */}
                 <span className="flex flex-col leading-none">
@@ -109,8 +102,8 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-3"
-              title="Practice Areas"
-              sections={[{ heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS }]}
+              title="Sections"
+              sections={[{ heading: 'Sections', links: PRACTICE_AREA_LINKS }]}
             />
 
             <FooterLinkColumn

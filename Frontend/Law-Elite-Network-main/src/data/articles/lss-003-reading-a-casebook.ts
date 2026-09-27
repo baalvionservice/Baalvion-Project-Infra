@@ -62,7 +62,7 @@ export const articleReadingCasebook: LawArticle[] = [
 <h3>Is it normal to not fully understand a case the first time through?</h3>
 <p>Yes. Comprehension builds across passes, and a second look after class discussion, or a hornbook check, often clarifies what the first read left murky.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-06T08:15:00.000Z',
     readingTime: 7,
     views: 0,
     featured: false,

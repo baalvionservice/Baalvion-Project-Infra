@@ -26,8 +26,8 @@ const RETIRED_ROOT_SLUGS = new Set([
 ]);
 
 /** The reference/newsroom sections retired alongside those guides. /news
- * un-retired 2026-09-25 at explicit request -- see next.config.ts. */
-const RETIRED_SECTIONS = new Set(['case-law', 'legislation', 'law-changes', 'world', 'plans']);
+ * re-retired 2026-09-27 (archived: YMYL/legal-lead-gen risk) -- see next.config.ts. */
+const RETIRED_SECTIONS = new Set(['case-law', 'legislation', 'law-changes', 'world', 'plans', 'news']);
 
 /**
  * Practice areas retired in the AdSense-readiness pass, in both their current
@@ -51,6 +51,9 @@ const RETIRED_CATEGORY_SLUGS = new Set([
   'car-accidents',
   'legal-guides',
   'immigration-law-visas',
+  'personal-injury-lawyer',
+  'maritime-offshore-injury-law',
+  'cruise-ship-passenger-vessel-accidents',
 ]);
 
 /**

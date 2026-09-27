@@ -52,7 +52,7 @@ export const articleCommonLawVsCivilLaw: LawArticle[] = [
 <h3>Does every common law country use an adversarial trial process?</h3>
 <p>Adversarial procedure is the norm in common law jurisdictions like the US, UK, and India, and it developed alongside the precedent-based tradition. But procedure and legal source aren't strictly locked together -- some common law jurisdictions incorporate inquisitorial elements in specific proceedings, so it's worth checking the actual procedural rules for the country and case type you're researching rather than assuming from the legal family alone.</p>`,
     author: 'Law Elite Editorial Team',
-    updatedAt: 'September 16, 2026',
+    updatedAt: '2026-09-09T09:40:00.000Z',
     readingTime: 7,
     views: 0,
     featured: false,

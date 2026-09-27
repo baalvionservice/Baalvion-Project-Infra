@@ -1,21 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Law Elite Network">
   <title>Law Elite Network</title>
   <!-- Navy background -->
-  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="6"/>
+  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="12"/>
   <!-- Balance beam -->
-  <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
+  <rect x="8" y="18" width="48" height="5" fill="#F6F4EF"/>
   <!-- Vertical post -->
-  <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
-  <!-- Fulcrum triangle (downward) -->
-  <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
+  <rect x="29" y="22" width="6" height="24" fill="#F6F4EF"/>
+  <!-- Base -->
+  <rect x="21" y="46" width="22" height="5" fill="#F6F4EF"/>
   <!-- Left chain -->
-  <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
+  <rect x="12" y="23" width="2.5" height="9" fill="#F6F4EF"/>
   <!-- Right chain -->
-  <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
-  <!-- Left pan (gold) -->
-  <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
-  <!-- Right pan (gold) -->
-  <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
-  <!-- Red bottom accent bar -->
-  <rect x="0" y="58" width="64" height="6" fill="#E13131" rx="0"/>
+  <rect x="49.5" y="23" width="2.5" height="9" fill="#F6F4EF"/>
+  <!-- Left pan (solid bowl) -->
+  <path d="M3,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
+  <!-- Right pan (solid bowl) -->
+  <path d="M41,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
 </svg>

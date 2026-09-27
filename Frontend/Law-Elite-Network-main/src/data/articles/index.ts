@@ -36,6 +36,15 @@ import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
 import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
 import { lawSchoolSuccessArticles } from './law-school-success';
+// New content pillars — real, published articles (not draft placeholders).
+// Re-added 2026-09-27 after the real editorial content was written and
+// verified. These replace the empty template versions that were removed earlier.
+import { articleHollywoodLawyers } from './law-and-popular-culture';
+import { articleLawAndPopularCultureExtra } from './law-and-popular-culture-extra';
+import { articleHistoryAndCivilizationDrafts } from './history-and-civilization';
+import { articleLanguageAndLiterature } from './language-and-literature';
+import { articleTechnologyAndDigitalCulture } from './technology-and-digital-culture';
+import { articleLawCultureAndSociety } from './law-culture-and-society';
 import { highProfileNewsArticles } from './high-profile-cases-news';
 import { entertainmentNewsArticles } from './entertainment-news';
 import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
@@ -47,6 +56,12 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...celebrityProfilesNewsArticles,
   ...sportsNewsArticles,
   ...lawSchoolSuccessArticles,
+  ...articleHollywoodLawyers,
+  ...articleLawAndPopularCultureExtra,
+  ...articleHistoryAndCivilizationDrafts,
+  ...articleLanguageAndLiterature,
+  ...articleTechnologyAndDigitalCulture,
+  ...articleLawCultureAndSociety,
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,
   ...businessCorporateExtra2Articles,

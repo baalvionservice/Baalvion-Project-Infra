@@ -75,10 +75,10 @@ export default function EditorialStandardsPage() {
           <div className="border-l-4 border-blue-600 bg-slate-50 rounded-r-2xl p-8 mb-16 flex items-start gap-5">
             <BookOpen className="w-8 h-8 text-blue-600 shrink-0 mt-1" />
             <p className="text-slate-700 leading-relaxed">
-              Law Elite Network publishes legal information that readers around the world rely on to orient themselves
-              and decide when to seek professional help. Because the law is a high-stakes subject, we hold our content to
-              documented standards for research, sourcing, accuracy, and transparency. This page explains exactly how our
-              articles are made.
+              Law Elite Network publishes stories about the history, language, popular-culture portrayal, and
+              technology of law for a general audience. Because historical and legal facts matter, we hold our
+              content to documented standards for research, sourcing, accuracy, and transparency. This page explains
+              exactly how our articles are made.
             </p>
           </div>
 
@@ -86,86 +86,79 @@ export default function EditorialStandardsPage() {
 
             <Block id="promise" title="Our Editorial Promise">
               <p>
-                We promise our readers four things: that our content is researched against authoritative sources, that it
-                is reviewed for accuracy before it is published, that it is kept current and clearly dated, and that we
-                are always honest about the difference between general legal information and personalized legal advice.
+                We promise our readers four things: that our content is researched against authoritative sources, that
+                it is reviewed for accuracy before it is published, that it is kept current and clearly dated, and
+                that we are always honest about the difference between general legal information and legal advice.
                 Every standard described below exists to keep that promise.
               </p>
             </Block>
 
             <Block id="research" title="How Articles Are Researched">
               <p>
-                Each article begins with research into the relevant law, not a summary of someone else&apos;s summary. Our
-                writers identify the governing statutes, regulations, rules, and — where relevant — leading court
-                decisions and official agency guidance for the jurisdiction the article addresses. We map how those
-                authorities fit together before writing a single explanatory sentence.
+                Each article begins with real research, not a summary of someone else&apos;s summary. Our writers
+                identify the historical record, primary legal texts, and — where relevant — reporting and scholarship
+                on the topic, and map how those sources fit together before writing a single explanatory sentence.
               </p>
               <p>
-                Because our coverage is worldwide, research also means identifying which jurisdiction a question belongs
-                to and flagging where the answer differs across countries or regions. When a topic spans multiple legal
-                systems, we make those distinctions explicit rather than papering over them with a single generic answer.
+                Because our coverage spans many countries and legal traditions, research also means identifying which
+                tradition a topic belongs to and flagging where the history or practice differs across countries or
+                regions, rather than papering over the differences with a single generic account.
               </p>
             </Block>
 
             <Block id="sourcing" title="Sourcing Standards">
               <p>We prioritize sources in the following order:</p>
               <ul>
-                <li><strong>Primary law</strong> — statutes, codes, regulations, constitutional provisions, and binding court decisions.</li>
-                <li><strong>Official guidance</strong> — publications from courts, regulators, and government agencies that administer the law in question.</li>
-                <li><strong>Reputable secondary sources</strong> — established legal references, bar association materials, and recognized scholarship, used to explain or contextualize the primary law.</li>
+                <li><strong>Primary sources</strong> — statutes, court opinions, historical records, and original documents.</li>
+                <li><strong>Official records</strong> — publications from courts, archives, and government or academic institutions.</li>
+                <li><strong>Reputable secondary sources</strong> — established references, academic scholarship, and recognized journalism, used to explain or contextualize the primary record.</li>
               </ul>
               <p>
                 We avoid relying on unverified or anonymous sources, and we do not present marketing material as if it
-                were neutral legal authority. When we describe what the law requires, that statement is grounded in a
-                source we have checked.
+                were neutral authority. When we state a fact, that statement is grounded in a source we have checked.
               </p>
             </Block>
 
             <Block id="writing" title="How Articles Are Written">
               <p>
-                Our house style favors plain language. We write for a reader who is trying to understand a topic for the
-                first time: we define terms of art, prefer concrete examples to abstraction, and structure articles so a
-                reader can find the specific point they need. Crucially, we signpost the moments where a reader should
-                stop relying on a general explanation and consult a licensed professional about their own facts.
+                Our house style favors plain language. We write for a reader who is trying to understand a topic for
+                the first time: we define terms of art, prefer concrete examples to abstraction, and structure
+                articles so a reader can find the specific point they need.
               </p>
               <p>
-                We aim for balance and accuracy over persuasion. Where the law is unsettled, contested, or fact-specific,
-                we say so rather than implying a certainty that does not exist.
+                We aim for balance and accuracy over persuasion. Where the history is unsettled, contested, or
+                fact-specific, we say so rather than implying a certainty that does not exist.
               </p>
             </Block>
 
             <Block id="fact-checking" title="Fact-Checking & Review">
               <p>
-                Before publication, every article is checked against its sources. Editors verify that legal statements
-                are supported by the cited authority, that jurisdiction labels are correct, that dates and figures are
-                accurate, and that nothing in the piece could be mistaken for individualized legal advice. Articles that
-                are fact-specific or that carry meaningful risk to readers receive additional review by an editor with
-                subject-matter familiarity in that area.
+                Before publication, every article is checked against its sources. Editors verify that claims are
+                supported by the cited authority, that dates and figures are accurate, and that nothing in the piece
+                reads as individualized legal advice. Articles that are fact-specific receive additional review by an
+                editor with subject-matter familiarity in that area.
               </p>
               <p>
-                Fact-checking is not a one-time event. When the underlying law changes, the affected content is
-                re-checked and corrected as part of our ongoing update process.
+                Fact-checking is not a one-time event. When new scholarship, rulings, or developments surface, the
+                affected content is re-checked and corrected as part of our ongoing update process.
               </p>
             </Block>
 
             <Block id="reviewers" title="Who Reviews Our Work">
               <p>
-                Our content is produced and reviewed by a team of legal writers, editors, and contributors with
-                experience across the practice areas we cover. Named legal editors are accountable for the accuracy of
-                the material in their areas, and our review standards apply uniformly to every contributor. Where a topic
-                warrants it, we draw on reviewers with deeper familiarity in the relevant field to confirm that an
-                explanation is fair, current, and clearly stated. You can learn more about our team on our{' '}
-                <Link href="/about-us">About Us</Link> page.
+                Our content is produced and reviewed by a team of writers, editors, and contributors with experience
+                across the sections we cover. Named editors are accountable for the accuracy of the material in their
+                sections, and our review standards apply uniformly to every contributor. You can learn more about our
+                team on our <Link href="/about-us">About Us</Link> page.
               </p>
             </Block>
 
             <Block id="updates" title="Update Cadence & Dating">
               <p>
-                The law changes, and content that is not maintained becomes misleading. We review our material on a
-                recurring schedule and whenever a significant legal development comes to our attention — a new statute, an
-                amendment, a major decision, or revised official guidance. Every page carries a clear &quot;last
-                updated&quot; date so readers can judge how current it is, and substantive changes are reflected in that
-                date.
+                History and culture are still living subjects, and content that is not maintained becomes misleading.
+                We review our material on a recurring schedule and whenever new scholarship, a relevant ruling, or a
+                cultural development comes to our attention. Every page carries a clear &quot;last updated&quot; date
+                so readers can judge how current it is, and substantive changes are reflected in that date.
               </p>
             </Block>
 
@@ -173,15 +166,15 @@ export default function EditorialStandardsPage() {
               <div className="not-prose mb-6 border-l-4 border-amber-500 bg-amber-50 rounded-r-2xl p-6 flex items-start gap-4">
                 <ShieldCheck className="w-6 h-6 text-amber-600 shrink-0" />
                 <p className="text-slate-700 m-0">
-                  Our content is general legal information for educational purposes only. It is not legal advice, and it
-                  does not create an attorney–client relationship.
+                  Our content is general legal and historical information for educational purposes only. It is not
+                  legal advice, and it does not create an attorney–client relationship.
                 </p>
               </div>
               <p>
-                No article can account for the specific facts of your situation, your jurisdiction, or how the law would
-                actually be applied to you. We write to inform and orient, never to substitute for advice from a licensed
-                attorney who knows your circumstances. This policy is reflected throughout our content and explained in
-                full in our <Link href="/terms-of-service">Terms of Service</Link>.
+                No article can account for the specific facts of your situation. We write to inform and explain,
+                never to substitute for advice from a licensed attorney who knows your circumstances. This policy is
+                reflected throughout our content and explained in full in our{' '}
+                <Link href="/terms-of-service">Terms of Service</Link>.
               </p>
             </Block>
 

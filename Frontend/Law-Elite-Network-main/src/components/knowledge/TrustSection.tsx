@@ -6,27 +6,27 @@ import Link from 'next/link';
 const PRINCIPLES = [
   {
     title: 'Plain language',
-    body: 'Complex legal concepts are explained for ordinary readers, not for other lawyers.',
+    body: 'Legal history and tradition are explained for curious general readers, not for other lawyers.',
   },
   {
-    title: 'Jurisdiction first',
-    body: 'Legal rules are connected to the jurisdiction in which they apply, not treated as universal.',
+    title: 'Context first',
+    body: 'Historical and cultural claims are tied to their time, place, and legal tradition, not treated as universal.',
   },
   {
     title: 'Editorial independence',
-    body: 'Educational content is kept separate from advertising and sponsorship decisions.',
+    body: 'Editorial content is kept separate from advertising and sponsorship decisions.',
   },
   {
     title: 'Source-conscious',
-    body: 'Legal claims are checked against authoritative sources where appropriate.',
+    body: 'Historical and factual claims are checked against authoritative sources before publication.',
   },
   {
     title: 'Corrections matter',
     body: 'Material errors are acknowledged and corrected transparently, not quietly edited away.',
   },
   {
-    title: 'Education, not representation',
-    body: "We provide general legal education. We don't replace qualified legal counsel.",
+    title: 'Education, not advice',
+    body: "We publish legal history, culture, and education. We don't offer legal advice.",
   },
 ];
 

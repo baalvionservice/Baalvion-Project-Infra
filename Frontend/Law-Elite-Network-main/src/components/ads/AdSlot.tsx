@@ -1,8 +1,20 @@
-import React from 'react';
+'use client';
+
+import { useState } from 'react';
 import { ResponsiveDisplayAd, type ResponsiveDisplayAdProps } from './ResponsiveDisplayAd';
 
-// Google AdSense Compliant Ad Frame
+// Google AdSense Compliant Ad Frame.
+//
+// The bordered "ADVERTISEMENT" label must collapse along with the ad it
+// labels -- a labeled box with nothing inside (guaranteed while the AdSense
+// account is unapproved, and not unheard of even once approved) reads as a
+// broken layout, not an intentional empty state. See
+// ResponsiveDisplayAd's onFilledChange for the fill-detection this reads.
 export function AdSlot({ className = '', ...ad }: ResponsiveDisplayAdProps & { className?: string }) {
+  const [filled, setFilled] = useState<boolean | null>(null);
+
+  if (filled === false) return null;
+
   return (
     <div
       role="region"
@@ -13,7 +25,7 @@ export function AdSlot({ className = '', ...ad }: ResponsiveDisplayAdProps & { c
         ADVERTISEMENT
       </span>
       <div className="flex justify-center items-center overflow-hidden">
-        <ResponsiveDisplayAd {...ad} />
+        <ResponsiveDisplayAd {...ad} onFilledChange={setFilled} />
       </div>
     </div>
   );

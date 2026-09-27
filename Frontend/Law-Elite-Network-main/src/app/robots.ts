@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { getLiveCategorySlugs } from '@/lib/category-visibility';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -27,10 +27,12 @@ const ALLOW = [
   // "blocked by robots.txt"). More specific Allow wins over the shorter
   // Disallow regardless of list order, per the robots.txt spec Google follows.
   '/api/image',
-  // /news un-retired 2026-09-25 (see next.config.ts) -- /case-law,
-  // /legislation and /law-changes stay retired and are still not in this
-  // list.
-  '/news',
+  // Bare /news still 301s to / (next.config.ts) -- there is no /news hub
+  // page. Real news content lives at /news/{year}/{month}/{day}/{geo}/
+  // {slug} (see news-url.ts), re-enabled 2026-09-27 once the owner
+  // confirmed daily real publishing. /case-law and /legislation stay
+  // retired and are not Allow-listed.
+  '/news/',
   '/search',
   '/plans',
   '/about-us',
@@ -52,10 +54,11 @@ const ALLOW = [
   '/policies',
   '/article/',
   '/law/',
-  ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
-  // Podcasts/Videos/Interviews retired 2026-09-27 (see next.config.ts) --
-  // real content, but off-topic for a legal-guides site under AdSense
-  // review. Now 301s to /, so no Allow entry needed.
+  // Live category slugs (category-visibility.ts) spread in below at
+  // request time -- a category isn't explicitly Allow-listed until it's
+  // actually live, same threshold as nav/sitemap.
+  '/podcasts',
+  '/videos',
   '/authors',
   '/author/',
 ];
@@ -118,7 +121,9 @@ const AI_USER_AGENTS = [
   'meta-externalagent',
 ];
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const liveSlugs = await getLiveCategorySlugs();
+  const allow = [...ALLOW, ...Array.from(liveSlugs).map((slug) => `/${slug}`)];
   return {
     rules: [
       // Google's AdSense ad-serving crawler needs full access to read page
@@ -127,8 +132,8 @@ export default function robots(): MetadataRoute.Robots {
       // '*' group's DISALLOW list, which is Google's documented cause of
       // "couldn't verify your site" / ads not serving.
       { userAgent: 'Mediapartners-Google', allow: '/' },
-      { userAgent: '*', allow: ALLOW, disallow: DISALLOW },
-      ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow: ALLOW, disallow: DISALLOW })),
+      { userAgent: '*', allow, disallow: DISALLOW },
+      ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow, disallow: DISALLOW })),
     ],
     sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
     host: BASE_URL,

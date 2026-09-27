@@ -64,19 +64,19 @@ export async function ArticleSidebar({
 
   return (
     <div className="space-y-8">
-      {/* ── Card 1: Confidential Legal Tips Scoop Box ───────────── */}
+      {/* ── Card 1: Suggest a Story ──────────────────────────────── */}
       <div className="bg-[#0C0F17] text-white p-5 md:p-6 border-t-4 border-[#E13131]">
         <div className="flex items-center gap-2 text-[#E13131] text-[11px] font-black uppercase tracking-widest mb-3">
           <Shield className="w-4 h-4 text-[#E13131]" />
-          <span>CONFIDENTIAL LEGAL TIPS</span>
+          <span>SUGGEST A STORY</span>
         </div>
 
         <h3 className="font-headline font-black text-base md:text-lg uppercase tracking-tight text-white leading-snug mb-2">
-          HAVE A LAWSUIT SCOOP OR LEAKED COURT DOCUMENT?
+          KNOW A STORY ABOUT LAW, HISTORY OR CULTURE WE SHOULD COVER?
         </h3>
 
         <p className="text-slate-400 text-xs leading-relaxed mb-5">
-          Our journalists review sealed filings, whistleblower leaks, and case intel confidentially.
+          We're always looking for well-sourced stories on the history, culture, language and technology of law.
         </p>
 
         <a
@@ -84,24 +84,17 @@ export async function ArticleSidebar({
           className="bg-[#E13131] hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider py-3 px-4 w-full flex items-center justify-center gap-2 transition-colors"
         >
           <Mail className="w-4 h-4" />
-          SUBMIT CONFIDENTIAL SCOOP
+          SEND A SUGGESTION
         </a>
       </div>
 
-      {/* ── Card 2: Advertisement ────────────────────────────────── */}
-      <div className="bg-slate-50 border border-slate-200 p-4 text-center">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-3">
-          ADVERTISEMENT
-        </span>
-        <div className="min-h-[250px] flex items-center justify-center bg-white border border-dashed border-slate-200">
-          <AdSlot
-            slotId={SIDEBAR_AD_SLOT_ID}
-            format="rectangle"
-            placement="sidebar-top"
-            minHeight="250px"
-          />
-        </div>
-      </div>
+      {/* ── Card 2: Advertisement — AdSlot renders its own label/border/collapse ── */}
+      <AdSlot
+        slotId={SIDEBAR_AD_SLOT_ID}
+        format="rectangle"
+        placement="sidebar-top"
+        minHeight="250px"
+      />
 
       {/* ── Card 3: More in Category ─────────────────────────────── */}
       <div className="space-y-4">

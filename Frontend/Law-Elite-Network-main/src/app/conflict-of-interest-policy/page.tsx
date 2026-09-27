@@ -26,10 +26,8 @@ export default function ConflictOfInterestPolicyPage() {
 
           <div className="border-l-4 border-blue-600 bg-slate-50 rounded-r-2xl p-8 mb-16">
             <p className="text-slate-700 leading-relaxed">
-              Law Elite Network both publishes independent legal commentary and connects readers with lawyers for
-              hire through our directory and appointments features.
-              Operating both a media outlet and a referral service creates conflict-of-interest risks that we manage
-              explicitly, rather than leave unaddressed.
+              Law Elite Network is a commercial publication funded by advertising and B2B sponsorship, and we manage
+              the conflicts of interest that come with that explicitly, rather than leave them unaddressed.
             </p>
           </div>
 
@@ -37,35 +35,31 @@ export default function ConflictOfInterestPolicyPage() {
 
             <Block icon={<Scale className="w-6 h-6 text-blue-600" />} title="Separating Editorial and Commercial Judgment">
               <p>
-                Referral and matching arrangements with listed lawyers are commercial relationships, disclosed in our{' '}
-                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>.
-                They are kept separate from editorial judgments about legal topics, which are governed by our{' '}
+                Advertising and sponsorship arrangements are commercial relationships, disclosed in our{' '}
+                <Link href="/sponsored-content-policy" className="text-blue-600 hover:underline">Sponsored Content Policy</Link>.
+                They are kept separate from editorial judgments about what we cover and how, which are governed by our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
-                A lawyer&apos;s participation in our referral network does not entitle them to favorable coverage,
-                and a lawyer&apos;s absence from the network does not result in unfavorable treatment in our
-                editorial content.
+                An advertiser&apos;s spend with us does not entitle them to favorable coverage, and declining to
+                advertise does not result in unfavorable treatment in our editorial content.
               </p>
             </Block>
 
             <Block icon={<Users className="w-6 h-6 text-blue-600" />} title="Personal Disclosure by Writers and Reviewers">
               <p>
-                Writers and reviewers are expected to disclose personal ties to the legal industry that are relevant
-                to what they cover — for example, a financial interest in a law firm, a close family relationship
-                with a practicing attorney in a practice area they are writing about, or any compensation received
-                from a firm discussed in an article. Where a relevant tie exists, we either disclose it alongside the
-                content, reassign the coverage to another editor, or both, depending on the severity of the
-                relationship.
+                Writers and reviewers are expected to disclose personal ties that are relevant to what they cover —
+                for example, a financial interest in a company or public figure they are writing about, or any
+                compensation received from a party discussed in an article. Where a relevant tie exists, we either
+                disclose it alongside the content, reassign the coverage to another editor, or both, depending on the
+                severity of the relationship.
               </p>
             </Block>
 
-            <Block icon={<FileWarning className="w-6 h-6 text-blue-600" />} title="Referral Arrangements Do Not Buy Coverage">
+            <Block icon={<FileWarning className="w-6 h-6 text-blue-600" />} title="Sponsorship Does Not Buy Coverage">
               <p>
-                No referral fee, advertising spend, or directory placement fee entitles a lawyer or firm to
-                editorial coverage, a &quot;Verified&quot; designation, or favorable mention in an article. Verified
-                status reflects a separate credentialing check described in our{' '}
-                <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>,
-                and editorial coverage decisions are made without regard to a firm&apos;s commercial relationship with
-                us.
+                No advertising spend or sponsorship fee entitles a company or individual to editorial coverage or
+                favorable mention in an article. Editorial coverage decisions are made without regard to a party&apos;s
+                commercial relationship with us, as described in our{' '}
+                <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
               </p>
             </Block>
 

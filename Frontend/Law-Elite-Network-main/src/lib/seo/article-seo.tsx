@@ -4,7 +4,25 @@ import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
 import { articleDates } from '@/lib/seo/normalize-date';
 import { articleUrl } from '@/lib/article-url';
+import { newsUrl } from '@/lib/news-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+
+/**
+ * News (contentType: 'news') gets its own /news/{date}/{geo}/{slug} URL
+ * (see news-url.ts) instead of the /{category}/{slug} shape every other
+ * article uses -- canonical/OG/JSON-LD all need to agree on which one a
+ * given piece of content actually resolves to. Falls back to articleUrl()
+ * when the news item has no real published date yet (newsUrl returns null
+ * rather than fabricating one) so metadata generation never throws on a
+ * draft.
+ */
+function resolveCanonicalPath(article: { slug?: string | null; contentType?: string } | null, slug: string): string {
+  const withSlug = article ? { ...article, slug } : { slug };
+  if (article?.contentType === 'news') {
+    return newsUrl(withSlug) || articleUrl(withSlug);
+  }
+  return articleUrl(withSlug);
+}
 
 /**
  * `JSON.stringify` escapes neither `<` nor `/`, so a CMS value containing
@@ -48,7 +66,7 @@ function isCurrentCategoryArticle(article: any): boolean {
  * fixed once doesn't regress on the other.
  */
 export function buildArticleMetadata(article: any | null, slug: string, site: string): Metadata {
-  const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
+  const url = `${site}${resolveCanonicalPath(article, slug)}`;
   // No server-side record: humanize the slug so the title is still specific (not bare "Article").
   if (!article) {
     const humanized = `${titleCase(slug)} | Law Elite Network`;
@@ -102,7 +120,7 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
  * route renders an article at a shorter URL than its full taxonomy.
  */
 export function ArticleJsonLd({ article, slug, site }: { article: any | null; slug: string; site: string }) {
-  const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
+  const url = `${site}${resolveCanonicalPath(article, slug)}`;
   const bylineName = (typeof article?.author === 'string' ? article.author : article?.author?.name) || undefined;
   const authorLd = buildAuthorLd(bylineName, site);
   const articleImage = article ? resolveArticleImage({ ...article, title: article.title, slug }) : undefined;

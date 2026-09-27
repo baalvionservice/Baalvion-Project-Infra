@@ -18,41 +18,36 @@ export function toNewCategorySlug(oldSlug: string): string {
   return CATEGORY_SLUG_RENAME[oldSlug] || oldSlug;
 }
 
-// AdSense-readiness retirement (see next.config.ts redirects() for the same
-// list): shrunk from 16 to 5, then to 3 (maritime-offshore-injury-law,
-// cruise-ship-passenger-vessel-accidents, personal-injury-lawyer), then the
-// LEN master-IA build added 'law-school-success' and 5 entertainment hubs
-// (movies, music, television, streaming, celebrity-news) alongside those 3 --
-// none of that additional build was part of the original AdSense-retirement
-// restore-later list.
+// AdSense-readiness retirement history (see next.config.ts redirects() for
+// the parallel list): shrunk from 16 down over several passes as the legal
+// practice-area categories (personal injury, maritime, cruise ship, news)
+// were archived outright 2026-09-27 for YMYL/legal-lead-gen risk -- not just
+// delinked, the underlying articles are archived in the CMS. Every slug
+// removed here for retirement (as opposed to archived) still exists with
+// real content; this list controls indexing/nav/sitemap eligibility, not
+// deletion.
 //
-// 2026-09-25: none of that has cleared AdSense review yet, and the site kept
-// growing (Fashion, Sports, the wider Entertainment/People layers) while
-// still mid-review -- the exact failure mode documented in
-// law-elite-hold-deploy-until-adsense. Narrowed to Fashion alone first, then
-// the original 3 personal-injury/maritime-injury categories plus
-// law-school-success were explicitly asked back in the same pass -- all real,
-// finished content, none thin, none attributed to a fabricated bio. Movies,
-// music, television, streaming, celebrity-news, and every other retired
-// pillar (Entertainment hub, Sports, People, Countries, Topics, Legal
-// cases/courts) stay out. Videos and Podcasts were never retired (see
-// next.config.ts / sitemap.ts). Every slug removed here still exists with
-// real content -- this list controls indexing/nav/sitemap eligibility, not
-// deletion -- and gets restored once AdSense approves the site as it stands.
-//
-// 2026-09-27, follow-up after the third rejection: Fashion removed too --
-// despite being the very first category kept above, it never got real
-// content and is still a "DESIGN PREVIEW... every story below is
-// placeholder content" page with fake headlines. That's fine unlinked, but
-// this pass is specifically about not shipping the accumulated gap between
-// this branch and what's live, so it comes out alongside Videos/Podcasts/
-// Interviews (see next.config.ts) rather than going live as a real nav item
-// pointing at placeholder copy. Restore once it has real articles.
+// 2026-09-27 repositioning: personal-injury/maritime/cruise-ship (see the
+// AdSense-retirement paragraph above) confirmed removed for good -- YMYL/
+// legal-lead-gen risk, not restoring alongside this pass regardless of any
+// earlier note about bringing them back. Five new categories added instead
+// for the "publication about the history, culture, language and technology
+// around law" direction (law-and-popular-culture, history-and-civilization,
+// language-and-literature, technology-and-digital-culture,
+// law-culture-and-society). Started EMPTY at creation; each now has real,
+// non-fabricated published articles (5-10+ per category as of the cluster
+// publishing passes later the same day -- see recent "feat(law-elite):
+// publish ... cluster articles" commits). Before resubmitting to AdSense,
+// re-verify actual live counts rather than trusting this comment, since it
+// was already stale once (it said "empty" while the pass above shows these
+// were already populated).
 export const CURRENT_CATEGORY_SLUGS = [
-  'personal-injury-lawyer',
-  'maritime-offshore-injury-law',
-  'cruise-ship-passenger-vessel-accidents',
   'law-school-success',
+  'law-and-popular-culture',
+  'history-and-civilization',
+  'language-and-literature',
+  'technology-and-digital-culture',
+  'law-culture-and-society',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */

@@ -15,7 +15,25 @@ import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { useAuth } from '@/hooks/useAuth';
 import { sharedSignInUrl } from '@/lib/shared-auth';
-import { PRIMARY_NAV } from '@/lib/site-nav';
+import { PRIMARY_NAV, type NavSection } from '@/lib/site-nav';
+
+/**
+ * Sections guaranteed live regardless of article count -- see
+ * category-visibility.ts's ALWAYS_LIVE. Used as the initial render so SSR
+ * and the first client paint match exactly (no hydration mismatch); the
+ * live-nav fetch below swaps in the real, count-based set right after
+ * mount, promoting a new pillar automatically once it crosses the
+ * threshold without any manual nav edit.
+ */
+const ALWAYS_LIVE_HREFS = new Set([
+  '/law-school-success',
+  '/law-and-popular-culture',
+  '/history-and-civilization',
+  '/language-and-literature',
+  '/technology-and-digital-culture',
+  '/law-culture-and-society',
+]);
+const INITIAL_NAV = PRIMARY_NAV.filter((s) => ALWAYS_LIVE_HREFS.has(s.href));
 
 /**
  * @fileOverview Public masthead. Two tiers: a white brand/utility row over a
@@ -27,6 +45,23 @@ export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [navSections, setNavSections] = useState<NavSection[]>(INITIAL_NAV);
+
+  // Promotes a category into nav automatically once it crosses
+  // category-visibility.ts's LIVE_THRESHOLD published articles -- see
+  // /api/live-nav. Starts from the always-live subset (matches SSR) and
+  // swaps in the real set once this resolves; a failed fetch just keeps
+  // the always-live subset rather than showing nothing.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/live-nav')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.sections)) setNavSections(data.sections);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Full-screen overlay: lock background scroll while it's open.
   useEffect(() => {
@@ -69,16 +104,15 @@ export function PublicNavbar() {
           {/* Center: Logo — scales mark + LAW ELITE NETWORK wordmark */}
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0" aria-label="Law Elite Network – Home">
             {/* Scales of Justice mark */}
-            <svg viewBox="0 0 64 64" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0" aria-hidden="true">
-              <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
-              <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
-              <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
-              <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
-              <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
-              <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
-              <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
-              <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
-              <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+            <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0" aria-hidden="true">
+              <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="12"/>
+              <rect x="8" y="18" width="48" height="5" fill="#F6F4EF"/>
+              <rect x="29" y="22" width="6" height="24" fill="#F6F4EF"/>
+              <rect x="21" y="46" width="22" height="5" fill="#F6F4EF"/>
+              <rect x="12" y="23" width="2.5" height="9" fill="#F6F4EF"/>
+              <rect x="49.5" y="23" width="2.5" height="9" fill="#F6F4EF"/>
+              <path d="M3,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
+              <path d="M41,32 a10,9 0 0 0 20,0 z" fill="#F6F4EF"/>
             </svg>
             {/* Wordmark */}
             <span className="flex flex-col leading-none">
@@ -144,7 +178,7 @@ export function PublicNavbar() {
       {/* ── Tier 2: black section bar (desktop) ─────────────────────── */}
       <nav className="hidden lg:block bg-black text-white" aria-label="Sections">
         <ul className="container mx-auto px-6 max-w-7xl h-10 flex items-stretch gap-7">
-          {PRIMARY_NAV.map((section) => (
+          {navSections.map((section) => (
             <li key={section.label} className="group relative flex items-stretch">
               <Link
                 href={section.href}
@@ -206,7 +240,7 @@ export function PublicNavbar() {
               >
                 Home
               </Link>
-              {PRIMARY_NAV.map((section) =>
+              {navSections.map((section) =>
                 section.children ? (
                   <details key={section.label} className="group border-b border-slate-100">
                     <summary className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 cursor-pointer list-none active:bg-slate-50 [&::-webkit-details-marker]:hidden">

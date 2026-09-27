@@ -17,9 +17,11 @@ export function NewsPublisherSchema() {
     ethicsPolicy: 'https://lawelitenetwork.com/sponsored-content-policy',
     diversityPolicy: 'https://lawelitenetwork.com/diversity-policy',
     knowsAbout: [
-      'Personal Injury Law',
-      'Maritime & Offshore Injury Law',
-      'Cruise Ship Accident Law',
+      'Legal History',
+      'Law and Popular Culture',
+      'Legal Language',
+      'Law and Technology',
+      'Law and Society',
       'Law School Education',
     ],
     sameAs: [

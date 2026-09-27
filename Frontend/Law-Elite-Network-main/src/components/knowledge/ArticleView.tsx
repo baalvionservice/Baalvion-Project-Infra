@@ -28,6 +28,7 @@ import { formatArticleDate } from '@/lib/format-date';
 import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
+import { newsUrl } from '@/lib/news-url';
 import { cmsGetArticles } from '@/lib/cms';
 import { getMergedAuthorByName } from '@/lib/authors-server';
 import { isNonPersonByline } from '@/lib/seo/author-ld';
@@ -103,7 +104,10 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
   const connectedEntities = await resolveEntityReferences(await getEntitiesForArticle(article));
-  const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
+  // News (contentType: 'news') resolves to /news/{date}/{geo}/{slug}, not
+  // the category-based URL every other article uses -- see news-url.ts.
+  const canonicalPath = article.contentType === 'news' ? newsUrl({ ...article, slug }) : null;
+  const canonicalUrl = `${SITE}${canonicalPath || articleUrl({ slug, category })}`;
 
   const readAlsoArticle = relatedArticles.length > 0 ? relatedArticles[0] : {
     title: 'How Many Hours Should You Actually Study in Law School?',
@@ -145,7 +149,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                     </Link>
                   )}
                   <span className="bg-black text-white font-black text-[11px] uppercase tracking-wider px-2.5 py-1">
-                    EXCLUSIVE
+                    FEATURED
                   </span>
                 </div>
 
@@ -214,7 +218,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 {/* Follow on Google News Box */}
                 <div className="border border-slate-200 p-3.5 my-4 flex flex-wrap items-center justify-between gap-3 bg-white">
                   <span className="text-xs md:text-sm font-bold text-slate-900">
-                    Stay informed — get Law Elite legal intelligence in your news feed.
+                    Stay informed — get new Law Elite Network stories in your news feed.
                   </span>
                   <a
                     href="https://news.google.com"

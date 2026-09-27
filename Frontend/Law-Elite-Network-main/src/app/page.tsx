@@ -16,17 +16,15 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
-  PillarColumn,
-  TrendingList,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-const TITLE = 'Law Elite Network | Legal Guides & News';
+const TITLE = 'Law Elite Network | History, Culture, Technology & Education';
 const DESCRIPTION =
-  'Law Elite Network publishes in-depth guides on personal injury, maritime and offshore injury law, cruise ship accidents, and law school success.';
+  'Law Elite Network explores the history, culture, language, entertainment, education, and technology surrounding law through informative stories, research, and accessible analysis.';
 
 // Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
 const AD_SLOT_ID = '4123514154';
@@ -69,7 +67,6 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
 import { TabbedStoryBox } from '@/components/home/TabbedStoryBox';
 import { NewsletterBanner } from '@/components/home/NewsletterBanner';
-import { FreeNewsAlertCard } from '@/components/monetization/FreeNewsAlertCard';
 import { NewsPublisherSchema } from '@/components/seo/NewsPublisherSchema';
 
 export default async function KnowledgeHomePage() {
@@ -127,12 +124,39 @@ export default async function KnowledgeHomePage() {
       <BreakingStrip articles={feed.breaking} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        <h1 className="sr-only">Law Elite Network: legal guides and news</h1>
-
+        <section className="py-10 md:py-14 border-b border-slate-200">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E13131] mb-3">
+            Where Law Meets History, Culture &amp; Innovation
+          </p>
+          <h1 className="font-headline text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.05] max-w-3xl">
+            Exploring the World Around Law
+          </h1>
+          <p className="mt-5 max-w-2xl text-[15px] md:text-base text-slate-600 leading-relaxed">
+            Discover fascinating stories about the evolution of legal traditions, the portrayal of law
+            in popular culture, the language of legal history, the technology transforming the legal
+            world, and the experience of studying law.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href="#top-stories"
+              className="inline-flex items-center px-5 py-2.5 bg-[#0F2440] text-white text-[13px] font-bold uppercase tracking-wider hover:bg-[#16325a] transition-colors"
+            >
+              Explore the Stories
+            </a>
+            <a
+              href="#practice-areas"
+              className="inline-flex items-center px-5 py-2.5 border border-slate-300 text-slate-900 text-[13px] font-bold uppercase tracking-wider hover:border-slate-900 transition-colors"
+            >
+              Browse Topics
+            </a>
+          </div>
+        </section>
 
         <AudioBriefing items={widgets.audio} />
 
-        <FrontPage articles={feed.latest} />
+        <div id="top-stories">
+          <FrontPage articles={feed.latest} />
+        </div>
 
         <DocketRail items={widgets.docket} />
 
@@ -142,21 +166,10 @@ export default async function KnowledgeHomePage() {
 
 
         {/* Multi-Tab Interactive Media Box */}
-        <TabbedStoryBox popular={feed.trending} legal={feed.legal} />
+        <TabbedStoryBox popular={feed.trending} exclusives={feed.celebrity} legal={feed.legal} profiles={feed.latest.slice(0, 4)} />
 
 
-        {/* ⚡ 100% Free Daily Scoop & Breaking Alerts Card */}
-        <FreeNewsAlertCard />
         <NewsPublisherSchema />
-
-        {/* Celebrity News column dropped 2026-09-25 (third AdSense-readiness
-            retirement pass, see category-slugs.ts) -- /celebrity-news now
-            301s to /. Restore alongside CURRENT_CATEGORY_SLUGS. */}
-        {feed.trending.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <TrendingList articles={feed.trending} />
-          </section>
-        )}
 
         {/* High-Converting Daily Newsletter Subscription Box */}
         <NewsletterBanner />
@@ -169,15 +182,10 @@ export default async function KnowledgeHomePage() {
             2026-09-25 (third AdSense-readiness retirement pass, see
             category-slugs.ts) -- /entertainment, /sports, and /people all
             now 301 to /. Restore alongside CURRENT_CATEGORY_SLUGS.
-            Legal Battles (feed.legal -- articles in the practice-area
-            categories, not the still-retired /legal/cases directory) added
-            back in the same pass its 4 categories were, pointed at
-            /personal-injury-lawyer instead of the retired /legal/cases. */}
-        {feed.legal.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
-          </section>
-        )}
+            The "Practice Area Guides" rail (feed.legal, linking to the
+            retired /personal-injury-lawyer redirect) and the Videos/
+            Interviews media rails were removed 2026-09-27 -- owner request,
+            no videos/podcasts/legal-practice surfaces on the homepage. */}
         {/* PopularTopics dropped in the same pass as above -- /topics still
             301s to /, and each topic card links to /topics/{slug}. */}
 

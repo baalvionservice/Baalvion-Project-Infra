@@ -4,12 +4,16 @@ import { getAllArticles, mergeArticles } from '@/data/law-content';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
-import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
-import { cmsGetArticles } from '@/lib/cms';
+import { newsUrl } from '@/lib/news-url';
+import { toNewCategorySlug } from '@/lib/category-slugs';
+import { getLiveCategorySlugs } from '@/lib/category-visibility';
+import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
-// People/Entertainment/Legal/Sports/Topics/Countries/Podcasts/Videos sitemap
-// imports removed 2026-09-25 and 2026-09-27 alongside the routes below --
-// see the retirement comment further down this file. Restore together.
+// People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
+// 2026-09-25 alongside the routes below -- see the retirement comment
+// further down this file. Restore together. Podcasts/Videos sitemap
+// entries removed 2026-09-27 (owner request) -- the routes and content
+// still exist, just no longer submitted to Google.
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -35,6 +39,18 @@ interface ArticleEntry {
   subcategory?: TaxonomyRef;
 }
 interface CategoryEntry { slug: string; updated_at?: string; updatedAt?: string }
+
+// Parses a real date or returns undefined -- never Date.now() as a fallback.
+// A missing/invalid date means we genuinely don't know when the page last
+// changed; reporting "right now" on every cache rebuild would be a
+// fabricated freshness signal, exactly what this file's header comment
+// already says to avoid. Omitting lastModified is valid per the sitemap
+// spec.
+function parseRealDate(value?: string): Date | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
 
 // law-service wraps lists as { data: { items: [...] } } and singles as { data: [...] }.
 async function safeFetch<T>(url: string): Promise<T[]> {
@@ -84,10 +100,11 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
     (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
-  const [articles, categories, cmsArticles] = await Promise.all([
+  const [articles, categories, cmsArticles, cmsNews] = await Promise.all([
     safeFetch<ArticleEntry>(`${apiBase}/articles?limit=1000`),
     safeFetch<CategoryEntry>(`${apiBase}/categories`),
     cmsGetArticles().catch(() => []),
+    cmsGetNews(1000).catch(() => []),
   ]);
 
   // No lastModified on these: they're hardcoded marketing/policy routes with
@@ -100,11 +117,12 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/` },
-    // /case-law, /legislation, /law-changes still 301 to / (next.config.ts)
-    // -- see retired-links.ts's RETIRED_SECTIONS. /news un-retired
-    // 2026-09-25 at explicit request (1 published article today, more
-    // expected as drafts get approved).
-    { url: `${BASE_URL}/news` },
+    // /case-law, /legislation, /law-changes, and /news all 301 to /
+    // (next.config.ts) -- see retired-links.ts's RETIRED_SECTIONS. /news
+    // was briefly un-retired 2026-09-25 then re-retired 2026-09-27 (no real
+    // published news content) -- not listed here since submitting a URL
+    // that immediately redirects is exactly what this comment's neighbors
+    // below exist to avoid.
     { url: `${BASE_URL}/about-us` },
     // /people, /entertainment, /legal/cases, /legal/courts, /sports (+
     // /sports/teams, /sports/competitions), /topics, /countries dropped
@@ -162,7 +180,13 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // in ROOT_FLAT_ARTICLE_SLUGS -- everything else is a retired-category
   // article temporarily reachable only at /article/{slug}, not something to
   // actively resubmit to Google.
-  const currentSlugSetForArticles = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  // Live-category gate (category-visibility.ts): a new pillar's articles
+  // aren't sitemap-eligible until the category itself has crossed
+  // LIVE_THRESHOLD published articles, same rule as nav -- an article
+  // sitting alone in an otherwise-empty section is exactly the thin-page
+  // risk this whole gate exists to avoid.
+  const liveSlugs = await getLiveCategorySlugs();
+  const currentSlugSetForArticles = liveSlugs;
   const isSitemapEligible = (a: ArticleEntry & { noindex?: boolean }): boolean => {
     if (a.noindex) return false;
     const rawSlug = a.category?.slug;
@@ -170,26 +194,26 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     return !!a.slug && ROOT_FLAT_ARTICLE_SLUGS.has(a.slug);
   };
 
-  const articleEntries = new Map<string, { url: string; lastModified: Date }>();
+  const articleEntries = new Map<string, { url: string; lastModified?: Date }>();
   getAllArticles().forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updatedAt),
     });
   });
   articles.forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updated_at || a.updatedAt),
     });
   });
   cmsArticles.forEach((a) => {
     if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
-      lastModified: new Date(a.updatedAt || Date.now()),
+      lastModified: parseRealDate(a.updatedAt),
     });
   });
 
@@ -197,7 +221,7 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
 
   const articleRoutes: MetadataRoute.Sitemap = Array.from(articleEntries.values()).map((entry) => ({
     url: entry.url,
-    lastModified: entry.lastModified,
+    ...(entry.lastModified && { lastModified: entry.lastModified }),
   }));
 
   // Subcategories no longer have a dedicated URL -- they're a filter chip on
@@ -216,17 +240,18 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // never meant to be indexable pages (they 404 -- see [categorySlug]/page.tsx's
   // fetchCategory) -- filtering to the curated list here stops those dead URLs
   // from ever being submitted to Google in the first place.
-  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  // Category hub itself is only sitemap-eligible once live -- same
+  // liveSlugs set computed above for articles.
   const categoryRoutes: MetadataRoute.Sitemap = [
     ...categories
-      .filter((c) => currentSlugSet.has(toNewCategorySlug(c.slug)))
+      .filter((c) => liveSlugs.has(toNewCategorySlug(c.slug)))
       .map((c) => ({
         url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
-        lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
+        ...(parseRealDate(c.updated_at || c.updatedAt) && { lastModified: parseRealDate(c.updated_at || c.updatedAt) }),
       })),
     // No lastModified here: the API didn't return this slug, so there's no
     // real updated_at to report -- omit rather than fabricate "now".
-    ...CURRENT_CATEGORY_SLUGS.filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
+    ...Array.from(liveSlugs).filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
       url: `${BASE_URL}/${slug}`,
     })),
   ];
@@ -286,17 +311,32 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // (next.config.ts), so submitting their URLs here would resubmit pages
   // that immediately redirect, same problem REDIRECTED_ARTICLE_SLUGS exists
   // to prevent for articles. Restore this block once AdSense approves the
-  // Fashion-only site. Podcasts and Videos, initially kept live because their
-  // content was real (not thin), were retired here too in a follow-up pass
-  // (2026-09-27, after the third rejection) -- real but off-topic
-  // entertainment content on a legal-guides site under review. See
-  // next.config.ts's /videos, /podcasts, /interviews redirects.
+  // Fashion-only site. Podcasts and Videos sitemap entries removed
+  // 2026-09-27 (owner request, alongside their nav/homepage links) -- the
+  // sitemap is now scoped to the static pages, the 6 live categories,
+  // article/author pages, and News.
+
+  // News (contentType: 'news', see news-url.ts): every published item, not
+  // just the last 2 days Google News wants (news-sitemap.xml handles that
+  // window) -- an item older than 2 days ages out of the News feed but must
+  // stay discoverable somewhere, or it becomes an orphan page the moment it
+  // stops being "breaking." newsUrl() returns null for an item with no real
+  // published date, which is filtered out here rather than ever fabricated.
+  const newsRoutes: MetadataRoute.Sitemap = cmsNews
+    .map((n) => {
+      const path = newsUrl(n);
+      if (!path) return null;
+      const lastModified = parseRealDate(n.updatedAt);
+      return { url: `${BASE_URL}${path}`, ...(lastModified && { lastModified }) };
+    })
+    .filter((entry): entry is { url: string; lastModified?: Date } => entry !== null);
 
   return [
     ...staticRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
+    ...newsRoutes,
   ];
 }
 

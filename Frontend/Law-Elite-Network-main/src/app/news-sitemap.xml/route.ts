@@ -1,14 +1,16 @@
 // Google News sitemap (https://developers.google.com/search/docs/crawling-indexing/sitemaps/news-sitemap).
 // Google News only wants articles published in the last 2 days, tagged with the
 // <news:news> extension — separate from the general sitemap.xml, which covers
-// every route with plain lastModified/changeFrequency entries.
+// every route with plain lastModified/changeFrequency entries. News items older
+// than 2 days age out of this feed but stay discoverable via the general
+// sitemap.xml (see sitemap.ts's newsRoutes block) -- never orphaned.
 //
-// Sourced the same way the /news page is (cmsGetNews, contentType: 'news'):
+// Sourced the same way the deleted /news page was (cmsGetNews, contentType: 'news'):
 // cmsGetNews already goes through cms.ts's timeout-guarded fetchJSON, so a slow
 // CMS degrades to an empty (but valid) sitemap instead of hanging this route.
 
 import { cmsGetNews } from '@/lib/cms';
-import { articleUrl } from '@/lib/article-url';
+import { newsUrl } from '@/lib/news-url';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const PUBLICATION_NAME = 'Law Elite Network';
@@ -39,7 +41,9 @@ export async function GET(): Promise<Response> {
 
   const urls = recent
     .map((a) => {
-      const loc = `${SITE}${articleUrl(a)}`;
+      const path = newsUrl(a);
+      if (!path) return null; // no real published date -- never fabricate a URL
+      const loc = `${SITE}${path}`;
       const publicationDate = new Date(a.updatedAt as string).toISOString();
       return `  <url>
     <loc>${escapeXml(loc)}</loc>
@@ -53,6 +57,7 @@ export async function GET(): Promise<Response> {
     </news:news>
   </url>`;
     })
+    .filter((entry): entry is string => entry !== null)
     .join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

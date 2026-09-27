@@ -119,10 +119,9 @@ export default function TermsOfServicePage() {
 
             <Block id="service" title="Description of Service">
               <p>
-                Law Elite Network is a legal knowledge platform that publishes general legal information, explainer
-                articles, jurisdiction guides, and educational resources, and that operates a directory through which
-                users may discover legal practitioners. The Service is designed to help readers understand legal
-                concepts and navigate where to seek qualified help.
+                Law Elite Network is an educational and cultural publication that covers the history, language,
+                popular-culture portrayal, and technology of law, alongside general legal explainer content. The
+                Service does not operate a lawyer directory or referral service.
               </p>
               <p>
                 <strong>The Service provides general legal information, not legal advice.</strong> Content published on
@@ -137,9 +136,8 @@ export default function TermsOfServicePage() {
             <Block id="no-relationship" title="No Attorney–Client Relationship">
               <p>
                 Your use of the Service — including reading our articles, using our tools, subscribing to our
-                newsletter, submitting an inquiry, or contacting a practitioner listed in our directory — does not
-                create an attorney–client relationship between you and Law Elite Network or any contributor, editor,
-                reviewer, or practitioner featured on the platform.
+                newsletter, or submitting an inquiry — does not create an attorney–client relationship between you
+                and Law Elite Network or any contributor, editor, or reviewer on the platform.
               </p>
               <p>
                 An attorney–client relationship is formed only by a separate, signed engagement agreement directly
