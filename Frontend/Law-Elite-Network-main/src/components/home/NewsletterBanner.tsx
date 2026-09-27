@@ -27,8 +27,8 @@ export function NewsletterBanner() {
   };
 
   return (
-    <section className="my-10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-y-4 border-[#E13131] text-white p-8 md:p-12 shadow-xl rounded-sm">
-      <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-8">
+    <section className="my-10 w-screen relative left-1/2 right-1/2 -mx-[50vw] bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-y-4 border-[#E13131] text-white p-8 md:p-12 shadow-xl">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-8">
         
         <div className="flex-1 space-y-3 text-center md:text-left">
           <div className="inline-flex items-center gap-2 bg-[#E13131] text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-sm shadow-sm">

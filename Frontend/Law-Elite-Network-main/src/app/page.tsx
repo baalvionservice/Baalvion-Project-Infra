@@ -17,7 +17,6 @@ import {
   ExploreBand,
   FrontPage,
   PillarColumn,
-  TrendingList,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
 import type { Metadata } from 'next';
@@ -69,7 +68,6 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
 import { TabbedStoryBox } from '@/components/home/TabbedStoryBox';
 import { NewsletterBanner } from '@/components/home/NewsletterBanner';
-import { FreeNewsAlertCard } from '@/components/monetization/FreeNewsAlertCard';
 import { NewsPublisherSchema } from '@/components/seo/NewsPublisherSchema';
 
 export default async function KnowledgeHomePage() {
@@ -172,18 +170,7 @@ export default async function KnowledgeHomePage() {
         <TabbedStoryBox popular={feed.trending} legal={feed.legal} />
 
 
-        {/* ⚡ 100% Free Daily Scoop & Breaking Alerts Card */}
-        <FreeNewsAlertCard />
         <NewsPublisherSchema />
-
-        {/* Celebrity News column dropped 2026-09-25 (third AdSense-readiness
-            retirement pass, see category-slugs.ts) -- /celebrity-news now
-            301s to /. Restore alongside CURRENT_CATEGORY_SLUGS. */}
-        {feed.trending.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <TrendingList articles={feed.trending} />
-          </section>
-        )}
 
         {/* High-Converting Daily Newsletter Subscription Box */}
         <NewsletterBanner />

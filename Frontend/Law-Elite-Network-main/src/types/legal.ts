@@ -14,6 +14,18 @@
 export const COURT_LEVELS = ['trial', 'appellate', 'supreme', 'international', 'other'] as const;
 export type CourtLevel = (typeof COURT_LEVELS)[number];
 
+const COURT_LEVEL_LABELS: Record<CourtLevel, string> = {
+  trial: 'Trial Court',
+  appellate: 'Appellate Court',
+  supreme: 'Supreme Court',
+  international: 'International Court',
+  other: 'Court',
+};
+
+export function courtLevelLabel(level: CourtLevel): string {
+  return COURT_LEVEL_LABELS[level] ?? level;
+}
+
 export interface Court {
   /** URL slug — /legal/courts/{slug}. */
   slug: string;

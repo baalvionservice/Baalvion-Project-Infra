@@ -144,13 +144,11 @@ export default function EditorialProcessPage() {
 
             <Block id="ethics" title="Ethical Conduct">
               <p>
-                Editorial judgments are made independently of advertising, sponsorship, and any referral
-                relationship in our lawyer directory — see our{' '}
+                Editorial judgments are made independently of advertising and sponsorship relationships — see our{' '}
                 <Link href="/conflict-of-interest-policy" className="text-blue-600 hover:underline">Conflict of Interest Policy</Link>{' '}
                 and{' '}
-                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>.
-                Contributors are expected to disclose personal ties to the legal industry relevant to what
-                they cover.
+                <Link href="/sponsored-content-policy" className="text-blue-600 hover:underline">Sponsored Content Policy</Link>.
+                Contributors are expected to disclose personal ties relevant to what they cover.
               </p>
             </Block>
 

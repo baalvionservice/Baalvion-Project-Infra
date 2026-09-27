@@ -10,7 +10,7 @@ const LAST_UPDATED = 'July 30, 2026';
 export const metadata: Metadata = {
   title: 'Editorial, DMCA & Disclosure Policy',
   description:
-    'How Law Elite Network sources and attributes legal information, who owns and operates the site, our copyright and DMCA takedown process, and how advertising and referral compensation is disclosed.',
+    'How Law Elite Network sources and attributes content, who owns and operates the site, our copyright and DMCA takedown process, and how advertising compensation is disclosed.',
   alternates: { canonical: '/editorial-disclosure-policy' },
 };
 
@@ -137,27 +137,19 @@ export default function EditorialDisclosurePolicyPage() {
               </p>
             </Block>
 
-            <Block icon={<Handshake className="w-6 h-6 text-blue-600" />} title="4. Advertising, Affiliate &amp; Referral Disclosure">
+            <Block icon={<Handshake className="w-6 h-6 text-blue-600" />} title="4. Advertising Disclosure">
               <p>
                 Law Elite Network is a free publication that may be supported in part by advertising, including
-                through Google AdSense, to help fund our content. Some outbound links, and some placements within our
-                lawyer directory, may also be
-                compensated — for example, a referral arrangement where a lawyer or firm pays a fee when a reader is
-                connected to them through our appointments flow, or a
-                paid promotional placement described on our{' '}
+                through Google AdSense, and by B2B sponsorship placements described on our{' '}
                 <Link href="/advertise" className="text-blue-600 hover:underline">Advertise</Link> page. Where a link
-                or listing involves compensation, we aim to make that clear in context.
+                or placement involves compensation, we aim to make that clear in context, consistent with our{' '}
+                <Link href="/sponsored-content-policy" className="text-blue-600 hover:underline">Sponsored Content Policy</Link>.
               </p>
               <p>
-                Compensation never influences which lawyers we designate as &quot;Verified,&quot; how we describe a
-                legal topic, or the conclusions in our editorial coverage — verification and editorial judgments are
-                governed separately by our{' '}
-                <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>
-                {' '}and applied identically to paying and non-paying listings. A lawyer's participation in a referral
-                arrangement is a business relationship, not an editorial endorsement. This is distinct from, and
-                complements, our{' '}
-                <Link href="/sponsored-content-policy" className="text-blue-600 hover:underline">Sponsored Content Policy</Link>,
-                which governs paid articles and featured posts rather than referral links. See our{' '}
+                Compensation never influences how we describe a topic or the conclusions in our editorial coverage —
+                editorial judgments are governed separately by our{' '}
+                <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>{' '}
+                and applied identically to advertisers and non-advertisers alike. See our{' '}
                 <Link href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link> for how
                 advertising partners use cookies and other tracking technologies.
               </p>
@@ -167,7 +159,7 @@ export default function EditorialDisclosurePolicyPage() {
               <p>
                 For copyright notices: <a href="mailto:dmca@lawelitenetwork.com" className="text-blue-600 hover:underline">dmca@lawelitenetwork.com</a>.
                 For permissions and licensing: <a href="mailto:permissions@lawelitenetwork.com" className="text-blue-600 hover:underline">permissions@lawelitenetwork.com</a>.
-                For advertising and referral relationships: <a href="mailto:advertise@lawelitenetwork.com" className="text-blue-600 hover:underline">advertise@lawelitenetwork.com</a>.
+                For advertising and sponsorship: <a href="mailto:advertise@lawelitenetwork.com" className="text-blue-600 hover:underline">advertise@lawelitenetwork.com</a>.
                 For anything about ownership or how the site is structured:{' '}
                 <a href="mailto:legal@baalvion.com" className="text-blue-600 hover:underline">legal@baalvion.com</a>{' '}
                 or our{' '}

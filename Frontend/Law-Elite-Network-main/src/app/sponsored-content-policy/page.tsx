@@ -26,9 +26,9 @@ export default function SponsoredContentPolicyPage() {
 
           <div className="border-l-4 border-blue-600 bg-slate-50 rounded-r-2xl p-8 mb-16">
             <p className="text-slate-700 leading-relaxed">
-              Law Elite Network occasionally works with law firms, legal service providers, and other partners on
-              sponsored posts and featured placements. This policy explains how sponsored content is labeled,
-              reviewed, and kept separate from our independent editorial judgment.
+              Law Elite Network occasionally works with brands and B2B partners on sponsored posts and featured
+              placements. This policy explains how sponsored content is labeled, reviewed, and kept separate from
+              our independent editorial judgment.
             </p>
           </div>
 
@@ -36,22 +36,21 @@ export default function SponsoredContentPolicyPage() {
 
             <Block icon={<Tag className="w-6 h-6 text-blue-600" />} title="Clear Labeling">
               <p>
-                Any post, article, or featured-lawyer placement that is paid for or provided by a partner is clearly
-                labeled as sponsored, paid, or in partnership with the relevant party, wherever it appears on the
-                site. We do not present paid material as if it were produced independently by our newsroom. This
-                labeling requirement applies consistently, regardless of the size of the partner or the format of the
+                Any post, article, or placement that is paid for or provided by a partner is clearly labeled as
+                sponsored, paid, or in partnership with the relevant party, wherever it appears on the site. We do
+                not present paid material as if it were produced independently by our newsroom. This labeling
+                requirement applies consistently, regardless of the size of the partner or the format of the
                 placement.
               </p>
             </Block>
 
             <Block icon={<ShieldCheck className="w-6 h-6 text-blue-600" />} title="Same Editorial Bar">
               <p>
-                Sponsored content is still held to the same factual and legal accuracy standard as regular content,
-                as described in our{' '}
+                Sponsored content is still held to the same factual-accuracy standard as regular content, as
+                described in our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
-                Claims about the law, a legal process, or a firm&apos;s track record are checked before publication
-                just as they would be in unsponsored coverage. A sponsorship does not permit inaccurate, misleading,
-                or unverifiable claims.
+                Claims are checked before publication just as they would be in unsponsored coverage. A sponsorship
+                does not permit inaccurate, misleading, or unverifiable claims.
               </p>
             </Block>
 
@@ -64,15 +63,11 @@ export default function SponsoredContentPolicyPage() {
               </p>
             </Block>
 
-            <Block icon={<Eye className="w-6 h-6 text-blue-600" />} title="Verified vs. Paid Placement">
+            <Block icon={<Eye className="w-6 h-6 text-blue-600" />} title="Sponsored vs. Editorial Content">
               <p>
-                It is important to distinguish two separate designations on our site. A &quot;Verified&quot; badge in
-                our lawyer directory reflects an
-                editorial or credentialing check, described in our{' '}
-                <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
-                A paid or sponsored placement, by contrast, reflects a commercial arrangement disclosed under our{' '}
-                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>.
-                A listing can be both, one, or neither — paying for placement does not itself confer Verified status.
+                A paid or sponsored placement reflects a commercial arrangement, always labeled as such at the point
+                it appears. Everything else on the site — our articles, guides, and editorial rankings — is produced
+                independently and is never for sale.
               </p>
             </Block>
 

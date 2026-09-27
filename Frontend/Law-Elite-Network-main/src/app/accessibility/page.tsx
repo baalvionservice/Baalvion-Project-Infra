@@ -37,7 +37,7 @@ export default function AccessibilityPage() {
             <Block icon={<Accessibility className="w-6 h-6 text-blue-600" />} title="Our Standard">
               <p>
                 We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at Level AA across our core
-                pages, including our article pages and lawyer directory. This
+                pages, including our article and section pages. This
                 includes attention to color contrast, keyboard navigation, semantic heading structure, descriptive
                 link text, and alternative text for meaningful images.
               </p>
@@ -46,8 +46,7 @@ export default function AccessibilityPage() {
             <Block icon={<Wrench className="w-6 h-6 text-blue-600" />} title="Ongoing Improvement">
               <p>
                 Accessibility is not a one-time project; it is an ongoing part of how we build and maintain the
-                site. As we publish new features, redesign templates, or add tools such as appointment scheduling,
-                we review
+                site. As we publish new features or redesign templates, we review
                 them against our accessibility standard and correct issues as they are identified, in the same spirit
                 as our{' '}
                 <Link href="/corrections" className="text-blue-600 hover:underline">Corrections</Link> process for
@@ -57,8 +56,8 @@ export default function AccessibilityPage() {
 
             <Block icon={<PuzzleIcon className="w-6 h-6 text-blue-600" />} title="Third-Party Content">
               <p>
-                Some parts of the site incorporate third-party embedded tools, such as lawyer directory widgets,
-                scheduling components, or advertising placements. These components are built and maintained outside
+                Some parts of the site incorporate third-party embedded tools, such as advertising placements or
+                analytics widgets. These components are built and maintained outside
                 our direct control, and may at times lag behind full conformance with our accessibility standard. We
                 work with vendors to address known issues and prioritize accessible alternatives where a suitable
                 option is not yet available.
