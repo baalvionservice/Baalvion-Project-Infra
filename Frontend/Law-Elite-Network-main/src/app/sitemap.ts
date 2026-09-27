@@ -8,9 +8,11 @@ import { toNewCategorySlug } from '@/lib/category-slugs';
 import { getLiveCategorySlugs } from '@/lib/category-visibility';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
-// People/Entertainment/Legal/Sports/Topics/Countries/Podcasts/Videos sitemap
-// imports removed 2026-09-25 and 2026-09-27 alongside the routes below --
-// see the retirement comment further down this file. Restore together.
+// People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
+// 2026-09-25 alongside the routes below -- see the retirement comment
+// further down this file. Restore together. Podcasts/Videos sitemap
+// entries removed 2026-09-27 (owner request) -- the routes and content
+// still exist, just no longer submitted to Google.
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -295,11 +297,10 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // (next.config.ts), so submitting their URLs here would resubmit pages
   // that immediately redirect, same problem REDIRECTED_ARTICLE_SLUGS exists
   // to prevent for articles. Restore this block once AdSense approves the
-  // Fashion-only site. Podcasts and Videos, initially kept live because their
-  // content was real (not thin), were retired here too in a follow-up pass
-  // (2026-09-27, after the third rejection) -- real but off-topic
-  // entertainment content on a legal-guides site under review. See
-  // next.config.ts's /videos, /podcasts, /interviews redirects.
+  // Fashion-only site. Podcasts and Videos sitemap entries removed
+  // 2026-09-27 (owner request, alongside their nav/homepage links) -- the
+  // sitemap is now scoped to the static pages, the 6 live categories, and
+  // article/author pages only.
 
   return [
     ...staticRoutes,
