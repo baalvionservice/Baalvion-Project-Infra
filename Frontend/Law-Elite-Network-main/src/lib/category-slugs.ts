@@ -39,7 +39,6 @@ export function toNewCategorySlug(oldSlug: string): string {
 // until each has real, non-fabricated published articles -- an empty-but-
 // linked category was exactly the failure mode in the prior rejections.
 export const CURRENT_CATEGORY_SLUGS = [
-  'fashion',
   'law-school-success',
   'law-and-popular-culture',
   'history-and-civilization',
