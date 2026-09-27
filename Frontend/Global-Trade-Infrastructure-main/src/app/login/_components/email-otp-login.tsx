@@ -22,6 +22,8 @@ const LABEL_CLASS = 'text-[10px] font-black uppercase tracking-widest text-muted
 export function EmailOtpLogin() {
   const [step, setStep] = useState<Step>('trigger');
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [code, setCode] = useState('');
   const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,10 @@ export function EmailOtpLogin() {
     setError(null);
     setBusy(true);
     try {
-      const res = await publicAuthApi.requestEmailOtp(email.trim());
+      // auth-service binds first/last name to the issued code at REQUEST time (so a brand-new
+      // account is provisioned with the right name and it can never be spoofed at verify) — both
+      // fields are required by the backend schema, not optional metadata.
+      const res = await publicAuthApi.requestEmailOtp(email.trim(), firstName.trim(), lastName.trim());
       const data = res?.data ?? (res as { sentTo?: string; resendAvailableInSeconds?: number });
       setSentTo(data?.sentTo || email.trim());
       setResendIn(data?.resendAvailableInSeconds || 60);
@@ -87,18 +92,40 @@ export function EmailOtpLogin() {
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
             Passwordless access — we&apos;ll email a one-time code.
           </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
+              <Label htmlFor="otp-first-name" className={LABEL_CLASS}>First Name</Label>
+              <Input
+                id="otp-first-name"
+                autoFocus
+                placeholder="Jane"
+                className={INPUT_CLASS}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="otp-last-name" className={LABEL_CLASS}>Last Name</Label>
+              <Input
+                id="otp-last-name"
+                placeholder="Okafor"
+                className={INPUT_CLASS}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="space-y-3">
             <Label htmlFor="otp-email" className={LABEL_CLASS}>Corporate Identifier</Label>
             <div className="relative group">
               <Input
                 id="otp-email"
                 type="email"
-                autoFocus
                 placeholder="institution@email.gov"
                 className={INPUT_CLASS}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && email.trim()) sendCode(); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && email.trim() && firstName.trim() && lastName.trim()) sendCode(); }}
               />
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             </div>
@@ -109,7 +136,7 @@ export function EmailOtpLogin() {
             </div>
           )}
           <div className="flex items-center gap-3">
-            <Button type="button" disabled={busy || !email.trim()} onClick={sendCode} className="flex-1 h-14 font-black uppercase tracking-widest text-sm">
+            <Button type="button" disabled={busy || !email.trim() || !firstName.trim() || !lastName.trim()} onClick={sendCode} className="flex-1 h-14 font-black uppercase tracking-widest text-sm">
               {busy ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
               Send Code
             </Button>
