@@ -33,19 +33,18 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
         <div className="lg:col-span-7">
           <span className="kicker">Our Mission</span>
           <h2 className="font-headline text-2xl md:text-3xl font-extrabold text-slate-900 mt-2 mb-5">
-            Making the Law Understandable
+            Where Law Meets History, Culture &amp; Language
           </h2>
           <div className="space-y-4 text-[15px] leading-relaxed text-slate-600 mb-8">
             <p>
-              Law Elite Network was founded on March 11, 2025 to translate complex legal topics into
-              plain, accurate, and genuinely useful explanations — so anyone, regardless of
-              background, can make better-informed decisions about when and how to seek professional
-              advice.
+              Law Elite Network was founded on March 11, 2025 to explore the law from the outside in —
+              how legal traditions took shape, how courts and legal figures show up in film and
+              television, where the language of the law actually comes from, and how technology is
+              reshaping legal work today.
             </p>
             <p>
-              We are an educational publisher, not a law firm. Our purpose is to inform and orient,
-              never to replace the judgment of a licensed attorney who knows the facts of your
-              situation.{' '}
+              We are an editorial and educational publication, not a law firm, and we don't offer
+              legal advice. Every guide is researched, written, and reviewed by a named editor.{' '}
               <Link href="/about-us" className="text-blue-700 underline underline-offset-2">
                 Read our full mission →
               </Link>
@@ -53,7 +52,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
           </div>
           <div className="grid grid-cols-2 gap-6 max-w-md">
             <Stat value={`${stats.guides}+`} label="Published Guides" />
-            <Stat value={String(stats.practiceAreas)} label="Practice Areas" />
+            <Stat value={String(stats.practiceAreas)} label="Sections" />
           </div>
         </div>
         <div className="lg:col-span-5">
@@ -61,7 +60,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
             Editorial Board
           </h3>
           <p className="text-[13px] text-slate-500 mb-5 leading-relaxed">
-            The desk editors who lead each practice-area's coverage and edit guides in their
+            The desk editors who lead each section's coverage and edit guides in their
             subject area, with named, published profiles. Guides are written by our wider
             contributor team — see the full{' '}
             <Link href="/authors" className="text-blue-700 underline underline-offset-2">contributors list</Link>.

@@ -76,9 +76,9 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-16">
 
             <Block id="collection" title="Information We Collect">
-              <p>Law Elite Network (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is a brand operated by <strong>Baalvion Industries Private Limited</strong>, and this policy governs the legal knowledge and practitioner-discovery platform at lawelitenetwork.com. It collects:</p>
+              <p>Law Elite Network (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is a brand operated by <strong>Baalvion Industries Private Limited</strong>, and this policy governs the legal history, culture, and education publication at lawelitenetwork.com. It collects:</p>
               <ul>
-                <li><strong>Information you provide:</strong> name, email address, and account details when you register, subscribe to our newsletter, contact us, or request a consultation.</li>
+                <li><strong>Information you provide:</strong> name, email address, and account details when you register, subscribe to our newsletter, or contact us.</li>
                 <li><strong>Information collected automatically:</strong> IP address, browser type, device identifiers, pages visited, referring URLs, and time spent on pages, gathered through cookies and analytics tools.</li>
                 <li><strong>Usage data:</strong> search queries, articles read, and interactions used to improve content relevance.</li>
               </ul>

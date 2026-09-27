@@ -35,22 +35,21 @@ export default function DiversityPolicyPage() {
 
           <section className="space-y-16">
 
-            <Block icon={<Globe2 className="w-6 h-6 text-blue-600" />} title="Breadth of Practice Areas and Jurisdictions">
+            <Block icon={<Globe2 className="w-6 h-6 text-blue-600" />} title="Breadth of Coverage">
               <p>
-                Our practice-area guides span business and corporate law to criminal law, family law, tax, employment, and
-                technology, reflecting the reality that readers arrive with very different legal needs. Where law
-                varies meaningfully by jurisdiction, we aim to note that variation rather than present a single
-                jurisdiction&apos;s rule as universal.
+                Our sections span law's history, its language, its portrayal in popular culture, and the technology
+                reshaping how it's practiced and studied, reflecting the reality that our readers arrive with very
+                different interests. Where a topic varies meaningfully by country or legal tradition, we aim to note
+                that variation rather than present one tradition's history as universal.
               </p>
             </Block>
 
-            <Block icon={<Users className="w-6 h-6 text-blue-600" />} title="Diverse Voices in Our Directory and Contributors">
+            <Block icon={<Users className="w-6 h-6 text-blue-600" />} title="Diverse Voices Among Our Contributors">
               <p>
-                We aim for our lawyer directory and our{' '}
+                We aim for our{' '}
                 <Link href="/authors" className="text-blue-600 hover:underline">contributor roster</Link> to reflect
-                the diversity of the legal profession itself, across practice focus, firm size, geography, and
-                background. Verification and inclusion criteria are applied consistently to every applicant,
-                regardless of these characteristics, under our{' '}
+                a diversity of background, geography, and subject expertise. Inclusion criteria are applied
+                consistently to every contributor, regardless of these characteristics, under our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
               </p>
             </Block>

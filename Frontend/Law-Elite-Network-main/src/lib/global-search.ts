@@ -22,6 +22,8 @@ import { entertainmentTypeLabel } from '@/types/entertainment';
 import { entertainmentUrl } from '@/lib/entertainment-url';
 import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
 import { legalCaseUrl, courtUrl } from '@/lib/legal-case-url';
+import { courtLevelLabel } from '@/types/legal';
+import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
 import { teamUrl, competitionUrl } from '@/lib/sports-url';
 import { getMergedTopics } from '@/lib/topics-server';
@@ -57,6 +59,8 @@ export interface SearchResultItem {
   url: string;
   score: number;
   views?: number;
+  /** Always resolvable (real photo or a deterministic generated placeholder) via resolveArticleImage/resolvePersonImage — never left unset for a type that has one. */
+  image?: string;
 }
 
 // Same AdSense-readiness rule the article-only search already applied: never
@@ -108,7 +112,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
   const articles = await getSearchableArticles();
   articles.forEach((a) => {
     corpus.push({
-      item: { id: `article:${a.slug}`, type: 'article', title: a.title, subtitle: a.category?.name, url: articleUrl(a) },
+      item: { id: `article:${a.slug}`, type: 'article', title: a.title, subtitle: a.category?.name, url: articleUrl(a), image: resolveArticleImage(a) },
       title: a.title,
       description: a.summary || '',
       views: a.views || 0,
@@ -117,7 +121,14 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
 
   (await getMergedPeople()).forEach((p) => {
     corpus.push({
-      item: { id: `person:${p.slug}`, type: 'person', title: p.displayName || p.fullName, subtitle: personCategoryLabel(p.category), url: personUrl(p.slug) },
+      item: {
+        id: `person:${p.slug}`,
+        type: 'person',
+        title: p.displayName || p.fullName,
+        subtitle: personCategoryLabel(p.category),
+        url: personUrl(p.slug),
+        image: resolvePersonImage({ avatarUrl: p.photo?.url || p.avatarUrl, name: p.displayName || p.fullName, id: p.slug, avatarSeed: p.avatarSeed }),
+      },
       title: p.displayName || p.fullName,
       description: p.biography || '',
       views: 0,
@@ -144,7 +155,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
 
   (await getMergedCourts()).forEach((c) => {
     corpus.push({
-      item: { id: `court:${c.slug}`, type: 'court', title: c.name, subtitle: c.level, url: courtUrl(c.slug) },
+      item: { id: `court:${c.slug}`, type: 'court', title: c.name, subtitle: courtLevelLabel(c.level), url: courtUrl(c.slug) },
       title: c.name,
       description: c.description || '',
       views: 0,

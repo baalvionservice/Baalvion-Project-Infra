@@ -30,15 +30,6 @@ const PRACTICE_AREA_LINKS = [
   { href: '/law-school-success', label: 'Law School Success' },
 ];
 
-const FASHION_LINKS = [
-  { href: '/fashion', label: 'Fashion Hub' },
-];
-
-const MEDIA_LINKS = [
-  { href: '/videos', label: 'Videos' },
-  { href: '/podcasts', label: 'Podcasts' },
-];
-
 const ABOUT_LINKS = [
   { href: '/about-us', label: 'About Us' },
   { href: '/authors', label: 'Contributors' },
@@ -53,10 +44,7 @@ const ABOUT_LINKS = [
 const LEGAL_LINKS = [
   { href: '/privacy-policy', label: 'Privacy Policy' },
   { href: '/terms-of-service', label: 'Terms of Service' },
-  { href: '/terms-of-service#disclaimers', label: 'Disclaimer' },
   { href: '/cookie-policy', label: 'Cookie Policy' },
-  { href: '/editorial-disclosure-policy', label: 'DMCA' },
-  { href: '/sponsored-content-policy', label: 'Advertising Disclosure' },
   { href: '/sitemap.xml', label: 'Sitemap' },
 ];
 
@@ -113,15 +101,6 @@ export function PublicFooter() {
               colSpan="md:col-span-3"
               title="Sections"
               sections={[{ heading: 'Sections', links: PRACTICE_AREA_LINKS }]}
-            />
-
-            <FooterLinkColumn
-              colSpan="md:col-span-2"
-              title="Fashion & Media"
-              sections={[
-                { heading: 'Fashion', links: FASHION_LINKS },
-                { heading: 'Media', links: MEDIA_LINKS },
-              ]}
             />
 
             <FooterLinkColumn
