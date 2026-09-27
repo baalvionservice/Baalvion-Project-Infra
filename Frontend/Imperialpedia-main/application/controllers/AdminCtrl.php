@@ -20,11 +20,36 @@ class AdminCtrl extends CI_Controller{
         $this->check_login();
         $this->load->database();
         $data['catss'] = $this->Admin_model->cat_list();
+        $data['subcat_list'] = $this->Admin_model->subcat_list();
+        $data['cat_sub'] = $this->Admin_model->cat_and_subcat();
         $data['total_posts'] = $this->db->table_exists('post') ? $this->db->count_all('post') : 0;
         $data['total_cats'] = $this->db->table_exists('category') ? $this->db->count_all('category') : 0;
         $data['total_subcats'] = $this->db->table_exists('sub_category') ? $this->db->count_all('sub_category') : 0;
         $data['total_comments'] = $this->db->table_exists('comment') ? $this->db->count_all('comment') : 0;
         $data['total_poll_votes'] = $this->db->table_exists('poll_vote') ? $this->db->count_all('poll_vote') : 0;
+
+        // Content & SEO Health Audit Metrics
+        $data['missing_img_count'] = $this->db->table_exists('post') ? 
+            $this->db->where("post_img IS NULL OR post_img = '' OR post_img = 'post.png' OR post_img = 'user.png'")->count_all_results('post') : 0;
+            
+        $data['missing_desc_count'] = $this->db->table_exists('post') ? 
+            $this->db->where("post_desc IS NULL OR post_desc = '' OR LENGTH(post_desc) < 30")->count_all_results('post') : 0;
+
+        $data['missing_meta_tags_count'] = $this->db->table_exists('meta') ? 
+            $this->db->where("meta_title IS NULL OR meta_title = '' OR meta_desc IS NULL OR meta_desc = ''")->count_all_results('meta') : 0;
+            
+        $data['unassigned_subcat_count'] = $this->db->table_exists('post') ? 
+            $this->db->where("sub_cat_id IS NULL OR sub_cat_id = 0")->count_all_results('post') : 0;
+
+        $data['audit_warning_posts'] = $this->db->table_exists('post') ? 
+            $this->db->select('p.post_id, p.post_title, p.post_img, p.post_desc, p.sub_cat_id, p.posted_date, s.sub_cat_name')
+                     ->from('post p')
+                     ->join('sub_category s', 's.sub_cat_id = p.sub_cat_id', 'left')
+                     ->where("p.post_img IS NULL OR p.post_img = '' OR p.post_img = 'post.png' OR p.post_desc IS NULL OR p.post_desc = '' OR LENGTH(p.post_desc) < 30 OR p.sub_cat_id IS NULL OR p.sub_cat_id = 0")
+                     ->order_by('p.post_id', 'DESC')
+                     ->limit(8)
+                     ->get()->result_array() : [];
+
         $data['recent_posts'] = $this->db->table_exists('post') ? 
             $this->db->select('p.*, s.sub_cat_name')
                      ->from('post p')
