@@ -14,6 +14,7 @@ const gatewayToAuth = (id) => ({
     userId:      id.userId,
     email:       id.email ?? null,
     orgId:       id.orgId ?? null,
+    orgType:     id.orgType ?? null,
     orgCode:     null,
     role:        (id.roles && id.roles[0]) || 'client',  // scalar (highest) — requireRole compat
     roles:       id.roles || [],
@@ -57,6 +58,30 @@ const requireRole = (...roles) => (req, res, next) => {
     if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
     if (!roles.includes(req.auth.role)) {
         return next(new AppError('FORBIDDEN', `Role '${req.auth.role}' is not authorized for this action`, 403));
+    }
+    return next();
+};
+
+/**
+ * Gate on the caller's ORGANIZATION TYPE (buyer/seller/logistics_provider/bank/etc.) — a
+ * different axis from `requireRole`'s membership role. Business actions like creating a
+ * listing (seller), issuing an RFQ (buyer), or clearing customs (customs_authority) are
+ * scoped to what kind of participant the caller's org IS, not what tier they hold within
+ * it. `requireRole`/`requirePermission` alone let ANY membership role of ANY org type
+ * through — this is the check that was missing.
+ *
+ * platform_owner always passes (cross-tenant authority), matching `isPlatformOrgType` in
+ * the frontend's org model — a platform operator administers every org type's queue.
+ */
+const requireOrgType = (...orgTypes) => (req, res, next) => {
+    if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+    if (req.auth.orgType === 'platform_owner') return next();
+    if (!req.auth.orgType || !orgTypes.includes(req.auth.orgType)) {
+        return next(new AppError(
+            'FORBIDDEN',
+            `Organization type '${req.auth.orgType || 'unknown'}' is not authorized for this action (requires: ${orgTypes.join(' or ')})`,
+            403,
+        ));
     }
     return next();
 };
@@ -109,4 +134,4 @@ const requireVerified = (level = 'business') => async (req, res, next) => {
     }
 };
 
-module.exports = { authMiddleware, optionalAuth, requireRole, requireVerified };
+module.exports = { authMiddleware, optionalAuth, requireRole, requireOrgType, requireVerified };

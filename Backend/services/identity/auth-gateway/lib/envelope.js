@@ -9,7 +9,7 @@ const DEFAULT_TTL = 30;
 
 /**
  * Build a signed v2 identity envelope.
- * @param {object} user  { userId|id, orgId, roles[], sessionId, permissions[] }
+ * @param {object} user  { userId|id, orgId, orgType, roles[], sessionId, permissions[] }
  * @param {object} opts  { secret, region, workloadId, geo: { country, source }, ttlSeconds }
  * @returns {{ payload: string, signature: string }}
  *   payload   = base64url(JSON.stringify(envelope))
@@ -23,6 +23,7 @@ function build(user, { secret, region = 'local', workloadId = 'auth-gateway', ge
     user: {
       id:          String(user.userId || user.id || ''),
       orgId:       user.orgId != null ? String(user.orgId) : null,
+      orgType:     user.orgType != null ? String(user.orgType) : null,
       roles:       Array.isArray(user.roles) ? user.roles : [],
       sessionId:   user.sessionId != null ? String(user.sessionId) : null,
       permissions: Array.isArray(user.permissions) ? user.permissions : [],

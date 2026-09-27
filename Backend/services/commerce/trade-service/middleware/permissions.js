@@ -53,11 +53,19 @@ const LOGISTICS_PERMISSIONS = Object.freeze({
 });
 
 const ADMIN_BYPASS_ROLES = new Set(['admin', 'owner', 'super_admin']);
-
+// 'admin'/'owner' are per-ORG membership roles (see @baalvion frontend's core/organizations.ts
+// MEMBERSHIP_ROLES) — a buyer-org's own owner has this role exactly like a logistics_provider's
+// owner does on theirs. Checking the role alone let ANY org's admin bypass every
+// requirePermission() check platform-wide (warehouse, fleet, driver, tracking management, etc.),
+// same class of bug fixed in insuranceController.isAdmin. 'super_admin' is kept unscoped: it is
+// not a per-org membership role at all (not in MEMBERSHIP_ROLES) — it only exists on genuine
+// platform-staff accounts.
 function isAdminBypass(req) {
-    if (req.auth && ADMIN_BYPASS_ROLES.has(req.auth.role)) return true;
-    const roles = (req.auth && req.auth.roles) || [];
-    return roles.some((r) => ADMIN_BYPASS_ROLES.has(r));
+    const roles = (req.auth && (req.auth.roles || (req.auth.role ? [req.auth.role] : []))) || [];
+    if (roles.includes('super_admin')) return true;
+    if (!roles.some((r) => ADMIN_BYPASS_ROLES.has(r))) return false;
+    const orgType = req.auth && req.auth.orgType;
+    return orgType === 'logistics_provider' || orgType === 'platform_owner';
 }
 
 // requirePermission(...perms) — caller needs at least ONE of the listed

@@ -59,7 +59,10 @@ function verifyGatewayIdentity(headers) {
   if (!userId || !sig) return null;
   const expected = crypto.createHmac('sha256', sec).update(`${userId}.${orgId}.${roles.join(',')}`).digest('hex');
   if (sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
-  return normalizeGateway({ userId, orgId, roles, sessionId: headers['x-session-id'] });
+  // x-org-type is NOT part of the signed message (see gateway's proxy.js comment) — v1 is a
+  // best-effort fallback for islands that haven't adopted the v2 envelope, where orgType IS
+  // covered by the whole-payload HMAC.
+  return normalizeGateway({ userId, orgId, orgType: headers['x-org-type'] || null, roles, sessionId: headers['x-session-id'] });
 }
 
 /**
@@ -79,6 +82,7 @@ function bffBridge(req) {
     const identity = normalizeGateway({
       userId:    envelope.user.id,
       orgId:     envelope.user.orgId,
+      orgType:   envelope.user.orgType,
       roles:     envelope.user.roles,
       sessionId: envelope.user.sessionId,
     });

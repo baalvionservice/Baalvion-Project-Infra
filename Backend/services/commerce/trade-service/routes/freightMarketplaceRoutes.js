@@ -4,7 +4,7 @@
 // store-shadow endpoints). Carrier discovery is public; quoting + booking require a
 // gateway identity; tenant scoping is enforced in the controller (ownership) + RLS.
 const router = require('express').Router();
-const { authMiddleware, requireVerified } = require('../middleware/authMiddleware');
+const { authMiddleware, requireVerified, requireOrgType } = require('../middleware/authMiddleware');
 const config = require('../config/appConfig');
 const ctrl = require('../controller/freightMarketplaceController');
 
@@ -21,7 +21,9 @@ router.get('/',  authMiddleware, ctrl.listBookings);
 
 router.get('/:id',          authMiddleware, ctrl.getBooking);
 router.get('/:id/events',   authMiddleware, ctrl.getEvents);
-router.post('/:id/status',  authMiddleware, ctrl.updateStatus);
+// Advancing the booking's operational status is the carrier's own event; retry/cancel are left
+// open to either party — whoever booked it may legitimately need to retry or cancel their own booking.
+router.post('/:id/status',  authMiddleware, requireOrgType('logistics_provider'), ctrl.updateStatus);
 router.post('/:id/retry',   authMiddleware, ctrl.retryBooking);
 router.post('/:id/cancel',  authMiddleware, ctrl.cancelBooking);
 

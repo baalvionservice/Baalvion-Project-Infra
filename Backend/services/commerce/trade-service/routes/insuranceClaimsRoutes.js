@@ -6,10 +6,14 @@
 // Reads/file/evidence require authentication (controller tenant-scopes); adjudication, payout
 // and recovery require an org admin (matches insuranceController.isAdmin).
 const router = require('express').Router();
-const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
+const { authMiddleware, requireRole, requireOrgType } = require('../middleware/authMiddleware');
 const c = require('../controller/insuranceController');
 
-const claimsAdmin = requireRole('admin', 'owner', 'super_admin');
+// requireRole alone checked membership tier only — 'admin'/'owner' is a per-ORG role, so any
+// policyholder's own admin passed this exactly like a genuine insurer's admin would. requireOrgType
+// closes that: adjudication/payout/recovery decisions are the underwriting insurer's call, never
+// the claimant's own org (see insuranceController.isAdmin, which had the same gap server-side).
+const claimsAdmin = [requireRole('admin', 'owner', 'super_admin'), requireOrgType('insurance_provider')];
 
 // Static paths before '/:id'.
 router.post('/from_incident', authMiddleware, c.fileClaimFromIncident);

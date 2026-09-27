@@ -14,10 +14,11 @@
  */
 
 // Gateway (BFF) signed-header identity → canonical shape.
-function normalizeGateway({ userId, orgId, roles, sessionId } = {}) {
+function normalizeGateway({ userId, orgId, orgType, roles, sessionId } = {}) {
   return {
     userId:      userId != null ? String(userId) : '',
     orgId:       orgId || null,
+    orgType:     orgType || null,
     roles:       Array.isArray(roles) ? roles : [],
     permissions: [],                 // not carried in headers (hybrid: the injected JWT still has them)
     sessionId:   sessionId || null,
