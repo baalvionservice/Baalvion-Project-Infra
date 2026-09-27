@@ -88,20 +88,13 @@ export async function ArticleSidebar({
         </a>
       </div>
 
-      {/* ── Card 2: Advertisement ────────────────────────────────── */}
-      <div className="bg-slate-50 border border-slate-200 p-4 text-center">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-3">
-          ADVERTISEMENT
-        </span>
-        <div className="min-h-[250px] flex items-center justify-center bg-white border border-dashed border-slate-200">
-          <AdSlot
-            slotId={SIDEBAR_AD_SLOT_ID}
-            format="rectangle"
-            placement="sidebar-top"
-            minHeight="250px"
-          />
-        </div>
-      </div>
+      {/* ── Card 2: Advertisement — AdSlot renders its own label/border/collapse ── */}
+      <AdSlot
+        slotId={SIDEBAR_AD_SLOT_ID}
+        format="rectangle"
+        placement="sidebar-top"
+        minHeight="250px"
+      />
 
       {/* ── Card 3: More in Category ─────────────────────────────── */}
       <div className="space-y-4">
