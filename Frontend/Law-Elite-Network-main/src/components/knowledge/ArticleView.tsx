@@ -214,7 +214,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 {/* Follow on Google News Box */}
                 <div className="border border-slate-200 p-3.5 my-4 flex flex-wrap items-center justify-between gap-3 bg-white">
                   <span className="text-xs md:text-sm font-bold text-slate-900">
-                    Stay informed — get Law Elite legal intelligence in your news feed.
+                    Stay informed — get new Law Elite Network stories in your news feed.
                   </span>
                   <a
                     href="https://news.google.com"
