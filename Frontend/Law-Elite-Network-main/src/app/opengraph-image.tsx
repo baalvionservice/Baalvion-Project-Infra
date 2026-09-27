@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 // Programmatic OG card — drawn with code at the edge, no public/ asset needed.
 // System fonts only; do NOT fetch external fonts (breaks edge builds).
 export const runtime = 'edge';
-export const alt = 'Law Elite Network — Legal Guides & News';
+export const alt = 'Law Elite Network — History, Culture, Technology & Education';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -28,8 +28,8 @@ export default function OpenGraphImage() {
           fontFamily: 'Arial Narrow, Arial, sans-serif',
         }}
       >
-        {/* Top red accent bar */}
-        <div style={{ width: '100%', height: 8, background: RED, display: 'flex' }} />
+        {/* Top navy accent bar */}
+        <div style={{ width: '100%', height: 8, background: NAVY, display: 'flex' }} />
 
         {/* Main content area */}
         <div style={{ display: 'flex', flex: 1, padding: '48px 72px', gap: 48, alignItems: 'center' }}>
@@ -49,19 +49,19 @@ export default function OpenGraphImage() {
             {/* SVG scales — rendered as inline element in ImageResponse */}
             <svg viewBox="0 0 64 64" width="110" height="110">
               {/* Beam */}
-              <rect x="8" y="17" width="48" height="6" fill={WHITE} />
+              <rect x="10" y="20" width="44" height="4" fill={WHITE} />
               {/* Post */}
-              <rect x="29" y="23" width="6" height="14" fill={WHITE} />
-              {/* Fulcrum */}
-              <polygon points="20,52 44,52 32,37" fill={WHITE} />
+              <rect x="30" y="24" width="4" height="20" fill={WHITE} />
+              {/* Base */}
+              <rect x="24" y="46" width="16" height="4" fill={WHITE} />
               {/* Left chain */}
-              <rect x="10" y="23" width="3" height="10" fill={WHITE} />
+              <rect x="13.5" y="24" width="2" height="9" fill={WHITE} />
               {/* Right chain */}
-              <rect x="51" y="23" width="3" height="10" fill={WHITE} />
+              <rect x="48.5" y="24" width="2" height="9" fill={WHITE} />
               {/* Left pan */}
-              <circle cx="11.5" cy="38" r="9" fill={GOLD} />
+              <circle cx="15.5" cy="33" r="7.5" fill="none" stroke={WHITE} strokeWidth="2" />
               {/* Right pan */}
-              <circle cx="52.5" cy="38" r="9" fill={GOLD} />
+              <circle cx="50.5" cy="33" r="7.5" fill="none" stroke={WHITE} strokeWidth="2" />
             </svg>
           </div>
 
@@ -105,7 +105,7 @@ export default function OpenGraphImage() {
                 maxWidth: 780,
               }}
             >
-              Legal Guides, Court News & Expert Analysis
+              History, Culture, Language & Technology of Law
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function OpenGraphImage() {
             lawelitenetwork.com
           </span>
           <span style={{ color: GOLD, fontSize: 18, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Know Your Rights
+Exploring the World Around Law
           </span>
         </div>
       </div>

@@ -72,8 +72,8 @@ export function FrontPage({ articles }: { articles: Article[] }) {
         {rail.length > 0 && (
           <aside className="lg:col-span-4 bg-slate-50/80 border-2 border-slate-900 p-5 rounded-sm shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b-2 border-[#E13131] pb-2 mb-4">
-              <h3 className="font-serif text-lg font-black uppercase tracking-tight text-slate-900">HOT NEWS RAIL</h3>
-              <span className="text-[10px] font-black uppercase tracking-widest bg-[#E13131] text-white px-2 py-0.5">EXCLUSIVES</span>
+              <h3 className="font-serif text-lg font-black uppercase tracking-tight text-slate-900">FEATURED STORIES</h3>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-[#E13131] text-white px-2 py-0.5">NEW</span>
             </div>
             {rail.map((a) => (
               <StoryCard key={a.slug} article={a} variant="horizontal" />

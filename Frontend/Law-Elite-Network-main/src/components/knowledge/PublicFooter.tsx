@@ -65,15 +65,14 @@ export function PublicFooter() {
               <Link href="/" className="flex items-center gap-2.5 group" aria-label="Law Elite Network – Home">
                 {/* Scales of Justice mark */}
                 <svg viewBox="0 0 64 64" className="h-10 w-10 flex-shrink-0" aria-hidden="true">
-                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
-                  <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
-                  <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
-                  <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
-                  <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
-                  <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
-                  <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
-                  <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
-                  <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="10"/>
+                  <rect x="10" y="20" width="44" height="4" fill="#F6F4EF"/>
+                  <rect x="30" y="24" width="4" height="20" fill="#F6F4EF"/>
+                  <rect x="24" y="46" width="16" height="4" fill="#F6F4EF"/>
+                  <rect x="13.5" y="24" width="2" height="9" fill="#F6F4EF"/>
+                  <rect x="48.5" y="24" width="2" height="9" fill="#F6F4EF"/>
+                  <path d="M8 33 h15 a7.5 7.5 0 0 1 -15 0 z" fill="none" stroke="#F6F4EF" strokeWidth="2"/>
+                  <path d="M43 33 h15 a7.5 7.5 0 0 1 -15 0 z" fill="none" stroke="#F6F4EF" strokeWidth="2"/>
                 </svg>
                 {/* Wordmark */}
                 <span className="flex flex-col leading-none">
