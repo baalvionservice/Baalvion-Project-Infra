@@ -7,6 +7,7 @@ import { PersonCard } from '@/components/people/PersonCard';
 import { articleUrl } from '@/lib/article-url';
 import { topicUrl } from '@/lib/topic-url';
 import { PRIMARY_NAV } from '@/lib/site-nav';
+import { getLiveCategorySlugs } from '@/lib/category-visibility';
 import { mediaUrl } from '@/lib/media-url';
 import { formatArticleDate as formatDate } from '@/lib/format-date';
 import type { MediaEntry } from '@/lib/media-server';
@@ -231,14 +232,21 @@ export function PopularTopics({ topics }: { topics: HomeFeed['popularTopics'] })
   );
 }
 
-/** Always-on directory band, driven by the same config as the nav so a new section shows up here too. */
-export function ExploreBand() {
+/**
+ * Always-on directory band, driven by the same config as the nav so a new
+ * section shows up here too -- and, like the nav, only once it's actually
+ * live (see category-visibility.ts). Async server component: no client
+ * fetch needed here since this never runs in the browser.
+ */
+export async function ExploreBand() {
+  const live = await getLiveCategorySlugs();
+  const sections = PRIMARY_NAV.filter((s) => live.has(s.href.replace(/^\//, '').split('/')[0]));
   return (
     <section className="bg-[#0F2440] text-white">
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-10">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C8A24A]">Explore Law Elite Network</p>
         <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10">
-          {PRIMARY_NAV.map((s) => (
+          {sections.map((s) => (
             <Link key={s.label} href={s.href} className="group bg-[#0F2440] p-5 hover:bg-[#16325a] transition-colors">
               <span className="flex items-center justify-between font-headline text-lg font-extrabold">
                 {s.label}

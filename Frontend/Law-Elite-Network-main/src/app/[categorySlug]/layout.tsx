@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { isCategoryLive } from '@/lib/category-visibility';
 import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { fetchArticleForMetadata } from '@/lib/article-metadata-fetch';
 import { buildArticleMetadata } from '@/lib/seo/article-seo';
@@ -49,6 +50,14 @@ export async function generateMetadata(
   if (!(CURRENT_CATEGORY_SLUGS as readonly string[]).includes(categorySlug)) {
     return { robots: { index: false, follow: false } };
   }
+  // Category exists (renders fine, an editor can preview it) but hasn't
+  // crossed category-visibility.ts's LIVE_THRESHOLD published articles yet --
+  // noindex so it can't get crawled/ranked as a thin section while nav and
+  // the sitemap also aren't linking to it. Promotes automatically once the
+  // 4th article publishes, same as nav.
+  if (!(await isCategoryLive(categorySlug))) {
+    return { robots: { index: false, follow: false } };
+  }
   const cat = await fetchCategory(categorySlug);
   const cmsOnly = CMS_ONLY_CATEGORIES[categorySlug];
   // Bundled seed-data description (e.g. tech-ip's) -- last real-data fallback
@@ -66,14 +75,14 @@ export async function generateMetadata(
   const description = cat?.description || cmsOnly?.metaDescription || cmsOnly?.description || bundledCat?.description
     || (isEntertainment
       ? `${name} coverage on Law Elite Network.`
-      : `Plain-language ${name} guides on Law Elite Network -- understand the law before you call a lawyer.`);
+      : `Plain-language ${name} guides on Law Elite Network.`);
   const url = `${SITE}/${categorySlug}`;
   // "{name} lawyer"/"{name} attorney"/"find a lawyer" only make sense for the
   // legal pillar (see cms-only-categories.ts's `pillar` field) -- an
   // Entertainment hub gets its own, non-legal keyword set instead.
   const keywords = isEntertainment
     ? [name, `${name} news`, 'entertainment news', 'law elite network']
-    : [name, `${name} lawyer`, `${name} attorney`, 'legal advice', 'find a lawyer'];
+    : [name, `${name} guide`, 'law elite network'];
   return {
     title,
     description,

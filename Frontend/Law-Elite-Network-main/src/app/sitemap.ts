@@ -4,7 +4,8 @@ import { getAllArticles, mergeArticles } from '@/data/law-content';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
-import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+import { toNewCategorySlug } from '@/lib/category-slugs';
+import { getLiveCategorySlugs } from '@/lib/category-visibility';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 // People/Entertainment/Legal/Sports/Topics/Countries/Podcasts/Videos sitemap
@@ -162,7 +163,13 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // in ROOT_FLAT_ARTICLE_SLUGS -- everything else is a retired-category
   // article temporarily reachable only at /article/{slug}, not something to
   // actively resubmit to Google.
-  const currentSlugSetForArticles = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  // Live-category gate (category-visibility.ts): a new pillar's articles
+  // aren't sitemap-eligible until the category itself has crossed
+  // LIVE_THRESHOLD published articles, same rule as nav -- an article
+  // sitting alone in an otherwise-empty section is exactly the thin-page
+  // risk this whole gate exists to avoid.
+  const liveSlugs = await getLiveCategorySlugs();
+  const currentSlugSetForArticles = liveSlugs;
   const isSitemapEligible = (a: ArticleEntry & { noindex?: boolean }): boolean => {
     if (a.noindex) return false;
     const rawSlug = a.category?.slug;
@@ -216,17 +223,18 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // never meant to be indexable pages (they 404 -- see [categorySlug]/page.tsx's
   // fetchCategory) -- filtering to the curated list here stops those dead URLs
   // from ever being submitted to Google in the first place.
-  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  // Category hub itself is only sitemap-eligible once live -- same
+  // liveSlugs set computed above for articles.
   const categoryRoutes: MetadataRoute.Sitemap = [
     ...categories
-      .filter((c) => currentSlugSet.has(toNewCategorySlug(c.slug)))
+      .filter((c) => liveSlugs.has(toNewCategorySlug(c.slug)))
       .map((c) => ({
         url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
         lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
       })),
     // No lastModified here: the API didn't return this slug, so there's no
     // real updated_at to report -- omit rather than fabricate "now".
-    ...CURRENT_CATEGORY_SLUGS.filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
+    ...Array.from(liveSlugs).filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
       url: `${BASE_URL}/${slug}`,
     })),
   ];

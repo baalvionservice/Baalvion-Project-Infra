@@ -3,24 +3,24 @@ type LawEliteMarkProps = {
   variant?: 'navy' | 'white';
 };
 
-const GOLD = '#C8A24A';
-
 /**
- * Brand mark — a balance beam reduced to four flat shapes (beam, stem,
- * fulcrum, two pans). `navy` variant is for light backgrounds, `white` for
- * placement on the brand navy itself (header chip, footer-on-navy).
+ * Brand mark — a balance beam reduced to flat shapes (beam, post, base,
+ * two solid pans). `navy` variant is for light backgrounds, `white` for
+ * placement on the brand navy itself (header chip, footer-on-navy). Single
+ * ink color throughout (no separate gold accent) to match the header/
+ * footer/favicon mark exactly.
  */
 export function LawEliteMark({ className, variant = 'navy' }: LawEliteMarkProps) {
   const ink = variant === 'navy' ? '#0F2440' : '#F6F4EF';
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <rect x="10" y="16" width="44" height="4" fill={ink} />
-      <rect x="30" y="20" width="4" height="24" fill={ink} />
-      <polygon points="22,52 42,52 32,44" fill={ink} />
-      <rect x="14" y="20" width="3" height="11" fill={ink} />
-      <rect x="47" y="20" width="3" height="11" fill={ink} />
-      <circle cx="15.5" cy="35" r="7" fill={GOLD} />
-      <circle cx="48.5" cy="35" r="7" fill={GOLD} />
+      <rect x="8" y="18" width="48" height="5" fill={ink} />
+      <rect x="29" y="22" width="6" height="24" fill={ink} />
+      <rect x="21" y="46" width="22" height="5" fill={ink} />
+      <rect x="12" y="23" width="2.5" height="9" fill={ink} />
+      <rect x="49.5" y="23" width="2.5" height="9" fill={ink} />
+      <path d="M3,32 a10,9 0 0 0 20,0 z" fill={ink} />
+      <path d="M41,32 a10,9 0 0 0 20,0 z" fill={ink} />
     </svg>
   );
 }
