@@ -27,7 +27,6 @@ import { PRIMARY_NAV, type NavSection } from '@/lib/site-nav';
  */
 const ALWAYS_LIVE_HREFS = new Set([
   '/law-school-success',
-  '/fashion',
   '/law-and-popular-culture',
   '/history-and-civilization',
   '/language-and-literature',

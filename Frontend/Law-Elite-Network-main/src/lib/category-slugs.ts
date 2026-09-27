@@ -41,7 +41,6 @@ export function toNewCategorySlug(oldSlug: string): string {
 // renders instead of 404ing; it stays unlinked from nav until it has real
 // articles (see site-nav.ts).
 export const CURRENT_CATEGORY_SLUGS = [
-  'fashion',
   'law-school-success',
   'law-and-popular-culture',
   'history-and-civilization',

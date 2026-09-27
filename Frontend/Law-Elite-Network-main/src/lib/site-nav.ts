@@ -22,9 +22,11 @@ export interface NavSection extends NavLink {
 // earlier note about restoring them). These five categories are newly
 // created in the CMS -- see category-slugs.ts's CURRENT_CATEGORY_SLUGS
 // comment for current article counts before treating them as launch-ready.
-// Fashion and Videos/Podcasts are dropped from this nav (later commits the
-// same day remove them from the sitemap/footer too) -- unlinked, not
-// deleted.
+// Videos/Podcasts keep their real content and stay as secondary nav,
+// unchanged by this pass. Fashion was pulled from nav 2026-09-27 (not part
+// of the history/culture repositioning and not needed right now); the
+// /fashion route and its data still exist, just unlinked -- see
+// category-slugs.ts and category-visibility.ts.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Stories on Screen',
@@ -49,5 +51,12 @@ export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Law School Life',
     href: '/law-school-success',
+  },
+  {
+    label: 'Videos',
+    href: '/videos',
+    children: [
+      { label: 'Podcasts', href: '/podcasts' },
+    ],
   },
 ];

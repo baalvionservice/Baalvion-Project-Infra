@@ -33,6 +33,8 @@ interface BreadcrumbsProps {
  * Subcategory is optional and only renders when the article actually
  * carries real data for it -- never fabricated.
  */
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
 export function Breadcrumbs({ category, subcategory, articleTitle, categoryIsCurrentPage, hideBackLink }: BreadcrumbsProps) {
   // A CMS article's category slug isn't guaranteed to be one of the site's 8
   // real category pages (e.g. a narrow one-off like `criminal-law-dui-defense`
@@ -51,8 +53,50 @@ export function Breadcrumbs({ category, subcategory, articleTitle, categoryIsCur
     : '/';
   const backLabel = hasRealCategory && category ? category.name : 'Home';
 
+  // Construct JSON-LD BreadcrumbList schema dynamically for SEO and AdSense Quality Crawlers
+  const breadcrumbElements: Array<{ '@type': string; position: number; name: string; item: string }> = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+  ];
+
+  if (hasRealCategory && category) {
+    breadcrumbElements.push({
+      '@type': 'ListItem',
+      position: breadcrumbElements.length + 1,
+      name: category.name,
+      item: `${SITE_URL}/${category.slug}`,
+    });
+  }
+
+  if (hasRealCategory && category && subcategory?.slug && subcategory?.name) {
+    breadcrumbElements.push({
+      '@type': 'ListItem',
+      position: breadcrumbElements.length + 1,
+      name: subcategory.name,
+      item: `${SITE_URL}/${category.slug}?sub=${subcategory.slug}`,
+    });
+  }
+
+  if (articleTitle) {
+    breadcrumbElements.push({
+      '@type': 'ListItem',
+      position: breadcrumbElements.length + 1,
+      name: articleTitle,
+      item: `${SITE_URL}${backHref}`,
+    });
+  }
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbElements,
+  };
+
   return (
     <div className="mb-8 animate-in fade-in slide-in-from-left-2 duration-700">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {!hideBackLink && (
         <Link
           href={backHref}
@@ -62,7 +106,7 @@ export function Breadcrumbs({ category, subcategory, articleTitle, categoryIsCur
         </Link>
       )}
 
-      <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex-wrap">
+      <nav aria-label="Breadcrumb navigation" className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 flex-wrap">
         <Link href="/" className="hover:text-blue-600 transition-colors flex items-center gap-1.5">
           <Home className="w-3 h-3" /> Home
         </Link>

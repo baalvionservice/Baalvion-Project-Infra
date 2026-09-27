@@ -8,7 +8,6 @@ import { cmsGetArticles } from '@/lib/cms';
  */
 const ALWAYS_LIVE = new Set([
   'law-school-success',
-  'fashion',
   'law-and-popular-culture',
   'history-and-civilization',
   'language-and-literature',
