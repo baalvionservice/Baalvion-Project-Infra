@@ -26,9 +26,9 @@ import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-const TITLE = 'Law Elite Network | News on People, Entertainment, Sports and the Law';
+const TITLE = 'Law Elite Network | History, Culture, Technology & Education';
 const DESCRIPTION =
-  'Law Elite Network covers the people, entertainment, sports and legal stories that matter, with profiles, cases, courts and interviews in one place.';
+  'Law Elite Network explores the history, culture, language, entertainment, education, and technology surrounding law through informative stories, research, and accessible analysis.';
 
 // Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
 const AD_SLOT_ID = '4123514154';
@@ -129,12 +129,39 @@ export default async function KnowledgeHomePage() {
       <BreakingStrip articles={feed.breaking} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        <h1 className="sr-only">Law Elite Network: people, entertainment, sports and legal news</h1>
-
+        <section className="py-10 md:py-14 border-b border-slate-200">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E13131] mb-3">
+            Where Law Meets History, Culture &amp; Innovation
+          </p>
+          <h1 className="font-headline text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.05] max-w-3xl">
+            Exploring the World Around Law
+          </h1>
+          <p className="mt-5 max-w-2xl text-[15px] md:text-base text-slate-600 leading-relaxed">
+            Discover fascinating stories about the evolution of legal traditions, the portrayal of law
+            in popular culture, the language of legal history, the technology transforming the legal
+            world, and the experience of studying law.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href="#top-stories"
+              className="inline-flex items-center px-5 py-2.5 bg-[#0F2440] text-white text-[13px] font-bold uppercase tracking-wider hover:bg-[#16325a] transition-colors"
+            >
+              Explore the Stories
+            </a>
+            <a
+              href="#practice-areas"
+              className="inline-flex items-center px-5 py-2.5 border border-slate-300 text-slate-900 text-[13px] font-bold uppercase tracking-wider hover:border-slate-900 transition-colors"
+            >
+              Browse Topics
+            </a>
+          </div>
+        </section>
 
         <AudioBriefing items={widgets.audio} />
 
-        <FrontPage articles={feed.latest} />
+        <div id="top-stories">
+          <FrontPage articles={feed.latest} />
+        </div>
 
         <DocketRail items={widgets.docket} />
 
