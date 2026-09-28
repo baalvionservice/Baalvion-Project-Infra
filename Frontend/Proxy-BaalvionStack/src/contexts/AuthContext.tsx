@@ -25,29 +25,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Silent session restore (no localStorage). Tries /me FIRST off the still-live access cookie —
-  // a session bootstrapped via the SSO hand-off from auth.baalvion.com has no refresh cookie at
-  // all (that flow never gets a refresh token — see SsoCallback.tsx), so going straight to
-  // /refresh first would 401 and log out a perfectly valid, still-live SSO session on its very
-  // first reload. Only falls back to /refresh (native login's path) when /me says the access
-  // cookie is gone or expired.
+  // Silent session restore (no localStorage). Tries /refresh FIRST — it's the only call that
+  // returns a real bearer token in the body, which platformClient/adminApiClient (via tokenStore)
+  // need for cross-origin calls to proxy-service (org data, billing, …). Only when that fails (no
+  // refresh cookie at all — the case for a session bootstrapped via the SSO hand-off from
+  // auth.baalvion.com, which never gets a refresh token; see SsoCallback.tsx) falls back to /me,
+  // which still resolves `user` off the shorter-lived access cookie alone. That fallback has no
+  // bearer token to recover — /me never returns the raw token — so an SSO session's cross-origin
+  // calls stay limited after a reload; what it fixes is `isAuthenticated` (derived from `user`,
+  // not `accessToken`) so a live SSO session isn't wrongly bounced to /login.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         try {
-          const u = await authClient.me('');
-          if (!cancelled) {
-            setUser(u);
-            tokenStore.set(null, u);
-          }
-          return; // access cookie alone was enough — no refresh cookie to fall back to
-        } catch {
-          /* access cookie missing/expired — fall through to refresh */
-        }
-        try {
           const { accessToken: at } = await authClient.refresh();
-          if (cancelled || !at) return;
+          if (cancelled || !at) throw new Error('no token');
           setAccessToken(at);
           tokenStore.set(at);
           try {
@@ -59,8 +52,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch {
             /* token valid; profile fetch best-effort */
           }
+          return;
         } catch {
-          /* no valid refresh cookie → remain unauthenticated */
+          /* no refresh cookie (or refresh failed) — fall through to a cookie-only /me */
+        }
+        try {
+          const u = await authClient.me('');
+          if (!cancelled) {
+            setUser(u);
+            tokenStore.set(null, u);
+          }
+        } catch {
+          /* no live session either way → remain unauthenticated */
         }
       } finally {
         if (!cancelled) setIsInitialized(true);
@@ -106,7 +109,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       accessToken,
-      isAuthenticated: !!accessToken,
+      // Derived from `user`, not `accessToken`: the cookie-only restore path (an SSO-bootstrapped
+      // session with no refresh token — see the effect above) resolves `/me` successfully and sets
+      // `user`, but has no raw token to put in `accessToken` (it's httpOnly, never returned by
+      // /me). Gating on `accessToken` here bounced a perfectly live session to /login on its very
+      // first reload — this was the SSO logout-on-refresh bug in its final form.
+      isAuthenticated: !!user,
       isInitialized,
       login,
       register,
