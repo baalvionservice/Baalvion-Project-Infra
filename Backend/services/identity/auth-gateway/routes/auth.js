@@ -102,7 +102,50 @@ router.post('/login', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  // accessToken is ALSO returned in the body (not cookie-only) for consumer apps whose client
+  // (e.g. proxy.baalvionstack.com) calls OTHER, cross-origin services directly with a bearer
+  // header — those calls can't rely on this gateway's same-origin cookie. Deliberate trade-off:
+  // only the short-lived access token is exposed to JS; the refresh token stays cookie-only.
+  return res.json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+});
+
+// POST /auth/sso/exchange — bootstrap a gateway session from the shared auth.baalvion.com sign-in
+// surface's hand-off. That page mints its OWN raw access token via auth-service directly (not
+// through this gateway) and hands it to the browser via a redirect fragment; the target site then
+// posts it here, same-origin, so THIS site gets a real gateway session instead of just holding an
+// unverified, unpersisted token in memory. Verified cryptographically (same RS256 keys/issuer/
+// audience every service already trusts) — not just decoded.
+//
+// No refresh token is available here (auth.baalvion.com never exposes its own refresh cookie
+// cross-origin, by design), so only the access cookie is set — the session survives page reloads
+// for the access token's lifetime (accessMaxAge) but cannot silently refresh past that. That is a
+// deliberate trade-off, not an oversight: getting a real refresh token would mean putting it in a
+// URL, which is worse.
+router.post('/sso/exchange', async (req, res) => {
+  const token = req.body && req.body.accessToken;
+  if (!token || typeof token !== 'string') {
+    return res.status(400).json({ error: { code: 'SSO_TOKEN_MISSING', message: 'No sign-in token was provided.' } });
+  }
+  let c;
+  try {
+    c = await verifier.verify(token);
+  } catch (err) {
+    return res.status(401).json({ error: { code: 'SSO_TOKEN_INVALID', message: 'Your sign-in link has expired. Please sign in again.' } });
+  }
+  const csrfToken = genToken();
+  const geo = detectGeo(req);
+  await createSession({
+    sid: c.sid, userId: c.sub, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles, exp: c.exp,
+    csrfToken, uaHash: sha256(req.headers['user-agent']), ipHash: sha256(clientIp(req)),
+    geo: { country: geo.country, source: geo.source },
+  });
+  res.cookie(config.cookie.accessName, token, cookieOpts(config.cookie.accessMaxAge));
+  res.cookie(config.cookie.csrfName, csrfToken, cookieOpts(config.cookie.accessMaxAge, false));
+  return res.json({
+    accessToken: token,
+    user: { id: c.sub, email: c.email, fullName: null, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} },
+    csrfToken,
+  });
 });
 
 // POST /auth/register → auth-service register (registers + auto-logs-in) → cookies + SAFE profile + csrf.
@@ -122,7 +165,7 @@ router.post('/register', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  return res.status(201).json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // Passwordless email-OTP login. request → auth-service emails a one-time code (no session).
@@ -139,7 +182,7 @@ router.post('/email/otp/verify', async (req, res) => {
   }
   const { accessToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  return res.json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // POST /auth/invite → invite a member to the caller's org. Requires a valid session; forwards the
@@ -237,7 +280,7 @@ router.post('/accept-invite', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  return res.status(201).json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // Onboarding intake — public (the applicant has no session yet). Forwards the
@@ -300,7 +343,7 @@ router.post('/mfa-challenge', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  return res.json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // POST /auth/mfa-enroll/start (public) → fetch the provisioning material (QR + secret + recovery
@@ -323,7 +366,7 @@ router.post('/mfa-enroll', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
+  return res.json({ accessToken, user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // GET /auth/me → verify cookie + session; canonical user (NO token).
@@ -359,7 +402,7 @@ router.post('/refresh', async (req, res) => {
   }
   const { accessToken } = json.data;
   const { csrfToken } = await establish(req, res, accessToken, refreshFromCookie || refreshToken);
-  return res.json({ ok: true, csrfToken });
+  return res.json({ ok: true, accessToken, csrfToken });
 });
 
 // POST /auth/logout → revoke (blacklist jti + delete session) + clear cookies.
