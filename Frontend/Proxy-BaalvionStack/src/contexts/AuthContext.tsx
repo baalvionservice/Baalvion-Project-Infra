@@ -25,26 +25,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Silent session restore via the httpOnly refresh cookie (no localStorage).
+  // Silent session restore (no localStorage). Tries /me FIRST off the still-live access cookie —
+  // a session bootstrapped via the SSO hand-off from auth.baalvion.com has no refresh cookie at
+  // all (that flow never gets a refresh token — see SsoCallback.tsx), so going straight to
+  // /refresh first would 401 and log out a perfectly valid, still-live SSO session on its very
+  // first reload. Only falls back to /refresh (native login's path) when /me says the access
+  // cookie is gone or expired.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { accessToken: at } = await authClient.refresh();
-        if (cancelled || !at) return;
-        setAccessToken(at);
-        tokenStore.set(at);
         try {
-          const u = await authClient.me(at);
+          const u = await authClient.me('');
           if (!cancelled) {
             setUser(u);
-            tokenStore.set(at, u);
+            tokenStore.set(null, u);
+          }
+          return; // access cookie alone was enough — no refresh cookie to fall back to
+        } catch {
+          /* access cookie missing/expired — fall through to refresh */
+        }
+        try {
+          const { accessToken: at } = await authClient.refresh();
+          if (cancelled || !at) return;
+          setAccessToken(at);
+          tokenStore.set(at);
+          try {
+            const u = await authClient.me(at);
+            if (!cancelled) {
+              setUser(u);
+              tokenStore.set(at, u);
+            }
+          } catch {
+            /* token valid; profile fetch best-effort */
           }
         } catch {
-          /* token valid; profile fetch best-effort */
+          /* no valid refresh cookie → remain unauthenticated */
         }
-      } catch {
-        /* no valid refresh cookie → remain unauthenticated */
       } finally {
         if (!cancelled) setIsInitialized(true);
       }

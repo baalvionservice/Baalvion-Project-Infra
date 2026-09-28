@@ -299,8 +299,12 @@ api.baalvion.com {
 	# the BFF below, which blanket-requires a bearer token and 401d. The browser reports that as a
 	# CORS failure (a 401 carrying no Access-Control-Allow-Origin header looks like CORS, not like
 	# auth), so the pricing page silently rendered no plans at all.
-	# Scoped to /v1/public/* only — the authenticated proxy surface stays behind the BFF.
-	@proxy_public_marketing path /api/v1/infrastructure/proxy/v1/public/*
+	# Scoped to /v1/public/* plus the OTHER unauthenticated GETs platformRoutes.js registers
+	# before its tenant guard (white-label branding lookup, marketplace catalog/price, referral
+	# tracking) — those are equally public in Express but were missed by the original carve-out
+	# because they don't live under /public/*, so they 401'd the same way (e.g. white-label/resolve
+	# on proxy.baalvionstack.com's own page load, logged in or not).
+	@proxy_public_marketing path /api/v1/infrastructure/proxy/v1/public/* /api/v1/infrastructure/proxy/v1/white-label/resolve /api/v1/infrastructure/proxy/v1/marketplace/catalog /api/v1/infrastructure/proxy/v1/marketplace/price /api/v1/infrastructure/proxy/v1/referral/track
 	handle @proxy_public_marketing {
 		uri strip_prefix /api/v1/infrastructure/proxy
 		reverse_proxy app-edge-realtime:4000
