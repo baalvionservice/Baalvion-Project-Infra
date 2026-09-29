@@ -4,7 +4,7 @@
  * Booking Hearing Rooms at London's International Arbitration Centres"
  * (slug: booking-hearing-rooms-london-international-arbitration-centre)
  * predates two fixes already applied to the bundled source
- * (Frontend/Law-Elite-Network-main/src/data/articles/lcia-arbitration-series.ts,
+ * (Frontend/lawelitenetwork.com/src/data/articles/lcia-arbitration-series.ts,
  * article id dr-009):
  *
  *   1. Design/sourcing: replaces the plain-text "Sources & Further Reading"

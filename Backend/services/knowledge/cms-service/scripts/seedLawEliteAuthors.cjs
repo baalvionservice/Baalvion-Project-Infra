@@ -4,7 +4,7 @@
  * so every byline is editable + publishable from the admin-platform console
  * (admin.baalvion.com → Website → Authors) and served on the live /author pages.
  *
- * Mirrors Frontend/Law-Elite-Network-main/src/data/authors.ts so the CMS becomes
+ * Mirrors Frontend/lawelitenetwork.com/src/data/authors.ts so the CMS becomes
  * the source of truth while the bundled profiles remain the offline fallback.
  *
  * Idempotent: skips an author whose slug already exists (409 / pre-check).

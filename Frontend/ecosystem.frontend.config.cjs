@@ -57,7 +57,7 @@ module.exports = {
     next('baalvion-com-web', 'baalvion.com', 3043, 'dev'),
     next('imperialpedia-web', 'Imperialpedia-nextjs-main', 3029),
     next('gti-web', 'Global-Trade-Infrastructure-main', 9003),
-    next('law-web', 'Law-Elite-Network-main', 9002),
+    next('law-web', 'lawelitenetwork.com', 9002),
     next('amarise-web', 'amarisemaisonavenue.com', 3033),
     next('brand-web', 'connect.baalvion.com', 3035),
     next('mining-web', 'mining.baalvion.com', 3028),
