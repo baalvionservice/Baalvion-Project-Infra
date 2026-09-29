@@ -10,11 +10,11 @@ const BASE_URL      = process.env.NEXT_PUBLIC_API_URL        || 'https://api.baa
 // Auth goes through the SAME-ORIGIN proxy (next.config rewrite → gateway) so the httpOnly
 // `baalvion_refresh` cookie is stored against this origin and flows on every refresh.
 const AUTH_URL      = '/auth-bff';
-const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'https://api.baalvion.com/api/v1/platform/admin/v1';
-const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'https://api.baalvion.com/api/v1/identity/session/v1';
-const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'https://api.baalvion.com/api/v1/identity/oauth';
+const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'https://admin.baalvion.com/api-bff/platform/admin/v1';
+const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'https://admin.baalvion.com/api-bff/identity/session/v1';
+const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'https://admin.baalvion.com/api-bff/identity/oauth';
 // CMS engine (cms-service). Multi-site content/taxonomy/media/workflow API.
-const CMS_API_URL   = process.env.NEXT_PUBLIC_CMS_API_URL     || 'https://api.baalvion.com/api/v1/knowledge/cms/api/v1';
+const CMS_API_URL   = process.env.NEXT_PUBLIC_CMS_API_URL     || 'https://admin.baalvion.com/api-bff/knowledge/cms/api/v1';
 
 // ─── Main API client ──────────────────────────────────────────────────────────
 export const apiClient = axios.create({
