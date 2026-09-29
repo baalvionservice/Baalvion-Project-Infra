@@ -127,7 +127,7 @@ test('an unknown site id throws rather than returning empty rails', () => {
 // ---------------------------------------------------------------- registry integrity
 
 test('registry is internally consistent', () => {
-  assert.equal(SITES.length, 19);
+  assert.equal(SITES.length, 21);
   const ids = SITES.map((s) => s.id);
   assert.equal(new Set(ids).size, ids.length, 'site ids must be unique');
 
@@ -183,7 +183,7 @@ test('an unassigned site says so rather than inventing a placeholder', () => {
   const a = legalEntityFor('gti', {});
   assert.equal(a.legalEntityId, null);
   assert.equal(a.source, 'unassigned');
-  assert.equal(sitesWithoutLegalEntity({}).length, 19);
+  assert.equal(sitesWithoutLegalEntity({}).length, 21);
 });
 
 test('a per-site override wins, then the registry, then the default', () => {
