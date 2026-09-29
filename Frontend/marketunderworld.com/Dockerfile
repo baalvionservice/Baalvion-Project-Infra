@@ -13,7 +13,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune investors-and-founders-web --docker
+RUN pnpm dlx turbo@2.10.4 prune investors-and-founders-web --docker
 
 FROM base AS builder
 COPY .npmrc ./

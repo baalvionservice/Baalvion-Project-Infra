@@ -7,7 +7,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune @baalvion/auth-gateway --docker
+RUN pnpm dlx turbo@2.10.4 prune @baalvion/auth-gateway --docker
 
 FROM base AS installer
 COPY .npmrc ./
