@@ -50,7 +50,7 @@ import { entertainmentNewsArticles } from './entertainment-news';
 import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
 import { sportsNewsArticles } from './sports-news';
 
-export const LAW_ARTICLES: LawArticle[] = [
+const BUNDLED_ARTICLES: LawArticle[] = [
   ...highProfileNewsArticles,
   ...entertainmentNewsArticles,
   ...celebrityProfilesNewsArticles,
@@ -93,3 +93,17 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...disputeResolutionExtra2Articles,
   ...lciaArbitrationSeriesArticles,
 ];
+
+/**
+ * Bundled articles an editor has archived in the CMS. The public CMS API only
+ * returns published records, so the site can't see an archive and would keep
+ * serving (and listing in the sitemap) the bundled copy -- add the slug here
+ * to drop it everywhere LAW_ARTICLES is read.
+ */
+const RETIRED_ARTICLE_SLUGS = new Set<string>([
+  'common-law-vs-civil-law',
+]);
+
+export const LAW_ARTICLES: LawArticle[] = BUNDLED_ARTICLES.filter(
+  (a) => !RETIRED_ARTICLE_SLUGS.has(a.slug),
+);
