@@ -66,7 +66,7 @@ overrides:
   hono: 4.13.5
   '@hono/node-server': 2.0.10
   undici: 7.29.0
-  multer: 2.3.0
+  multer: 2.4.0
   http-proxy-middleware@3: 3.0.7
   glob@10: 10.5.0
   file-type@21: 21.3.2
@@ -1956,8 +1956,8 @@ importers:
         specifier: ^9.0.2
         version: 9.0.3
       multer:
-        specifier: 2.3.0
-        version: 2.3.0
+        specifier: 2.4.0
+        version: 2.4.0
       pg:
         specifier: ^8.13.1
         version: 8.22.0
@@ -2090,8 +2090,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       multer:
-        specifier: 2.3.0
-        version: 2.3.0
+        specifier: 2.4.0
+        version: 2.4.0
       nodemailer:
         specifier: 9.1.1
         version: 9.1.1
@@ -2132,48 +2132,6 @@ importers:
       supertest:
         specifier: ^7.2.2
         version: 7.2.2
-
-  Backend/services/ecosystem/law-elite/gateway:
-    dependencies:
-      '@baalvion/auth-node':
-        specifier: workspace:*
-        version: link:../../../../packages/auth-node
-      dotenv:
-        specifier: ^16.0.3
-        version: 16.6.1
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
-      express-rate-limit:
-        specifier: ^7.5.0
-        version: 7.5.1(express@5.2.1)
-      http-proxy-middleware:
-        specifier: 3.0.7
-        version: 3.0.7
-      morgan:
-        specifier: ^1.12.0
-        version: 1.12.0
-
-  Backend/services/ecosystem/law-elite/services/case-service:
-    dependencies:
-      dotenv:
-        specifier: ^16.0.3
-        version: 16.6.1
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
-
-  Backend/services/ecosystem/law-elite/services/user-service:
-    dependencies:
-      dotenv:
-        specifier: ^16.0.3
-        version: 16.6.1
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
-      uuid:
-        specifier: 11.1.1
-        version: 11.1.1
 
   Backend/services/ecosystem/mining-service:
     dependencies:
@@ -3291,8 +3249,8 @@ importers:
         specifier: ^5.4.1
         version: 5.11.1
       multer:
-        specifier: 2.3.0
-        version: 2.3.0
+        specifier: 2.4.0
+        version: 2.4.0
       nodemailer:
         specifier: 9.1.1
         version: 9.1.1
@@ -3422,8 +3380,8 @@ importers:
         specifier: ^8.1.0
         version: 8.2.0
       multer:
-        specifier: 2.3.0
-        version: 2.3.0
+        specifier: 2.4.0
+        version: 2.4.0
       pg:
         specifier: ^8.20.0
         version: 8.22.0
@@ -13706,10 +13664,6 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  basic-auth@2.0.1:
-    resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
-    engines: {node: '>= 0.8'}
-
   basic-ftp@5.3.1:
     resolution: {integrity: sha512-bopVNp6ugyA150DDuZfPFdt1KZ5a94ZDiwX4hMgZDzF+GttD80lEy8kj98kbyhLXnPvhtIo93mdnLIjpCAeeOw==}
     engines: {node: '>=10.0.0'}
@@ -14193,10 +14147,6 @@ packages:
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
-
-  concat-stream@2.0.0:
-    resolution: {integrity: sha512-MWufYdFw53ccGjCA+Ol7XJYpAlW6/prSMzuPOTRnJGcGzuhLn4Scrz7qf6o8bROZ514ltazcIFJZevcfbo0x7A==}
-    engines: {'0': node >= 6.0}
 
   concurrently@8.2.2:
     resolution: {integrity: sha512-1dP4gpXFhei8IOtlXRE/T/4H88ElHgTiUzh71YUmtjTEHMSRS2Z/fgOxHSxxusGHogsRfxNq1vyAwxSC+EVyDg==}
@@ -17468,10 +17418,6 @@ packages:
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
 
-  morgan@1.12.0:
-    resolution: {integrity: sha512-OHpTRQwn2ezasILW8iKe+Yww1XsfWsZIpUOLF7RDb2g5GwO3trPaRwi7+8BDiJ7HFx2Kg2mfUdCBcVhwYlOz2g==}
-    engines: {node: '>= 0.8.0'}
-
   motion-dom@11.18.1:
     resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
 
@@ -17497,8 +17443,8 @@ packages:
   msgpackr@2.0.4:
     resolution: {integrity: sha512-o1C5KRmuRt+apqMr1HuGSqWStZoRBUpEsCsl15uM9VdAF1qHLtvMOU2En747EnTyEl6c4pzPewRMFF31s1CNbA==}
 
-  multer@2.3.0:
-    resolution: {integrity: sha512-cjNbm3sttszgZeGfJR124D+jFEfkXCVAsoPBmFn9X7UxmDSFHWqE2CoEj0vrmSpuAFnqWR1Szcm9QTsiHr60Xw==}
+  multer@2.4.0:
+    resolution: {integrity: sha512-7dqa0ZcFfzbefdTuIkzOSMvZWC0J7FLqBOjJUZvDCXShIURWKxAyTT1wHhnE5q19c7jOJf43IYYKjBmZVZmvhg==}
     engines: {node: '>= 10.16.0'}
 
   mute-stream@0.0.7:
@@ -18479,8 +18425,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-is@19.2.8:
-    resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
+  react-is@19.3.0:
+    resolution: {integrity: sha512-UpMYezM4v5/18F28aC66AEsjXIgE02kyEMH6yLdgLXu/UTfa1Ntwck/nNLrbqJsEXW7gPb0coNO9FQse9WTovA==}
 
   react-joyride@2.9.3:
     resolution: {integrity: sha512-1+Mg34XK5zaqJ63eeBhqdbk7dlGCFp36FXwsEvgpjqrtyywX2C6h9vr3jgxP0bGHCw8Ilsp/nRDzNVq6HJ3rNw==}
@@ -19851,9 +19797,6 @@ packages:
 
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
-
-  typedarray@0.0.6:
-    resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
 
   typescript-eslint@8.70.0:
     resolution: {integrity: sha512-P/W5cz70/cQAuKfY3xwQMWWTV7BvJ0mAQmi+9mBcsVPaBUpd6Ohpa+fECv9rBFrQcig86jAiNBFNWUqnTjr4pw==}
@@ -23592,7 +23535,7 @@ snapshots:
       '@nestjs/core': 11.1.28(@nestjs/common@11.1.28(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.28)(@nestjs/websockets@11.1.28)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       cors: 2.8.6
       express: 5.2.1
-      multer: 2.3.0
+      multer: 2.4.0
       path-to-regexp: 8.4.2
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -28506,10 +28449,6 @@ snapshots:
 
   baseline-browser-mapping@2.11.21: {}
 
-  basic-auth@2.0.1:
-    dependencies:
-      safe-buffer: 5.1.2
-
   basic-ftp@5.3.1: {}
 
   bcrypt@6.0.0:
@@ -29039,13 +28978,6 @@ snapshots:
       - supports-color
 
   concat-map@0.0.1: {}
-
-  concat-stream@2.0.0:
-    dependencies:
-      buffer-from: 1.1.2
-      inherits: 2.0.4
-      readable-stream: 3.6.2
-      typedarray: 0.0.6
 
   concurrently@8.2.2:
     dependencies:
@@ -30121,7 +30053,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.70.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.70.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -30143,7 +30075,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.70.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.70.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -33292,16 +33224,6 @@ snapshots:
 
   moment@2.30.1: {}
 
-  morgan@1.12.0:
-    dependencies:
-      basic-auth: 2.0.1
-      debug: 2.6.9
-      depd: 2.0.0
-      on-finished: 2.4.1
-      on-headers: 1.1.0
-    transitivePeerDependencies:
-      - supports-color
-
   motion-dom@11.18.1:
     dependencies:
       motion-utils: 11.18.1
@@ -33334,11 +33256,10 @@ snapshots:
     optionalDependencies:
       msgpackr-extract: 3.0.4
 
-  multer@2.3.0:
+  multer@2.4.0:
     dependencies:
       append-field: 1.0.0
       busboy: 1.6.0
-      concat-stream: 2.0.0
       type-is: 1.6.18
 
   mute-stream@0.0.7: {}
@@ -34068,12 +33989,12 @@ snapshots:
       '@jest/schemas': 30.4.1
       ansi-styles: 5.2.0
       react-is-18: react-is@18.3.1
-      react-is-19: react-is@19.2.8
+      react-is-19: react-is@19.3.0
 
   pretty-format@30.5.1:
     dependencies:
       '@jest/react-is-18': react-is@18.3.1
-      '@jest/react-is-19': react-is@19.2.8
+      '@jest/react-is-19': react-is@19.3.0
       '@jest/schemas': 30.5.0
       ansi-styles: 5.2.0
 
@@ -34455,7 +34376,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-is@19.2.8: {}
+  react-is@19.3.0: {}
 
   react-joyride@2.9.3(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
@@ -34920,7 +34841,8 @@ snapshots:
       has-symbols: 1.1.0
       isarray: 2.0.5
 
-  safe-buffer@5.1.2: {}
+  safe-buffer@5.1.2:
+    optional: true
 
   safe-buffer@5.2.1: {}
 
@@ -36192,8 +36114,6 @@ snapshots:
   typedarray-to-buffer@3.1.5:
     dependencies:
       is-typedarray: 1.0.0
-
-  typedarray@0.0.6: {}
 
   typescript-eslint@8.70.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3):
     dependencies:
