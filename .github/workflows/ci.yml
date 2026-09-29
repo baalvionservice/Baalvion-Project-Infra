@@ -2,13 +2,14 @@
 # CI is build + scan ONLY. It never pushes images and never deploys.
 #
 # deploy.yml — the 19-service pipeline this header used to name — was deleted
-# 2026-07-02. Two workflows ship to production now:
-#   • deploy-consolidated-box2.yml  — box2, the only live target (workflow_dispatch)
-#   • community-giftcard-deploy.yml — the only push-triggered deploy
+# 2026-07-02. deploy-consolidated-box2.yml and community-giftcard-deploy.yml (the
+# two AWS/box2 pipelines this comment used to point at) were removed 2026-09-29 —
+# AWS is fully retired, all backend now runs on the Hostinger VPS. The one live
+# ship-to-production pipeline is build-hostinger-images.yml (GHCR, on push to main).
 #
-# Image names referenced here are kept in sync with those two workflows' ECR repos
-# so a CI-scanned artifact maps 1:1 to a shipped image. The image set below is a
-# representative SUBSET of the fleet, not all of it.
+# Image names referenced here were kept in sync with the old AWS ECR repos; that
+# mapping is now stale and should be reconciled against build-hostinger-images.yml
+# instead. The image set below is a representative SUBSET of the fleet, not all of it.
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI Pipeline
 
@@ -57,6 +58,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Check pnpm overrides are in sync
         run: node scripts/check-lockfile-overrides.mjs
+
+      # Report-only for now: 144 pre-existing drift findings (Node/Turbo pins across
+      # Backend + Frontend Dockerfiles, see docs/VERSIONS.md) predate this check.
+      # Switch to --strict once scripts/check-version-drift.mjs --fix has been run
+      # and the resulting migration PR is merged.
+      - name: Check runtime version drift (Node/pnpm/Turbo)
+        run: node scripts/check-version-drift.mjs
 
   lint-and-typecheck:
     name: Lint & Typecheck
