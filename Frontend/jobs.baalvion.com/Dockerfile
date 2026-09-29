@@ -53,21 +53,22 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.10.4 run build --filter=jobs.baalvion.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3026 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-WORKDIR /app/Frontend/Baalvion-Jobs-Portal-main
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Baalvion-Jobs-Portal-main/.next/standalone /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Baalvion-Jobs-Portal-main/.next/static ./.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Baalvion-Jobs-Portal-main/public ./public
+WORKDIR /app/Frontend/jobs.baalvion.com
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/jobs.baalvion.com/.next/standalone /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/jobs.baalvion.com/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/jobs.baalvion.com/public ./public
 USER nextjs
 EXPOSE 3026
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3026),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Next standalone emits the workspace server.js under the package path. Absolute path —
 # a relative one here resolves against WORKDIR and double-nests
-# (.../Baalvion-Jobs-Portal-main/Frontend/Baalvion-Jobs-Portal-main/server.js, MODULE_NOT_FOUND).
-CMD ["node", "/app/Frontend/Baalvion-Jobs-Portal-main/server.js"]
+# (.../Frontend/jobs.baalvion.com/Frontend/jobs.baalvion.com/server.js, MODULE_NOT_FOUND).
+CMD ["node", "/app/Frontend/jobs.baalvion.com/server.js"]

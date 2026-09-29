@@ -8,7 +8,7 @@
 # Frontend/admin-platform/Dockerfile, and bakes the prod NEXT_PUBLIC_* into the client bundle.
 #
 # Build context = REPO ROOT:
-#   docker build -f Frontend/Law-Elite-Network-main/Dockerfile -t law-elite-web \
+#   docker build -f Frontend/lawelitenetwork.com/Dockerfile -t law-elite-web \
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://yourdomain.com \
 #     .
@@ -55,6 +55,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.10.4 run build --filter=lawelitenetwork.com
 
 # 4) Minimal runner (Next standalone server).
@@ -62,16 +63,16 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=9002 HOSTNAME=0.0.0.0 \
     CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/public CMS_WEBSITE_SLUG=law-elite-network
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-WORKDIR /app/Frontend/Law-Elite-Network-main
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Law-Elite-Network-main/.next/standalone /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Law-Elite-Network-main/.next/static ./.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Law-Elite-Network-main/public ./public
+WORKDIR /app/Frontend/lawelitenetwork.com
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/lawelitenetwork.com/.next/standalone /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/lawelitenetwork.com/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/lawelitenetwork.com/public ./public
 USER nextjs
 EXPOSE 9002
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||9002),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # WORKDIR is already the package path, so server.js is right here -- not
-# Frontend/Law-Elite-Network-main/server.js again (that duplicated path doesn't
+# Frontend/lawelitenetwork.com/server.js again (that duplicated path doesn't
 # exist and was never actually caught before because nothing had run this
 # image; CI only builds and CVE-scans it, it never starts the container).
 CMD ["node", "server.js"]
