@@ -187,7 +187,7 @@ module.exports = {
       GATEWAY_ORIGIN: process.env.GATEWAY_ORIGIN || 'http://localhost:3099',
     }),
     nextApp('brand-web', './Frontend/connect.baalvion.com', 3035),
-    nextApp('testrank-baalvion-web', './Frontend/testrank-baalvion', 3034),
+    nextApp('newaiskillsteam.baalvion.com-web', './Frontend/newaiskillsteam.baalvion.com', 3034),
     nextApp('dashboard-web', './Frontend/dashboard.baalvion.com', 3024),
     nextApp('gti-web', './Frontend/Global-Trade-Infrastructure-main', 9003),
     nextApp('imperialpedia-web', './Frontend/Imperialpedia-nextjs-main', 3029),

@@ -27,7 +27,7 @@ const SITES = [
   ['amarisemaisonavenue.com', 'Amarise Maison Avenue', 'amarise-maison-avenue', 'enterprise', ['pages','portfolio_item','news'], 'amarisemaisonavenue.com', 'order-service', 'commerce', true],
   ['imperialpedia.com',       'Imperialpedia',          'imperialpedia',         'enterprise', ['pages','article','doc'],       'Imperialpedia-nextjs-main',      'imperialpedia-service','imperialpedia', true],
   ['lawelitenetwork.com',     'Law Elite Network',      'law-elite-network',     'enterprise', ['pages','article','news'],      'lawelitenetwork.com',  'law-service',          'legal',  true],
-  ['controlthemarket.com',    'Control The Market',     'control-the-market',    'enterprise', ['pages','post','news'],         'controlthemarket-main',   'ctm-service',          'ctm',    true],
+  ['controlthemarket.com',    'Control The Market',     'control-the-market',    'enterprise', ['pages','post','news'],         'newaiskillsteam.baalvion.com',   'ctm-service',          'ctm',    true],
   ['mining.baalvion.com',     'Baalvion Mining',        'baalvion-mining',       'enterprise', ['pages','news'],                'mining.baalvion.com',    'mining-service',       'mining', true],
   ['jobs.baalvion.com',       'Baalvion Jobs',          'baalvion-jobs',         'enterprise', ['pages','job_listing'],         'jobs.baalvion.com','jobs-service',        'jobs',   true],
   ['ir.baalvion.com',         'Baalvion Investor Relations','baalvion-ir',       'enterprise', ['pages','news','doc'],          'ir.baalvion.com',        'ir-service',           'ir',     true],

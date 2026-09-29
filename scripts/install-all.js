@@ -18,7 +18,7 @@ const frontends = [
     'Frontend/jobs.baalvion.com',
     'Frontend/connect.baalvion.com',
     'Frontend/dashboard.baalvion.com',
-    'Frontend/testrank-baalvion',
+    'Frontend/newaiskillsteam.baalvion.com',
     'Frontend/Imperialpedia-nextjs-main',
     'Frontend/ir.baalvion.com',
     'Frontend/mining.baalvion.com',
