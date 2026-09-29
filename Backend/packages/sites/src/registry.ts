@@ -156,6 +156,19 @@ export const SITES: readonly Site[] = Object.freeze([
     legalEntity: null,
   },
   {
+    id: 'canwemarry',
+    name: 'CanWeMarry',
+    domains: ['canwemarry.baalvion.com'],
+    apexOwnsSubdomains: false,
+    status: 'live',
+    // Live in deploy/stack/caddy/Caddyfile (app-canwemarry-web:3071) but not previously in
+    // this registry at all -- added 2026-09-29 during the Frontend rename/cleanup pass.
+    rails: [],
+    railsBasis: 'none',
+    services: ['canwemarry-service'],
+    legalEntity: null,
+  },
+  {
     id: 'jobs',
     name: 'TalentOS',
     domains: ['jobs.baalvion.com'],
@@ -262,6 +275,21 @@ export const SITES: readonly Site[] = Object.freeze([
     rails: [],
     railsBasis: 'none',
     services: ['cms-service'],
+    legalEntity: null,
+  },
+  {
+    id: 'newaiskillsteam',
+    name: 'NEW AI Skills Team',
+    domains: ['newaiskillsteam.baalvion.com'],
+    apexOwnsSubdomains: false,
+    status: 'not_live',
+    // Frontend/newaiskillsteam.baalvion.com (renamed 2026-09-29 from testrank-baalvion,
+    // itself renamed from controlthemarket-main). Owner-directed rebrand; no Caddy block or
+    // DNS wired up yet. Note: this is NOT the same property as the 'ctm' entry above --
+    // controlthemarket.com is a separate, still-live Vercel deployment unrelated to this folder.
+    rails: [],
+    railsBasis: 'none',
+    services: ['ctm-service'],
     legalEntity: null,
   },
 ]);
