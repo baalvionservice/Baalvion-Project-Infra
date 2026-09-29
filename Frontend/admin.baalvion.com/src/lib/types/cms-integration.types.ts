@@ -31,13 +31,17 @@ export interface IntegrationTestResult {
 }
 
 export interface WebsiteIntegrationSummary {
-  websiteId: string;
+  // null for a registry site that has no cms_websites row yet (nothing configured there).
+  websiteId: string | null;
   name: string;
   slug: string;
   total: number;
   configured: number;
   hasPayment: boolean;
   hasApi: boolean;
+  // Present only when the caller is a platform admin (registry-backed rollup).
+  siteStatus?: 'live' | 'not_live' | 'internal';
+  hasCmsRecord?: boolean;
 }
 
 // ── Provider catalog: drives which fields the console renders per integration ──

@@ -13,6 +13,7 @@ const { AppError } = require('../utils/errors');
 const secretCrypto = require('../utils/secretCrypto');
 const { getSdk } = require('../platform/sdk');
 const { emitSafe, CmsEvents } = require('../platform/events');
+const { SITES } = require('@baalvion/sites');
 
 // Minimum fields that must be present for an integration to count as testable.
 const PROVIDER_REQUIRED = {
@@ -275,36 +276,74 @@ async function resolve(websiteSlug, { provider, category } = {}) {
     }));
 }
 
+// A cms_websites.domain value matches a registry entry if it equals (case-insensitively)
+// any of the entry's domains. cms_websites rows are per-tenant CMS installs, not every
+// Baalvion property has one — this only tells us which registry sites already have keys.
+function findSiteForDomain(domain) {
+    const needle = String(domain || '').toLowerCase();
+    return SITES.find((s) => s.domains.some((d) => d.toLowerCase() === needle)) || null;
+}
+
 /**
  * Per-website integration/connection status rollup for the dashboard "Website
- * Connections" widget. Org-scoped for tenant admins; a platform principal sees
- * every website across orgs (so the platform owner's dashboard isn't empty when
- * their token's org doesn't own the sites). Scope = { orgId, isPlatformAdmin }.
+ * Connections" widget.
+ *
+ * For a platform principal this lists every property in the canonical site registry
+ * (@baalvion/sites), not just the ones that happen to have a cms_websites row — cms_websites
+ * only exists for tenants actually using the CMS module, so keying off it alone silently
+ * dropped every other Baalvion property from the dashboard. Registry sites are merged with
+ * any matching cms_websites integration data by domain; a site with no CMS record is honestly
+ * reported with zero configured integrations rather than omitted.
+ * Tenant admins remain org-scoped to their own cms_websites rows, since the registry has no
+ * notion of organization ownership.
  */
 async function summary(scope) {
     const websites = await CmsWebsite.findAll({
         where: { ...orgFilter(scope) },
-        attributes: ['id', 'name', 'slug'],
+        attributes: ['id', 'name', 'slug', 'domain'],
         order: [['name', 'ASC']],
     });
-    if (websites.length === 0) return [];
-    const integrations = await CmsWebsiteIntegration.findAll({
-        where: { websiteId: websites.map((w) => w.id) },
-    });
+    const integrations = websites.length
+        ? await CmsWebsiteIntegration.findAll({ where: { websiteId: websites.map((w) => w.id) } })
+        : [];
     const byWebsite = {};
     for (const i of integrations) {
         (byWebsite[i.websiteId] = byWebsite[i.websiteId] || []).push(i);
     }
-    return websites.map((w) => {
+    const rollup = (w) => {
         const rows = byWebsite[w.id] || [];
         return {
-            websiteId: w.id,
-            name: w.name,
-            slug: w.slug,
             total: rows.length,
             configured: rows.filter((i) => i.status === 'configured').length,
             hasPayment: rows.some((i) => i.category === 'payment' && i.status === 'configured'),
             hasApi: rows.some((i) => i.category === 'api' && i.status === 'configured'),
+        };
+    };
+
+    const isPlatformAdmin = Boolean(scope && typeof scope === 'object' && scope.isPlatformAdmin);
+    if (!isPlatformAdmin) {
+        return websites.map((w) => ({
+            websiteId: w.id,
+            name: w.name,
+            slug: w.slug,
+            ...rollup(w),
+        }));
+    }
+
+    const websiteBySiteId = {};
+    for (const w of websites) {
+        const site = findSiteForDomain(w.domain);
+        if (site) websiteBySiteId[site.id] = w;
+    }
+    return SITES.map((site) => {
+        const w = websiteBySiteId[site.id];
+        return {
+            websiteId: w ? w.id : null,
+            name: site.name,
+            slug: site.id,
+            siteStatus: site.status,
+            hasCmsRecord: Boolean(w),
+            ...(w ? rollup(w) : { total: 0, configured: 0, hasPayment: false, hasApi: false }),
         };
     });
 }
