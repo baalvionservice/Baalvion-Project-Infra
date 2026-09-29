@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 # Configure Apache DocumentRoot
 ENV APACHE_DOCUMENT_ROOT /var/www/html
