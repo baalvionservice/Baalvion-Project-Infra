@@ -57,7 +57,7 @@ module.exports = {
     next('baalvion-com-web', 'baalvion.com', 3043, 'dev'),
     next('imperialpedia-web', 'Imperialpedia-nextjs-main', 3029),
     next('gti-web', 'Global-Trade-Infrastructure-main', 9003),
-    next('law-web', 'Law-Elite-Network-main', 9002),
+    next('law-web', 'lawelitenetwork.com', 9002),
     next('amarise-web', 'amarisemaisonavenue.com', 3033),
     // ctm-web removed — controlthemarket-main was an empty leftover; the real app
     // already lives at testrank-baalvion (see chore/ctm-rename-testrank-baalvion).

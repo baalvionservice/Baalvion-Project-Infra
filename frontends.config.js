@@ -28,7 +28,7 @@ module.exports = {
     next('jobs-web',         'jobs.baalvion.com',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
     next('testrank-baalvion-web', 'testrank-baalvion',           3034),
     next('dashboard-web',    'dashboard.baalvion.com',   3024),
-    next('law-web',          'Law-Elite-Network-main',           9002),
+    next('law-web',          'lawelitenetwork.com',           9002),
     next('brand-web',        'connect.baalvion.com',             3035),
     next('mining-web',       'mining.baalvion.com',             3028),
     // Absent until 2026-09: CI derives its frontend build matrix from this list,
