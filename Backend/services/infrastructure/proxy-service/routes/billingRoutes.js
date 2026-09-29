@@ -1,6 +1,6 @@
 'use strict';
 /**
- * BFF checkout — the ONLY payment path the Proxy-BaalvionStack frontend uses.
+ * BFF checkout — the ONLY payment path the proxy.baalvionstack.com frontend uses.
  *
  * It does NOT implement payment logic or hold provider keys; it forwards to the
  * SDK-native payment-service server-to-server (internal-auth), which resolves the

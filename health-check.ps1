@@ -98,7 +98,7 @@ $frontends = @(
   @('brand-connector',          3035, '/'),
   @('Global-Trade-Infra',       9003, '/'),
   @('For-Investors',            8080, '/'),
-  @('Proxy-BaalvionStack',      8090, '/')
+  @('proxy.baalvionstack.com',      8090, '/')
 )
 
 $up = 0; $down = 0

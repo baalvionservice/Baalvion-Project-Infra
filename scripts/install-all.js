@@ -22,7 +22,7 @@ const frontends = [
     'Frontend/Imperialpedia-nextjs-main',
     'Frontend/IR-Baalvion-main',
     'Frontend/mining.baalvion.com',
-    'Frontend/Proxy-BaalvionStack',
+    'Frontend/proxy.baalvionstack.com',
     'Frontend/admin-platform',
 ];
 

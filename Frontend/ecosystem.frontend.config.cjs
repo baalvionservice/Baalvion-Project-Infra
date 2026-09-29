@@ -67,6 +67,6 @@ module.exports = {
     next('admin-platform', 'admin-platform', 3030),
     next('dashboard-web', 'dashboard.baalvion.com', 3024),
     vite('founders-web', 'For Invstors and Founders', 8082),
-    vite('proxy-web', 'Proxy-BaalvionStack', 8080),
+    vite('proxy-web', 'proxy.baalvionstack.com', 8080),
   ],
 };
