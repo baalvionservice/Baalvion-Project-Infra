@@ -14,9 +14,9 @@ class SearchCtrl extends CI_Controller {
     }
 
     public function index(){
-        $q = trim($this->input->get('q', TRUE));
+        $q = trim((string) $this->input->get('q', TRUE));
         if (empty($q)) {
-            $q = trim($this->input->post('q', TRUE));
+            $q = trim((string) $this->input->post('q', TRUE));
         }
 
         $data['query'] = $q;
@@ -54,7 +54,7 @@ class SearchCtrl extends CI_Controller {
     }
 
     public function api(){
-        $q = trim($this->input->get('q', TRUE));
+        $q = trim((string) $this->input->get('q', TRUE));
         if (empty($q) || strlen($q) < 2) {
             echo json_encode(array('status' => 'ok', 'results' => array()));
             return;
