@@ -40,7 +40,7 @@
   // Deliberately not `turbo run build --filter=...`: that would put `next build` behind Turbo's
   // strict env mode, which has already silently dropped build-time config on other properties.
   "build": {
-    "command": "pnpm --filter baalvion-com-web^... run build && npm run build"
+    "command": "pnpm --filter baalvion.com^... run build && npm run build"
   },
   "assets": {
     "directory": "./out",
