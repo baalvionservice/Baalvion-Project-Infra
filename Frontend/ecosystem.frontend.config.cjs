@@ -64,7 +64,7 @@ module.exports = {
     next('brand-web', 'connect.baalvion.com', 3035),
     next('mining-web', 'mining.baalvion.com', 3028),
     next('jobs-web', 'Baalvion-Jobs-Portal-main', 3026), // production `next start`
-    next('admin-platform', 'admin-platform', 3030),
+    next('admin-platform', 'admin.baalvion.com', 3030),
     next('dashboard-web', 'dashboard.baalvion.com', 3024),
     vite('founders-web', 'For Invstors and Founders', 8082),
     vite('proxy-web', 'proxy.baalvionstack.com', 8080),

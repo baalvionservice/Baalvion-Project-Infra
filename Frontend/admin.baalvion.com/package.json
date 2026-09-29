@@ -1,5 +1,5 @@
 {
-  "name": "baalvion-admin-platform",
+  "name": "admin.baalvion.com",
   "engines": {
     "node": ">=24",
     "pnpm": ">=9"
