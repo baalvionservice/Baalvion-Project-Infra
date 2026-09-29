@@ -7,7 +7,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune cms-service --docker
+RUN pnpm dlx turbo@2.10.4 prune cms-service --docker
 
 FROM base AS installer
 COPY .npmrc ./
@@ -31,7 +31,7 @@ RUN pnpm -r --filter "./Backend/packages/*" run build
 # The shared tsconfig chain (root base + Backend shim) is not part of the pruned output → copy it.
 COPY tsconfig.base.json ./tsconfig.base.json
 COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=cms-service...
+RUN pnpm dlx turbo@2.10.4 run build --filter=cms-service...
 RUN pnpm deploy --filter=cms-service --prod /out
 
 FROM node:26.9-alpine AS final

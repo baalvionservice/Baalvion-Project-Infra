@@ -32,7 +32,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3030';
 const EMAIL = process.env.ADMIN_EMAIL || 'sa.test@baalvion.local';
 const PASSWORD = process.env.ADMIN_PASSWORD || 'TestPass!2026';
 const APP_DIR = process.env.APP_DIR
-  || join(process.cwd(), 'Frontend/admin-platform/src/app');
+  || join(process.cwd(), 'Frontend/admin.baalvion.com/src/app');
 
 // Ports the console talks to, from src/lib/api/client.ts + .env.local.
 const SERVICES = {

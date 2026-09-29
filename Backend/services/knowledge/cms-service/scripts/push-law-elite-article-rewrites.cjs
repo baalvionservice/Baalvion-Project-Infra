@@ -3,7 +3,7 @@
  * AdSense-readiness content pass (Law Elite Network): pushes locally-drafted
  * editorial rewrites of the 28 kept articles (3 surviving categories --
  * Maritime & Offshore Injury Law, Cruise Ship & Passenger Vessel Accidents,
- * Personal Injury Lawyer -- see Frontend/Law-Elite-Network-main/src/lib/
+ * Personal Injury Lawyer -- see Frontend/lawelitenetwork.com/src/lib/
  * category-slugs.ts's CURRENT_CATEGORY_SLUGS) into the CMS.
  *
  * WHY: the site's original live content was flagged as reading templated/

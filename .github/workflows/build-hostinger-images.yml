@@ -29,7 +29,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Frontend/admin-platform/**'
+      - 'Frontend/admin.baalvion.com/**'
       - 'Backend/packages/**'
       - '.github/workflows/build-hostinger-images.yml'
   workflow_dispatch: {}
@@ -58,7 +58,7 @@ jobs:
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Log in to GHCR
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -77,13 +77,29 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
-          file: Frontend/admin-platform/Dockerfile
+          file: Frontend/admin.baalvion.com/Dockerfile
           push: false
           load: true
           provenance: false
           tags: baalvion-admin-web:scan
           cache-from: type=gha,scope=hostinger-admin-web
           cache-to: type=gha,mode=max,scope=hostinger-admin-web
+          # NEXT_PUBLIC_* are baked in at build time -- without these the browser bundle
+          # ships with undefined API URLs. Carried over from the deleted deploy-consolidated.yml
+          # (same values, same admin.baalvion.com origin) -- this workflow was missing them
+          # entirely until now, so every image it pushed to GHCR to date was broken.
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://admin.baalvion.com
+            NEXT_PUBLIC_GATEWAY_URL=/auth-bff
+            NEXT_PUBLIC_CMS_API_URL=https://admin.baalvion.com/api-bff/knowledge/cms/api/v1
+            NEXT_PUBLIC_AUTH_URL=https://admin.baalvion.com/auth-bff
+            NEXT_PUBLIC_ADMIN_API_URL=https://admin.baalvion.com/api-bff/platform/admin/v1
+            NEXT_PUBLIC_SESSION_API_URL=https://admin.baalvion.com/api-bff/identity/session/v1
+            NEXT_PUBLIC_OAUTH_URL=https://admin.baalvion.com/api-bff/identity/oauth
+            NEXT_PUBLIC_CRM_API_URL=https://admin.baalvion.com/api-bff/ecosystem/crm/api/v1
+            NEXT_PUBLIC_SERVICE_URLS={"jobs":"https://admin.baalvion.com/api-bff/ecosystem/jobs/api/v1","mining":"https://admin.baalvion.com/api-bff/ecosystem/mining/api/v1","imperialpedia":"https://admin.baalvion.com/api-bff/knowledge/imperialpedia/api/v1","realEstate":"https://admin.baalvion.com/api-bff/ecosystem/real-estate/api/v1","brand":"https://admin.baalvion.com/api-bff/ecosystem/brand-connector/api/v1","market":"https://admin.baalvion.com/api-bff/commerce/market/api/v1","ir":"https://admin.baalvion.com/api-bff/ecosystem/ir/api/v1","dashboard":"https://admin.baalvion.com/api-bff/platform/dashboard/api/v1","about":"https://admin.baalvion.com/api-bff/ecosystem/about/api/v1","ctm":"https://admin.baalvion.com/api-bff/ecosystem/ctm/api/v1","commerce":"https://admin.baalvion.com/api-bff/commerce/commerce/api/v1","inventory":"https://admin.baalvion.com/api-bff/commerce/inventory/api/v1","fulfillment":"https://admin.baalvion.com/api-bff/commerce/fulfillment/api/v1","law":"https://admin.baalvion.com/api-bff/knowledge/law/v1","notifications":"https://admin.baalvion.com/api-bff/infrastructure/notification/v1","rbac":"https://admin.baalvion.com/api-bff/identity/rbac/api/v1","audit":"https://admin.baalvion.com/api-bff/infrastructure/audit/v1","crm":"https://admin.baalvion.com/api-bff/ecosystem/crm/api/v1","marketplace":"https://admin.baalvion.com/api-bff/marketplace/marketplace/api/v1","news":"https://admin.baalvion.com/api-bff/knowledge/news/v1/admin"}
+            NEXT_PUBLIC_GTI_ADMIN_URL=https://trade.baalvion.com
+            NEXT_PUBLIC_APP_ENV=production
 
       # Advisory, not a merge gate — same philosophy as box2's admin-web build
       # ("admin console is a nice-to-have, never blocks"): scan results are visible

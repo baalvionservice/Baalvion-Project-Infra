@@ -1,0 +1,61 @@
+# company-unified-dashboard web — Next 15 standalone image (pnpm + Turborepo monorepo).
+# Build context = REPO ROOT:
+#   docker build -f Frontend/dashboard.baalvion.com/Dockerfile -t dashboard-web .
+#
+# NEXT_PUBLIC_* that the CLIENT bundle reads are baked at BUILD time — pass them as --build-arg
+# (see ARGs below), pointed at the PUBLIC prod origin. The /auth-bff + /api-bff rewrite target
+# (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at SERVER START, so it stays a RUNTIME env
+# (set it to the internal gateway, e.g. http://auth-gateway:3099, in docker-compose).
+FROM node:26.9-alpine AS base
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
+WORKDIR /app
+
+# 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).
+FROM base AS pruner
+COPY . .
+RUN npx turbo@2.10.4 prune dashboard.baalvion.com --docker
+
+# 2) Install pruned deps.
+# --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override
+# ("uuid@11": "11.1.1") and `turbo prune` drops the matching package snapshot from the pruned
+# lockfile, so a frozen install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY). Non-frozen lets pnpm
+# repair the gap in-image. The root lockfile itself is consistent (frozen install passes on the host).
+FROM base AS installer
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --no-frozen-lockfile
+
+# 3) Build (NEXT_PUBLIC_* are inlined into the client bundle + middleware at build time).
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_REALTIME_WS_URL
+# Must equal the gateway's COOKIE_REFRESH_NAME, else the route-gate middleware 307-loops to /login.
+ARG NEXT_PUBLIC_REFRESH_COOKIE_NAME=baalvion_refresh
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG DASHBOARD_API_URL
+ENV DASHBOARD_API_URL=$DASHBOARD_API_URL
+ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
+COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
+RUN pnpm turbo run build --filter=dashboard.baalvion.com
+
+# 4) Minimal runner (standalone server).
+FROM base AS runner
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3024 HOSTNAME=0.0.0.0
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+WORKDIR /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/.next/static ./Frontend/dashboard.baalvion.com/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/public ./Frontend/dashboard.baalvion.com/public
+USER nextjs
+EXPOSE 3024
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3024),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
+# Standalone server entrypoint is nested under the app path in a monorepo build.
+CMD ["node", "Frontend/dashboard.baalvion.com/server.js"]

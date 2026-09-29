@@ -410,7 +410,7 @@ services:
   # ── Admin Platform (optional: production only — use npm run dev locally) ─────
   admin-platform:
     build:
-      context: ./Frontend/admin-platform
+      context: ./Frontend/admin.baalvion.com
       dockerfile: Dockerfile
     container_name: baalvion-admin
     restart: unless-stopped

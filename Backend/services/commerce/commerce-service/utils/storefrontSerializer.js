@@ -1,7 +1,7 @@
 'use strict';
 
 // Maps commerce-service models into the exact shapes the Amarisé storefront renders
-// (Frontend/AmariseMaisonAvenue-main/src/lib/types.ts: Product / Category / Department /
+// (Frontend/amarisemaisonavenue.com/src/lib/types.ts: Product / Category / Department /
 // Collection). Relational data (price → default variant, images → media, taxonomy →
 // categories, collection membership → join table) comes from proper columns; app-specific
 // luxury attributes (isVip, regions, condition, colors, sizes, rating…) live in the

@@ -1,0 +1,66 @@
+{
+  // Cloudflare Workers Static Assets — serves the Next.js static export in `out/`, with a thin
+  // Worker (worker.ts) in front that proxies `/auth-bff/*` to the central auth-service so the
+  // embedded /signin form is first-party. Everything else is served straight from `out/`.
+  // Deploy:  npx wrangler deploy
+  // Preview: npx wrangler dev
+  "name": "baalvion",
+  "compatibility_date": "2024-11-01",
+  "main": "worker.ts",
+  // `out/` is a build artifact and is gitignored, so it does NOT exist in a fresh clone.
+  // Cloudflare Workers Builds deploys from a fresh clone, so without this the deploy failed
+  // on every push with:
+  //   X [ERROR] The directory specified by the "assets.directory" field in your
+  //             configuration file does not exist:  .../baalvion-com-main/out
+  // Declaring the build here (rather than relying on the Workers Builds dashboard's build
+  // command) keeps it version-controlled and makes `wrangler deploy` self-contained
+  // everywhere — CI, the dashboard, and a developer's laptop behave identically.
+  // wrangler runs this before both `deploy` and `dev`, so package.json's deploy/preview
+  // scripts must NOT also run `next build` or the site would be built twice.
+  //
+  // ⚠️  The "Build command" field in the Workers Builds dashboard
+  //     (Settings → Build) MUST STAY EMPTY. It is passed straight to /bin/sh, so a
+  //     human-readable note in that field is executed as a command. It previously held:
+  //         npm run build (runs next build, static export to out/)
+  //     which failed EVERY build across at least seven PRs with:
+  //         /bin/sh: 1: Syntax error: "(" unexpected
+  //     Nothing about the site was broken — baalvion.com kept serving the last good
+  //     deploy — so it read as harmless red CI while shipping was silently frozen.
+  //     Keep the build step here in version control, where review can catch a typo.
+  //
+  // The command builds this app's workspace dependencies before `next build`. Both
+  // @baalvion/company and @baalvion/design resolve their entrypoints through `dist/`, which is
+  // gitignored and only exists once tsup has run. Nothing in the Cloudflare fresh clone runs it,
+  // so from the commit that added the @baalvion/company import onward every build stopped at:
+  //     ./src/components/site-footer.tsx
+  //     Module not found: Can't resolve '@baalvion/company'
+  //     > Build failed because of webpack errors
+  // `<pkg>^...` is pnpm's "dependencies of, excluding the package itself" filter, so a workspace
+  // dependency added later is built without anyone remembering to edit this line.
+  // Deliberately not `turbo run build --filter=...`: that would put `next build` behind Turbo's
+  // strict env mode, which has already silently dropped build-time config on other properties.
+  "build": {
+    "command": "pnpm --filter baalvion.com^... run build && npm run build"
+  },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+  "vars": {
+    // OPERATOR: set to the real auth-service base reachable from Cloudflare's edge.
+    // Override per-env with `wrangler secret put AUTH_SERVICE_URL` if it should not live in source.
+    //
+    // `api.baalvion.com` was wrong: worker.ts appends `/v1/auth`, and `api.baalvion.com/v1/auth/*`
+    // falls through Caddy to the proxy-service BFF — a DIFFERENT service with its own tenant-auth
+    // and its own `email_otps` table that was never created (sql/004_email_otp_login.sql is
+    // unapplied there). Sign-in 500'd with `relation "email_otps" does not exist`.
+    //
+    // `auth-api.baalvion.com` is the central auth-service exposed at root for exactly this
+    // same-origin /auth-bff/* pattern, so `/v1/auth/email/otp/{request,verify}` resolve directly.
+    // NOT the `api.baalvion.com/api/v1/identity/auth/v1/auth` path: Caddy routes that to the
+    // auth-GATEWAY, whose otp/verify answers `{ user, csrfToken }` — auth-api.ts requires the
+    // auth-service `{ success, data: { accessToken } }` envelope and would read `data` as undefined.
+    "AUTH_SERVICE_URL": "https://auth-api.baalvion.com"
+  }
+}
