@@ -41,6 +41,7 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm turbo run build --filter=newaiskillsteam.baalvion.com
 
 # 4) Minimal runner (standalone server).
@@ -48,12 +49,12 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/.next/static ./Frontend/testrank-baalvion/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/public ./Frontend/testrank-baalvion/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/newaiskillsteam.baalvion.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/newaiskillsteam.baalvion.com/.next/static ./Frontend/newaiskillsteam.baalvion.com/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/newaiskillsteam.baalvion.com/public ./Frontend/newaiskillsteam.baalvion.com/public
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
-CMD ["node", "Frontend/testrank-baalvion/server.js"]
+CMD ["node", "Frontend/newaiskillsteam.baalvion.com/server.js"]

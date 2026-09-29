@@ -38,6 +38,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production BUILD_STANDALONE=1
 ENV SITE_URL=${SITE_URL} NEXT_PUBLIC_SITE_URL=${SITE_URL}
 COPY --from=pruner /app/out/full/ ./
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 # --env-mode=loose: turbo 2.x filters the task environment to what turbo.json declares, and
 # BUILD_STANDALONE is not declared there. Strictly filtered, it never reaches next.config.ts,
 # `output: 'standalone'` silently does not apply, and the build succeeds while producing no
@@ -54,13 +55,13 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3071 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/CanWeMarry-main/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/CanWeMarry-main/.next/static ./Frontend/CanWeMarry-main/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/CanWeMarry-main/public ./Frontend/CanWeMarry-main/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/canwemarry.baalvion.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/canwemarry.baalvion.com/.next/static ./Frontend/canwemarry.baalvion.com/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/canwemarry.baalvion.com/public ./Frontend/canwemarry.baalvion.com/public
 USER nextjs
 EXPOSE 3071
 # The app has no /api/health route, so the healthcheck asks for the home page. <500 is the
 # right bar: it proves the server renders, and does not fail the container on a 404.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3071)+'/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-CMD ["node", "Frontend/CanWeMarry-main/server.js"]
+CMD ["node", "Frontend/canwemarry.baalvion.com/server.js"]

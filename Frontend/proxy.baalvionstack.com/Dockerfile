@@ -7,7 +7,7 @@
 # the httpOnly refresh cookie flows; nginx handles that (target = AUTH_PROXY_TARGET runtime env).
 #
 # Build context = REPO ROOT:
-#   docker build -f Frontend/Proxy-BaalvionStack/Dockerfile -t proxy-web \
+#   docker build -f Frontend/proxy.baalvionstack.com/Dockerfile -t proxy-web \
 #     --build-arg VITE_API_PLATFORM_BASE_URL=https://api.baalvion.com/api/v1/infrastructure/proxy/v1 \
 #     --build-arg VITE_API_AUTH_BASE_URL=https://api.baalvion.com/api/v1/identity/auth/v1/auth \
 #     --build-arg VITE_GATEWAY_URL=https://api.baalvion.com \
@@ -40,14 +40,15 @@ ARG VITE_PAYU_ACTION_URL
 ENV NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.10.4 run build --filter=proxy.baalvionstack.com
 
 # 4) Static runner — non-root nginx (uid 101), listens on 8080.
 FROM nginxinc/nginx-unprivileged:1.31-alpine AS runner
 ENV AUTH_PROXY_TARGET=https://api.baalvion.com/api/v1/identity/auth/v1/auth
 ENV AUTH_PROXY_HOST=api.baalvion.com
-COPY --chown=nginx:nginx Frontend/Proxy-BaalvionStack/nginx.conf.template /etc/nginx/templates/default.conf.template
-COPY --from=installer --chown=nginx:nginx /app/Frontend/Proxy-BaalvionStack/dist /usr/share/nginx/html
+COPY --chown=nginx:nginx Frontend/proxy.baalvionstack.com/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=installer --chown=nginx:nginx /app/Frontend/proxy.baalvionstack.com/dist /usr/share/nginx/html
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD ["sh","-c","wget -qO- http://127.0.0.1:8080/healthz || exit 1"]

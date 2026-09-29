@@ -5,7 +5,7 @@
 # monorepo-aware (turbo prune + pnpm) and bakes the prod NEXT_PUBLIC_* into the client bundle.
 #
 # Build context = REPO ROOT:
-#   docker build -f Frontend/admin-platform/Dockerfile -t admin-web \
+#   docker build -f Frontend/admin.baalvion.com/Dockerfile -t admin-web \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://admin.baalvion.com \
 #     --build-arg NEXT_PUBLIC_GATEWAY_URL=https://api.baalvion.com \
 #     .
@@ -66,22 +66,23 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.10.4 run build --filter=admin.baalvion.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3030 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-WORKDIR /app/Frontend/admin-platform
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/standalone /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/static ./.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/public ./public
+WORKDIR /app/Frontend/admin.baalvion.com
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/.next/standalone /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/public ./public
 USER nextjs
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # WORKDIR is already the package path, so server.js is right here -- not
-# Frontend/admin-platform/server.js again (that duplicated path doesn't exist
+# Frontend/admin.baalvion.com/server.js again (that duplicated path doesn't exist
 # and was never actually caught before because nothing had run this image;
 # CI only builds and CVE-scans it, it never starts the container).
 CMD ["node", "server.js"]
