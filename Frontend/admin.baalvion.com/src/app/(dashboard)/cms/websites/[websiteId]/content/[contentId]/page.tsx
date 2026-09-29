@@ -15,6 +15,17 @@ import { flattenCategoryTree } from '@/lib/types/cms-taxonomy.types';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 
+// Law Elite serves articles at /<category>/<slug>; a bare /<slug> 404s. An article
+// with no category falls back to /article/<slug>, which the site redirects.
+function lawElitePath(
+  slug: string,
+  categoryIds: string[] | undefined,
+  categories: { id: string; slug: string }[],
+): string {
+  const category = categories.find((c) => categoryIds?.includes(c.id));
+  return category ? `/${category.slug}/${slug}` : `/article/${slug}`;
+}
+
 export default function ContentEditorPage({
   params,
 }: {
@@ -105,7 +116,9 @@ export default function ContentEditorPage({
         categoryIds: content.categoryIds,
         categories: flattenCategoryTree(categoryTree ?? []),
       })
-    : `/${content.slug}`;
+    : website?.slug === 'law-elite-network' && content.type === 'article'
+      ? lawElitePath(content.slug, content.categoryIds, flattenCategoryTree(categoryTree ?? []))
+      : `/${content.slug}`;
   const liveUrl = liveBase ? `${liveBase}${publicPath}` : null;
   const isPublished = content.status === 'published';
 
