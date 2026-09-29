@@ -51,7 +51,7 @@ const vite = (name, dir, port) => ({
 module.exports = {
   apps: [
     next('about-web', 'about.baalvion.com', 3020),
-    next('ir-web', 'IR-Baalvion-main', 3027),
+    next('ir-web', 'ir.baalvion.com', 3027),
     // baalvion-com uses `output: 'export'` (static) + Cloudflare/wrangler in prod,
     // so `next start` refuses to serve it. Run `next dev` locally instead.
     next('baalvion-com-web', 'baalvion.com', 3043, 'dev'),

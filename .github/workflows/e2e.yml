@@ -107,7 +107,7 @@ jobs:
       # ratchet in scripts/lint-ratchet.mjs. Without it this build fails on IR's existing
       # baselined debt, which would make the e2e gate red for reasons that are not e2e.
       - name: Build the IR frontend
-        working-directory: Frontend/IR-Baalvion-main
+        working-directory: Frontend/ir.baalvion.com
         env:
           NODE_ENV: production
         run: pnpm exec next build --no-lint
@@ -126,7 +126,7 @@ jobs:
           curl -sf http://127.0.0.1:3008/health
 
       - name: Start the IR frontend
-        working-directory: Frontend/IR-Baalvion-main
+        working-directory: Frontend/ir.baalvion.com
         env:
           NODE_ENV: production
         run: |

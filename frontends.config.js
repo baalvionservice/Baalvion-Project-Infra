@@ -22,7 +22,7 @@ module.exports = {
   apps: [
     // --- Next.js apps ---
     next('about-web',        'about.baalvion.com',              3020),
-    next('ir-web',           'IR-Baalvion-main',                 3027),
+    next('ir-web',           'ir.baalvion.com',                 3027),
     next('amarise-web',      'amarisemaisonavenue.com',         3033),
     next('gti-web',          'Global-Trade-Infrastructure-main', 9003),
     next('jobs-web',         'Baalvion-Jobs-Portal-main',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),

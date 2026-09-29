@@ -20,7 +20,7 @@ const frontends = [
     'Frontend/dashboard.baalvion.com',
     'Frontend/testrank-baalvion',
     'Frontend/Imperialpedia-nextjs-main',
-    'Frontend/IR-Baalvion-main',
+    'Frontend/ir.baalvion.com',
     'Frontend/mining.baalvion.com',
     'Frontend/proxy.baalvionstack.com',
     'Frontend/admin.baalvion.com',
