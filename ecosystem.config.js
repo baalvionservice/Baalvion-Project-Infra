@@ -191,7 +191,7 @@ module.exports = {
     nextApp('dashboard-web', './Frontend/dashboard.baalvion.com', 3024),
     nextApp('gti-web', './Frontend/Global-Trade-Infrastructure-main', 9003),
     nextApp('imperialpedia-web', './Frontend/Imperialpedia-nextjs-main', 3029),
-    nextApp('ir-web', './Frontend/IR-Baalvion-main', 3027),
+    nextApp('ir-web', './Frontend/ir.baalvion.com', 3027),
     // :3026 is this app's own port (package.json).
     nextApp('jobs-web', './Frontend/Baalvion-Jobs-Portal-main', 3026),
     nextApp('law-web', './Frontend/Law-Elite-Network-main', 9002),
