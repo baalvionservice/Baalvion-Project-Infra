@@ -7,7 +7,7 @@
 # to same-origin paths (/insiders-api, /auth-bff) which Caddy resolves to app-insiders on this
 # box, so there is nothing to bake in — and nothing to get silently wrong the way a bare ARG
 # does when it has no matching ENV.
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -25,7 +25,7 @@ RUN pnpm install --no-frozen-lockfile --filter marketunderworld.com...
 COPY --from=pruner /repo/out/full/ ./
 RUN pnpm --filter marketunderworld.com build
 
-FROM nginx:1.27-alpine AS final
+FROM nginx:1.31-alpine AS final
 # SPA fallback: every directory route is client-rendered, so an unmatched path must return
 # index.html rather than nginx's 404. Assets keep a long immutable cache (Vite content-hashes
 # their filenames); index.html must not, or a deploy would not be picked up.
