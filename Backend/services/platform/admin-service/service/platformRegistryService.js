@@ -24,12 +24,13 @@ const REGISTRY = [
     name: 'ControlTheMarket',
     domain: 'controlthemarket.com',
     adminUrl: 'https://controlthemarket.com',
-    // No default: ctm-service is off-box and its own frontend's documented production
-    // default (`https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`, see
-    // Frontend/newaiskillsteam.baalvion.com/README.md — that app folder was renamed from
-    // controlthemarket-main; the registry key/domain/adminUrl here describe the real
-    // controlthemarket.com production site and are intentionally untouched by that rename)
-    // routes through api.baalvion.com's gateway — but that
+    // No default: ctm-service is off-box. controlthemarket.com itself is a separate,
+    // still-live Vercel deployment (see deploy/*/caddy/Caddyfile's CTM auth-bff comment) —
+    // NOT served by any folder in this repo. Frontend/newaiskillsteam.baalvion.com (renamed
+    // from testrank-baalvion, itself renamed from controlthemarket-main in 592d0297b) is an
+    // unrelated rebrand of that old folder; it does not serve this domain. The documented
+    // production default (`https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`) routes
+    // through api.baalvion.com's gateway — but that
     // gateway is documented elsewhere in this platform as 404ing for non-public management
     // routes (see cms_content_migrated_admin_routing notes: "api.baalvion.com/api/v1/<domain>/
     // <service>/* 404s for management routes"). Guessing that default here risks a false

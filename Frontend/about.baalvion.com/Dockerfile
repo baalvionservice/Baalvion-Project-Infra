@@ -1,5 +1,5 @@
 # about.baalvion.com — Next 15 standalone image (pnpm + Turborepo monorepo).
-# Build context = REPO ROOT:  docker build -f Frontend/about-baalvion-main/Dockerfile -t about-web .
+# Build context = REPO ROOT:  docker build -f Frontend/about.baalvion.com/Dockerfile -t about-web .
 #
 # This app is CMS-driven and reads the CMS public delivery API server-side at runtime,
 # so it needs no NEXT_PUBLIC_* baked in beyond the public app URL. CMS_PUBLIC_URL /
@@ -44,6 +44,7 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm turbo run build --filter=about.baalvion.com
 
 # 4) Minimal runner (standalone server)
@@ -51,12 +52,12 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3020 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about-baalvion-main/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about-baalvion-main/.next/static ./Frontend/about-baalvion-main/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about-baalvion-main/public ./Frontend/about-baalvion-main/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about.baalvion.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about.baalvion.com/.next/static ./Frontend/about.baalvion.com/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/about.baalvion.com/public ./Frontend/about.baalvion.com/public
 USER nextjs
 EXPOSE 3020
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3020),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
-CMD ["node", "Frontend/about-baalvion-main/server.js"]
+CMD ["node", "Frontend/about.baalvion.com/server.js"]

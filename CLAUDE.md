@@ -101,7 +101,9 @@ Preferred order:
 
 1. README.md
 2. docs/
-3. DEPLOYMENT_GUIDE.md
-4. RUNBOOK.md
+3. docs/operations/vps-health-and-safe-deploy-runbook.md — the actual production
+   deploy doc (Hostinger VPS, `baalvion-prod`, ~19 sites). DEPLOYMENT_GUIDE.md and
+   RUNBOOK.md describe a local/limited-beta stack only, not production — do not
+   treat them as deploy instructions for the live sites.
 
 All other documentation should be treated as optional context.

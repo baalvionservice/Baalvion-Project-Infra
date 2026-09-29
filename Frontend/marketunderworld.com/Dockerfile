@@ -1,7 +1,7 @@
 # Static build of the Insiders directory SPA, served by nginx.
 #
 # BUILD CONTEXT MUST BE THE REPO ROOT:
-#   docker build -f "Frontend/For Invstors and Founders/Dockerfile" -t baalvion-insiders-web:local .
+#   docker build -f "Frontend/marketunderworld.com/Dockerfile" -t baalvion-insiders-web:local .
 #
 # No NEXT_PUBLIC/VITE build args are passed on purpose. The app's two API bases both default
 # to same-origin paths (/insiders-api, /auth-bff) which Caddy resolves to app-insiders on this
@@ -41,7 +41,7 @@ RUN printf '%s\n' \
   && rm -rf /usr/share/nginx/html/*
 # JSON-array form is required: the source path contains spaces, and the shell form treats
 # them as argument separators no matter how they are quoted.
-COPY --from=builder ["/repo/Frontend/For Invstors and Founders/dist", "/usr/share/nginx/html"]
+COPY --from=builder ["/repo/Frontend/marketunderworld.com/dist", "/usr/share/nginx/html"]
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://127.0.0.1:8080/index.html >/dev/null 2>&1 || exit 1

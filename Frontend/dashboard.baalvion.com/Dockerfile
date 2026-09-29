@@ -1,6 +1,6 @@
 # company-unified-dashboard web — Next 15 standalone image (pnpm + Turborepo monorepo).
 # Build context = REPO ROOT:
-#   docker build -f Frontend/company-unified-Dashboard-main/Dockerfile -t dashboard-web .
+#   docker build -f Frontend/dashboard.baalvion.com/Dockerfile -t dashboard-web .
 #
 # NEXT_PUBLIC_* that the CLIENT bundle reads are baked at BUILD time — pass them as --build-arg
 # (see ARGs below), pointed at the PUBLIC prod origin. The /auth-bff + /api-bff rewrite target
@@ -42,6 +42,7 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm turbo run build --filter=dashboard.baalvion.com
 
 # 4) Minimal runner (standalone server).
@@ -49,12 +50,12 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3024 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/company-unified-Dashboard-main/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/company-unified-Dashboard-main/.next/static ./Frontend/company-unified-Dashboard-main/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/company-unified-Dashboard-main/public ./Frontend/company-unified-Dashboard-main/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/.next/static ./Frontend/dashboard.baalvion.com/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/dashboard.baalvion.com/public ./Frontend/dashboard.baalvion.com/public
 USER nextjs
 EXPOSE 3024
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3024),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
-CMD ["node", "Frontend/company-unified-Dashboard-main/server.js"]
+CMD ["node", "Frontend/dashboard.baalvion.com/server.js"]

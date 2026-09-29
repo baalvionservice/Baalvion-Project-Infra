@@ -50,14 +50,14 @@ FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3072 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvion-stack/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvion-stack/.next/static ./Frontend/baalvion-stack/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvionstack.com/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvionstack.com/.next/static ./Frontend/baalvionstack.com/.next/static
 # public/ carries the product screenshots. Without it every card renders an empty frame.
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvion-stack/public ./Frontend/baalvion-stack/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/baalvionstack.com/public ./Frontend/baalvionstack.com/public
 USER nextjs
 EXPOSE 3072
 # The app has no /api/health route, so the healthcheck asks for the home page. <500 is the right
 # bar: it proves the server renders, and does not fail the container on a 404.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3072)+'/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-CMD ["node", "Frontend/baalvion-stack/server.js"]
+CMD ["node", "Frontend/baalvionstack.com/server.js"]
