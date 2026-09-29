@@ -3,7 +3,7 @@
 # Build context = REPO ROOT, because this is a pnpm workspace member and turbo prune has to
 # see the root lockfile:
 #
-#   docker build -f Frontend/CanWeMarry-main/Dockerfile -t baalvion-canwemarry-web:local \
+#   docker build -f Frontend/canwemarry.baalvion.com/Dockerfile -t baalvion-canwemarry-web:local \
 #     --build-arg SITE_URL=https://canwemarry.baalvion.com .
 #
 # SITE_URL is a BUILD arg, not a runtime one, and that is deliberate. Guide pages are
@@ -21,7 +21,7 @@ WORKDIR /app
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune canwemarry.baalvion.com --docker
+RUN pnpm dlx turbo@2.10.4 prune canwemarry.baalvion.com --docker
 
 # 2) Install the pruned dependency set.
 #    --no-frozen-lockfile: turbo prune can drop catalog/override snapshots that a frozen
@@ -47,7 +47,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 #
 # NEXT_PUBLIC_* is exempt from that filtering, which is why the SITE_URL guard passed while
 # BUILD_STANDALONE was being dropped.
-RUN pnpm dlx turbo@2.9.16 run build --filter=canwemarry-web --env-mode=loose
+RUN pnpm dlx turbo@2.10.4 run build --filter=canwemarry.baalvion.com --env-mode=loose
 
 # 4) Minimal runner.
 FROM base AS runner

@@ -1,6 +1,6 @@
 # Law Elite Network — frontend (Next.js 15) production image.
 #
-# law-elite-network-web is a pnpm workspace member (depends on @baalvion/eslint-config,
+# lawelitenetwork.com is a pnpm workspace member (depends on @baalvion/eslint-config,
 # @baalvion/company, @baalvion/design, @baalvion/illustrations via workspace:*), so a plain
 # `npm install` cannot resolve it -- that protocol has no meaning outside a pnpm workspace,
 # and this app was never actually buildable through the bare-npm form this Dockerfile used
@@ -19,7 +19,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune lawelitenetwork.com --docker
+RUN pnpm dlx turbo@2.10.4 prune lawelitenetwork.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots from the pruned lockfile, which a frozen install rejects.
@@ -55,7 +55,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=law-elite-network-web
+RUN pnpm dlx turbo@2.10.4 run build --filter=lawelitenetwork.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner

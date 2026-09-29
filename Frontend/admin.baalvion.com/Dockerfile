@@ -1,4 +1,4 @@
-# baalvion-admin-platform — Next 15 standalone image (pnpm + Turborepo monorepo).
+# admin.baalvion.com — Next 15 standalone image (pnpm + Turborepo monorepo).
 #
 # admin-platform is a pnpm workspace member (no package-lock.json) that depends on
 # @baalvion/auth-sdk (workspace:*), so a plain `npm ci` cannot build it. This image is
@@ -16,7 +16,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune admin.baalvion.com --docker
+RUN pnpm dlx turbo@2.10.4 prune admin.baalvion.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots (e.g. uuid@11) from the pruned lockfile, which a frozen install rejects.
@@ -66,7 +66,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=baalvion-admin-platform
+RUN pnpm dlx turbo@2.10.4 run build --filter=admin.baalvion.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner

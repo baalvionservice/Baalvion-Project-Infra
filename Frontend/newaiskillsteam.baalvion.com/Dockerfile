@@ -1,6 +1,6 @@
 # testrank-baalvion web — Next 15 standalone image (pnpm + Turborepo monorepo).
 # Build context = REPO ROOT:
-#   docker build -f Frontend/testrank-baalvion/Dockerfile -t testrank-baalvion-web .
+#   docker build -f Frontend/newaiskillsteam.baalvion.com/Dockerfile -t newaiskillsteam-web .
 #
 # NEXT_PUBLIC_* are baked at BUILD time — pass them as --build-arg (see ARGs below),
 # NOT as runtime env. Point them at the PUBLIC prod origin. The /auth-bff/* rewrite target
@@ -12,7 +12,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).
 FROM base AS pruner
 COPY . .
-RUN npx turbo@2.9.16 prune newaiskillsteam.baalvion.com --docker
+RUN npx turbo@2.10.4 prune newaiskillsteam.baalvion.com --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override
@@ -41,7 +41,7 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm turbo run build --filter=testrank-baalvion-web
+RUN pnpm turbo run build --filter=newaiskillsteam.baalvion.com
 
 # 4) Minimal runner (standalone server).
 FROM base AS runner

@@ -3,7 +3,7 @@
 # Build context = REPO ROOT, because this is a pnpm workspace member and turbo prune has to see
 # the root lockfile:
 #
-#   docker build -f Frontend/baalvion-stack/Dockerfile -t baalvion-stack-web:local .
+#   docker build -f Frontend/baalvionstack.com/Dockerfile -t baalvion-stack-web:local .
 #
 # This app reads @baalvion/sites at BUILD time — the catalogue, the navigation, the sitemap and
 # the JSON-LD are all generated from the registry and baked into static HTML. So the image is a
@@ -16,7 +16,7 @@ WORKDIR /app
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune baalvionstack.com --docker
+RUN pnpm dlx turbo@2.10.4 prune baalvionstack.com --docker
 
 # 2) Install the pruned dependency set.
 #    --no-frozen-lockfile: turbo prune can drop catalog/override snapshots that a frozen install
@@ -43,7 +43,7 @@ COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 # filtering has previously dropped build-shaping variables silently, producing a build that
 # succeeds while emitting no .next/standalone, and failing several minutes later in the runner
 # stage on a missing COPY. Loose mode is scoped to this build and changes no shared turbo config.
-RUN pnpm dlx turbo@2.9.16 run build --filter=baalvion-stack-web --env-mode=loose
+RUN pnpm dlx turbo@2.10.4 run build --filter=baalvionstack.com --env-mode=loose
 
 # 4) Minimal runner.
 FROM base AS runner

@@ -10,7 +10,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps
 FROM base AS pruner
 COPY . .
-RUN npx turbo@2.9.16 prune amarisemaisonavenue.com --docker
+RUN npx turbo@2.10.4 prune amarisemaisonavenue.com --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override
@@ -66,7 +66,7 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm turbo run build --filter=amarise-maison-avenue-web
+RUN pnpm turbo run build --filter=amarisemaisonavenue.com
 
 # 4) Minimal runner (standalone server)
 FROM base AS runner

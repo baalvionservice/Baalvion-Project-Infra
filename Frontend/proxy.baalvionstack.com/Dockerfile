@@ -19,7 +19,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune proxy.baalvionstack.com --docker
+RUN pnpm dlx turbo@2.10.4 prune proxy.baalvionstack.com --docker
 
 # 2) Install pruned deps (--no-frozen-lockfile: turbo prune may drop override snapshots).
 FROM base AS installer
@@ -40,7 +40,7 @@ ARG VITE_PAYU_ACTION_URL
 ENV NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=proxy-baalvionstack-web
+RUN pnpm dlx turbo@2.10.4 run build --filter=proxy.baalvionstack.com
 
 # 4) Static runner — non-root nginx (uid 101), listens on 8080.
 FROM nginxinc/nginx-unprivileged:1.31-alpine AS runner

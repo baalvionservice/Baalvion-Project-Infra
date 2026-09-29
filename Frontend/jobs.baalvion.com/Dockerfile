@@ -1,11 +1,11 @@
-# baalvion-jobs-portal-web — Next 15 standalone image (pnpm + Turborepo monorepo).
+# jobs.baalvion.com — Next 15 standalone image (pnpm + Turborepo monorepo).
 #
 # Jobs Portal is a pnpm workspace member (no package-lock.json) that depends on
 # @baalvion/auth-sdk (workspace:*), so a plain `npm ci` cannot build it. This image is
 # monorepo-aware (turbo prune + pnpm) and bakes the prod NEXT_PUBLIC_* into the client bundle.
 #
 # Build context = REPO ROOT:
-#   docker build -f Frontend/Baalvion-Jobs-Portal-main/Dockerfile -t baalvion-jobs-portal-web \
+#   docker build -f Frontend/jobs.baalvion.com/Dockerfile -t baalvion-jobs-portal-web \
 #     --build-arg NEXT_PUBLIC_JOBS_SERVICE_URL=https://api.baalvion.com/api/v1/ecosystem/jobs \
 #     --build-arg NEXT_PUBLIC_GATEWAY_URL=https://api.baalvion.com \
 #     --build-arg NEXT_PUBLIC_AUTH_URL=https://api.baalvion.com/api/v1/identity/auth/v1/auth \
@@ -20,7 +20,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune jobs.baalvion.com --docker
+RUN pnpm dlx turbo@2.10.4 prune jobs.baalvion.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots from the pruned lockfile, which a frozen install rejects.
@@ -53,7 +53,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm dlx turbo@2.9.16 run build --filter=baalvion-jobs-portal-web
+RUN pnpm dlx turbo@2.10.4 run build --filter=jobs.baalvion.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner
