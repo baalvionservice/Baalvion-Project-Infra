@@ -425,13 +425,9 @@ export default function DashboardPage() {
             Per-website API endpoints &amp; payment keys. Add a key on any site and the platform uses it live.
           </p>
           <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-            {(integrationSummary ?? []).map((w) => (
-              <Link
-                key={w.websiteId}
-                href={`/cms/websites/${w.websiteId}/integrations`}
-                className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-xs transition-colors hover:bg-muted/50"
-              >
-                <span className="truncate font-medium">{w.name}</span>
+            {(integrationSummary ?? []).map((w) => {
+              const rowClassName = 'flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-xs transition-colors hover:bg-muted/50';
+              const badges = (
                 <span className="flex shrink-0 items-center gap-1">
                   <KeyRound
                     className={cn('h-3.5 w-3.5', w.hasApi ? 'text-green-500' : 'text-muted-foreground/40')}
@@ -449,8 +445,23 @@ export default function DashboardPage() {
                     </Badge>
                   )}
                 </span>
-              </Link>
-            ))}
+              );
+              // A registry site with no cms_websites row yet has nothing to link to.
+              if (!w.websiteId) {
+                return (
+                  <div key={w.slug} className={cn(rowClassName, 'opacity-60 hover:bg-transparent')}>
+                    <span className="truncate font-medium">{w.name}</span>
+                    {badges}
+                  </div>
+                );
+              }
+              return (
+                <Link key={w.slug} href={`/cms/websites/${w.websiteId}/integrations`} className={rowClassName}>
+                  <span className="truncate font-medium">{w.name}</span>
+                  {badges}
+                </Link>
+              );
+            })}
             {integrationSummaryError && (
               <p className="col-span-full py-4 text-center text-xs text-red-500">
                 Failed to load website connections. The API request errored — check the network
