@@ -13,7 +13,7 @@ WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.10.4 prune investors-and-founders-web --docker
+RUN pnpm dlx turbo@2.10.4 prune marketunderworld.com --docker
 
 FROM base AS builder
 COPY .npmrc ./
@@ -21,9 +21,9 @@ COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # turbo prune drops the root uuid@11 override snapshot from the pruned lockfile, so a frozen
 # install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY); --no-frozen lets pnpm repair it here.
-RUN pnpm install --no-frozen-lockfile --filter investors-and-founders-web...
+RUN pnpm install --no-frozen-lockfile --filter marketunderworld.com...
 COPY --from=pruner /repo/out/full/ ./
-RUN pnpm --filter investors-and-founders-web build
+RUN pnpm --filter marketunderworld.com build
 
 FROM nginx:1.27-alpine AS final
 # SPA fallback: every directory route is client-rendered, so an unmatched path must return
