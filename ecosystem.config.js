@@ -193,7 +193,7 @@ module.exports = {
     nextApp('imperialpedia-web', './Frontend/Imperialpedia-nextjs-main', 3029),
     nextApp('ir-web', './Frontend/ir.baalvion.com', 3027),
     // :3026 is this app's own port (package.json).
-    nextApp('jobs-web', './Frontend/Baalvion-Jobs-Portal-main', 3026),
+    nextApp('jobs-web', './Frontend/jobs.baalvion.com', 3026),
     nextApp('law-web', './Frontend/Law-Elite-Network-main', 9002),
     nextApp('mining-web', './Frontend/mining.baalvion.com', 3028),
     // insiders-seo-web REMOVED — the Frontend/insiders-seo SEO site was deleted.

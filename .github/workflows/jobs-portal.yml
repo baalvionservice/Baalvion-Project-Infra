@@ -4,12 +4,12 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'Frontend/Baalvion-Jobs-Portal-main/**'
+      - 'Frontend/jobs.baalvion.com/**'
       - '.github/workflows/jobs-portal.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'Frontend/Baalvion-Jobs-Portal-main/**'
+      - 'Frontend/jobs.baalvion.com/**'
       - '.github/workflows/jobs-portal.yml'
 
 jobs:
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: jobs-portal-build
-          path: Frontend/Baalvion-Jobs-Portal-main/.next
+          path: Frontend/jobs.baalvion.com/.next
           retention-days: 7
 
   notify-ci-failure:

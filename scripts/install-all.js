@@ -15,7 +15,7 @@ const backends = [
 const frontends = [
     'Frontend/about-baalvion-main',
     'Frontend/amarisemaisonavenue.com',
-    'Frontend/Baalvion-Jobs-Portal-main',
+    'Frontend/jobs.baalvion.com',
     'Frontend/connect.baalvion.com',
     'Frontend/dashboard.baalvion.com',
     'Frontend/testrank-baalvion',
