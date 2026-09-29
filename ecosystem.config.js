@@ -173,12 +173,12 @@ module.exports = {
 
     // ── Frontends (production builds) ───────────────────────────────────
     // Next.js apps — `next start` against a prebuilt .next/. Run `pnpm build` first.
-    nextApp('about-web', './Frontend/about-baalvion-main', 3020),
+    nextApp('about-web', './Frontend/about.baalvion.com', 3020),
     nextApp('admin-platform', './Frontend/admin-platform', 3030),
-    nextApp('amarise-web', './Frontend/AmariseMaisonAvenue-main', 3033),
+    nextApp('amarise-web', './Frontend/amarisemaisonavenue.com', 3033),
     // :3043 (moved off :3040, the realtime-service contract port).
-    nextApp('baalvion-com-web', './Frontend/baalvion-com-main', 3043),
-    nextApp('canwemarry-web', './Frontend/CanWeMarry-main', 3071, {
+    nextApp('baalvion-com-web', './Frontend/baalvion.com', 3043),
+    nextApp('canwemarry-web', './Frontend/canwemarry.baalvion.com', 3071, {
       // Server-side only. The browser reaches the gateway through this app's own origin
       // (/auth-bff/*, /api/canwemarry/*), so the session cookie stays first-party.
       // :3099 is where the gateway actually runs (its own .env, health-check.ps1, the fleet
@@ -186,16 +186,16 @@ module.exports = {
       // assigned port — pointing this at that default aimed the BFF at the jobs portal.
       GATEWAY_ORIGIN: process.env.GATEWAY_ORIGIN || 'http://localhost:3099',
     }),
-    nextApp('brand-web', './Frontend/brand-connector-main', 3035),
+    nextApp('brand-web', './Frontend/connect.baalvion.com', 3035),
     nextApp('testrank-baalvion-web', './Frontend/testrank-baalvion', 3034),
-    nextApp('dashboard-web', './Frontend/company-unified-Dashboard-main', 3024),
+    nextApp('dashboard-web', './Frontend/dashboard.baalvion.com', 3024),
     nextApp('gti-web', './Frontend/Global-Trade-Infrastructure-main', 9003),
-    nextApp('imperialpedia-web', './Frontend/Imperialpedia-main', 3029),
+    nextApp('imperialpedia-web', './Frontend/Imperialpedia-nextjs-main', 3029),
     nextApp('ir-web', './Frontend/IR-Baalvion-main', 3027),
     // :3026 is this app's own port (package.json).
     nextApp('jobs-web', './Frontend/Baalvion-Jobs-Portal-main', 3026),
     nextApp('law-web', './Frontend/Law-Elite-Network-main', 9002),
-    nextApp('mining-web', './Frontend/Mining.Baalvion-main', 3028),
+    nextApp('mining-web', './Frontend/mining.baalvion.com', 3028),
     // insiders-seo-web REMOVED — the Frontend/insiders-seo SEO site was deleted.
 
     // Vite SPAs — `vite preview` against a prebuilt dist/. Run `pnpm build` first.

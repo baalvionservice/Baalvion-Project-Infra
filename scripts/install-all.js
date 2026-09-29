@@ -14,14 +14,14 @@ const backends = [
 
 const frontends = [
     'Frontend/about-baalvion-main',
-    'Frontend/AmariseMaisonAvenue-main',
+    'Frontend/amarisemaisonavenue.com',
     'Frontend/Baalvion-Jobs-Portal-main',
-    'Frontend/brand-connector-main',
-    'Frontend/company-unified-Dashboard-main',
+    'Frontend/connect.baalvion.com',
+    'Frontend/dashboard.baalvion.com',
     'Frontend/testrank-baalvion',
-    'Frontend/Imperialpedia-main',
+    'Frontend/Imperialpedia-nextjs-main',
     'Frontend/IR-Baalvion-main',
-    'Frontend/Mining.Baalvion-main',
+    'Frontend/mining.baalvion.com',
     'Frontend/Proxy-BaalvionStack',
     'Frontend/admin-platform',
 ];

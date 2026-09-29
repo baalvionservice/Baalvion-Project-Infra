@@ -16,7 +16,7 @@ Two components:
 | Component | Path | Port |
 |---|---|---|
 | `canwemarry-service` | `Backend/services/ecosystem/canwemarry-service` | 3070 |
-| `canwemarry-web` | `Frontend/CanWeMarry-main` | 3071 |
+| `canwemarry-web` | `Frontend/canwemarry.baalvion.com` | 3071 |
 
 ```
 browser ──cookie──▶ auth-gateway (BFF) ──Bearer + signed identity──▶ canwemarry-service
@@ -198,7 +198,7 @@ should not have a discussion of their marriage left behind.
 
 ## Future Expo application
 
-`Frontend/CanWeMarry-main/src/lib/api/` is the whole data layer and imports nothing from
+`Frontend/canwemarry.baalvion.com/src/lib/api/` is the whole data layer and imports nothing from
 Next.js or the DOM. The transport is injected via `configureApi`, so React Native supplies
 its own and reuses `client.ts`, `index.ts` and `types.ts` unchanged.
 

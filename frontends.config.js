@@ -21,20 +21,20 @@ const vite = (name, dir, port, env = {}) => ({
 module.exports = {
   apps: [
     // --- Next.js apps ---
-    next('about-web',        'about-baalvion-main',              3020),
+    next('about-web',        'about.baalvion.com',              3020),
     next('ir-web',           'IR-Baalvion-main',                 3027),
-    next('amarise-web',      'AmariseMaisonAvenue-main',         3033),
+    next('amarise-web',      'amarisemaisonavenue.com',         3033),
     next('gti-web',          'Global-Trade-Infrastructure-main', 9003),
     next('jobs-web',         'Baalvion-Jobs-Portal-main',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
     next('testrank-baalvion-web', 'testrank-baalvion',           3034),
-    next('dashboard-web',    'company-unified-Dashboard-main',   3024),
+    next('dashboard-web',    'dashboard.baalvion.com',   3024),
     next('law-web',          'Law-Elite-Network-main',           9002),
-    next('brand-web',        'brand-connector-main',             3035),
-    next('mining-web',       'Mining.Baalvion-main',             3028),
+    next('brand-web',        'connect.baalvion.com',             3035),
+    next('mining-web',       'mining.baalvion.com',             3028),
     // Absent until 2026-09: CI derives its frontend build matrix from this list,
     // so Imperialpedia was the one production site CI never built.
-    next('imperialpedia-web','Imperialpedia-main',               3029),
-    next('canwemarry-web',   'CanWeMarry-main',                  3071),
+    next('imperialpedia-web','Imperialpedia-nextjs-main',               3029),
+    next('canwemarry-web',   'canwemarry.baalvion.com',                  3071),
 
     // --- Vite SPAs ---
     vite('insiders-web',     'For Invstors and Founders',        8080),

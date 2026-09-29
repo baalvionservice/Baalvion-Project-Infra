@@ -50,21 +50,22 @@ const vite = (name, dir, port) => ({
 
 module.exports = {
   apps: [
-    next('about-web', 'about-baalvion-main', 3020),
+    next('about-web', 'about.baalvion.com', 3020),
     next('ir-web', 'IR-Baalvion-main', 3027),
     // baalvion-com uses `output: 'export'` (static) + Cloudflare/wrangler in prod,
     // so `next start` refuses to serve it. Run `next dev` locally instead.
-    next('baalvion-com-web', 'baalvion-com-main', 3043, 'dev'),
-    next('imperialpedia-web', 'Imperialpedia-main', 3029),
+    next('baalvion-com-web', 'baalvion.com', 3043, 'dev'),
+    next('imperialpedia-web', 'Imperialpedia-nextjs-main', 3029),
     next('gti-web', 'Global-Trade-Infrastructure-main', 9003),
     next('law-web', 'Law-Elite-Network-main', 9002),
-    next('amarise-web', 'AmariseMaisonAvenue-main', 3033),
-    next('ctm-web', 'controlthemarket-main', 3034),
-    next('brand-web', 'brand-connector-main', 3035),
-    next('mining-web', 'Mining.Baalvion-main', 3028),
+    next('amarise-web', 'amarisemaisonavenue.com', 3033),
+    // ctm-web removed — controlthemarket-main was an empty leftover; the real app
+    // already lives at testrank-baalvion (see chore/ctm-rename-testrank-baalvion).
+    next('brand-web', 'connect.baalvion.com', 3035),
+    next('mining-web', 'mining.baalvion.com', 3028),
     next('jobs-web', 'Baalvion-Jobs-Portal-main', 3026), // production `next start`
     next('admin-platform', 'admin-platform', 3030),
-    next('dashboard-web', 'company-unified-Dashboard-main', 3024),
+    next('dashboard-web', 'dashboard.baalvion.com', 3024),
     vite('founders-web', 'For Invstors and Founders', 8082),
     vite('proxy-web', 'Proxy-BaalvionStack', 8080),
   ],

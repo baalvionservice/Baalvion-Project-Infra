@@ -9,7 +9,7 @@
  * MAISON_STORY, CUSTOMER_SERVICE, CITIES, BUYING_GUIDES, editorials) into real,
  * centrally-managed CMS content, editable from the admin-platform console.
  *
- * Contract matches Frontend/AmariseMaisonAvenue-main/src/lib/cms.ts:
+ * Contract matches Frontend/amarisemaisonavenue.com/src/lib/cms.ts:
  *   - maison-story      page  customFields = { title, subtitle, philosophy, history[],
  *                                              craftsmanship[], sustainability, institutionalCharter }
  *   - customer-service  page  customFields = { byCountry: { us|uk|ae|in|sg|ca: {shipping, returns, faqs[]} } }
