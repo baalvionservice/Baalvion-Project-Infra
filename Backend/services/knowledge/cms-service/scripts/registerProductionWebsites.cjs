@@ -44,7 +44,7 @@ const SITES = [
   // ── pending user confirmation (best guess) ──
   ['baalvion.com',            'Baalvion',               'baalvion',              'enterprise', ['pages','news'],                'about.baalvion.com',     'about-service',        'about',  false],
   ['baalvionstack.com',       'BaalvionStack',          'baalvionstack',         'enterprise', ['pages'],                       'baalvionstack.com',     'proxy-service',        'os',     false],
-  ['baalviongroup.com',       'Baalvion Group',         'baalvion-group',        'enterprise', ['pages','news'],                'For Invstors and Founders','insiders-service',    'insiders', false],
+  ['baalviongroup.com',       'Baalvion Group',         'baalvion-group',        'enterprise', ['pages','news'],                'marketunderworld.com','insiders-service',    'insiders', false],
   ['marketunderworld.com',    'Market Underworld',      'market-underworld',     'enterprise', ['pages','product','news'],      'Global-Trade-Infrastructure-main','trade-service', 'trade',  false],
   ['market.baalvion.com',     'Baalvion Market',        'baalvion-market',       'enterprise', ['pages','product'],             'Global-Trade-Infrastructure-main','market-service','market', false],
   ['shop.baalvionstack.com',  'BaalvionStack Shop',     'baalvionstack-shop',    'enterprise', ['pages','product'],             null,                      'commerce-service',     'commerce', false],
