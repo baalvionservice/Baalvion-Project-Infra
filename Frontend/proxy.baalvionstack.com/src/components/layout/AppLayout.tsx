@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, Link, Navigate, useLocation } from "react-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { isPlatformAdmin } from "@/lib/roles";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
 import { PageTransition } from "@/components/PageTransition";
@@ -33,7 +34,7 @@ function MaintenanceBanner() {
 }
 
 export function AppLayout() {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated, isInitialized, user } = useAuth();
   const { onboarding } = useEnterprise();
   const location = useLocation();
   // The onboarding overlay must NOT block deliberate destinations like checkout
@@ -43,6 +44,9 @@ export function AppLayout() {
 
   if (!isInitialized) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  // The user dashboard is for regular users only — platform admins belong in /admin
+  // (mirrors the reverse gate in AdminLayout, which already excludes non-admins).
+  if (isPlatformAdmin(user?.role)) return <Navigate to="/admin" replace />;
 
   return (
     <div className="min-h-screen bg-background">

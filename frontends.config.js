@@ -38,7 +38,7 @@ module.exports = {
 
     // --- Vite SPAs ---
     vite('insiders-web',     'For Invstors and Founders',        8080),
-    vite('proxy-web',        'Proxy-BaalvionStack',              8090, {
+    vite('proxy-web',        'proxy.baalvionstack.com',              8090, {
       VITE_API_PLATFORM_BASE_URL: 'http://localhost:4000/v1',
       VITE_API_AUTH_BASE_URL:     'http://localhost:4000/v1/auth',
       VITE_AUTH_PROXY_TARGET:     'http://localhost:4000/v1/auth',

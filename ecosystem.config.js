@@ -200,6 +200,6 @@ module.exports = {
 
     // Vite SPAs — `vite preview` against a prebuilt dist/. Run `pnpm build` first.
     viteApp('founders-web', './Frontend/For Invstors and Founders', 8082),
-    viteApp('proxy-web', './Frontend/Proxy-BaalvionStack', 8080),
+    viteApp('proxy-web', './Frontend/proxy.baalvionstack.com', 8080),
   ],
 };

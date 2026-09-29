@@ -105,7 +105,7 @@
 # ══════════════════════════════════════════════════════════════════════════════
 /Frontend/                                      @baalvionservice   # team: @baalvion/frontend-guild
 /Frontend/admin-platform/                       @baalvionservice   # team: @baalvion/frontend-guild @baalvion/platform-core
-/Frontend/Proxy-BaalvionStack/                  @baalvionservice   # team: @baalvion/proxy-division @baalvion/frontend-guild
+/Frontend/proxy.baalvionstack.com/                  @baalvionservice   # team: @baalvion/proxy-division @baalvion/frontend-guild
 
 # ── Isolated greenfield subtree (investment platform — NestJS + Prisma) ────────
 /investment-platform/                           @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
