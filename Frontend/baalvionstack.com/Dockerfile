@@ -16,7 +16,7 @@ WORKDIR /app
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.16 prune baalvion-stack-web --docker
+RUN pnpm dlx turbo@2.9.16 prune baalvionstack.com --docker
 
 # 2) Install the pruned dependency set.
 #    --no-frozen-lockfile: turbo prune can drop catalog/override snapshots that a frozen install
