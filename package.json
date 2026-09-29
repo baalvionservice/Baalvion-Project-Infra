@@ -2,7 +2,7 @@
   "name": "baalvion-platform",
   "version": "1.0.1",
   "private": true,
-  "description": "Baalvion Identity Platform \u2014 enterprise monorepo",
+  "description": "Baalvion Identity Platform — enterprise monorepo",
   "engines": {
     "node": ">=24",
     "pnpm": ">=9"
@@ -127,7 +127,7 @@
       "picomatch@4": "4.0.4",
       "path-to-regexp@<0.1.13": "0.1.13",
       "ajv@8": "8.18.0",
-      "nodemailer": "9.1.1",
+      "nodemailer": "10.0.2",
       "dompurify@3": "3.4.13",
       "tar@7": "7.5.22",
       "tar@6": "7.5.22",
