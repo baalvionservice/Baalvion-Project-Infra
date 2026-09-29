@@ -1,20 +1,20 @@
-name: testrank-baalvion Frontend CI/CD
+name: newaiskillsteam.baalvion.com Frontend CI/CD
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - 'Frontend/testrank-baalvion/**'
+      - 'Frontend/newaiskillsteam.baalvion.com/**'
       - '.github/workflows/testrank-baalvion-frontend.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'Frontend/testrank-baalvion/**'
+      - 'Frontend/newaiskillsteam.baalvion.com/**'
       - '.github/workflows/testrank-baalvion-frontend.yml'
 
 defaults:
   run:
-    working-directory: Frontend/testrank-baalvion
+    working-directory: Frontend/newaiskillsteam.baalvion.com
 
 jobs:
   lint-typecheck:
@@ -47,11 +47,11 @@ jobs:
       - name: Type check
         # tsc --noEmit is clean (next.config no longer ignores build type errors),
         # so this is a real gate — no error filtering.
-        run: pnpm --filter testrank-baalvion-web typecheck
+        run: pnpm --filter newaiskillsteam.baalvion.com typecheck
 
       - name: Run tests
         working-directory: .
-        run: pnpm --filter testrank-baalvion-web test --if-present
+        run: pnpm --filter newaiskillsteam.baalvion.com test --if-present
 
   build:
     name: Build
@@ -87,13 +87,13 @@ jobs:
 
       - name: Build
         working-directory: .
-        run: pnpm --filter testrank-baalvion-web build
+        run: pnpm --filter newaiskillsteam.baalvion.com build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: testrank-baalvion-build
-          path: Frontend/testrank-baalvion/.next
+          name: newaiskillsteam.baalvion.com-build
+          path: Frontend/newaiskillsteam.baalvion.com/.next
           retention-days: 7
 
   notify-ci-failure:
@@ -110,4 +110,4 @@ jobs:
         with:
           webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
           status: failure
-          title: 'testrank-baalvion Frontend CI/CD'
+          title: 'newaiskillsteam.baalvion.com Frontend CI/CD'

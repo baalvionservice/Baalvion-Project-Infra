@@ -60,7 +60,7 @@ module.exports = {
     next('law-web', 'lawelitenetwork.com', 9002),
     next('amarise-web', 'amarisemaisonavenue.com', 3033),
     // ctm-web removed — controlthemarket-main was an empty leftover; the real app
-    // already lives at testrank-baalvion (see chore/ctm-rename-testrank-baalvion).
+    // already lives at newaiskillsteam.baalvion.com (see chore/ctm-rename-testrank-baalvion).
     next('brand-web', 'connect.baalvion.com', 3035),
     next('mining-web', 'mining.baalvion.com', 3028),
     next('jobs-web', 'jobs.baalvion.com', 3026), // production `next start`

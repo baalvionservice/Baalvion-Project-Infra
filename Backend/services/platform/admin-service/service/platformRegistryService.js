@@ -26,7 +26,7 @@ const REGISTRY = [
     adminUrl: 'https://controlthemarket.com',
     // No default: ctm-service is off-box and its own frontend's documented production
     // default (`https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`, see
-    // Frontend/testrank-baalvion/README.md — that app folder was renamed from
+    // Frontend/newaiskillsteam.baalvion.com/README.md — that app folder was renamed from
     // controlthemarket-main; the registry key/domain/adminUrl here describe the real
     // controlthemarket.com production site and are intentionally untouched by that rename)
     // routes through api.baalvion.com's gateway — but that
@@ -46,6 +46,13 @@ const REGISTRY = [
     name: 'Proxy-BaalvionStack',
     domain: 'proxy.baalvionstack.com',
     adminUrl: 'https://proxy.baalvionstack.com/admin',
+    // proxy-service's SPA has a real /auth/sso-callback route (src/pages/public/SsoCallback.tsx)
+    // that exchanges a central auth-service access token for its own session — so "Open Admin"
+    // can hand off the caller's live session instead of just opening the bare URL and making them
+    // log in again. Only set true for sites confirmed to implement that route (grep-verified
+    // 2026-09-29: proxy, Amarise, CTM/newaiskillsteam.baalvion.com do; signal and GTI do not) — sending an
+    // unsupported site a token in the URL fragment would just leak it into a page that ignores it.
+    ssoCapable: true,
     healthUrl: `${process.env.PROXY_SERVICE_URL || 'http://app-edge-realtime:4000'}/health`,
     // proxy-service is a documented separate RS256 self-issuer (own keypair, not the central
     // auth-service JWKS) — a central admin bearer will NOT verify there. Revenue calls need a
@@ -133,6 +140,7 @@ async function listPlatforms() {
       name: entry.name,
       domain: entry.domain,
       adminUrl: entry.adminUrl,
+      ssoCapable: Boolean(entry.ssoCapable),
       hasRevenueSource: Boolean(entry.revenue),
       ...(await probeHealth(entry)),
     })),
