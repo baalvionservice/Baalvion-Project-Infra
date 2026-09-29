@@ -52,7 +52,7 @@ overrides:
   picomatch@4: 4.0.4
   path-to-regexp@<0.1.13: 0.1.13
   ajv@8: 8.18.0
-  nodemailer: 9.1.1
+  nodemailer: 10.0.2
   dompurify@3: 3.4.13
   tar@7: 7.5.22
   tar@6: 7.5.22
@@ -2093,8 +2093,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       nodemailer:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 10.0.2
+        version: 10.0.2
       pg:
         specifier: ^8.20.0
         version: 8.22.0
@@ -2321,8 +2321,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       nodemailer:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 10.0.2
+        version: 10.0.2
       pg:
         specifier: ^8.20.0
         version: 8.22.0
@@ -2727,8 +2727,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       nodemailer:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 10.0.2
+        version: 10.0.2
       pino:
         specifier: ^9.7.0
         version: 9.14.0
@@ -2825,8 +2825,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       nodemailer:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 10.0.2
+        version: 10.0.2
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -3252,8 +3252,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       nodemailer:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 10.0.2
+        version: 10.0.2
       pg:
         specifier: ^8.20.0
         version: 8.22.0
@@ -17553,9 +17553,9 @@ packages:
     resolution: {integrity: sha512-wRNIrw4DmVLKQlbgOMdkMx27Wrpzes2hh5Jtbi2bjPd+4wJstWIqP5A+lscnqbm0xxmT5Bpg8Lec5ItEBwx6BQ==}
     engines: {node: '>=18'}
 
-  nodemailer@9.1.1:
-    resolution: {integrity: sha512-izw9mVKFix6YSnC9eLgV6g1opl9DUlRio9ZNcq+Wu9Ujn2UwF+8Nl0B8nz22kEC+CTZCvinkxwJ0DeFbb6NwcQ==}
-    engines: {node: '>=6.0.0'}
+  nodemailer@10.0.2:
+    resolution: {integrity: sha512-83mO0TnWXySiJXdMAIUYmlXYdJ2KUq/w8EJgc4ogKU2UssaHf7ZPeuHcb4YCxeNiM0DDshnm291U0/ClrSZZsg==}
+    engines: {node: '>=20.0.0'}
 
   nodemon@3.1.14:
     resolution: {integrity: sha512-jakjZi93UtB3jHMWsXL68FXSAosbLfY0In5gtKq3niLSkrWznrVBzXFNOEMJUfc9+Ke7SHWoAZsiMkNP3vq6Jw==}
@@ -18385,8 +18385,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-is@19.2.8:
-    resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
+  react-is@19.3.0:
+    resolution: {integrity: sha512-UpMYezM4v5/18F28aC66AEsjXIgE02kyEMH6yLdgLXu/UTfa1Ntwck/nNLrbqJsEXW7gPb0coNO9FQse9WTovA==}
 
   react-joyride@2.9.3:
     resolution: {integrity: sha512-1+Mg34XK5zaqJ63eeBhqdbk7dlGCFp36FXwsEvgpjqrtyywX2C6h9vr3jgxP0bGHCw8Ilsp/nRDzNVq6HJ3rNw==}
@@ -33418,7 +33418,7 @@ snapshots:
 
   node-releases@2.0.51: {}
 
-  nodemailer@9.1.1: {}
+  nodemailer@10.0.2: {}
 
   nodemon@3.1.14:
     dependencies:
@@ -34019,12 +34019,12 @@ snapshots:
       '@jest/schemas': 30.4.1
       ansi-styles: 5.2.0
       react-is-18: react-is@18.3.1
-      react-is-19: react-is@19.2.8
+      react-is-19: react-is@19.3.0
 
   pretty-format@30.5.1:
     dependencies:
       '@jest/react-is-18': react-is@18.3.1
-      '@jest/react-is-19': react-is@19.2.8
+      '@jest/react-is-19': react-is@19.3.0
       '@jest/schemas': 30.5.0
       ansi-styles: 5.2.0
 
@@ -34406,7 +34406,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-is@19.2.8: {}
+  react-is@19.3.0: {}
 
   react-joyride@2.9.3(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
