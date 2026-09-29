@@ -29,7 +29,7 @@ const SITES = [
   ['lawelitenetwork.com',     'Law Elite Network',      'law-elite-network',     'enterprise', ['pages','article','news'],      'Law-Elite-Network-main',  'law-service',          'legal',  true],
   ['controlthemarket.com',    'Control The Market',     'control-the-market',    'enterprise', ['pages','post','news'],         'controlthemarket-main',   'ctm-service',          'ctm',    true],
   ['mining.baalvion.com',     'Baalvion Mining',        'baalvion-mining',       'enterprise', ['pages','news'],                'mining.baalvion.com',    'mining-service',       'mining', true],
-  ['jobs.baalvion.com',       'Baalvion Jobs',          'baalvion-jobs',         'enterprise', ['pages','job_listing'],         'Baalvion-Jobs-Portal-main','jobs-service',        'jobs',   true],
+  ['jobs.baalvion.com',       'Baalvion Jobs',          'baalvion-jobs',         'enterprise', ['pages','job_listing'],         'jobs.baalvion.com','jobs-service',        'jobs',   true],
   ['ir.baalvion.com',         'Baalvion Investor Relations','baalvion-ir',       'enterprise', ['pages','news','doc'],          'ir.baalvion.com',        'ir-service',           'ir',     true],
   ['dashboard.baalvion.com',  'Baalvion Dashboard',     'baalvion-dashboard',    'enterprise', ['pages'],                       'dashboard.baalvion.com','dashboard-service','dashboard', true],
   ['connect.baalvion.com',    'Baalvion Connect',       'baalvion-connect',      'enterprise', ['pages','post'],                'connect.baalvion.com',    'brand-connector-service','brand', true],

@@ -25,7 +25,7 @@ module.exports = {
     next('ir-web',           'ir.baalvion.com',                 3027),
     next('amarise-web',      'amarisemaisonavenue.com',         3033),
     next('gti-web',          'Global-Trade-Infrastructure-main', 9003),
-    next('jobs-web',         'Baalvion-Jobs-Portal-main',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
+    next('jobs-web',         'jobs.baalvion.com',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
     next('testrank-baalvion-web', 'testrank-baalvion',           3034),
     next('dashboard-web',    'dashboard.baalvion.com',   3024),
     next('law-web',          'Law-Elite-Network-main',           9002),
