@@ -37,7 +37,7 @@ module.exports = {
     next('canwemarry-web',   'canwemarry.baalvion.com',                  3071),
 
     // --- Vite SPAs ---
-    vite('insiders-web',     'For Invstors and Founders',        8080),
+    vite('insiders-web',     'marketunderworld.com',        8080),
     vite('proxy-web',        'proxy.baalvionstack.com',              8090, {
       VITE_API_PLATFORM_BASE_URL: 'http://localhost:4000/v1',
       VITE_API_AUTH_BASE_URL:     'http://localhost:4000/v1/auth',
