@@ -9,18 +9,18 @@ WORKDIR /app
 # workspace deps, so the full lockfile + its own manifest is enough for a frozen install.
 FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY Frontend/auth-baalvion/package.json Frontend/auth-baalvion/package.json
+COPY Frontend/auth.baalvion.com/package.json Frontend/auth.baalvion.com/package.json
 # auth-baalvion DOES have a @baalvion/* workspace dep now — @baalvion/design, which it imports
 # as `@baalvion/design/base.css`. Its manifest must be present for the filtered install to
 # resolve the workspace link, and its source must be copied and BUILT, because the package's
 # "exports" point at dist/ which only exists after tsup runs. Without this the image builds
 # until webpack, then fails `Can't resolve '@baalvion/design/base.css'`.
 COPY Backend/packages/design/package.json Backend/packages/design/package.json
-RUN pnpm install --filter auth-baalvion... --frozen-lockfile
+RUN pnpm install --filter auth.baalvion.com... --frozen-lockfile
 COPY Backend/packages/design ./Backend/packages/design
 COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm --filter @baalvion/design run build
-COPY Frontend/auth-baalvion ./Frontend/auth-baalvion
+COPY Frontend/auth.baalvion.com ./Frontend/auth.baalvion.com
 # NEXT_PUBLIC_* are inlined into the client bundle at build time, so they must be present as ENV
 # for `pnpm build`. The Turnstile SITE key is public (safe to bake); the SECRET key lives only on
 # auth-service. Empty defaults keep dev/CI image builds runnable (the captcha widget just doesn't
@@ -36,15 +36,15 @@ ARG AUTH_SERVICE_URL="http://localhost:3001"
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=$NEXT_PUBLIC_ALLOWED_RETURN_HOSTS
 ENV AUTH_SERVICE_URL=$AUTH_SERVICE_URL
-WORKDIR /app/Frontend/auth-baalvion
+WORKDIR /app/Frontend/auth.baalvion.com
 RUN pnpm build
 
 # Minimal runner. Next's standalone output preserves the monorepo path, so root the app at /app:
-# server.js is emitted at /app/Frontend/auth-baalvion/server.js.
+# server.js is emitted at /app/Frontend/auth.baalvion.com/server.js.
 FROM base AS runner
 ENV NODE_ENV=production PORT=3055 HOSTNAME=0.0.0.0
 WORKDIR /app
-COPY --from=build /app/Frontend/auth-baalvion/.next/standalone ./
-COPY --from=build /app/Frontend/auth-baalvion/.next/static ./Frontend/auth-baalvion/.next/static
+COPY --from=build /app/Frontend/auth.baalvion.com/.next/standalone ./
+COPY --from=build /app/Frontend/auth.baalvion.com/.next/static ./Frontend/auth.baalvion.com/.next/static
 EXPOSE 3055
-CMD ["node", "Frontend/auth-baalvion/server.js"]
+CMD ["node", "Frontend/auth.baalvion.com/server.js"]
