@@ -53,7 +53,7 @@ module.exports = {
     {
       // multer/S3/ws + billing worker. Same unset-CORS_ORIGINS bug as cms-service above --
       // browser calls from the public site (categoriesPublicApi/subcategoriesPublicApi/
-      // articlesPublicApi in Law-Elite-Network-main/src/lib/api/client.ts) and from
+      // articlesPublicApi in lawelitenetwork.com/src/lib/api/client.ts) and from
       // admin-platform's client-rendered /law dashboard page (admin.baalvion.com) were both
       // silently CORS-blocked with no Access-Control-Allow-Origin header at all.
       ...svc('law-service', 'knowledge/law-service', 3015, 256, 384),

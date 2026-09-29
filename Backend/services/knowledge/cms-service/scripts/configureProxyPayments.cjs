@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Add the missing Stripe + PayU payment integrations to the CMS vault for the
- * Proxy-BaalvionStack site (slug: proxy-baalvionstack).
+ * proxy.baalvionstack.com site (slug: proxy-baalvionstack).
  *
  * The site already had a Razorpay entry (mock mode, placeholder keys); the
  * BillingCheckout UI lets shoppers pick razorpay | stripe | payu, but selecting

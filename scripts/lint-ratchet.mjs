@@ -3,7 +3,7 @@
 // error count went UP against the recorded baseline.
 //
 // Why a ratchet rather than an allow-list. CI used to lint two of twenty-five apps
-// by name (`--filter=proxy-baalvionstack-web --filter=baalvion-admin-platform`).
+// by name (`--filter=proxy.baalvionstack.com --filter=admin.baalvion.com`).
 // A hardcoded list has to be edited for every new app, so in practice it never is —
 // thirteen apps had no ESLint config at all and nobody noticed, because `next lint`
 // silently supplied defaults and nothing else ever ran.

@@ -1,0 +1,87 @@
+# admin.baalvion.com — Next 15 standalone image (pnpm + Turborepo monorepo).
+#
+# admin-platform is a pnpm workspace member (no package-lock.json) that depends on
+# @baalvion/auth-sdk (workspace:*), so a plain `npm ci` cannot build it. This image is
+# monorepo-aware (turbo prune + pnpm) and bakes the prod NEXT_PUBLIC_* into the client bundle.
+#
+# Build context = REPO ROOT:
+#   docker build -f Frontend/admin-platform/Dockerfile -t admin-web \
+#     --build-arg NEXT_PUBLIC_APP_URL=https://admin.baalvion.com \
+#     --build-arg NEXT_PUBLIC_GATEWAY_URL=https://api.baalvion.com \
+#     .
+FROM node:26.9-alpine AS base
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
+WORKDIR /app
+
+# 1) Prune the monorepo to just this app + its workspace deps.
+FROM base AS pruner
+COPY . .
+RUN pnpm dlx turbo@2.10.4 prune admin.baalvion.com --docker
+
+# 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
+#    snapshots (e.g. uuid@11) from the pruned lockfile, which a frozen install rejects.
+FROM base AS installer
+COPY .npmrc* ./
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --no-frozen-lockfile
+
+# 3) Build. NEXT_PUBLIC_* are inlined into the client bundle + middleware at build time.
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_GATEWAY_URL
+ARG NEXT_PUBLIC_CMS_API_URL
+ARG NEXT_PUBLIC_AUTH_URL
+ARG NEXT_PUBLIC_APP_ENV=production
+# lib/api/client.ts's per-service axios clients (commerce, orders, inventory, rbac, crm, law,
+# jobs, ...) fall back to http://localhost:<port> with NO safe prod default — unlike the named
+# clients above, which already default to a working api.baalvion.com path. NEXT_PUBLIC_SERVICE_URLS
+# is the JSON name→baseURL map that overrides that per-service fallback; each value below is one
+# of Caddy's /api-bff/<domain>/<service>/* same-origin routes (see stack/caddy/Caddyfile), so
+# calls never leave admin.baalvion.com and never hit a browser-unreachable localhost port.
+ARG NEXT_PUBLIC_SERVICE_URLS
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_ADMIN_API_URL
+ARG NEXT_PUBLIC_SESSION_API_URL
+ARG NEXT_PUBLIC_OAUTH_URL
+# CRITICAL: ARG alone is NOT visible to `next build` — without ENV re-exports below, every
+# NEXT_PUBLIC_* here silently bakes its source-code default regardless of --build-arg.
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
+    NEXT_PUBLIC_GATEWAY_URL=$NEXT_PUBLIC_GATEWAY_URL \
+    NEXT_PUBLIC_CMS_API_URL=$NEXT_PUBLIC_CMS_API_URL \
+    NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL \
+    NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV \
+    NEXT_PUBLIC_SERVICE_URLS=$NEXT_PUBLIC_SERVICE_URLS \
+    NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_ADMIN_API_URL=$NEXT_PUBLIC_ADMIN_API_URL \
+    NEXT_PUBLIC_SESSION_API_URL=$NEXT_PUBLIC_SESSION_API_URL \
+    NEXT_PUBLIC_OAUTH_URL=$NEXT_PUBLIC_OAUTH_URL
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG ALLOW_LOCAL_BACKENDS
+ENV ALLOW_LOCAL_BACKENDS=$ALLOW_LOCAL_BACKENDS
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
+ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
+COPY --from=pruner /app/out/full/ ./
+# Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
+COPY tsconfig.base.json ./tsconfig.base.json
+RUN pnpm dlx turbo@2.10.4 run build --filter=admin.baalvion.com
+
+# 4) Minimal runner (Next standalone server).
+FROM base AS runner
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3030 HOSTNAME=0.0.0.0
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+WORKDIR /app/Frontend/admin-platform
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/standalone /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/public ./public
+USER nextjs
+EXPOSE 3030
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
+# WORKDIR is already the package path, so server.js is right here -- not
+# Frontend/admin-platform/server.js again (that duplicated path doesn't exist
+# and was never actually caught before because nothing had run this image;
+# CI only builds and CVE-scans it, it never starts the container).
+CMD ["node", "server.js"]

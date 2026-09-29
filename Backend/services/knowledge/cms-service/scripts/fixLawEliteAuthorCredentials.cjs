@@ -3,7 +3,7 @@
  * One-off correction: seedLawEliteAuthors.cjs originally hardcoded unverified
  * "12+ years", "LL.M.", "J.D." style credentials for the 11 original Law Elite
  * Network contributors and ran them into production. The bundled fallback
- * (Frontend/Law-Elite-Network-main/src/data/authors.ts) deliberately excludes
+ * (Frontend/lawelitenetwork.com/src/data/authors.ts) deliberately excludes
  * exactly this kind of unverified degree/experience claim — see its file
  * header comment. The seed script has been corrected to match; this script
  * PATCHes the already-created live CMS author records to the same honest
@@ -26,7 +26,7 @@ const SITE = process.env.WEBSITE_SLUG || 'law-elite-network';
 const TARGET_BASE = process.env.TARGET_CMS_BASE || 'https://admin.baalvion.com/api-bff/knowledge/cms/api/v1';
 const PUBLIC_BASE = process.env.PUBLIC_CMS_BASE || 'https://api.baalvion.com/api/v1/public';
 
-// Honest wording — verbatim from Frontend/Law-Elite-Network-main/src/data/authors.ts.
+// Honest wording — verbatim from Frontend/lawelitenetwork.com/src/data/authors.ts.
 const CORRECTIONS = {
   'elena-rossi': 'Corporate & Securities desk, Law Elite Network',
   'marcus-hale': 'Technology & Data Protection desk, Law Elite Network',

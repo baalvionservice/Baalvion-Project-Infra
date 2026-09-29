@@ -34,7 +34,7 @@ const BASE = `${CMS}/cms/websites/${WEBSITE_ID}`;
 // ── Resolve imageId -> imageUrl from the IR frontend placeholder map (best effort) ──
 const PLACEHOLDER_JSON = path.join(
   __dirname,
-  '../../../../../Frontend/IR-Baalvion-main/src/lib/placeholder-images.json'
+  '../../../../../Frontend/ir.baalvion.com/src/lib/placeholder-images.json'
 );
 let IMG = {};
 try {

@@ -14,16 +14,16 @@ const backends = [
 
 const frontends = [
     'Frontend/about-baalvion-main',
-    'Frontend/AmariseMaisonAvenue-main',
-    'Frontend/Baalvion-Jobs-Portal-main',
-    'Frontend/brand-connector-main',
-    'Frontend/company-unified-Dashboard-main',
-    'Frontend/testrank-baalvion',
+    'Frontend/amarisemaisonavenue.com',
+    'Frontend/jobs.baalvion.com',
+    'Frontend/connect.baalvion.com',
+    'Frontend/dashboard.baalvion.com',
+    'Frontend/newaiskillsteam.baalvion.com',
     'Frontend/Imperialpedia-nextjs-main',
-    'Frontend/IR-Baalvion-main',
-    'Frontend/Mining.Baalvion-main',
-    'Frontend/Proxy-BaalvionStack',
-    'Frontend/admin-platform',
+    'Frontend/ir.baalvion.com',
+    'Frontend/mining.baalvion.com',
+    'Frontend/proxy.baalvionstack.com',
+    'Frontend/admin.baalvion.com',
 ];
 
 const target = process.argv[2] || 'all';

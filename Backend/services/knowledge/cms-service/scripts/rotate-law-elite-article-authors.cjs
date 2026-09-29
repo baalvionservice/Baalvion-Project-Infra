@@ -15,7 +15,7 @@
  * column is a BIGINT reference to the platform *user* account that created
  * the row (every article here shows "1", the seeding superadmin), unrelated
  * to the CmsAuthor contributor-profile table. The frontend's toArticle()
- * (Frontend/Law-Elite-Network-main/src/lib/cms.ts) instead reads the byline
+ * (Frontend/lawelitenetwork.com/src/lib/cms.ts) instead reads the byline
  * name from `customFields.author`, a plain string inside the content's JSON
  * customFields blob -- the same extension point ReviewerPanel/FactCheckerPanel
  * already use for reviewerSlug/factCheckerSlug/seriesSlug etc. Sequelize's
@@ -206,7 +206,7 @@ async function allPublished() {
 
 // The original ~20 "desk" contributors (Deepak Kumar Kuldeep, Waki Malik, Elena
 // Rossi, ...) were never created as `cms_authors` rows -- they live only in the
-// frontend's bundled fallback (Frontend/Law-Elite-Network-main/src/data/authors.ts)
+// frontend's bundled fallback (Frontend/lawelitenetwork.com/src/data/authors.ts)
 // and the live site's getMergedAuthors() unions that file with the CMS table (CMS
 // wins by slug). The public /authors endpoint below is CMS-only, so without this
 // fallback map roster() silently drops all 20 and the missing-roster-slug check

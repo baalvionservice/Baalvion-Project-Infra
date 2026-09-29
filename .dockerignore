@@ -13,75 +13,101 @@
 **/.env
 **/.env.local
 **/.env.*.local
-# Frontend is excluded from the lean backend build contexts, EXCEPT the two frontends built
-# from the repo root: auth-baalvion (core-auth-baalvion) and admin-platform (admin-web, the
-# admin.baalvion.com console). Re-include just those; their build artifacts stay excluded by
-# the **/node_modules etc. rules below. NOTE: without admin-platform here, its source never
-# enters the build context and `turbo prune baalvion-admin-platform` fails "package not found".
+# Frontend is excluded from the lean backend build contexts, EXCEPT the apps whose own
+# Dockerfile runs `turbo prune` from the repo root (see scripts/discover-images.mjs's
+# needsRootContext check). Each needs an explicit re-include below, or its source never
+# enters the build context and `turbo prune <name>` fails "package not found".
 Frontend/*
-!Frontend/auth-baalvion
-!Frontend/admin-platform
-# jobs.baalvion.com is built from the repo root too. Without this its source never enters
-# the build context and `turbo prune baalvion-jobs-portal-web` fails "package not found" —
-# which is why its image could only ever be rebuilt from a branch that was never merged.
-!Frontend/Baalvion-Jobs-Portal-main
-Frontend/Baalvion-Jobs-Portal-main/node_modules
-Frontend/Baalvion-Jobs-Portal-main/.next
-Frontend/Baalvion-Jobs-Portal-main/.turbo
-# baalvion-stack (baalvionstack.com) is built from the repo root too, so its source must be
-# re-included or `turbo prune baalvion-stack-web` fails with "package not found" — exactly the
-# failure the note above describes.
-!Frontend/baalvion-stack
-Frontend/baalvion-stack/node_modules
-Frontend/baalvion-stack/.next
-Frontend/baalvion-stack/.turbo
-# lawelitenetwork.com is built from the repo root too (its Dockerfile is monorepo-aware —
-# turbo prune + pnpm — same as admin-platform), so its source must be re-included or
-# `turbo prune law-elite-network-web` fails with "package not found" — exactly the failure
-# the note above describes. This is the one that was actually missing: the app's own
-# Dockerfile ran a bare `npm install` against workspace:* deps it could never resolve, so
-# no build ever caught the missing entry here until the Dockerfile itself was fixed.
-!Frontend/Law-Elite-Network-main
-Frontend/Law-Elite-Network-main/node_modules
-Frontend/Law-Elite-Network-main/.next
-Frontend/Law-Elite-Network-main/.turbo
-Frontend/auth-baalvion/node_modules
-Frontend/auth-baalvion/.next
-Frontend/auth-baalvion/.turbo
-Frontend/admin-platform/node_modules
-Frontend/admin-platform/.next
-Frontend/admin-platform/.turbo
+!Frontend/about.baalvion.com
+!Frontend/admin.baalvion.com
+!Frontend/amarisemaisonavenue.com
+!Frontend/auth.baalvion.com
+!Frontend/baalvionstack.com
+!Frontend/canwemarry.baalvion.com
+!Frontend/dashboard.baalvion.com
+!Frontend/jobs.baalvion.com
+!Frontend/lawelitenetwork.com
+!Frontend/marketunderworld.com
+!Frontend/newaiskillsteam.baalvion.com
+!Frontend/proxy.baalvionstack.com
+Frontend/about.baalvion.com/node_modules
+Frontend/about.baalvion.com/.next
+Frontend/about.baalvion.com/.turbo
+Frontend/admin.baalvion.com/node_modules
+Frontend/admin.baalvion.com/.next
+Frontend/admin.baalvion.com/.turbo
+Frontend/amarisemaisonavenue.com/node_modules
+Frontend/amarisemaisonavenue.com/.next
+Frontend/amarisemaisonavenue.com/.turbo
+Frontend/auth.baalvion.com/node_modules
+Frontend/auth.baalvion.com/.next
+Frontend/auth.baalvion.com/.turbo
+Frontend/baalvionstack.com/node_modules
+Frontend/baalvionstack.com/.next
+Frontend/baalvionstack.com/.turbo
+Frontend/canwemarry.baalvion.com/node_modules
+Frontend/canwemarry.baalvion.com/.next
+Frontend/canwemarry.baalvion.com/.turbo
+Frontend/dashboard.baalvion.com/node_modules
+Frontend/dashboard.baalvion.com/.next
+Frontend/dashboard.baalvion.com/.turbo
+Frontend/jobs.baalvion.com/node_modules
+Frontend/jobs.baalvion.com/.next
+Frontend/jobs.baalvion.com/.turbo
+Frontend/lawelitenetwork.com/node_modules
+Frontend/lawelitenetwork.com/.next
+Frontend/lawelitenetwork.com/.turbo
+Frontend/marketunderworld.com/node_modules
+Frontend/marketunderworld.com/dist
+Frontend/newaiskillsteam.baalvion.com/node_modules
+Frontend/newaiskillsteam.baalvion.com/.next
+Frontend/newaiskillsteam.baalvion.com/.turbo
+Frontend/proxy.baalvionstack.com/node_modules
+Frontend/proxy.baalvionstack.com/dist
 # .dockerignore matches like .gitignore -- last match wins. Every `!Frontend/X`
 # re-include above re-includes X's ENTIRE tree, which silently un-excludes the
-# **/.env* rules (lines 13-15) for anything under it too, since those come
-# earlier in the file. Confirmed live: Frontend/Law-Elite-Network-main/.env.local
-# (a real local-dev file pointing CMS_PUBLIC_URL at localhost:3018) was leaking
-# into every one of these 5 apps' Docker build contexts and getting picked up
-# by Next's own env loading during static generation -- baking dev URLs into
-# prod ISR pages regardless of the Dockerfile's own ENV/ARG values. Re-exclude
-# env files for every re-included app, the same way node_modules/.next/.turbo
-# already are above.
-Frontend/Law-Elite-Network-main/.env
-Frontend/Law-Elite-Network-main/.env.local
-Frontend/Law-Elite-Network-main/.env.*.local
-Frontend/auth-baalvion/.env
-Frontend/auth-baalvion/.env.local
-Frontend/auth-baalvion/.env.*.local
-Frontend/admin-platform/.env
-Frontend/admin-platform/.env.local
-Frontend/admin-platform/.env.*.local
-Frontend/Baalvion-Jobs-Portal-main/.env
-Frontend/Baalvion-Jobs-Portal-main/.env.local
-Frontend/Baalvion-Jobs-Portal-main/.env.*.local
-Frontend/baalvion-stack/.env
-Frontend/baalvion-stack/.env.local
-Frontend/baalvion-stack/.env.*.local
+# **/.env* rules above for anything under it too, since those come earlier in
+# the file. A real local-dev .env.local leaking into a re-included app's Docker
+# build context gets picked up by Next's own env loading during static
+# generation -- baking dev URLs into prod ISR pages regardless of the
+# Dockerfile's own ENV/ARG values. Re-exclude env files for every re-included
+# app, the same way node_modules/.next/.turbo already are above.
+Frontend/about.baalvion.com/.env
+Frontend/about.baalvion.com/.env.local
+Frontend/about.baalvion.com/.env.*.local
+Frontend/admin.baalvion.com/.env
+Frontend/admin.baalvion.com/.env.local
+Frontend/admin.baalvion.com/.env.*.local
+Frontend/amarisemaisonavenue.com/.env
+Frontend/amarisemaisonavenue.com/.env.local
+Frontend/amarisemaisonavenue.com/.env.*.local
+Frontend/auth.baalvion.com/.env
+Frontend/auth.baalvion.com/.env.local
+Frontend/auth.baalvion.com/.env.*.local
+Frontend/baalvionstack.com/.env
+Frontend/baalvionstack.com/.env.local
+Frontend/baalvionstack.com/.env.*.local
+Frontend/canwemarry.baalvion.com/.env
+Frontend/canwemarry.baalvion.com/.env.local
+Frontend/canwemarry.baalvion.com/.env.*.local
+Frontend/dashboard.baalvion.com/.env
+Frontend/dashboard.baalvion.com/.env.local
+Frontend/dashboard.baalvion.com/.env.*.local
+Frontend/jobs.baalvion.com/.env
+Frontend/jobs.baalvion.com/.env.local
+Frontend/jobs.baalvion.com/.env.*.local
+Frontend/lawelitenetwork.com/.env
+Frontend/lawelitenetwork.com/.env.local
+Frontend/lawelitenetwork.com/.env.*.local
+Frontend/marketunderworld.com/.env
+Frontend/marketunderworld.com/.env.local
+Frontend/marketunderworld.com/.env.*.local
+Frontend/newaiskillsteam.baalvion.com/.env
+Frontend/newaiskillsteam.baalvion.com/.env.local
+Frontend/newaiskillsteam.baalvion.com/.env.*.local
+Frontend/proxy.baalvionstack.com/.env
+Frontend/proxy.baalvionstack.com/.env.local
+Frontend/proxy.baalvionstack.com/.env.*.local
 e2e
 docs
 *.md
-# insiders directory SPA (www.marketunderworld.com), built from the repo root like the two
-# above. Without this re-include its source never enters the context and `turbo prune
-# investors-and-founders-web` fails "package.json not found".
-!Frontend/For Invstors and Founders
-Frontend/For Invstors and Founders/node_modules
-Frontend/For Invstors and Founders/dist

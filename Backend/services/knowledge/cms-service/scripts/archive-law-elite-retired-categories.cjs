@@ -2,7 +2,7 @@
 /**
  * AdSense-readiness retirement (Law Elite Network): archives every published
  * article whose category is one of the 11 practice areas retired from the
- * live site (see Frontend/Law-Elite-Network-main/src/lib/category-slugs.ts's
+ * live site (see Frontend/lawelitenetwork.com/src/lib/category-slugs.ts's
  * CURRENT_CATEGORY_SLUGS comment) or one of 2 orphan CMS categories that were
  * never a real category-page route to begin with, and separately deactivates
  * the 80 international author profiles whose bios carry the fabricated
@@ -84,7 +84,7 @@ const BASE = `${CMS_BASE.replace(/\/+$/, '')}/cms/websites/${encodeURIComponent(
 
 /**
  * Old slug -> new slug, exact 6-entry copy of
- * Frontend/Law-Elite-Network-main/src/lib/category-slugs.ts's
+ * Frontend/lawelitenetwork.com/src/lib/category-slugs.ts's
  * CATEGORY_SLUG_RENAME -- hardcoded rather than imported since this is a
  * standalone Node script in a different package with no shared build step.
  * Keep the two in sync by hand if either ever changes.

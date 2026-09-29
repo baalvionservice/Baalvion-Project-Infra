@@ -113,7 +113,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=consolidated-backend
 
   # ════════════════════════ 1b) build + push the admin console image ════════════════════════
-  # admin.baalvion.com serves the Next.js standalone admin console (Frontend/admin-platform),
+  # admin.baalvion.com serves the Next.js standalone admin console (Frontend/admin.baalvion.com),
   # NOT a backend service. It is its own ECR image (baalvion/admin-web). NEXT_PUBLIC_* are baked
   # HERE at build (Next inlines them into the client bundle). The browser only ever calls
   # same-origin /auth-bff + /api-bff, which Caddy terminates at the edge on the box.
@@ -173,7 +173,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
-          file: Frontend/admin-platform/Dockerfile.deploy
+          file: Frontend/admin.baalvion.com/Dockerfile.deploy
           push: true
           provenance: false
           # Same-origin BFF: the browser hits admin.baalvion.com/auth-bff + /api-bff, which the

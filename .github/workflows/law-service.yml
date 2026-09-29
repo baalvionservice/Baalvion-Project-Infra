@@ -6,13 +6,13 @@ on:
     paths:
       - 'Backend/services/knowledge/law-service/**'
       - 'Backend/packages/auth-node/**'
-      - 'Frontend/Law-Elite-Network-main/**'
+      - 'Frontend/lawelitenetwork.com/**'
       - '.github/workflows/law-service.yml'
   pull_request:
     branches: [main, develop]
     paths:
       - 'Backend/services/knowledge/law-service/**'
-      - 'Frontend/Law-Elite-Network-main/**'
+      - 'Frontend/lawelitenetwork.com/**'
 
 jobs:
   # ── Backend: unit tests + migrations against a real Postgres ────────────────
@@ -97,7 +97,7 @@ jobs:
         run: pnpm --filter @baalvion/illustrations build
 
       - name: Build (standalone)
-        working-directory: Frontend/Law-Elite-Network-main
+        working-directory: Frontend/lawelitenetwork.com
         run: pnpm run build
         env:
           NEXT_PUBLIC_API_BASE_URL: https://api.baalvion.com/api/v1/knowledge/law/v1
