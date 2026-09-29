@@ -51,7 +51,7 @@ const MIN_REVALIDATE_SECONDS = 900;
 const APPS = [
   'Frontend/Imperialpedia-nextjs-main',
   'Frontend/Law-Elite-Network-main',
-  'Frontend/AmariseMaisonAvenue-main',
+  'Frontend/amarisemaisonavenue.com',
 ];
 
 /**
@@ -69,7 +69,7 @@ const ALLOW = {
   'Frontend/Imperialpedia-nextjs-main/src/services/data/search-service.ts': 'no-store',
   // Google News wants a fresh sitemap; one route on a short window is fine.
   'Frontend/Imperialpedia-nextjs-main/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
-  'Frontend/AmariseMaisonAvenue-main/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
+  'Frontend/amarisemaisonavenue.com/src/app/news-sitemap.xml/route.ts': 'segment-revalidate',
   // Opt-in only: `revalidate: false` is passed explicitly by the draft-preview
   // caller, and preview is confined to /article/:slug*, which is dynamic anyway.
   'Frontend/Law-Elite-Network-main/src/lib/cms.ts': 'no-store',
@@ -81,15 +81,15 @@ const ALLOW = {
   // editor's write response to another.
   'Frontend/Law-Elite-Network-main/src/lib/editorial/cms-client.ts': 'no-store',
   // Live visitor presence, read from a client component — never server-rendered.
-  'Frontend/AmariseMaisonAvenue-main/src/lib/presence.ts': 'no-store',
+  'Frontend/amarisemaisonavenue.com/src/lib/presence.ts': 'no-store',
   // Both consumers (useMarkets.ts, store.tsx) are "use client", so this runs in
   // the browser where `next: { revalidate }` is inert — no route inherits it.
   // Confirmed against the build: no Amarisé route carries a 5m window except the
   // news sitemap. If a server component ever imports this, drop the exemption.
-  'Frontend/AmariseMaisonAvenue-main/src/lib/markets.ts': 'revalidate-constant',
+  'Frontend/amarisemaisonavenue.com/src/lib/markets.ts': 'revalidate-constant',
   // Storefront pricing and stock. 60s is a deliberate commerce-freshness call;
   // it bounds the two catalog routes and nothing else.
-  'Frontend/AmariseMaisonAvenue-main/src/lib/catalog.ts': 'fetch-revalidate',
+  'Frontend/amarisemaisonavenue.com/src/lib/catalog.ts': 'fetch-revalidate',
 };
 
 const violations = [];
@@ -180,7 +180,7 @@ function checkFile(absPath) {
         note(relPath, n, 'root-layout-dynamic',
           `\`${api[1]}()\` in a ROOT layout makes EVERY route in this app dynamic — ` +
           'nothing can be cached at all. Read the value from a route param instead ' +
-          '(see Frontend/AmariseMaisonAvenue-main/src/app/[country]/layout.tsx).');
+          '(see Frontend/amarisemaisonavenue.com/src/app/[country]/layout.tsx).');
       }
     }
   });
