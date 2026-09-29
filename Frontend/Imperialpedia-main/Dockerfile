@@ -33,6 +33,9 @@ RUN { \
       echo 'upload_max_filesize = 20M'; \
       echo 'post_max_size = 25M'; \
       echo 'memory_limit = 256M'; \
+      echo 'display_errors = Off'; \
+      echo 'log_errors = On'; \
+      echo 'error_log = /proc/self/fd/2'; \
     } > /usr/local/etc/php/conf.d/uploads.ini
 
 # Set default working directory
