@@ -23,7 +23,7 @@ const frontends = [
     'Frontend/IR-Baalvion-main',
     'Frontend/mining.baalvion.com',
     'Frontend/proxy.baalvionstack.com',
-    'Frontend/admin-platform',
+    'Frontend/admin.baalvion.com',
 ];
 
 const target = process.argv[2] || 'all';

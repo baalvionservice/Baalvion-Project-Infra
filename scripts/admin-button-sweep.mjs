@@ -25,7 +25,7 @@ import { join } from 'node:path';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3030';
 const EMAIL = process.env.ADMIN_EMAIL || 'sa.test@baalvion.local';
 const PASSWORD = process.env.ADMIN_PASSWORD || 'TestPass!2026';
-const APP_DIR = process.env.APP_DIR || join(process.cwd(), 'Frontend/admin-platform/src/app');
+const APP_DIR = process.env.APP_DIR || join(process.cwd(), 'Frontend/admin.baalvion.com/src/app');
 
 const DESTRUCTIVE = /delete|remove|revoke|cancel|deactivate|suspend|ban\b|purge|wipe|reset|unpublish|disable|terminate|refund|clear|archive|drop|kill|stop/i;
 const MUTATING = /save|create|add\b|new\b|publish|send|invite|approve|reject|assign|update|submit|import|export|sync|run\b|retry|generate|upload|apply|confirm|pay|charge|enable|activate|rotate|revert|merge|promote/i;

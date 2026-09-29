@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { ExternalLink, Server, Clock, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ExternalLink, Server, Clock, Tag, Loader2 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +9,20 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePlatformRegistry } from '@/lib/queries/platform-registry.queries';
 import { useUIStore } from '@/lib/store/uiStore';
+import { platformRegistryApi } from '@/lib/api/platform-registry';
 import type { PlatformEntry, PlatformStatus } from '@/lib/api/platform-registry';
 import { cn } from '@/lib/utils/cn';
+
+// The raw bearer token never leaves this app — only a one-time, 60s-TTL, single-use code minted
+// by auth-gateway's POST /sso/code. It's inert without the matching server-side exchange, so it's
+// safe to carry in a URL, unlike the token itself (see auth-gateway/routes/auth.js).
+function ssoHandoffUrl(adminUrl: string, code: string): string {
+  const target = new URL(adminUrl);
+  const cb = new URL('/auth/sso-callback', target.origin);
+  cb.searchParams.set('next', adminUrl);
+  cb.searchParams.set('code', code);
+  return cb.toString();
+}
 
 const STATUS_META: Record<PlatformStatus, { label: string; dot: string; text: string }> = {
   online:          { label: 'Online',        dot: 'bg-green-500',  text: 'text-green-500' },
@@ -22,6 +34,27 @@ const STATUS_META: Record<PlatformStatus, { label: string; dot: string; text: st
 
 function PlatformCard({ platform }: { platform: PlatformEntry }) {
   const meta = STATUS_META[platform.status];
+  const [opening, setOpening] = useState(false);
+
+  const openAdmin = async () => {
+    if (!platform.adminUrl || opening) return;
+    if (!platform.ssoCapable) {
+      window.open(platform.adminUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setOpening(true);
+    try {
+      const { data } = await platformRegistryApi.ssoCode();
+      window.open(ssoHandoffUrl(platform.adminUrl, data.code), '_blank', 'noopener,noreferrer');
+    } catch {
+      // Code mint failed (session expired, gateway unreachable, …) — bare URL still works, it
+      // just lands on that site's own login screen instead of a hand-off.
+      window.open(platform.adminUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setOpening(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2 pt-4 px-4">
@@ -55,10 +88,14 @@ function PlatformCard({ platform }: { platform: PlatformEntry }) {
           size="sm"
           variant="outline"
           className="w-full"
-          disabled={!platform.adminUrl}
-          onClick={() => platform.adminUrl && window.open(platform.adminUrl, '_blank', 'noopener,noreferrer')}
+          disabled={!platform.adminUrl || opening}
+          onClick={openAdmin}
         >
-          <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+          {opening ? (
+            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+          ) : (
+            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+          )}
           {platform.adminUrl ? 'Open Admin' : 'No admin URL configured'}
         </Button>
       </CardContent>

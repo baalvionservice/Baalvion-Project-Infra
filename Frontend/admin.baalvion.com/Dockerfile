@@ -32,6 +32,29 @@ ARG NEXT_PUBLIC_GATEWAY_URL
 ARG NEXT_PUBLIC_CMS_API_URL
 ARG NEXT_PUBLIC_AUTH_URL
 ARG NEXT_PUBLIC_APP_ENV=production
+# lib/api/client.ts's per-service axios clients (commerce, orders, inventory, rbac, crm, law,
+# jobs, ...) fall back to http://localhost:<port> with NO safe prod default — unlike the named
+# clients above, which already default to a working api.baalvion.com path. NEXT_PUBLIC_SERVICE_URLS
+# is the JSON name→baseURL map that overrides that per-service fallback; each value below is one
+# of Caddy's /api-bff/<domain>/<service>/* same-origin routes (see stack/caddy/Caddyfile), so
+# calls never leave admin.baalvion.com and never hit a browser-unreachable localhost port.
+ARG NEXT_PUBLIC_SERVICE_URLS
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_ADMIN_API_URL
+ARG NEXT_PUBLIC_SESSION_API_URL
+ARG NEXT_PUBLIC_OAUTH_URL
+# CRITICAL: ARG alone is NOT visible to `next build` — without ENV re-exports below, every
+# NEXT_PUBLIC_* here silently bakes its source-code default regardless of --build-arg.
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
+    NEXT_PUBLIC_GATEWAY_URL=$NEXT_PUBLIC_GATEWAY_URL \
+    NEXT_PUBLIC_CMS_API_URL=$NEXT_PUBLIC_CMS_API_URL \
+    NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL \
+    NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV \
+    NEXT_PUBLIC_SERVICE_URLS=$NEXT_PUBLIC_SERVICE_URLS \
+    NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_ADMIN_API_URL=$NEXT_PUBLIC_ADMIN_API_URL \
+    NEXT_PUBLIC_SESSION_API_URL=$NEXT_PUBLIC_SESSION_API_URL \
+    NEXT_PUBLIC_OAUTH_URL=$NEXT_PUBLIC_OAUTH_URL
 # Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
 # destinations into routes-manifest.json, so setting these on the running container is a
 # no-op. Unset, the config silently falls back to its hardcoded default.

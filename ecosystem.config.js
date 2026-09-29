@@ -174,7 +174,7 @@ module.exports = {
     // ── Frontends (production builds) ───────────────────────────────────
     // Next.js apps — `next start` against a prebuilt .next/. Run `pnpm build` first.
     nextApp('about-web', './Frontend/about.baalvion.com', 3020),
-    nextApp('admin-platform', './Frontend/admin-platform', 3030),
+    nextApp('admin-platform', './Frontend/admin.baalvion.com', 3030),
     nextApp('amarise-web', './Frontend/amarisemaisonavenue.com', 3033),
     // :3043 (moved off :3040, the realtime-service contract port).
     nextApp('baalvion-com-web', './Frontend/baalvion.com', 3043),
