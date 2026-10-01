@@ -26,6 +26,12 @@ class PostsCtrl extends CI_Controller{
 
 
 
+	private function gone(){
+		$this->output->set_status_header(410);
+		$this->output->set_header('X-Robots-Tag: noindex');
+		$this->output->set_output('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page removed - Imperialpedia</title></head><body style="font-family:sans-serif;max-width:560px;margin:15vh auto;padding:0 20px"><h1>This page has been removed</h1><p>The page you are looking for no longer exists. <a href="' . htmlspecialchars(base_url()) . '">Go to the Imperialpedia homepage</a>.</p></body></html>');
+	}
+
 	public function index(){ 
 		$this->load->view('includes/header'); 
 		$this->load->view('seo_view'); 
@@ -115,6 +121,11 @@ class PostsCtrl extends CI_Controller{
 				}
 			}
 
+			// Unknown top-level section (e.g. a URL from the retired Next.js site): 410, not a template-load 500.
+			if(!file_exists(APPPATH.'views/'.$seg1.'_view.php')){
+				$this->gone();
+				return;
+			}
 			$this->load->view('includes/header', $data); 
 			$this->load->view($this->uri->segment(1).'_view', $data); 
 			$this->load->view('includes/footer');  
@@ -139,6 +150,10 @@ class PostsCtrl extends CI_Controller{
         $data['post_details'] = $this->Post_model->get_post_by_url($url);
         $data['comments'] = $this->Post_model->comm_list(uri_string());  
 		if(!empty($this->uri->segment(1))){ 
+			if(!file_exists(APPPATH.'views/'.$this->uri->segment(1).'_details_view.php')){
+				$this->gone();
+				return;
+			}
 			$this->load->view('includes/header', $data); 
 			$this->load->view($this->uri->segment(1).'_details_view'); 
 			$this->load->view('includes/footer'); 

@@ -71,5 +71,5 @@ $route['(:any)/(:any)'] = 'PostsCtrl/posts';
 }
 
 
-$route['404_override'] = '';
+$route['404_override'] = 'GoneCtrl';
 $route['translate_uri_dashes'] = FALSE;
