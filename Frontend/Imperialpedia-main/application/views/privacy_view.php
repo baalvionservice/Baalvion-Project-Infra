@@ -10,60 +10,54 @@
 </section>
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
-   <h1 class="text-dark">Privacy Policy for Imperial Pedia</h1>
+   <h1 class="text-dark">Privacy Policy</h1>
    <p class="text-center">Last updated: October 2, 2026</p>
-   <p>At Imperial Pedia, accessible from <?php echo str_replace(array('https://','http://'), '', base_url()); ?>, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Imperial Pedia and how we use it.</p>
-   <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.</p>
-   <p>This Privacy Policy applies only to our online activities and is valid for visitors to our website with regards to the information that they shared and/or collect in Imperial Pedia. This policy is not applicable to any information collected offline or via channels other than this website. Our Privacy Policy was created with the help of the <a href="https://www.privacypolicygenerator.info">Free Privacy Policy Generator</a>.</p>
-   <h2>Consent</h2>
-   <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
-   <h2>Information we collect</h2>
-   <p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
-   <p>If you contact us directly, we may receive additional information about you such as your name, email address, phone number, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</p>
-   <p>When you register for an Account, we may ask for your contact information, including items such as name, company name, address, email address, and telephone number.</p>
-   <h2>How we use your information</h2>
-   <p>We use the information we collect in various ways, including to:</p>
-   <ul>
-      <li>Provide, operate, and maintain our website</li>
-      <li>Improve, personalize, and expand our website</li>
-      <li>Understand and analyze how you use our website</li>
-      <li>Develop new products, services, features, and functionality</li>
-      <li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes</li>
-      <li>Send you emails</li>
-      <li>Find and prevent fraud</li>
-   </ul>
-   <h2>Log Files</h2>
-   <p>Imperial Pedia follows a standard procedure of using log files. These files log visitors when they visit websites. All hosting companies do this and a part of hosting services' analytics. The information collected by log files include internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable. The purpose of the information is for analyzing trends, administering the site, tracking users' movement on the website, and gathering demographic information.</p>
-   <h2>Cookies and Web Beacons</h2>
-   <p>Like any other website, Imperial Pedia uses 'cookies'. These cookies are used to store information including visitors' preferences, and the pages on the website that the visitor accessed or visited. The information is used to optimize the users' experience by customizing our web page content based on visitors' browser type and/or other information.</p>
-   <p>For more general information on cookies, please read <a href="https://www.generateprivacypolicy.com/#cookies">the Cookies article on Generate Privacy Policy website</a>.</p>
-   <h2>Google DoubleClick DART Cookie</h2>
-   <p>Google is one of a third-party vendor on our site. It also uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to <?php echo str_replace(array('https://','http://'), '', base_url()); ?> and other sites on the internet. However, visitors may choose to decline the use of DART cookies by visiting the Google ad and content network Privacy Policy at the following URL – <a href="https://policies.google.com/technologies/ads">https://policies.google.com/technologies/ads</a></p>
-   <h2>Advertising Partners Privacy Policies</h2>
-   <P>You may consult this list to find the Privacy Policy for each of the advertising partners of Imperial Pedia.</p>
-   <p>Third-party ad servers or ad networks uses technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Imperial Pedia, which are sent directly to users' browser. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.</p>
-   <p>Note that Imperial Pedia has no access to or control over these cookies that are used by third-party advertisers.</p>
-   <h2>Third Party Privacy Policies</h2>
-   <p>Imperial Pedia's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information. It may include their practices and instructions about how to opt-out of certain options. </p>
-   <p>You can choose to disable cookies through your individual browser options. To know more detailed information about cookie management with specific web browsers, it can be found at the browsers' respective websites.</p>
-   <h2>CCPA Privacy Rights (Do Not Sell My Personal Information)</h2>
-   <p>Under the CCPA, among other rights, California consumers have the right to:</p>
-   <p>Request that a business that collects a consumer's personal data disclose the categories and specific pieces of personal data that a business has collected about consumers.</p>
-   <p>Request that a business delete any personal data about the consumer that a business has collected.</p>
-   <p>Request that a business that sells a consumer's personal data, not sell the consumer's personal data.</p>
-   <p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
-   <h2>GDPR Data Protection Rights</h2>
-   <p>We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:</p>
-   <p>The right to access – You have the right to request copies of your personal data. We may charge you a small fee for this service.</p>
-   <p>The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request that we complete the information you believe is incomplete.</p>
-   <p>The right to erasure – You have the right to request that we erase your personal data, under certain conditions.</p>
-   <p>The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions.</p>
-   <p>The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions.</p>
-   <p>The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.</p>
-   <p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
-   <h2>Children's Information</h2>
-   <p>Another part of our priority is adding protection for children while using the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.</p>
-   <p>Imperial Pedia does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.</p>
-   <h2>Contact Us</h2>
-   <p>If you have questions about this Privacy Policy or would like to exercise any of the rights described above, you can reach us at: <a href="mailto:advimperialpedia@gmail.com">advimperialpedia@gmail.com</a></p>
+
+   <p>This page explains what personal information Imperialpedia collects when you use <a href="<?php echo base_url()?>">imperialpedia.com</a>, why we collect it, and what you can ask us to do with it. We have tried to describe what the site actually does, not what a typical website might do. If something here is unclear, email us at <a href="mailto:advimperialpedia@gmail.com">advimperialpedia@gmail.com</a>.</p>
+
+   <h3>Reading the site</h3>
+   <p>You can read every article without creating an account or giving us any information. Like any web server, ours records basic technical details of each visit in its logs: your IP address, the browser and device you use, the page you asked for, and the time. We use these logs to keep the site running and to spot errors or abuse. We do not currently run an analytics service such as Google Analytics on the site.</p>
+
+   <h3>What we collect when you take an action</h3>
+   <p><strong>Comments.</strong> If you comment on an article we ask for a name, an optional email address and your comment. The name and comment are shown publicly on the page. Your email address is not shown. Please do not put anything in a comment that you do not want strangers to read.</p>
+   <p><strong>Newsletter.</strong> If you subscribe, we store your email address so we can send you the newsletter. You can ask us to remove it at any time.</p>
+   <p><strong>Accounts.</strong> If you register, we store your name, your email address and a password. You can also sign in with your Google account, in which case Google shares your name and email address with us. We use this only to run your account.</p>
+   <p><strong>Polls.</strong> When you vote in a poll, we store your vote together with a scrambled identifier made from your IP address and browser details. We use it only to stop the same person voting repeatedly. We do not store your raw IP address with the vote.</p>
+   <p><strong>Job applications.</strong> If you apply on our Careers page, we collect your name, email, phone number, address, city, pincode, the role you chose and your CV as a PDF. This is sent to our team by email and stored on our server so that we can consider your application. Only send what you are comfortable sharing, and leave out anything you do not want us to hold, such as government ID numbers.</p>
+   <p><strong>Emails and phone calls to us.</strong> If you write to or call us, we keep the message and your contact details for as long as we need them to reply and follow up.</p>
+
+   <h3>Cookies</h3>
+   <p>We use two kinds of cookies ourselves. A session cookie remembers you between pages (for example, that you are signed in or that a message has been shown), and a security cookie protects our forms from forged submissions. Neither is used to track you across other websites.</p>
+   <p>You can block or delete cookies in your browser settings. If you do, sign-in and some forms may stop working.</p>
+
+   <h3>Advertising and Google AdSense</h3>
+   <p>We have applied to Google AdSense so that we can show advertising and cover the cost of running the site. Ads are not being shown yet. The AdSense code is already on our pages, so your browser may contact Google&rsquo;s servers when you load a page.</p>
+   <p>When ads do start appearing, Google and its advertising partners may use cookies or similar technologies to show ads, including ads based on your earlier visits to this and other websites, and to measure how ads perform. We do not control those cookies and we do not receive your personal information from them. You can read how Google uses data at <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">policies.google.com/technologies/ads</a>, and you can turn off personalised ads in <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ad Settings</a> or at <a href="https://www.aboutads.info" target="_blank" rel="noopener">aboutads.info</a>. We will update this page when advertising goes live.</p>
+
+   <h3>Other services we load</h3>
+   <p>To display pages we load fonts, icons and scripts from third-party providers such as Google Fonts, jsDelivr and cdnjs. These providers receive your IP address and browser details when your browser fetches those files. Our share buttons are ordinary links to X, Facebook and similar sites; nothing is sent to them unless you click.</p>
+
+   <h3>How we use and share your information</h3>
+   <p>We use your information only for the purposes described above: running the site, replying to you, sending a newsletter you asked for, handling job applications, and keeping the site safe. We do not sell your personal information. We share it only with the services that help us run the site (our web host, our email provider, and Google when you sign in with Google or when ads run), or when the law requires it.</p>
+
+   <h3>How long we keep it</h3>
+   <p>We keep information only as long as it is useful for the reason we collected it. Comments stay until they are removed. Newsletter and account details stay until you ask us to delete them. Job applications are kept while we consider them and for a reasonable period afterwards in case a suitable role comes up; you can ask us to delete yours sooner.</p>
+
+   <h3>Keeping it safe</h3>
+   <p>We take reasonable steps to protect the information we hold, but no website or email system can be made completely secure, so we cannot guarantee it. Use a password for our site that you do not use anywhere else.</p>
+
+   <h3>Your choices</h3>
+   <p>You can ask us to show you the personal information we hold about you, correct it, or delete it. You can also ask us to remove your email from the newsletter or delete your account or a comment. Email <a href="mailto:advimperialpedia@gmail.com">advimperialpedia@gmail.com</a> from the address concerned and we will respond as soon as we reasonably can. If you are in India, the European Economic Area or the United Kingdom, you may have additional rights under the laws that apply to you, and we will honour them.</p>
+
+   <h3>Children</h3>
+   <p>Imperialpedia is written for adults. It is not directed at children under 18, and we do not knowingly collect their personal information. If you believe a child has given us their details, tell us and we will delete them.</p>
+
+   <h3>Links to other sites</h3>
+   <p>Articles sometimes link to other websites. We do not control them and are not responsible for their privacy practices. Check their policies before you share anything.</p>
+
+   <h3>Changes to this policy</h3>
+   <p>If we change how we handle information, for example when advertising starts, we will update this page and the date at the top.</p>
+
+   <h3>Contact</h3>
+   <p>Imperialpedia, Bangalore, India<br>Email: <a href="mailto:advimperialpedia@gmail.com">advimperialpedia@gmail.com</a><br>Phone: <a href="tel:+918951284770">+91 89512 84770</a></p>
 </div>
