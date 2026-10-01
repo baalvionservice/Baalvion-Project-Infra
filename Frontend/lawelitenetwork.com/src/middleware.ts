@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isRetiredPath } from '@/lib/retired-routes';
 
 // The retired per-app /admin panel redirects to the central admin-platform
 // console. The console URL is env-driven so production points at the real CMS;
@@ -34,6 +35,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     if (ADMIN_CONSOLE_URL) {
       return NextResponse.redirect(new URL(ADMIN_CONSOLE_URL));
     }
+  }
+
+  if (isRetiredPath(pathname)) {
+    return new NextResponse('410 Gone: this page has been permanently removed.', {
+      status: 410,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'noindex',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
   }
 
   const response = NextResponse.next();
