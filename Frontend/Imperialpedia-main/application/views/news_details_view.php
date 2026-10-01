@@ -409,18 +409,7 @@ body {
             </div>
             <h1 class="p6-detail-title"><?php echo ucfirst($row['post_title']);?></h1>
             <div class="p6-author-bar flex-wrap justify-content-between">
-               <div class="d-flex align-items-center gap-3">
-                  <div class="p6-author-avatar">IP</div>
-                  <div>
-                     <div class="d-flex align-items-center flex-wrap gap-2">
-                        <strong class="text-dark">Imperialpedia News Desk</strong>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style="font-size:0.75rem;">
-                           <i class="fa-solid fa-circle-check me-1"></i> Fact-Checked
-                        </span>
-                     </div>
-                     <span class="text-muted" style="font-size:0.8rem;"><i class="fa-regular fa-calendar me-1"></i> Posted on <?php echo date('F d, Y', strtotime(!empty($row['posted_date']) ? $row['posted_date'] : 'now')); ?> &bull; 5 min read</span>
-                  </div>
-               </div>
+         <?php $this->load->view('includes/byline', array('row'=>$row)); ?>
                <!-- Byline Share Icons (Desktop) -->
                <div class="d-none d-md-flex align-items-center gap-2 mt-2 mt-md-0">
                   <span class="text-uppercase text-muted fw-bold me-1" style="font-size: 0.75rem; letter-spacing: 1px;">Share:</span>
@@ -521,14 +510,8 @@ body {
                <?php echo $row['post_desc'];?>
             </article>
 
-            <!-- Author Bio Card (Page Six & NY Post Standard) -->
-            <div class="p6-widget-box mt-4 p-4 d-flex align-items-center gap-3 bg-light border-0 shadow-sm" style="border-radius:12px;">
-               <div class="p6-author-avatar flex-shrink-0" style="width:56px; height:56px; font-size:1.2rem;">IP</div>
-               <div>
-                  <h4 class="h6 mb-1 fw-bold text-dark">Written by Imperialpedia News Desk</h4>
-                  <p class="small text-muted mb-0">Our news team brings real-time breaking reporting, tech innovation, market movements, and expert editorial coverage.</p>
-               </div>
-            </div>
+
+               <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
 
             <?php $this->load->view('includes/comments_view'); ?>
          </div>

@@ -73,11 +73,12 @@
         ],
         "datePublished": "<?php echo $pub_date; ?>",
         "dateModified": "<?php echo $mod_date; ?>",
-        "author": {
-          "@type": "Organization",
-          "name": "Imperialpedia Editorial Desk",
-          "url": "<?php echo base_url(); ?>"
-        },
+        "author": <?php
+          $ld_author = !empty($pd) ? post_author($pd) : null;
+          echo $ld_author
+            ? json_encode(array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => $ld_author['url'], 'jobTitle' => $ld_author['title']), JSON_UNESCAPED_SLASHES)
+            : json_encode(array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()), JSON_UNESCAPED_SLASHES);
+        ?>,
         "publisher": {
           "@type": "Organization",
           "name": "Imperialpedia",

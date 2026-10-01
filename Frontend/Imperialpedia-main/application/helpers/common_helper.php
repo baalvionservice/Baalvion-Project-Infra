@@ -34,3 +34,30 @@ if (!function_exists('seo_excerpt')) {
         return rtrim(mb_substr($cut, 0, $sp > 60 ? $sp : $max), " ,;:-") . '…';
     }
 }
+
+
+if (!function_exists('post_author')) {
+    // The author row for a post, or null when none is assigned.
+    function post_author($post) {
+        static $cache = array();
+        $id = (int)(is_array($post) ? ($post['author_id'] ?? 0) : $post);
+        if ($id < 1) return null;
+        if (!array_key_exists($id, $cache)) {
+            $CI =& get_instance();
+            $CI->load->database();
+            $row = $CI->db->get_where('author', array('id' => $id))->row_array();
+            if ($row) {
+                $row['url'] = base_url('author/' . $row['slug']);
+                $row['avatar_url'] = author_avatar_url($row['avatar'] ?? '', $row['name']);
+            }
+            $cache[$id] = $row ?: null;
+        }
+        return $cache[$id];
+    }
+}
+
+if (!function_exists('post_read_minutes')) {
+    function post_read_minutes($html) {
+        return max(1, (int)ceil(str_word_count(strip_tags((string)$html)) / 200));
+    }
+}

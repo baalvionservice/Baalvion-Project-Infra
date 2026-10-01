@@ -76,22 +76,36 @@ class AuthorCtrl extends CI_Controller {
 					'bio' => $a['bio'],
 					'avatar' => author_avatar_url($a['avatar'] ?? '', $a['name']),
 					'topics' => $topics,
-					'linkedin' => $a['linkedin'] ?? 'https://linkedin.com',
-					'twitter' => $a['twitter'] ?? 'https://x.com',
-					'articles_count' => rand(5, 15),
-					'articles' => [
-						[
-							'title' => 'Complete Editorial & Topic Benchmark Guide (2026)',
-							'url' => base_url('seo/web-seo'),
-							'category' => 'Editorial',
-							'date' => date('M d, Y'),
-							'read_time' => '8 min read',
-							'excerpt' => 'Research insights and authoritative analysis published by ' . $a['name'] . '.'
-						]
-					]
+					'linkedin' => $a['linkedin'] ?? '',
+					'twitter' => $a['twitter'] ?? '',
+					'articles' => $this->_articles_by($a['id'])
 				];
 			}
 		}
 		return $authors;
+	}
+
+	// Published articles written by one author, newest first.
+	private function _articles_by($author_id) {
+		$rows = $this->db->select('p.post_title, p.uri, p.post_desc, p.posted_date, c.cat_name, s.sub_cat_name')
+			->from('post p')
+			->join('category c', 'c.cat_id = p.cat_id', 'left')
+			->join('sub_category s', 's.sub_cat_id = p.sub_cat_id', 'left')
+			->where('p.author_id', (int)$author_id)
+			->where('p.status', 'published')
+			->order_by('p.posted_date', 'DESC')
+			->get()->result_array();
+		$out = [];
+		foreach ($rows as $r) {
+			$out[] = [
+				'title' => ucfirst($r['post_title']),
+				'url' => base_url(str_replace(' ', '-', $r['cat_name']) . '/' . str_replace(' ', '-', $r['sub_cat_name']) . '/' . str_replace(' ', '-', $r['uri'])),
+				'category' => ucfirst($r['cat_name']),
+				'date' => date('M d, Y', strtotime($r['posted_date'])),
+				'read_time' => post_read_minutes($r['post_desc']) . ' min read',
+				'excerpt' => seo_excerpt($r['post_desc'], 160),
+			];
+		}
+		return $out;
 	}
 }

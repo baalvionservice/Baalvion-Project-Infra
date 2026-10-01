@@ -802,7 +802,7 @@ body {
             Read the full article from the Imperialpedia editorial desk.
           </p>
           <div class="p6-meta-byline">
-            By <span class="author">Imperialpedia Editorial Desk</span> &bull; Updated <?php echo date('F d, Y', strtotime($lead_post['post_updated'])); ?>
+            <?php $lead_au = post_author($lead_post); if($lead_au){ ?>By <span class="author"><?php echo htmlspecialchars($lead_au['name']); ?></span> &bull; <?php } ?> Updated <?php echo date('F d, Y', strtotime($lead_post['post_updated'])); ?>
           </div>
         </a>
       </div>

@@ -217,7 +217,7 @@ body {
 }
 
 /* E-E-A-T Author Box */
-.p6-eeat-box {
+               <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
    background: #ecfeff;
    border: 1px solid #cffaff;
    border-radius: 12px;
@@ -244,20 +244,7 @@ body {
       </h1>
 
       <div class="p6-author-bar flex-wrap justify-content-between">
-         <div class="d-flex align-items-center gap-3">
-            <div class="p6-author-avatar">
-               <i class="fa-solid fa-sliders"></i>
-            </div>
-            <div>
-               <div class="d-flex align-items-center flex-wrap gap-2">
-                  <span class="fw-bold text-dark">Written by <span class="text-info fw-bold">Imperialpedia Software Engineering Lab</span></span>
-                  <span class="p6-meta-tag"><i class="fa-solid fa-microchip me-1"></i> VERIFIED WORKFLOW</span>
-               </div>
-               <div class="text-muted small">
-                  Published: <?php echo date('F j, Y'); ?> | Tested & Verified for 2026 Workflows
-               </div>
-            </div>
-         </div>
+         <?php $this->load->view('includes/byline', array('row'=>$row)); ?>
          <!-- Byline Share Icons (Desktop) -->
          <div class="d-none d-md-flex align-items-center gap-2 mt-2 mt-md-0">
             <span class="text-uppercase text-muted fw-bold me-1" style="font-size: 0.75rem; letter-spacing: 1px;">Share:</span>
@@ -326,18 +313,7 @@ body {
             <?php } ?>
          </div>
 
-         <!-- E-E-A-T Author Box -->
-         <div class="p6-eeat-box">
-            <div class="p6-author-avatar" style="width: 56px; height: 56px; font-size: 1.4rem;">
-               <i class="fa-solid fa-code-compare"></i>
-            </div>
-            <div>
-               <h5 class="fw-bold mb-1 text-dark">Reviewed by Software & Media Engineering Lead</h5>
-               <p class="text-muted small mb-0">
-                  Imperialpedia Productivity Lab conducts empirical benchmark testing across SaaS platforms, design tools, and media rendering pipelines to provide unbiased technical evaluations.
-               </p>
-            </div>
-         </div>
+         <?php foreach($post_details as $row){ $this->load->view('includes/author_box', array('row'=>$row)); } ?>
       </div>
 
       <!-- Right Sidebar -->
