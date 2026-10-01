@@ -26,8 +26,17 @@
 </section>
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
-   <p>Imperialpedia was founded in 2022 with a simple goal: make financial and business decisions easier to understand, for readers at any stage &mdash; whether you're investing for the first time or you're an experienced business owner, advisor, or executive looking for a clear, well-researched reference.</p>
-   <p>We're a finance and business information site headquartered in Bangalore, covering insurance, SEO, marketing, digital tools, and related topics readers rely on to make informed, confident decisions. Every article is written to be genuinely useful on its own &mdash; not written to game search rankings, but to actually answer the question that brought you here.</p>
-   <p>We're a small, growing team, and we're upfront about that: rather than promise more than we can deliver, our focus is on getting each topic right and expanding thoughtfully from there.</p>
-   <p>If you have feedback, a correction, or a topic you'd like us to cover, we'd genuinely like to hear from you &mdash; see our <a href="<?php echo base_url()?>contact">Contact</a> page.</p>
+   <p>Imperialpedia is an independent information site that explains finance, business and technology topics in plain language. It was founded in 2022 and is based in Bangalore, India.</p>
+
+   <h2>What we cover</h2>
+   <p>Our articles and guides cover insurance, SEO, marketing, digital tools and software, business and finance basics, and news in these areas. Readers use the site to learn a topic, compare options, or look up a term before making a decision.</p>
+
+   <h2>How we write</h2>
+   <p>Each article aims to answer a specific question clearly, without padding. Topics are researched before they are written, and pages are updated when information changes. You can read more about how content is produced and corrected in our <a href="<?php echo base_url()?>editorial-policy">Editorial Policy</a>.</p>
+
+   <h2>Please note</h2>
+   <p>Content on Imperialpedia is for general information only and is not financial, legal or professional advice. See our <a href="<?php echo base_url()?>disclaimer">Disclaimer</a> for details.</p>
+
+   <h2>Get in touch</h2>
+   <p>If you have feedback, a correction, or a topic you would like us to cover, please visit our <a href="<?php echo base_url()?>contact">Contact</a> page.</p>
 </div>
