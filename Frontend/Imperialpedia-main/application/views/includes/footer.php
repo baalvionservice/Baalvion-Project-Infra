@@ -300,5 +300,10 @@
       });
    });
 </script>
+<style>
+/* One typeface site-wide (Plus Jakarta Sans). Loaded last so it wins over each page's own font rules; icons and code keep theirs. */
+:root{--p6-font-body:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--p6-font-headline:var(--p6-font-body);--p6-font-serif:var(--p6-font-body);--p6-font-accent:var(--p6-font-body)}
+body *:not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(code):not(pre):not(kbd):not(svg):not(svg *){font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif !important}
+</style>
 </body>
 </html>
