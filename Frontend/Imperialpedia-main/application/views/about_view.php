@@ -48,7 +48,7 @@
    <p>Mistakes happen, and we would rather fix them than leave them. If you spot an error or an out-of-date detail, use the correction option on the article, or reach us through the <a href="<?php echo base_url()?>contact">Contact</a> page. We review reports and update the page when a correction is warranted.</p>
 
    <h2>Important to know</h2>
-   <p>Imperialpedia is an information resource, not an advisory service. Nothing on the site is financial, legal, tax or insurance advice, and you should speak to a qualified professional before acting on any of it. Our <a href="<?php echo base_url()?>disclaimer">Disclaimer</a> and <a href="<?php echo base_url()?>privacy-policy">Privacy Policy</a> explain this and how we handle your data. If the site shows advertising, our <a href="<?php echo base_url()?>editorial-policy">editorial approach</a> does not change because of it.</p>
+   <p>Imperialpedia is an information resource, not an advisory service. Nothing on the site is financial, legal, tax or insurance advice, and you should speak to a qualified professional before acting on any of it. Our <a href="<?php echo base_url()?>disclaimer">Disclaimer</a> and <a href="<?php echo base_url()?>privacy-policy">Privacy Policy</a> explain this and how we handle your data.</p>
 
    <h2>Work with us</h2>
    <p>Interested in advertising, writing for the site, or joining the team? Visit our <a href="<?php echo base_url()?>advertise">Advertise</a> and <a href="<?php echo base_url()?>careers">Careers</a> pages, or get in touch through <a href="<?php echo base_url()?>contact">Contact</a>.</p>
