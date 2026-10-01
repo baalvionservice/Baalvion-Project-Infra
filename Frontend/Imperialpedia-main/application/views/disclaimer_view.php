@@ -8,7 +8,7 @@
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
    <h1  class="text-dark text-center text-uppercase">Imperial pedia Disclaimer</h1>
-   <p class="text-center">Last updated: August 24, 2026</p>
+   <p class="text-center">Last updated: October 2, 2026</p>
    <h2 class="h1">Interpretation and Definitions</h2>
    <h2>Interpretation</h2>
    <p>The words of which the initial letter is capitalized have meanings defined under the following conditions.

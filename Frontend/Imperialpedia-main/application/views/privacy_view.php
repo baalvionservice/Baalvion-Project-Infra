@@ -11,7 +11,7 @@
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
    <h1 class="text-dark">Privacy Policy for Imperial Pedia</h1>
-   <p class="text-center">Last updated: August 24, 2026</p>
+   <p class="text-center">Last updated: October 2, 2026</p>
    <p>At Imperial Pedia, accessible from <?php echo str_replace(array('https://','http://'), '', base_url()); ?>, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Imperial Pedia and how we use it.</p>
    <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.</p>
    <p>This Privacy Policy applies only to our online activities and is valid for visitors to our website with regards to the information that they shared and/or collect in Imperial Pedia. This policy is not applicable to any information collected offline or via channels other than this website. Our Privacy Policy was created with the help of the <a href="https://www.privacypolicygenerator.info">Free Privacy Policy Generator</a>.</p>

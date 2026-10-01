@@ -9,7 +9,7 @@
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
    <h1 class="text-dark">Imperialpedia Terms of Use</h1>
-   <p><strong>Effective Date: 24-08-2026</strong></p>
+   <p><strong>Effective Date: October 2, 2026</strong></p>
    <p>These Terms of Use ("Terms") govern your access to and use of <a href="<?php echo base_url(); ?>"><?php echo str_replace(array('https://','http://'), '', base_url()); ?></a> (the "Service"), operated by Imperial Pedia ("we", "us", "our"). By using the Service, you agree to these Terms. If you don't agree, please don't use the Service. For how we handle your personal information specifically, see our <a href="<?php echo base_url()?>privacy-policy">Privacy Policy</a>.</p>
 
    <h2 id="tableofcontents">Contents</h2>
