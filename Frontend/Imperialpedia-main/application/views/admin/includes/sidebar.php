@@ -173,6 +173,11 @@
         </a>
       </li>
       <li>
+        <a href="<?php echo base_url(); ?>imp-admin/cookies_section">
+          <i class="fa fa-eye-slash text-warning"></i> <span>Cookies Section Visibility</span>
+        </a>
+      </li>
+      <li>
         <a href="<?php echo base_url(); ?>imp-admin/seo_settings">
           <i class="fa fa-gear text-success"></i> <span>SEO & Global Settings</span>
         </a>

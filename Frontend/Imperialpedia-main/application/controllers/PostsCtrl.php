@@ -13,6 +13,15 @@ class PostsCtrl extends CI_Controller{
 		$this->load->model('Post_model'); 
 		$this->load->model('Quots_model'); 
 		$this->load->library('session'); 
+		$this->load->model('Setting_model');
+		// Section switched off in the admin panel: 410 so search engines drop it.
+		if($this->uri->segment(1) === 'cookies' && !$this->Setting_model->cookies_section_enabled()){
+			$this->output->set_status_header(410);
+			$this->output->set_header('X-Robots-Tag: noindex');
+			$this->output->set_content_type('text/plain', 'utf-8');
+			$this->output->set_output("410 Gone\n")->_display();
+			exit;
+		}
 	} 
 
 

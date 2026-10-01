@@ -590,6 +590,33 @@ class AdminCtrl extends CI_Controller{
 
 
     // -----------------------------------------------------------------------
+    // GET /imp-admin/cookies_section — switch the /cookies section on or off for visitors and search engines
+    // POST /imp-admin/cookies_section_save
+    // -----------------------------------------------------------------------
+    public function cookies_section(){
+        $this->check_login();
+        $this->load->model('Setting_model');
+        $data['catss'] = $this->Admin_model->cat_list();
+        $data['enabled'] = $this->Setting_model->cookies_section_enabled();
+
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/includes/sidebar');
+        $this->load->view('admin/view_cookies_section', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    public function cookies_section_save(){
+        $this->check_login();
+        $this->load->model('Setting_model');
+        $on = $this->input->post('enabled') === '1';
+        $this->Setting_model->set('cookies_section_enabled', $on ? '1' : '0');
+        $this->session->set_flashdata('succ_msg', $on
+            ? 'Cookies section is now LIVE and open to search engines.'
+            : 'Cookies section is now hidden (410 Gone, removed from sitemap and menu).');
+        redirect(base_url('imp-admin/cookies_section'));
+    }
+
+    // -----------------------------------------------------------------------
     // GET /imp-admin/seo_settings — Site-wide SEO & Global Configuration
     // -----------------------------------------------------------------------
     public function seo_settings(){
