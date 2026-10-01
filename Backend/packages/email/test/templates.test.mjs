@@ -47,3 +47,14 @@ test('order template renders line items', () => {
 test('unknown template throws', () => {
     assert.throws(() => templates.render('nope', {}, ctx), /Unknown email template/);
 });
+
+test('contributorInvitation renders accept link and escapes the note', () => {
+    const r = templates.render('contributorInvitation', {
+        publication: 'Law Elite Network', roleName: 'Editor', inviterName: 'Sam',
+        personalNote: '<script>x</script>', acceptUrl: 'https://admin.baalvion.com/invite/tok', email: 'a@b.co', expiresHours: 72,
+    }, ctx);
+    assert.match(r.subject, /Law Elite Network/);
+    assert.ok(r.html.includes('https://admin.baalvion.com/invite/tok'));
+    assert.ok(!r.html.includes('<script>x'));
+    assert.ok(templates.categoryOf('contributorInvitation'));
+});

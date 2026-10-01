@@ -251,6 +251,21 @@ ${d.title ? `<h1 class="h1">${e(d.title)}</h1>` : ''}
 ${d.ctaUrl ? btn(d.ctaUrl, d.ctaLabel || 'Read More') : ''}`,
         }),
     },
+    // 11. Contributor / member invitation (cms-service: invite someone without an account)
+    contributorInvitation: {
+        category: 'notifications',
+        render: (d, ctx) => ({
+            subject: `You're invited to join ${d.publication || 'a Baalvion publication'} as ${d.roleName || 'a contributor'}`,
+            preview: `${d.inviterName ? `${d.inviterName} invited you` : 'You have been invited'} to ${d.publication || 'Baalvion'}`,
+            text: `${d.inviterName || 'A Baalvion editor'} invited you to join ${d.publication || 'a Baalvion publication'} as ${d.roleName || 'a contributor'}.${d.personalNote ? `\n\n"${d.personalNote}"` : ''}\n\nAccept the invitation: ${d.acceptUrl}\nThis link expires in ${d.expiresHours || 72} hours. If you were not expecting this, ignore this email.`,
+            body: `
+<h1 class="h1">You're invited to ${e(d.publication || 'Baalvion')}</h1>
+<p class="text">${e(d.inviterName || 'A Baalvion editor')} invited <strong>${e(d.email || 'you')}</strong> to join <strong>${e(d.publication || 'a Baalvion publication')}</strong> as <strong>${e(d.roleName || 'a contributor')}</strong>.</p>
+${d.personalNote ? `<div class="panel" style="background:#f4f5f7;border-radius:10px;padding:16px 20px;margin:16px 0;"><p class="text" style="margin:0;">${e(d.personalNote).replace(/\n/g, '<br />')}</p></div>` : ''}
+${btn(d.acceptUrl, 'Accept Invitation')}
+<p class="muted">This invitation expires in ${e(d.expiresHours || 72)} hours. Or paste this link into your browser:<br /><a href="${e(d.acceptUrl)}" style="color:#6b7280;word-break:break-all">${e(d.acceptUrl)}</a></p>`,
+        }),
+    },
 };
 
 /**
