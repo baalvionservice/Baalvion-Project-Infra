@@ -13,13 +13,13 @@ for the move. Only the switch below and the server routing change.
 
 ## Move day
 1. Lower the DNS TTL for `imperialpedia.com` to 300 s a day ahead.
-2. In `/opt/baalvion/stack/docker-compose.app.yml`, service `app-legacy-imperialpedia-web`, add
+2. In `/opt/baalvion/stack/docker-compose.app.yml`, service `app-imperialpedia-php-web`, add
    `CANONICAL_HOST: imperialpedia.com` under `environment:`. From then on every request arriving on any
    other real hostname (including legacy) is answered with a **301 to the same path on imperialpedia.com**.
 3. In the Caddyfile on the box, point the `imperialpedia.com` (and `www.`) site block at
-   `app-legacy-imperialpedia-web:80`, keep `legacy.imperialpedia.com` pointing at it too so the 301s are served.
+   `app-imperialpedia-php-web:80`, keep `legacy.imperialpedia.com` pointing at it too so the 301s are served.
    Reload Caddy.
-4. `docker compose ... up -d --no-build --no-deps app-legacy-imperialpedia-web`.
+4. `docker compose ... up -d --no-build --no-deps app-imperialpedia-php-web`.
 5. Check: `curl -sI https://legacy.imperialpedia.com/insurance/india` → `301` to `https://imperialpedia.com/insurance/india`;
    `curl -s https://imperialpedia.com/robots.txt` names `https://imperialpedia.com/sitemap.xml`.
 6. Cloudflare: purge the cache for both hosts.
