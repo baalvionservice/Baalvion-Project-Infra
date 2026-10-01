@@ -1,73 +1,24 @@
 import { MetadataRoute } from 'next';
-import { getLiveCategorySlugs } from '@/lib/category-visibility';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-// Practice-area categories are top-level routes (/{slug} + nested
-// /{slug}/{article}) since the URL restructure -- listed explicitly even
-// though '/' already covers them, for parity with the other section prefixes
-// below. Sourced from CURRENT_CATEGORY_SLUGS (lib/category-slugs.ts) instead
-// of a hardcoded duplicate list -- this previously still listed only the
-// original 8 categories after 8 more were added there, so newer categories
-// (e.g. /boating-accidents, /legal-education-and-history) had no explicit
-// Allow entry even though CURRENT_CATEGORY_SLUGS elsewhere in the codebase
-// already treats them as real, indexable routes. /law/ stays allowed
-// forever: those URLs now permanently (308) redirect to their new home, and
-// a redirect source must stay crawlable for Google to keep following and
-// crediting it -- disallowing it would strand the old URLs' accumulated
-// ranking signal instead of transferring it.
-const ALLOW = [
-  '/',
-  // Every image on the site is served through this resize proxy (see
-  // next.config.ts images.loader: 'custom' -> src/lib/image-loader.ts and
-  // src/app/api/image/route.ts) -- it's the actual image URL a crawler
-  // fetches, not just an internal API call. The blanket '/api/' disallow
-  // below was blocking every one of those URLs, which is why no site image
-  // could be indexed (Screaming Frog / Search Console flagged all ~118 as
-  // "blocked by robots.txt"). More specific Allow wins over the shorter
-  // Disallow regardless of list order, per the robots.txt spec Google follows.
-  '/api/image',
-  // Bare /news still 301s to / (next.config.ts) -- there is no /news hub
-  // page. Real news content lives at /news/{year}/{month}/{day}/{geo}/
-  // {slug} (see news-url.ts), re-enabled 2026-09-27 once the owner
-  // confirmed daily real publishing. /case-law and /legislation stay
-  // retired and are not Allow-listed.
-  '/news/',
-  '/search',
-  '/plans',
-  '/about-us',
-  '/contact-us',
-  '/careers',
-  '/advertise',
-  '/editorial-process',
-  '/editorial-standards',
-  '/corrections',
-  '/privacy-policy',
-  '/terms-of-service',
-  '/editorial-disclosure-policy',
-  '/cookie-policy',
-  '/diversity-policy',
-  '/accessibility',
-  '/conflict-of-interest-policy',
-  '/sponsored-content-policy',
-  '/comment-policy',
-  '/policies',
-  '/article/',
-  '/law/',
-  // Live category slugs (category-visibility.ts) spread in below at
-  // request time -- a category isn't explicitly Allow-listed until it's
-  // actually live, same threshold as nav/sitemap.
-  '/podcasts',
-  '/videos',
-  '/authors',
-  '/author/',
-];
+// Crawling is allowed by default, so no per-page Allow list is needed. The old
+// file repeated ~60 Allow lines for every one of 14 crawler groups (950 lines),
+// which Search Console flagged ("Rule ignored by Googlebot"). One shared group
+// keeps it short.
+//
+// Retired sections (see src/lib/retired-routes.ts) must NOT be disallowed here:
+// Googlebot has to fetch them to see the 410 and drop them from the index.
+// Same for /law/, whose legacy URLs redirect.
+
+// Every image is served through this resize proxy (src/app/api/image/route.ts),
+// so it carves out of the '/api/' disallow below. The more specific Allow wins.
+const ALLOW = ['/api/image'];
 
 const DISALLOW = [
   '/dashboard',
   '/admin/',
   '/profile',
-  '/cases/',
   '/chat/',
   '/vault',
   '/transactions',
@@ -87,23 +38,14 @@ const DISALLOW = [
   '/forgot-password',
   '/reset-password',
   '/access-denied',
-  // Individual lawyer profile pages remain reachable; the /lawyers directory
-  // page itself was removed from the frontend, so it needs no disallow entry.
   '/lawyer/',
-  '/api/', // carved back open for /api/image above -- keep that Allow entry if this ever changes
-  // Auth-gated, not linked from the sitemap, but not previously disallowed --
-  // add explicitly so no crawl path (internal link, external backlink) can
-  // reach them and find only an auth wall.
+  '/api/',
   '/network',
   '/groups',
 ];
 
-// AI crawlers explicitly allowed (same allow/disallow scope as regular search
-// engines — private routes stay protected from AI bots too). Covers both
-// training crawlers (GPTBot, CCBot, Bytespider, Google-Extended, Amazonbot)
-// and live citation/search bots (OAI-SearchBot, ChatGPT-User, PerplexityBot,
-// ClaudeBot, Applebot-Extended) so legal guides can surface — and be cited —
-// in AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Copilot).
+// AI crawlers get the same scope as regular search engines, so legal guides can
+// still be cited in answer engines while private routes stay protected.
 const AI_USER_AGENTS = [
   'GPTBot',
   'ChatGPT-User',
@@ -121,19 +63,13 @@ const AI_USER_AGENTS = [
   'meta-externalagent',
 ];
 
-export default async function robots(): Promise<MetadataRoute.Robots> {
-  const liveSlugs = await getLiveCategorySlugs();
-  const allow = [...ALLOW, ...Array.from(liveSlugs).map((slug) => `/${slug}`)];
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      // Google's AdSense ad-serving crawler needs full access to read page
-      // content and choose relevant/safe ads, even on routes hidden from
-      // search engines below -- with no dedicated rule it falls back to the
-      // '*' group's DISALLOW list, which is Google's documented cause of
-      // "couldn't verify your site" / ads not serving.
+      // AdSense's crawler needs full access; without its own group it would fall
+      // back to the '*' disallow list and fail to verify the site.
       { userAgent: 'Mediapartners-Google', allow: '/' },
-      { userAgent: '*', allow, disallow: DISALLOW },
-      ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow, disallow: DISALLOW })),
+      { userAgent: ['*', ...AI_USER_AGENTS], allow: ALLOW, disallow: DISALLOW },
     ],
     sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
   };
