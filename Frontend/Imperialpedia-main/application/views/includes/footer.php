@@ -252,8 +252,14 @@
       <div class="p6-az-container">
          <div class="p6-az-title"><i class="fa-solid fa-font me-1"></i> Imperialpedia Glossary &mdash; Browse Every Topic A-Z</div>
          <ul class="p6-az-list">
-            <?php for($i = 'a'; $i != 'aa'; $i++){ ?>
-               <li><a href="<?php echo base_url();?>terms/<?php echo $i; ?>"><?php echo strtoupper($i);?></a></li>
+            <?php
+               $CI =& get_instance();
+               $CI->load->model('Term_model');
+               $live_letters = $CI->Term_model->letters_with_terms();
+               for($i = 'a'; $i != 'aa'; $i++){
+                  $has_terms = in_array($i, $live_letters);
+            ?>
+               <li><a href="<?php echo $has_terms ? base_url().'terms/'.$i : '#'; ?>"<?php echo $has_terms ? '' : ' aria-disabled="true" tabindex="-1" style="pointer-events:none;opacity:.4;cursor:default"'; ?>><?php echo strtoupper($i);?></a></li>
             <?php } ?>
          </ul>
       </div>

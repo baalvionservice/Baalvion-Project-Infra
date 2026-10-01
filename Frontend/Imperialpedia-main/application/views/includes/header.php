@@ -40,7 +40,7 @@
       ?>
       <title><?php echo htmlspecialchars($meta_title); ?></title>
       <meta name="description" content="<?php echo htmlspecialchars($meta_desc); ?>" />
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="robots" content="<?php echo isset($meta_robots) ? $meta_robots : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'; ?>" />
       <link rel="canonical" href="<?php echo rtrim(base_url().uri_string(), '/'); ?>"/>
       <meta property="og:title" content="<?php echo htmlspecialchars($meta_title); ?>"/>
       <meta property="og:url" content="<?php echo base_url().uri_string();?>"/>

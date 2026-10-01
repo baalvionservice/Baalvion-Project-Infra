@@ -15,6 +15,12 @@ class Term_model extends CI_Model{
         return $query->result_array();
     }
   
+    // first letters (a-z) that have at least one term
+	public function letters_with_terms(){
+        $rows = $this->db->query("SELECT DISTINCT LOWER(LEFT(term_name,1)) AS l FROM terms")->result_array();
+        return array_column($rows, 'l');
+    }
+
     // details iformation about search  term  
     public function term_info($word){
         $this->db->from('terms');  
