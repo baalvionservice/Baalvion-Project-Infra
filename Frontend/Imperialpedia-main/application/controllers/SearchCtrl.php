@@ -13,10 +13,15 @@ class SearchCtrl extends CI_Controller {
         $this->load->library('session');
     }
 
+    private function query_param($key, $method = 'get'){
+        $v = $method === 'post' ? $this->input->post($key, TRUE) : $this->input->get($key, TRUE);
+        return is_string($v) ? $v : '';
+    }
+
     public function index(){
-        $q = trim((string) $this->input->get('q', TRUE));
+        $q = trim($this->query_param('q'));
         if (empty($q)) {
-            $q = trim((string) $this->input->post('q', TRUE));
+            $q = trim($this->query_param('q', 'post'));
         }
 
         $data['query'] = $q;
@@ -54,7 +59,7 @@ class SearchCtrl extends CI_Controller {
     }
 
     public function api(){
-        $q = trim((string) $this->input->get('q', TRUE));
+        $q = trim($this->query_param('q'));
         if (empty($q) || strlen($q) < 2) {
             echo json_encode(array('status' => 'ok', 'results' => array()));
             return;
