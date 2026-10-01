@@ -258,6 +258,7 @@ ssh baalvion-prod "docker run --rm --network baalvion_default curlimages/curl -s
 
 | Thing | Value |
 |---|---|
+| Naming rule | `imperialpedia-php-*` = the PHP/CodeIgniter site, `imperialpedia-nextjs-*` = the Next.js app. Anything still named `legacy-imperialpedia-*` (DB service, volumes, stage dir) is the PHP site — a leftover name, not a third system. |
 | Live PHP container | `baalvion-app-imperialpedia-php-web-1` (compose service `app-imperialpedia-php-web`) |
 | Next.js container (also running, not yet cut over as primary) | `baalvion-app-imperialpedia-nextjs-main-1` |
 | DB container | `baalvion-app-legacy-imperialpedia-db-1` |
