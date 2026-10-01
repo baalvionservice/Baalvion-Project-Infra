@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { authApi } from '@/lib/api/auth';
 import { refreshAccessToken } from '@/lib/api/client';
-import { isPublicPath } from '@/lib/constants/public-paths';
+import { isGuestOnlyPath, isPublicPath } from '@/lib/constants/public-paths';
 
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -76,7 +76,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!authenticated && !isPublic) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-    } else if (authenticated && isPublic) {
+    } else if (authenticated && isGuestOnlyPath(pathname)) {
       router.replace('/dashboard');
     }
   }, [isHydrated, pathname, router, isAuthenticated, isTokenExpired]);

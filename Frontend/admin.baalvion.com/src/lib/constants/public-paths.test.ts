@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isPublicPath, PUBLIC_PATHS } from './public-paths';
+import { isGuestOnlyPath, isPublicPath, PUBLIC_PATHS } from './public-paths';
 
 /**
  * Regression guard for a bug that shipped three times over.
@@ -29,5 +29,11 @@ describe('isPublicPath', () => {
     for (const p of ['/dashboard', '/audit-logs', '/sessions', '/cms']) {
       expect(isPublicPath(p)).toBe(false);
     }
+  });
+
+  it('keeps invitation links public and reachable while signed in', () => {
+    expect(isPublicPath('/invite/abc123')).toBe(true);
+    expect(isGuestOnlyPath('/invite/abc123')).toBe(false);
+    expect(isGuestOnlyPath('/login')).toBe(true);
   });
 });
