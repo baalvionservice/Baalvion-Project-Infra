@@ -8,6 +8,10 @@ class Category_model extends CI_Model{
 	}
 
 	public function cat_list(){ 
+		$this->load->model('Setting_model');
+		if(!$this->Setting_model->cookies_section_enabled()){
+			$this->db->where('cat_name !=', 'cookies');
+		}
 		$query = $this->db->get('category');
  		return $query->result_array();
 	} 

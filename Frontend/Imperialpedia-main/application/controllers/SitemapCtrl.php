@@ -23,6 +23,9 @@ class SitemapCtrl extends CI_Controller{
         $base = rtrim(base_url(), '/');
         $slug = function($v){ return strtolower(str_replace(' ', '-', trim($v))); };
 
+        $this->load->model('Setting_model');
+        $cookies_on = $this->Setting_model->cookies_section_enabled();
+
         $urls = array();
         $urls[] = array('loc' => $base . '/', 'lastmod' => null, 'priority' => '1.0');
 
@@ -42,6 +45,9 @@ class SitemapCtrl extends CI_Controller{
         $this->db->from('sub_category s');
         $this->db->join('category c', 'c.cat_id = s.cat_id');
         $this->db->join('post p', 'p.sub_cat_id = s.sub_cat_id AND p.status = "published"', 'left');
+        if(!$cookies_on){
+            $this->db->where('c.cat_name !=', 'cookies');
+        }
         $this->db->group_by('s.sub_cat_id, c.cat_name, s.sub_cat_name, s.sub_cat_desc');
         $subcats = $this->db->get()->result_array();
         foreach($subcats as $sc){
@@ -58,6 +64,9 @@ class SitemapCtrl extends CI_Controller{
         $this->db->join('category c', 'c.cat_id = p.cat_id', 'left');
         $this->db->join('sub_category s', 's.sub_cat_id = p.sub_cat_id', 'left');
         $this->db->where('p.status', 'published');
+        if(!$cookies_on){
+            $this->db->where('c.cat_name !=', 'cookies');
+        }
         $posts = $this->db->get()->result_array();
         foreach($posts as $p){
             // A post whose category/sub-category link is broken (data bug, not
