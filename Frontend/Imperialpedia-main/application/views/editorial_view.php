@@ -26,15 +26,26 @@
 </section>
 <!-- body text sections  -->
 <div class="container my-4 pivacy">
-   <p>Our goal is to answer every question related to finances so that you can confidently make your own decisions with ease. Being confident in one's own financial abilities - whether they're new to the game or experts - takes time. And from experience,Your financial life is filled with personal decisions and challenges. Whether you are investing as a beginner or expert, planning your retirement, buying a home, studying for an exam in business school, or running a small business our team is ready and willing at a moment's notice to answer any and all questions related to finance from navigating complicated topics like investments, finance degrees, mortgages, pensions and more!</p> 
-   <p>We feel it's important to share how we go about writing all of the articles that you depend on.</p>
-   <h3>Principles</h3>
-  <p><strong>Empowering:</strong> Finance can be complex and intimidating. We provide you with information that you can use with confidence, whatever your level of experience.</p>
-  <p><strong>Unbiased:</strong>From financial product recommendations to the financial implications of government policy we put things in context and provide all the facts. Our information is carefully researched and is not written to support any specific economic or political viewpoint.</p>
-  <p><strong>Accurate:</strong>Having accurate financial information, presented clearly and updated regularly is of the utmost importance to us. We seek out and work with the most qualified experts across every topic we cover. Any mistakes, inaccuracies or misrepresentations identified by our readers are investigated and corrected promptly.</p>
-  <p><strong>Inclusive:</strong>We work to ensure that our content serves—and depicts with dignity and respect—people of different ages, nationalities, religions, gender identities, sexual orientations, ethnicities, relationship statuses, physical and mental abilities, and family types.</p>
-  <h3>Writers</h3>
-  <p>Imperialpedia experts are carefully recruited, vetted, and chosen. Some are experienced financial writers, others are experts in particular aspects of finance; many are both. They are selected for their knowledge and their skill at communicating complex topics in clear, accessible, actionable language.</p>
-  <p>Every article’s author or reviewer is listed at the top of the page, to the left of the date, and is linked to their biography, which you can click on to learn more about their credentials, education, professional experience, and social media presence.</p> 
-  <p>All writers are required to uphold the editorial guidelines listed above.</p>
+   <p>Imperialpedia publishes guides and explainers on finance, insurance, marketing, SEO, internet technology and digital tools. This page explains how we decide what to publish and what we do to keep it useful and accurate.</p>
+
+   <h3>Our principles</h3>
+   <p><strong>Clear:</strong> We explain topics in plain language so that a beginner can follow them and an experienced reader can still find them useful.</p>
+   <p><strong>Independent:</strong> Articles are written to inform, not to push a product, a company or a political or economic viewpoint. Where we compare options, we say what each is good and not so good at.</p>
+   <p><strong>Accurate:</strong> We check facts, figures and names against reliable sources before publishing, and we update articles when things change. Our content is general information and can contain mistakes, so we correct them when readers point them out.</p>
+   <p><strong>Respectful:</strong> Our content should be fair and respectful to readers of every background.</p>
+
+   <h3>Who writes the articles</h3>
+   <p>Each article is written by a named author, shown at the top of the page with a link to their profile. Authors write in the areas they work in: for example, our SEO articles are written by our SEO writers and our insurance articles by our finance contributor. You can see everyone on our <a href="<?php echo base_url()?>author">writers page</a>, with their role and experience.</p>
+
+   <h3>How articles are produced</h3>
+   <p>An author researches a topic, drafts the article and checks the facts and figures it contains. The published date is shown on every page. When we make a significant update, the page shows the updated date.</p>
+
+   <h3>Corrections</h3>
+   <p>If you think something on the site is wrong, email <a href="mailto:advimperialpedia@gmail.com">advimperialpedia@gmail.com</a> or use the <a href="<?php echo base_url()?>contact">Contact</a> page. We look into each report and fix confirmed errors as soon as we can.</p>
+
+   <h3>Not professional advice</h3>
+   <p>Our articles are for general information only. They are not financial, legal, tax or insurance advice, and you should speak to a qualified professional before making a decision. See our <a href="<?php echo base_url()?>disclaimer">Disclaimer</a>.</p>
+
+   <h3>Advertising and sponsorship</h3>
+   <p>Advertising, sponsored content and affiliate links are handled separately from editorial decisions. Any sponsored content is labelled as such. See the <a href="<?php echo base_url()?>advertise">Advertise</a> page for details.</p>
 </div>

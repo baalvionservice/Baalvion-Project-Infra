@@ -21,6 +21,7 @@ class TermsCtrl extends CI_Controller {
         $data['cat_list'] = $this->Category_model->cat_list(); 
         $data['subcat_list'] = $this->SubCategory_model->subcat_list(); 
         $data['terms'] = $this->Term_model->term_list($letter); 
+        if(empty($data['terms'])){ $data['meta_robots'] = 'noindex, follow'; }
 		// print_r($data['terms']);die; 
 		$this->load->view('includes/header', $data); 
 		$this->load->view('terms_view');  
