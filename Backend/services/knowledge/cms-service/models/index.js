@@ -37,6 +37,7 @@ db.CmsWorkflow        = require('./cmsWorkflow')(sequelize, DataTypes);
 db.CmsApprovalLog     = require('./cmsApprovalLog')(sequelize, DataTypes);
 db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
 db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
+db.CmsInvitation      = require('./cmsInvitation')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsContentEntityMention = require('./cmsContentEntityMention')(sequelize, DataTypes);
 db.CmsContentComment  = require('./cmsContentComment')(sequelize, DataTypes);
@@ -128,6 +129,9 @@ db.CmsContentRevision.belongsTo(db.CmsContent, { foreignKey: 'contentId', as: 'c
 
 // Website Members
 db.CmsWebsiteMember.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
+
+// Invitations
+db.CmsInvitation.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
 
 // Convenience exports for services
 db.Op = Sequelize.Op;
