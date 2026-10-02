@@ -3,6 +3,7 @@ const { Router } = require('express');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const internalAuth = require('../middleware/internalAuth');
 const websiteRoutes = require('./websiteRoutes');
+const invitationRoutes = require('./invitationRoutes');
 const taxonomyRoutes = require('./taxonomyRoutes');
 const contentRoutes = require('./contentRoutes');
 const editorialRoutes = require('./editorialRoutes');
@@ -66,6 +67,10 @@ router.get('/internal/content-feed/:websiteSlug', internalAuth, internalContentF
 
 // Org-wide integration summary for the dashboard "Website Connections" widget.
 router.get('/cms/integrations/summary', authMiddleware, integrationController.summary);
+
+// Invitation accept flow. Mounted without the router-wide auth: GET is token-authenticated
+// (recipient has no session yet) and POST /:token/accept applies authMiddleware itself.
+router.use('/cms/invitations', invitationRoutes);
 
 // All CMS management APIs require auth
 router.use('/cms/websites', authMiddleware, websiteRoutes);
