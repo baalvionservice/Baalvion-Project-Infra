@@ -25,27 +25,30 @@ export interface RoutePolicy extends AccessRequirement {
 export const ROUTE_POLICIES: RoutePolicy[] = [
   // ── Open to any signed-in staff member ────────────────────────────────────────
   { path: '/dashboard', label: 'Signed-in staff' },
-  { path: '/analytics', label: 'Signed-in staff' },
+  { path: '/analytics', minRole: 'manager', label: 'Managers and above' },
   { path: '/welcome', label: 'Signed-in staff' },
   // Your own profile — never gated behind the /settings admin rule below.
   { path: '/settings/profile', label: 'Your own profile' },
 
-  // ── Content & editorial: the CMS enforces per-website membership itself ───────
-  // (cms-service gates every route with requireCmsRole; a blanket console gate here
-  //  would lock out exactly the writers the CMS is designed to admit.)
+  // ── Content & editorial ───────────────────────────────────────────────────────
+  // /cms is open to any signed-in user because cms-service enforces per-website membership
+  // itself (requireCmsRole on every route) — a blanket console gate would lock out exactly the
+  // writers the CMS is designed to admit. A writer sees only the sites they were granted.
   { path: '/cms', label: 'Signed-in staff' },
   { path: '/media', label: 'Signed-in staff' },
-  { path: '/imperialpedia', label: 'Signed-in staff' },
-  { path: '/news-intelligence', label: 'Signed-in staff' },
-  { path: '/law', label: 'Signed-in staff' },
   { path: '/notifications', label: 'Signed-in staff' },
+  // Separate editorial back-offices: not part of a website-scoped writer's grant.
+  { path: '/imperialpedia', minRole: 'editor', label: 'Editors and above' },
+  { path: '/news-intelligence', minRole: 'editor', label: 'Editors and above' },
+  { path: '/law', minRole: 'editor', label: 'Editors and above' },
+  { path: '/newsroom', minRole: 'editor', label: 'Editors and above' },
 
   // Verticals that also ship as their own deployment but keep an in-console admin page.
-  { path: '/jobs', label: 'Signed-in staff' },
-  { path: '/ctm', label: 'Signed-in staff' },
+  { path: '/jobs', minRole: 'manager', label: 'Managers and above' },
+  { path: '/ctm', minRole: 'manager', label: 'Managers and above' },
 
   // ── Commerce ──────────────────────────────────────────────────────────────────
-  { path: '/commerce', label: 'Signed-in staff' },
+  { path: '/commerce', minRole: 'manager', label: 'Managers and above' },
   { path: '/commerce/revenue', minRole: 'admin', label: 'Administrators' },
 
   // ── Identity & access ─────────────────────────────────────────────────────────
@@ -89,6 +92,8 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
 
   // ── Console configuration ─────────────────────────────────────────────────────
   { path: '/settings', minRole: 'admin', label: 'Administrators' },
+  { path: '/status', minRole: 'admin', label: 'Administrators' },
+  { path: '/pending-features', minRole: 'admin', label: 'Administrators' },
 ];
 
 // Longest prefix wins, so /settings/profile beats /settings.
