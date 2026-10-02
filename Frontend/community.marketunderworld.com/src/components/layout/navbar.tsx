@@ -4,21 +4,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, MapPin, Bell, Globe, ArrowRight, Heart } from 'lucide-react';
+import { Search, Menu, X, MapPin, Bell, Globe, ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIdentity } from '@/context/identity-context';
 import { useAuth } from '@/context/auth-context';
 import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
 import { useNotifications } from '@/context/notification-context';
+import { useScaryTransition } from '@/components/layout/scary-transition-provider';
+import { useCart } from '@/context/cart-context';
 
 const NAV_ITEMS = [
+  { name: 'Clubs', path: '/clubs' },
+  { name: 'Calendar', path: '/calendar' },
   { name: 'Marketplace', path: '/marketplace' },
-  { name: 'My Cards', path: '/my-cards' },
   { name: 'Live Sessions', path: '/live-sessions' },
   { name: 'Forum', path: '/forum' },
   { name: 'Locals', path: '/locals' },
-  { name: 'Access', path: '/access' },
-  { name: 'About', path: '/about' },
 ];
 
 export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: boolean } = {}) => {
@@ -26,9 +27,16 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
   const { identity, isLoading } = useIdentity();
   const { user, isAuthenticated, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { navigateWithScare } = useScaryTransition();
+  const { itemCount } = useCart();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const handleScaryClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    navigateWithScare(path);
+  };
 
   // Close notifications on click outside
   useEffect(() => {
@@ -41,6 +49,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Adjust page padding for navbar on mobile (top-8 = 32px ticker + 14px nav = 56px total)
   // Hide Navbar inside specialized dashboards which have their own navigation
   const isDashboard = pathname.startsWith('/admin') || 
                       pathname.startsWith('/teacher-dashboard') || 
@@ -50,29 +59,31 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
   if (isDashboard) return null;
 
   return (
-    <nav className="fixed top-0 md:top-8 left-0 right-0 h-16 z-[1000] bg-[#0B0C0F]/80 backdrop-blur-md border-b border-[#252A33]">
+    <nav className="fixed top-8 left-0 right-0 h-14 z-[1000] bg-[#0B0C0F]/90 backdrop-blur-md border-b border-[#252A33]">
       <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-3 select-none" aria-label="Market Underworld Home">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#39FF14] to-[#3B82F6] flex items-center justify-center text-black font-bold text-[16px]">MU</div>
-          <div className="hidden sm:flex items-center text-[16px] tracking-tight leading-none font-display uppercase italic">
-            <span className="text-white font-normal">Market</span>
-            <span className="text-brand-green font-bold ml-1">Underworld</span>
+        <Link href="/" className="flex items-center gap-2.5 select-none" aria-label="Baalvion Home">
+          <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex items-center justify-center bg-black flex-shrink-0">
+            <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+          </div>
+          <div className="hidden sm:flex items-center text-[15px] tracking-widest leading-none font-display uppercase font-bold text-white">
+            BAALVION
           </div>
         </Link>
 
         {/* Desktop & Tablet Nav */}
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden xl:flex items-center gap-1">
           {NAV_ITEMS.map((item) => (
-            <Link 
+            <a 
               key={item.name}
               href={item.path} 
+              onClick={(e) => handleScaryClick(e, item.path)}
               className={cn(
-                "relative px-4 py-2 text-[12px] font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center rounded-md hover:bg-white/5",
+                "relative px-4 py-2 text-[12px] font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center rounded-md hover:bg-white/5 cursor-pointer",
                 pathname === item.path ? "text-brand-green bg-brand-green/5" : "text-text-muted hover:text-white"
               )}
             >
               {item.name}
-            </Link>
+            </a>
           ))}
           {isAuthenticated && (
             <Link
@@ -88,7 +99,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden xl:flex items-center gap-2">
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))}
               className="p-2.5 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-xl border border-white/5"
@@ -127,7 +138,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-surface rounded border border-brand-border">
+          <div className="hidden xl:flex items-center gap-3 px-4 py-2 bg-brand-surface rounded border border-brand-border">
             {isLoading ? (
               <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest animate-pulse">Scanning...</span>
             ) : (
@@ -149,15 +160,32 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
                 Sign Out
               </button>
             ) : (
-              <Link href="/auth/signin">
-                <button className="px-4 py-2 rounded bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all min-h-[44px] min-w-[80px]">
-                  Sign In
-                </button>
-              </Link>
+              <button
+                onClick={() => {
+                  if (window.location.pathname === '/') {
+                    document.getElementById('terminal-auth')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  } else {
+                    window.location.href = '/';
+                  }
+                }}
+                className="px-4 py-2 rounded text-[11px] font-bold uppercase tracking-widest transition-all min-h-[44px] min-w-[80px] border"
+                style={{ background: 'rgba(180,0,0,0.15)', borderColor: 'rgba(180,0,0,0.4)', color: '#cc4444' }}
+              >
+                ⚠ ENTER
+              </button>
             )}
 
+            <Link href="/checkout" className="relative p-2 text-text-muted min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-white/5 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute top-2 right-2 w-4 h-4 bg-fuchsia-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+
             <button 
-              className="lg:hidden p-2 text-text-muted min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-white/5" 
+              className="xl:hidden p-2 text-text-muted min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-white/5" 
               onClick={() => setIsMobileOpen(true)}
               aria-label="Open Navigation Menu"
             >
@@ -175,7 +203,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm xl:hidden"
               onClick={() => setIsMobileOpen(false)}
             />
             <motion.div 
@@ -183,10 +211,15 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-full max-w-sm z-[2001] bg-[#0B0C0F] border-l border-[#252A33] p-8 flex flex-col lg:hidden"
+              className="fixed top-0 right-0 bottom-0 w-full max-w-xs z-[2001] bg-[#0B0C0F] border-l border-[#252A33] p-6 flex flex-col xl:hidden overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-16">
-                <div className="w-10 h-10 rounded-lg bg-brand-green flex items-center justify-center text-black font-bold">MU</div>
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex-shrink-0">
+                    <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-sm font-black uppercase tracking-widest text-white">BAALVION</span>
+                </div>
                 <button 
                   onClick={() => setIsMobileOpen(false)}
                   className="min-h-[44px] min-w-[44px] flex items-center justify-center text-text-muted hover:text-white"
@@ -198,18 +231,21 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               
               <div className="flex flex-col gap-2">
                 {NAV_ITEMS.map((item) => (
-                  <Link 
+                  <a 
                     key={item.name} 
                     href={item.path} 
-                    onClick={() => setIsMobileOpen(false)}
+                    onClick={(e) => {
+                      setIsMobileOpen(false);
+                      handleScaryClick(e, item.path);
+                    }}
                     className={cn(
-                      "text-2xl font-bold uppercase italic py-4 border-b border-white/5 flex items-center justify-between group",
+                      "text-2xl font-bold uppercase italic py-4 border-b border-white/5 flex items-center justify-between group cursor-pointer",
                       pathname === item.path ? "text-brand-green" : "text-white"
                     )}
                   >
                     {item.name}
                     <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
+                  </a>
                 ))}
                 {isAuthenticated && (
                   <Link

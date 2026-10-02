@@ -22,7 +22,7 @@ export function RoleGuard({ allow, children }: RoleGuardProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  const allowed = true; // Bypassed for local admin viewing
+  const allowed = user ? allow.some(role => user.roles.includes(role)) : false;
 
   useEffect(() => {
     if (isLoading) return;

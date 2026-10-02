@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Get on the free guest list for top nightclubs. Book VIP bottle service, check lineups, dress codes & prices.",
 };
 
-export default function StateClubsPage({ params }: { params: { state: string } }) {
-  const state = params.state; // e.g. "mumbai", "delhi", "gurgaon"
+export default async function StateClubsPage({ params }: { params: Promise<{ state: string }> }) {
+  const { state } = await params;
   return <ClubsClient preselectedState={state} />;
 }

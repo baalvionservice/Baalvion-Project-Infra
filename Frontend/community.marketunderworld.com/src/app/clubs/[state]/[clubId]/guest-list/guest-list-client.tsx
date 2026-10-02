@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ChevronRight } from "lucide-react";
 import { Club } from "@/data/clubs-data";
+import { Breadcrumbs } from "@/components/ui/breadcrumb";
 
 export function GuestListClient({ club, state }: { club: Club, state: string }) {
   const [formData, setFormData] = useState({
@@ -25,6 +26,12 @@ export function GuestListClient({ club, state }: { club: Club, state: string }) 
     setSubmitted(true);
   };
 
+  const breadcrumbItems = [
+    { label: "Clubs", href: "/clubs" },
+    { label: state, href: `/clubs/${state}` },
+    { label: `${club.name} Guest List` }
+  ];
+
   return (
     <div className="min-h-screen bg-[#f3f4f7] text-[#222] font-sans">
       <Navbar />
@@ -32,14 +39,8 @@ export function GuestListClient({ club, state }: { club: Club, state: string }) 
       <main className="container max-w-[1200px] mx-auto px-4 py-8 mt-20">
         
         {/* Breadcrumb */}
-        <div className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-8 flex items-center gap-2">
-          <Link href="/" className="hover:text-[#ed6c2a] transition-colors">Home</Link>
-          <ChevronRight className="w-3 h-3" />
-          <Link href="/clubs" className="hover:text-[#ed6c2a] transition-colors">Clubs</Link>
-          <ChevronRight className="w-3 h-3" />
-          <Link href={`/clubs/${state}`} className="hover:text-[#ed6c2a] transition-colors">{state}</Link>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-[#ed6c2a]">{club.name} Guest List</span>
+        <div className="mb-8">
+          <Breadcrumbs items={breadcrumbItems} />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">

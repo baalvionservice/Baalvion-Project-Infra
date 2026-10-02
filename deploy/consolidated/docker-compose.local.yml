@@ -1,0 +1,111 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — LOCAL DEVELOPMENT OVERRIDE
+# Usage (from REPO ROOT):
+#   docker compose \
+#     --env-file deploy/consolidated/.env \
+#     -f deploy/consolidated/docker-compose.yml \
+#     -f deploy/consolidated/docker-compose.local.yml \
+#     up -d --build
+#
+# This overlay:
+#   1. Adds a local Postgres container (replaces AWS RDS)
+#   2. Mounts the RSA keypair as Docker secrets
+#   3. Exposes service ports to localhost for browser + curl testing
+#   4. Skips Caddy (no TLS needed locally) + admin-web (optional)
+# ─────────────────────────────────────────────────────────────────────────────
+
+secrets:
+  jwt_private:
+    file: ../../Backend/services/identity/auth-service/keys/private.pem
+  jwt_public:
+    file: ../../Backend/services/identity/auth-service/keys/public.pem
+
+services:
+
+  # ── Local PostgreSQL (replaces AWS RDS) ────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: baalvion_app
+      POSTGRES_PASSWORD: bc9f9cda3360df884bdec7d75c4bebfc
+      POSTGRES_DB: baalvion
+    volumes:
+      - pgdata_local:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U baalvion_app -d baalvion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Override x-node-app defaults: add secrets + postgres dep ───────────────
+  app-identity:
+    secrets: [jwt_private, jwt_public]
+    ports:
+      - "3001:3001"   # auth-service
+      - "3026:3026"   # auth-gateway (BFF)
+      - "3022:3022"   # session-service
+      - "3053:3053"   # rbac-service
+      - "3023:3023"   # oauth-service
+    depends_on:
+      redis:    { condition: service_healthy }
+      postgres: { condition: service_healthy }
+
+  app-commerce:
+    ports:
+      - "3012:3012"   # commerce-service
+      - "3013:3013"   # order-service
+    depends_on:
+      redis:       { condition: service_healthy }
+      postgres:    { condition: service_healthy }
+      app-identity: { condition: service_healthy }
+
+  app-trade:
+    ports:
+      - "3025:3025"   # trade-service
+    depends_on:
+      redis:       { condition: service_healthy }
+      postgres:    { condition: service_healthy }
+      app-identity: { condition: service_healthy }
+
+  app-ecosystem:
+    ports:
+      - "3064:3064"   # community-service
+      - "3002:3002"   # jobs-service
+      - "3063:3063"   # crm-service
+    depends_on:
+      redis:       { condition: service_healthy }
+      postgres:    { condition: service_healthy }
+      app-identity: { condition: service_healthy }
+
+  app-platform:
+    ports:
+      - "3021:3021"   # admin-service
+      - "3018:3018"   # cms-service
+    depends_on:
+      redis:       { condition: service_healthy }
+      postgres:    { condition: service_healthy }
+      app-identity: { condition: service_healthy }
+
+  app-edge-realtime:
+    ports:
+      - "3040:3040"   # realtime-service (WebSocket)
+      - "3031:3031"   # notification-service
+      - "4000:4000"   # proxy-service (BFF)
+    depends_on:
+      redis:       { condition: service_healthy }
+      postgres:    { condition: service_healthy }
+      app-identity: { condition: service_healthy }
+
+  # Skip Caddy locally — direct port access is used instead
+  caddy:
+    profiles: ["caddy-disabled"]
+
+  # Skip admin-web locally unless needed
+  admin-web:
+    profiles: ["admin-disabled"]
+
+volumes:
+  pgdata_local:

@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import { MapPin, Star, Music, Clock, Ticket, Search, ChevronRight } from "lucide-react";
 import { INDIAN_CLUBS } from "@/data/clubs-data";
 import { cn } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/breadcrumb";
 
 export function ClubsClient({ preselectedState }: { preselectedState?: string }) {
   const normalizedState = preselectedState 
@@ -22,6 +23,11 @@ export function ClubsClient({ preselectedState }: { preselectedState?: string })
     return matchesCity && matchesSearch;
   });
 
+  const breadcrumbItems = [
+    { label: "Clubs", href: "/clubs" },
+    ...(normalizedState !== "All" ? [{ label: normalizedState }] : [])
+  ];
+
   return (
     <div className="min-h-screen bg-[#f3f4f7] text-[#222] font-sans">
       <Navbar />
@@ -29,16 +35,8 @@ export function ClubsClient({ preselectedState }: { preselectedState?: string })
       <main className="container max-w-[1200px] mx-auto px-4 py-8 mt-20">
         
         {/* Breadcrumb */}
-        <div className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-8 flex items-center gap-2">
-          <Link href="/" className="hover:text-[#ed6c2a] transition-colors">Home</Link>
-          <ChevronRight className="w-3 h-3" />
-          <Link href="/clubs" className="hover:text-[#ed6c2a] transition-colors">Clubs</Link>
-          {normalizedState !== "All" && (
-            <>
-              <ChevronRight className="w-3 h-3" />
-              <span className="text-[#ed6c2a]">{normalizedState}</span>
-            </>
-          )}
+        <div className="mb-8">
+          <Breadcrumbs items={breadcrumbItems} />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">

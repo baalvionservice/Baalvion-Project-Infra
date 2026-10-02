@@ -1,24 +1,39 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, LogIn, UserPlus, Search, ChevronDown, Award, Megaphone, Users, Sparkles } from "lucide-react";
+import { useScaryTransition } from "@/components/layout/scary-transition-provider";
 
 export function BaalHeader() {
   const pathname = usePathname();
+
+  const { navigateWithScare } = useScaryTransition();
+
+  const handleScaryClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    navigateWithScare(path);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0e0c12]/95 backdrop-blur border-b border-[#2b2538] shadow-2xl">
       {/* Top utility bar */}
       <div className="hidden md:flex items-center justify-between px-6 py-1.5 bg-[#09080c] border-b border-[#1c1824] text-[11px] text-gray-400">
         <div className="flex items-center gap-4">
-          <Link href="/forum" className="hover:text-red-400 transition-colors font-medium">Forums</Link>
+          <a href="/forum" onClick={(e) => handleScaryClick(e, "/forum")} className="cursor-pointer hover:text-red-400 transition-colors font-medium">Forums</a>
           <span className="opacity-30">|</span>
-          <Link href="/forum/category/making-money-and-courses" className="hover:text-red-400 transition-colors">Making Money & Courses</Link>
+          <a href="/marketplace" onClick={(e) => handleScaryClick(e, "/marketplace")} className="cursor-pointer hover:text-red-400 transition-colors font-medium">Marketplace</a>
           <span className="opacity-30">|</span>
-          <Link href="/forum/category/anonymity-section" className="hover:text-red-400 transition-colors">Anonymity Section</Link>
+          <a href="/calendar" onClick={(e) => handleScaryClick(e, "/calendar")} className="cursor-pointer hover:text-red-400 transition-colors font-medium">Calendar</a>
           <span className="opacity-30">|</span>
-          <Link href="/forum/category/gaming-zone" className="hover:text-red-400 transition-colors">Gaming Zone</Link>
+          <a href="/clubs" onClick={(e) => handleScaryClick(e, "/clubs")} className="cursor-pointer hover:text-red-400 transition-colors font-medium">Clubs</a>
+          <span className="opacity-30">|</span>
+          <a href="/forum/category/making-money-and-courses" onClick={(e) => handleScaryClick(e, "/forum/category/making-money-and-courses")} className="cursor-pointer hover:text-red-400 transition-colors">Making Money & Courses</a>
+          <span className="opacity-30">|</span>
+          <a href="/forum/category/anonymity-section" onClick={(e) => handleScaryClick(e, "/forum/category/anonymity-section")} className="cursor-pointer hover:text-red-400 transition-colors">Anonymity</a>
+          <span className="opacity-30">|</span>
+          <a href="/forum/category/gaming-zone" onClick={(e) => handleScaryClick(e, "/forum/category/gaming-zone")} className="cursor-pointer hover:text-red-400 transition-colors">Gaming</a>
           <span className="opacity-30">|</span>
           <span className="text-amber-400 font-semibold flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Baalvion Network
@@ -31,21 +46,36 @@ export function BaalHeader() {
 
       {/* Main navigation row */}
       <div className="container mx-auto px-4 flex items-center justify-between h-14">
-        {/* Left: Home + Forum tabs */}
+        {/* Left: Logo, Home + Forum tabs */}
         <div className="flex items-center gap-1 h-full">
+          {/* Main Logo */}
+          <Link href="/" className="mr-4 hidden sm:block">
+            <div className="relative w-32 h-10 overflow-hidden rounded-md border border-white/10 shadow-sm">
+              <Image 
+                src="/logo.jpg" 
+                alt="Baalvion Logo" 
+                fill
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            </div>
+          </Link>
+
           {/* Red square home icon matching screenshot */}
-          <Link
+          <a
             href="/forum"
-            className="w-10 h-10 rounded bg-[#c0392b] hover:bg-[#d63031] text-white flex items-center justify-center shadow-lg transition-colors mr-2"
+            onClick={(e) => handleScaryClick(e, "/forum")}
+            className="w-10 h-10 rounded bg-[#c0392b] hover:bg-[#d63031] text-white flex items-center justify-center shadow-lg transition-colors mr-2 cursor-pointer"
             title="Home"
           >
             <Home className="w-5 h-5" />
-          </Link>
+          </a>
 
           {/* Forums Tab (Active) */}
-          <Link
+          <a
             href="/forum"
-            className={`flex items-center gap-1.5 px-3.5 h-10 rounded text-sm font-bold tracking-wide transition-all ${
+            onClick={(e) => handleScaryClick(e, "/forum")}
+            className={`flex items-center gap-1.5 px-3.5 h-10 rounded text-sm font-bold tracking-wide transition-all cursor-pointer ${
               pathname.startsWith("/forum")
                 ? "bg-[#251e30] text-[#f0f0f5] border border-[#3e3450]"
                 : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -53,7 +83,7 @@ export function BaalHeader() {
           >
             <span>Forums</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-          </Link>
+          </a>
 
           {/* What's New Tab */}
           <Link

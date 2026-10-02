@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getCommunities } from "@/lib/api/community";
 import { CommunityCard } from "@/components/forums/community-card";
 import { XenCategoryTable } from "@/components/forums/xen-category-table";
+import { LiveActivityFeed } from "@/components/forums/live-activity-feed";
 import { FORUM_CATEGORIES } from "@/lib/forum-data";
 
 export default async function ForumHubPage() {
@@ -143,11 +144,18 @@ export default async function ForumHubPage() {
             investors, traders, and builders.
           </p>
 
-          {/* ── XENFORO CATEGORIES TABLE (Matching altenens.is) ── */}
-          <div className="mb-14 space-y-6">
-            {FORUM_CATEGORIES.map((category) => (
-              <XenCategoryTable key={category.slug} category={category} />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-14">
+            {/* Left side: Main Forum Categories (75% width on large screens) */}
+            <div className="lg:col-span-3 space-y-6">
+              {FORUM_CATEGORIES.map((category) => (
+                <XenCategoryTable key={category.slug} category={category} />
+              ))}
+            </div>
+
+            {/* Right side: Live Activity Feed (25% width on large screens) */}
+            <div className="lg:col-span-1">
+              <LiveActivityFeed />
+            </div>
           </div>
 
           {communities.length > 0 && (

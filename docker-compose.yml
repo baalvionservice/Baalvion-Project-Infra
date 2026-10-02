@@ -1,1352 +1,250 @@
-services:
+version: "3.9"
 
-  # ── PostgreSQL (shared database for all services) ─────────────────────────
-  postgres:
-    image: postgres:15-alpine
-    container_name: baalvion-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: baalvion_db
-      POSTGRES_USER: baalvion
-      POSTGRES_PASSWORD: baalvion_dev_pass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U baalvion -d baalvion_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - default
-      - baalvion-net
+# ─────────────────────────────────────────────────────────────────────────────
+#  Baalvion Backend — Full Stack Docker Compose
+#  Boots: PostgreSQL · Redis · All Node.js microservices
+#  Usage: docker compose up --build
+# ─────────────────────────────────────────────────────────────────────────────
 
-  # ── Redis (queues + caching for proxy backend) ────────────────────────────
-  redis:
-    image: redis:7-alpine
-    container_name: baalvion-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - default
-      - baalvion-net
-
-  # ── pgAdmin (DB GUI) — DEV/OPS TOOL ONLY, not started by default ───────────
-  # HARDENED (cleanup/infra-hardening): this GUI talks to the PRIMARY baalvion_db,
-  # so it must never be a default-on, internet-exposed service.
-  #   • profile `tools`  → excluded from `docker compose up`; start explicitly:
-  #       docker compose --profile tools up -d pgadmin
-  #   • bound to 127.0.0.1 → reachable only from the host, never an external NIC.
-  #   • SERVER_MODE True   → real web login instead of passwordless desktop mode.
-  #   • credentials come from env (.env), with placeholder defaults — override them.
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: baalvion-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@baalvion.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-change-me-in-env}
-      PGADMIN_CONFIG_SERVER_MODE: 'True'
-    ports:
-      - "127.0.0.1:5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    profiles:
-      - tools
-
-  # ── CMS Service ──────────────────────────────────────────────────────────────
-  cms-service:
-    build:
-      context: .
-      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
-    container_name: baalvion-cms
-    restart: unless-stopped
-    ports:
-      - "3011:3011"
-    environment:
-      - PORT=3011
-      # development → use the dev vault key (matches the already-encrypted payment integrations)
-      # + dev inter-service secret. Real deploy: NODE_ENV=production + CMS_SECRETS_KEY + INTERNAL_SERVICE_SECRET.
-      - NODE_ENV=development
-      # Was entirely unset here, so every deploy silently fell back to appConfig.js's
-      # localhost-only default -- every production site reading the CMS client-side
-      # (public/website-info config fetch, and the /collect.js analytics beacon that
-      # UnifiedAnalytics.tsx injects into the page) got CORS-blocked in the browser
-      # with no visible error except a blank console warning. Server-side reads
-      # (cms.ts's fetch() calls from each site's own Next.js server) were never
-      # affected -- only same-origin-checked browser requests were broken.
-      - CORS_ORIGINS=${CMS_CORS_ORIGINS:-http://localhost:3000,http://localhost:3030,http://localhost:5173,https://lawelitenetwork.com,https://imperialpedia.com,https://www.amarisemaisonavenue.com}
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      # IndexNow: instant search-engine recrawl on publish. Key file must be hosted at
-      # https://<site-domain>/<key>.txt (see Imperialpedia public/13c7ede615e8cf445c4e183a9894e9c4.txt).
-      - INDEXNOW_KEY=13c7ede615e8cf445c4e183a9894e9c4
-      # Shared secret validating the x-internal-secret header on /internal/* routes (used by
-      # other services' vault resolvers, e.g. law-service's Razorpay integration). Without this,
-      # config.internalSecret silently falls back to a hardcoded dev placeholder.
-      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - backend
-
-  # ── Commerce Service ──────────────────────────────────────────────────────────
-  commerce-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/commerce-service/Dockerfile
-    container_name: baalvion-commerce
-    restart: unless-stopped
-    ports:
-      - "3012:3012"
-    environment:
-      - PORT=3012
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - backend
-
-  # ── Order Service: REMOVED (consolidated 2026-06-13) ──────────────────────────
-  #    Legacy Node order-service (order-service_DEPRECATED) deleted. Order lifecycle is
-  #    owned by trade/order-execution-service (oms schema, server-computed money-truth).
-
-  # ── Inventory Service ─────────────────────────────────────────────────────────
-  inventory-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/inventory-service/Dockerfile
-    container_name: baalvion-inventory
-    restart: unless-stopped
-    ports:
-      - "3014:3014"
-    environment:
-      - PORT=3014
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - backend
-
-  # ── Fulfillment Service ───────────────────────────────────────────────────────
-  fulfillment-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/fulfillment-service/Dockerfile
-    container_name: baalvion-fulfillment
-    restart: unless-stopped
-    ports:
-      - "3016:3015"
-    environment:
-      - PORT=3015
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - backend
-
-  # ── Auth Service (port 3001) ─────────────────────────────────────────────────
-  auth-service:
-    build:
-      context: .
-      dockerfile: Backend/services/identity/auth-service/Dockerfile
-    container_name: baalvion-auth
-    restart: unless-stopped
-    # Join the shared gateway network so Traefik resolves http://auth-service:3001.
-    # Keeps `default` for existing intra-compose connectivity (postgres/redis are on both).
-    networks:
-      - default
-      - baalvion-net
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      # Email → Mailpit dev SMTP catcher (no real auth; dummy creds satisfy the gate). Inbox: :8025
-      - EMAIL_FROM=noreply@baalvion.com
-      - SMTP_HOST=baalvion-mailpit
-      - SMTP_PORT=1025
-      - SMTP_USER=dev
-      - SMTP_PASS=dev
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - identity
-      - backend
-
-  # ── Admin Service (port 3021) ─────────────────────────────────────────────────
-  admin-service:
-    build:
-      context: .
-      dockerfile: Backend/services/platform/admin-service/Dockerfile
-    container_name: baalvion-admin-svc
-    restart: unless-stopped
-    ports:
-      - "3021:3021"
-    environment:
-      - PORT=3021
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - identity
-      - backend
-
-  # ── Session Service (port 3022) ───────────────────────────────────────────────
-  session-service:
-    build:
-      context: .
-      dockerfile: Backend/services/identity/session-service/Dockerfile
-    container_name: baalvion-session
-    restart: unless-stopped
-    ports:
-      - "3022:3022"
-    environment:
-      - PORT=3022
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
-      - IMPOSSIBLE_TRAVEL_KMH=900
-      - HIGH_RISK_SCORE=70
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - identity
-      - backend
-
-  # ── OAuth Service (port 3023) ─────────────────────────────────────────────────
-  oauth-service:
-    build:
-      context: .
-      dockerfile: Backend/services/identity/oauth-service/Dockerfile
-    container_name: baalvion-oauth
-    restart: unless-stopped
-    ports:
-      - "3023:3023"
-    environment:
-      - PORT=3023
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - OAUTH_BASE_URL=http://localhost:3023
-      - AUTH_UI_URL=http://localhost:3000
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - identity
-      - backend
-
-  # ── RBAC Service / Policy Decision Point (port 3055) ──────────────────────────
-  # Verify-only RS256 PDP for commerce store-team roles + ABAC. Containerized so the
-  # whole stack boots from `docker compose` with no host node process.
-  rbac-service:
-    build:
-      context: .
-      dockerfile: Backend/services/identity/rbac-service/Dockerfile
-    container_name: baalvion-rbac
-    restart: unless-stopped
-    # Shared gateway network so sibling containers resolve http://rbac-service:3055.
-    networks:
-      - default
-      - baalvion-net
-    ports:
-      - "3055:3055"
-    environment:
-      - PORT=3055
-      - NODE_ENV=production
-      - API_BASE_URL=http://rbac-service:3055
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - DB_SCHEMA=rbac
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      # Service-to-service PDP calls (commerce/order PEP -> /v1/authorize). User-token
-      # forwarding is the default path; this enables system-context calls when needed.
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3055/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    depends_on:
-      postgres:
-        condition: service_healthy
-    profiles:
-      - identity
-      - backend
-
-  # ── Admin Platform (optional: production only — use npm run dev locally) ─────
-  admin-platform:
-    build:
-      context: ./Frontend/admin.baalvion.com
-      dockerfile: Dockerfile
-    container_name: baalvion-admin
-    restart: unless-stopped
-    ports:
-      - "3030:3030"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000/v1
-      - NEXT_PUBLIC_AUTH_URL=http://localhost:3001/v1/auth
-      - NEXT_PUBLIC_ADMIN_API_URL=http://localhost:3021/v1
-      - NEXT_PUBLIC_SESSION_API_URL=http://localhost:3022/v1
-      - NEXT_PUBLIC_OAUTH_URL=http://localhost:3023
-      - NEXT_PUBLIC_APP_URL=http://localhost:3030
-      - NODE_ENV=production
-    profiles:
-      - admin
-
-  # ── Proxy Backend (port 4000) ─────────────────────────────────────────────
-  proxy-backend:
-    build:
-      context: .
-      dockerfile: Backend/services/infrastructure/proxy-service/Dockerfile
-    container_name: baalvion-proxy
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      - PORT=4000
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      # proxy-service issues its own tokens during migration (Phase 5 removes this) → needs the private key,
-      # else createAuthServer({requireRs256InProduction:true}) throws at startup with HS256 fallback off.
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
-      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
-      - PAYU_MERCHANT_KEY=${PAYU_MERCHANT_KEY}
-      - PAYU_MERCHANT_SALT=${PAYU_MERCHANT_SALT}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Jobs Service (port 3002) ──────────────────────────────────────────────
-  jobs-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/jobs-service/Dockerfile
-    container_name: baalvion-jobs
-    restart: unless-stopped
-    ports:
-      - "3002:3002"
-    environment:
-      - PORT=3002
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - AWS_REGION=${AWS_REGION:-ap-south-1}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
-      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://localhost:9200}
-    deploy:
-      resources:
-        limits:
-          memory: 768M
-          cpus: '0.75'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── CTM Service / ControlTheMarket (port 3011) ────────────────────────────
-  # Note: cms-service also uses host port 3011 — disable cms-service or this if running both
-  ctm-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/ctm-service/Dockerfile
-    container_name: baalvion-ctm
-    restart: unless-stopped
-    ports:
-      - "3017:3011"
-    environment:
-      - PORT=3011
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3011/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Mining Service / GeoTrade Nexus (port 3003) ───────────────────────────
-  mining-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/mining-service/Dockerfile
-    container_name: baalvion-mining
-    restart: unless-stopped
-    ports:
-      - "3003:3003"
-    environment:
-      - PORT=3003
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3003/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Imperialpedia Service (port 3004) ────────────────────────────────────
-  imperialpedia-service:
-    build:
-      context: .
-      dockerfile: Backend/services/knowledge/imperialpedia-service/Dockerfile
-    container_name: baalvion-imperialpedia
-    restart: unless-stopped
-    ports:
-      - "3004:3004"
-    environment:
-      - PORT=3004
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3004/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Real Estate Service / AmariseMaisonAvenue (port 3005) ────────────────
-  real-estate-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/real-estate-service/Dockerfile
-    container_name: baalvion-real-estate
-    restart: unless-stopped
-    ports:
-      - "3005:3005"
-    environment:
-      - PORT=3005
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3005/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Brand Connector Service (port 3006) ───────────────────────────────────
-  brand-connector-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/brand-connector-service/Dockerfile
-    container_name: baalvion-brand
-    restart: unless-stopped
-    ports:
-      - "3006:3006"
-    environment:
-      - PORT=3006
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3006/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Market Service (port 3007) ────────────────────────────────────────────
-  market-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/market-service/Dockerfile
-    container_name: baalvion-market
-    restart: unless-stopped
-    ports:
-      - "3007:3007"
-    environment:
-      - PORT=3007
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3007/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── IR Service / Investor Relations (port 3008) ───────────────────────────
-  ir-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/ir-service/Dockerfile
-    container_name: baalvion-ir
-    restart: unless-stopped
-    ports:
-      - "3008:3008"
-    environment:
-      - PORT=3008
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3008/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Dashboard Service (port 3009) ─────────────────────────────────────────
-  dashboard-service:
-    build:
-      context: .
-      dockerfile: Backend/services/platform/dashboard-service/Dockerfile
-    container_name: baalvion-dashboard
-    restart: unless-stopped
-    ports:
-      - "3009:3009"
-    environment:
-      - PORT=3009
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3009/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── About Service / CMS (port 3010) ──────────────────────────────────────
-  about-service:
-    build:
-      # Monorepo-aware build (Option A): context = repo root so packages/* + the
-      # workspace lockfile are visible to the pnpm/turbo-prune build.
-      context: .
-      dockerfile: Backend/services/ecosystem/about-service/Dockerfile
-    container_name: baalvion-about
-    restart: unless-stopped
-    ports:
-      - "3010:3010"
-    environment:
-      - PORT=3010
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3010/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Law Service / Law Elite Network (port 3015) ──────────────────────────
-  law-service:
-    build:
-      context: .
-      dockerfile: Backend/services/knowledge/law-service/Dockerfile
-    container_name: baalvion-law
-    restart: unless-stopped
-    ports:
-      - "3015:3015"
-    environment:
-      - PORT=3015
-      - NODE_ENV=production
-      - CORS_ORIGINS=${LAW_CORS_ORIGINS:-http://localhost:9002,http://localhost:3000,https://lawelitenetwork.com}
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      # Local postgres container has no TLS listener — auth-node's buildPgSsl() defaults
-      # to requiring TLS when NODE_ENV=production (see Backend/packages/auth-node/dbSsl.js),
-      # which this service is set to even locally. Real deploy: unset (RDS enforces SSL).
-      - DB_SSL=false
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      # Object storage (MinIO) for the document vault — internal endpoint for uploads,
-      # public endpoint for browser-reachable presigned downloads.
-      - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_PUBLIC_ENDPOINT=${LAW_MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-baalvion}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-baalvion_dev_pass}
-      - MINIO_BUCKET=${LAW_MINIO_BUCKET:-law-documents}
-      # Razorpay payment gateway — keys resolve from the CMS admin panel's "Integrations & Keys"
-      # for the law-elite-network website (category=payment, provider=razorpay) via the shared
-      # internal vault API. RAZORPAY_KEY_ID/SECRET/WEBHOOK_SECRET below are only a fallback for
-      # local dev when the vault is unreachable; empty everywhere = simulated settlement.
-      - CMS_BASE_URL=${CMS_BASE_URL:-http://cms-service:3011/api/v1}
-      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
-      - PAYMENT_SITE_SLUG=${LAW_PAYMENT_SITE_SLUG:-law-elite-network}
-      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
-      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
-      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}
-      # Public web origin (used in transactional email links).
-      - APP_PUBLIC_URL=${LAW_APP_PUBLIC_URL:-http://localhost:9002}
-      # Marketplace: platform commission withheld from each settled payment.
-      - PLATFORM_FEE_PERCENT=${LAW_PLATFORM_FEE_PERCENT:-15}
-      # Transactional email (SMTP). MAIL_ENABLED=false -> emails are logged, not sent.
-      - MAIL_ENABLED=${LAW_MAIL_ENABLED:-false}
-      - SMTP_HOST=${LAW_SMTP_HOST:-mailpit}
-      - SMTP_PORT=${LAW_SMTP_PORT:-1025}
-      - SMTP_SECURE=${LAW_SMTP_SECURE:-false}
-      - SMTP_USER=${LAW_SMTP_USER:-}
-      - SMTP_PASS=${LAW_SMTP_PASS:-}
-      - MAIL_FROM=${LAW_MAIL_FROM:-Law Elite Network <no-reply@lawelitenetwork.com>}
-      # Video consultations. Empty provider -> Jitsi public rooms (no keys needed).
-      - VIDEO_PROVIDER=${LAW_VIDEO_PROVIDER:-}
-      - DAILY_API_KEY=${LAW_DAILY_API_KEY:-}
-      - DAILY_DOMAIN=${LAW_DAILY_DOMAIN:-}
-      # Recurring-subscription billing worker.
-      - BILLING_WORKER_ENABLED=${LAW_BILLING_WORKER_ENABLED:-true}
-      - BILLING_INTERVAL_MINUTES=${LAW_BILLING_INTERVAL_MINUTES:-60}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3015/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Trade Service / Global Trade Infrastructure (port 3025) ─────────────────
-  trade-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/trade-service/Dockerfile
-    container_name: baalvion-trade
-    restart: unless-stopped
-    ports:
-      - "3025:3025"
-    environment:
-      - PORT=3025
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - SERVICE_NAME=trade-service
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:9003,http://localhost:3000}
-      - RATE_LIMIT_IP_MAX=120
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3025/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Realtime Service (port 3040) ──────────────────────────────────────────
-  realtime-service:
-    build:
-      context: .
-      dockerfile: Backend/services/infrastructure/realtime-service/Dockerfile
-    container_name: baalvion-realtime
-    restart: unless-stopped
-    ports:
-      - "3040:3040"
-    environment:
-      - PORT=3040
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - AUTH_SERVICE_URL=http://baalvion-auth:3001
-      # JWKS lives at ROOT on auth-service (index.js: app.use('/.well-known', wellKnown)) — NOT under /v1/auth
-      - JWKS_URI=http://baalvion-auth:3001/.well-known/jwks.json
-      # static RS256 public key as JWKS-fetch fallback (createJwksVerifier cascade)
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3040/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Notification Service (port 3041 internal) ─────────────────────────────
-  notification-service:
-    build:
-      context: .
-      dockerfile: Backend/services/infrastructure/notification-service/Dockerfile
-    container_name: baalvion-notification
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
-      - EMAIL_FROM=${EMAIL_FROM:-noreply@baalvion.com}
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Insiders Service (port 3050) — was a deployment gap; gateway: ecosystem/insiders ─
-  insiders-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/insiders-service/Dockerfile
-    container_name: baalvion-insiders
-    restart: unless-stopped
-    ports:
-      - "3050:3050"
-    environment:
-      - PORT=3050
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      # Supabase-adapter service self-issues during migration → gets both keys (Phase 5 isolates this)
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      # Gateway trust boundary: verify the auth-gateway's signed identity headers (must match the gateway).
-      - GATEWAY_SIGNING_SECRET=${GATEWAY_SIGNING_SECRET}
-      - ISLAND_AUTH_MODE=strict
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── ML Service (8000, Python/FastAPI) — HMAC-signed (NOT JWT), internal; gateway: knowledge/ml ─
-  ml-service:
-    build:
-      context: Backend/services/knowledge/ml-service
-    container_name: baalvion-ml
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      # HMAC secret shared with callers (mlInferenceClient.sign). Blank = dev/unsigned mode.
-      - ML_SERVICE_SECRET=${ML_SERVICE_SECRET}
-      - DATABASE_URL=postgres://baalvion:baalvion_dev_pass@postgres:5432/baalvion_db
-      - MODEL_DIR=/var/lib/baalvion/models
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
-  # ── Financial Services (Ledger + Payment): REMOVED (consolidated 2026-06-13) ──
-  #    The Node ledger-service and payment-service were duplicates of the canonical Java
-  #    finance suite (Backend/services/commerce/financial-services-java). The Razorpay/Stripe/
-  #    PayU PSP gateways were ported into the Java payment-service (/v1/gateway/* + webhooks).
-  #    Run the finance stack from financial-services-java/docker-compose.yml (host ports 130xx:
-  #    ledger 13014, payment 13015, escrow 13017, settlement 13018, …). Consumers point at
-  #    PAYMENT_SERVICE_URL=:13015 and the auth-gateway FINANCE block routes /finance-bff → 130xx.
-
-  # ── Migration Runner (one-shot job) ──────────────────────────────────────
-  migrate:
-    image: node:20-alpine
-    container_name: baalvion-migrate
-    working_dir: /migrations
-    command: ["node", "migrate.js", "up"]
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-    volumes:
-      - ./Backend/database/migrations:/migrations
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - migrate
-    restart: "no"
+networks:
+  baalvion:
+    driver: bridge
 
 volumes:
   postgres_data:
   redis_data:
-  pgadmin_data:
 
-networks:
-  baalvion-net:
-    external: true
-    name: baalvion-net
+x-common-env: &common-env
+  NODE_ENV: production
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: baalvion_db
+  DB_USER: baalvion
+  DB_PASSWORD: bc9f9cda3360df884bdec7d75c4bebfc
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_URL: redis://redis:6379
+  JWT_ISSUER: baalvion-auth
+  JWT_AUDIENCE: baalvion-services
+  BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+  JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+  JWKS_TTL_MS: "300000"
+  JWT_PUBLIC_KEY_B64: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2dUlLN0k0V3o4THdCczREaDdwSgpLeEg0dXBBOURPVjFsNWdlWWdlcGZXMmJGQU9RdnROWXlETkQ0bTU3YkJQYVRxd2xmeTVGa1pEVmNETDZkRzJ0ClovTitsOGd4R0tLK3VWTXROcTAwSDhMSm84d2JOTHNTekpaekF2N3NsLzZycEJyQ29EK2YrVklsalVDS2xCY0YKT2tkT2hKMjZOanVCL3d5TWJxM1pHWFJTVkV0YTl1dStCbjFnWVp4THV3U0NQR0IwQ0lPcnV1Qk43WnBnSkJ0ZApTUTRmM1d5Y0UzaDA3djhFNnl0TGdFT1RDM2tGeDMyL1piUlFOVStrUUtHTU1SWHJhdUVoM01sQnF1RXJBa09HCitvaWEvdDRKb25icDBSRnEvZ3ZKQmZ4ME4xcTl4MVEvSTR0QUxwQjhXbm1LTUhzT01majdoSVpwSGNXTDJXOEUKUHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==
+  INTERNAL_SERVICE_SECRET: 266614b02e12f65ebb45a041da81b97ce0924f2b1166ffc3f4efaa6c99563004
+  CORS_ORIGINS: "http://localhost:9004,http://localhost:3000,https://community.marketunderworld.com"
+
+x-node-service: &node-service
+  restart: unless-stopped
+  networks:
+    - baalvion
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  # ────────────────────────────── INFRASTRUCTURE ──────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: baalvion-postgres
+    restart: unless-stopped
+    networks:
+      - baalvion
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: baalvion
+      POSTGRES_PASSWORD: bc9f9cda3360df884bdec7d75c4bebfc
+      POSTGRES_DB: baalvion_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U baalvion -d baalvion_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: baalvion-redis
+    restart: unless-stopped
+    networks:
+      - baalvion
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────── IDENTITY DOMAIN ────────────────────────────────
+
+  auth-service:
+    <<: *node-service
+    container_name: baalvion-auth
+    build:
+      context: .
+      dockerfile: Backend/services/identity/auth-service/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      <<: *common-env
+      PORT: "3001"
+      JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
+      JWT_ACCESS_SECRET: 439033268b411d0f33f86425d6bade672717381df85d1ce0585472b0cd0d0704d998027a0e28e8361cf2ec19b7f507ab
+      JWT_REFRESH_SECRET: bd41a6fac4e8eb1bdd4947f2079c6ef94855660095c5de16357729d757afaeefc837df4e8a5d5e25197ca72d5edb1f8d
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: "12"
+      RATE_LIMIT_IP_MAX: "20"
+      EMAIL_FROM: noreply@baalvion.com
+      API_BASE_URL: http://localhost:3001
+      FRONTEND_URL: http://localhost:9004
+    volumes:
+      - ./Backend/services/identity/auth-service/keys:/app/keys:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  session-service:
+    <<: *node-service
+    container_name: baalvion-session
+    build:
+      context: .
+      dockerfile: Backend/services/identity/session-service/Dockerfile
+    ports:
+      - "3022:3022"
+    environment:
+      <<: *common-env
+      PORT: "3022"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  rbac-service:
+    <<: *node-service
+    container_name: baalvion-rbac
+    build:
+      context: .
+      dockerfile: Backend/services/identity/rbac-service/Dockerfile
+    ports:
+      - "3055:3055"
+    environment:
+      <<: *common-env
+      PORT: "3055"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  # ──────────────────────── INFRASTRUCTURE DOMAIN ─────────────────────────────
+
+  realtime-service:
+    <<: *node-service
+    container_name: baalvion-realtime
+    build:
+      context: .
+      dockerfile: Backend/services/infrastructure/realtime-service/Dockerfile
+    ports:
+      - "3040:3040"
+    environment:
+      <<: *common-env
+      PORT: "3040"
+      ALLOWED_ORIGINS: "http://localhost:9004,http://localhost:3000,https://community.marketunderworld.com"
+      JWT_BYPASS_AUTH: "false"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ADMIN_SERVICE_URL: http://admin-service:3021
+      SESSION_SERVICE_URL: http://session-service:3022
+      NOTIF_SERVICE_URL: http://notification-service:3031
+      COMMUNITY_SERVICE_URL: http://community-service:3064
+      METRICS_INTERVAL: "5000"
+      HEALTH_INTERVAL: "10000"
+      WS_RATE_LIMIT_PER_MINUTE: "60"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  notification-service:
+    <<: *node-service
+    container_name: baalvion-notification
+    build:
+      context: .
+      dockerfile: Backend/services/infrastructure/notification-service/Dockerfile
+    ports:
+      - "3031:3031"
+    environment:
+      <<: *common-env
+      PORT: "3031"
+      EMAIL_FROM: noreply@baalvion.com
+      EMAIL_FROM_NAME: Baalvion
+      EMAIL_REPLY_TO: support@baalvion.com
+      EMAIL_RATE_LIMIT_PER_HOUR: "10"
+      SMS_RATE_LIMIT_PER_HOUR: "10"
+      PUSH_PROVIDER: auto
+
+  # ─────────────────────────── PLATFORM DOMAIN ────────────────────────────────
+
+  admin-service:
+    <<: *node-service
+    container_name: baalvion-admin
+    build:
+      context: .
+      dockerfile: Backend/services/platform/admin-service/Dockerfile
+    ports:
+      - "3021:3021"
+    environment:
+      <<: *common-env
+      PORT: "3021"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      COMMUNITY_SERVICE_URL: http://community-service:3064
+      REALTIME_SERVICE_URL: http://realtime-service:3040
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  # ─────────────────────────── ECOSYSTEM DOMAIN ───────────────────────────────
+
+  community-service:
+    <<: *node-service
+    container_name: baalvion-community
+    build:
+      context: .
+      dockerfile: Backend/services/ecosystem/community-service/Dockerfile
+    ports:
+      - "3064:3064"
+    environment:
+      <<: *common-env
+      PORT: "3064"
+      JWT_AUDIENCE: baalvion-platform
+      RATE_LIMIT_IP_MAX: "120"
+      NODEBB_BASE_URL: http://nodebb:4567
+      NODEBB_WRITE_API_TOKEN: ""
+      PAYMENT_SERVICE_URL: http://localhost:3015
+      PAYMENT_SPINE: "false"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  jobs-service:
+    <<: *node-service
+    container_name: baalvion-jobs
+    build:
+      context: .
+      dockerfile: Backend/services/ecosystem/jobs-service/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      <<: *common-env
+      PORT: "3002"
+      AUTH_SERVICE_URL: http://auth-service:3001
+    depends_on:
+      auth-service:
+        condition: service_healthy

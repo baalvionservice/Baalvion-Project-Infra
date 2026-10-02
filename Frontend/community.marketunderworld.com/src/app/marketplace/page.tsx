@@ -10,6 +10,9 @@ import { GiftCardCheckoutModal } from "@/components/giftcards/giftcard-checkout-
 import { getCatalog, type GiftCardBrand } from "@/lib/api/giftcards";
 import { cn } from "@/lib/utils";
 import { DIGITAL_GOODS, type DigitalGood } from "@/data/digital-goods";
+import { useCart } from "@/context/cart-context";
+import { useToast } from "@/hooks/use-toast";
+import { Breadcrumbs } from "@/components/ui/breadcrumb";
 
 const COUNTRIES = [
   { code: "US", label: "United States" },
@@ -45,6 +48,9 @@ export default function MarketplacePage() {
   // Digital Goods State
   const [indieCategory, setIndieCategory] = useState<string>("All");
 
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
   useEffect(() => {
     if (activeTab === "giftcards") {
       setLoading(true);
@@ -79,6 +85,10 @@ export default function MarketplacePage() {
       <main className="container max-w-[1440px] mx-auto px-6 pt-44 pb-32">
         {/* Hero */}
         <header className="mb-12 space-y-8">
+          <Breadcrumbs 
+            items={[{ label: "Marketplace" }]} 
+            className="mb-8"
+          />
           <div className="inline-flex items-center gap-2 text-[11px] font-bold text-fuchsia-400 uppercase tracking-[0.3em] border border-fuchsia-500/20 rounded-full px-4 py-2">
             <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse" /> Virtual Marketplace
           </div>
@@ -206,7 +216,29 @@ export default function MarketplacePage() {
                                       {promoApplied && <div className="text-sm text-gray-500 line-through">${good.priceUsd}</div>}
                                     </div>
                                   </div>
-                                  <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 flex items-center justify-center transition-colors group-hover:bg-fuchsia-500">
+                                  <button 
+                                    onClick={() => {
+                                      addItem({
+                                        sku: `INDIE-${good.id}`,
+                                        name: good.title,
+                                        price: Number(finalPrice),
+                                        productId: good.id,
+                                        quantity: 1
+                                      }).then(() => {
+                                        toast({
+                                          title: "Added to Cart",
+                                          description: `${good.title} has been added to your cart.`,
+                                        });
+                                      }).catch((err) => {
+                                        toast({
+                                          variant: "destructive",
+                                          title: "Failed to Add",
+                                          description: err.message || "An error occurred.",
+                                        });
+                                      });
+                                    }}
+                                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 flex items-center justify-center transition-colors group-hover:bg-fuchsia-500"
+                                  >
                                     <ShoppingCart className="w-4 h-4 text-white" />
                                   </button>
                                 </div>
