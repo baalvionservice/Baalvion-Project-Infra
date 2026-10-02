@@ -19,7 +19,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune proxy-baalvionstack-web --docker
+RUN pnpm dlx turbo@2.9.14 prune proxy.baalvionstack.com --docker
 
 # 2) Install pruned deps (--no-frozen-lockfile: turbo prune may drop override snapshots).
 FROM base AS installer

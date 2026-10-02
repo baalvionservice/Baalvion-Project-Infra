@@ -11,7 +11,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps
 FROM base AS pruner
 COPY . .
-RUN npx turbo prune about-baalvion-web --docker
+RUN npx turbo prune about.baalvion.com --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile: the root pins a version-selector pnpm override and `turbo prune`

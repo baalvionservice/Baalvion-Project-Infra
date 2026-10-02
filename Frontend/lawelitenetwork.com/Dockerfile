@@ -19,7 +19,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune law-elite-network-web --docker
+RUN pnpm dlx turbo@2.9.14 prune lawelitenetwork.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots from the pruned lockfile, which a frozen install rejects.

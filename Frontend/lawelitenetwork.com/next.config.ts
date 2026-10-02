@@ -157,6 +157,10 @@ const nextConfig: NextConfig = {
   // was dropped as a near-duplicate of the Terms of Service disclaimer section.
   // Permanent redirects so bookmarks, backlinks, and any already-indexed URLs
   // don't 404.
+  // Retired sections (former practice areas, people/sports/entertainment pillars,
+  // /plans, ...) are no longer redirected to '/' here: a redirect to an unrelated
+  // page reads as a soft 404 to Google and keeps the URLs in the index for months.
+  // src/middleware.ts answers them with 410 Gone instead (src/lib/retired-routes.ts).
   async redirects() {
     return [
       { source: '/source-attribution-policy', destination: '/editorial-disclosure-policy', permanent: true },
@@ -179,9 +183,6 @@ const nextConfig: NextConfig = {
       // the third-retirement-pass block below and 308 to / themselves).
       // Pointed straight at / to avoid a two-hop redirect chain; repoint
       // these at their real destinations once that block comes out.
-      { source: '/tv', destination: '/', permanent: true },
-      { source: '/courts', destination: '/', permanent: true },
-      { source: '/legal', destination: '/', permanent: true },
       // /world pulled the exact same cmsGetNews() feed as /news with no real
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the
@@ -189,7 +190,6 @@ const nextConfig: NextConfig = {
       // Destination changed from /news to / now that /news is retired too
       // (see the four-section block below) -- redirecting into another dead
       // section would just move the soft-404 one hop deeper.
-      { source: '/world', destination: '/', permanent: true },
       // AdSense second-rejection finding: these "finished-looking" sections
       // (two reference indexes pointing exclusively at articles whose
       // practice areas were already retired above) read to a reviewer as the
@@ -201,18 +201,12 @@ const nextConfig: NextConfig = {
       // legal categories above -- it currently has only 1 published article
       // against 40 unapproved drafts, a real thin-section risk that was
       // flagged and accepted anyway rather than silently fixed.
-      { source: '/case-law', destination: '/', permanent: true },
-      { source: '/legislation', destination: '/', permanent: true },
-      { source: '/law-changes', destination: '/', permanent: true },
       // 2026-09-27: /news, personal-injury-lawyer, maritime-offshore-injury-law
       // and cruise-ship-passenger-vessel-accidents re-retired -- their content
       // was archived (YMYL/legal-lead-gen risk), not deleted, so this follows
       // the same pattern as the block above rather than leaving a now-empty
       // section directly reachable by URL.
       { source: '/news', destination: '/', permanent: true },
-      { source: '/personal-injury-lawyer', destination: '/', permanent: true },
-      { source: '/maritime-offshore-injury-law', destination: '/', permanent: true },
-      { source: '/cruise-ship-passenger-vessel-accidents', destination: '/', permanent: true },
       // Synonym consolidation. "offshore injury lawyer" / "offshore accident
       // lawyer", and the maritime and oil-rig pairs, are the same search intent
       // with a swapped noun -- six pages competing for one query each. The text
@@ -233,7 +227,6 @@ const nextConfig: NextConfig = {
       // processed on upgrade. Removed rather than rewritten; see the lawyer
       // registration wizard's inline subscription step for the same catalog
       // used elsewhere.
-      { source: '/plans', destination: '/', permanent: true },
       // Trailing-slash duplicates of root-flat article/category URLs -- the
       // canonical form (articleUrl() in src/lib/article-url.ts and the
       // category-hub routes) never has a trailing slash, but these specific
@@ -268,47 +261,18 @@ const nextConfig: NextConfig = {
       // slug also catches the corresponding /law/{old-slug} legacy path: that
       // shim (src/app/law/[categorySlug]/page.tsx) 308s to /{new-slug} first,
       // which then hits the matching rule below on the follow-up request.
-      { source: '/business/:path*', destination: '/', permanent: true },
-      { source: '/criminal-law/:path*', destination: '/', permanent: true },
-      { source: '/family-law/:path*', destination: '/', permanent: true },
-      { source: '/real-estate-law/:path*', destination: '/', permanent: true },
-      { source: '/tax-finance/:path*', destination: '/', permanent: true },
-      { source: '/employment-law/:path*', destination: '/', permanent: true },
-      { source: '/tech-ip/:path*', destination: '/', permanent: true },
-      { source: '/disputes/:path*', destination: '/', permanent: true },
-      { source: '/us-law-and-constitution/:path*', destination: '/', permanent: true },
-      { source: '/religion-law-and-weird-laws/:path*', destination: '/', permanent: true },
-      { source: '/legal-education-and-history/:path*', destination: '/', permanent: true },
       // Second retirement pass: 5 categories narrowed to 3 -- Boating
       // Accidents and Car Accidents were the shallowest of the 5 (4 and 2
       // articles), retired alongside the other 11 above.
-      { source: '/boating-accidents/:path*', destination: '/', permanent: true },
-      { source: '/car-accidents/:path*', destination: '/', permanent: true },
       // The 10 standalone guides below used to live in ROOT_FLAT_ARTICLE_SLUGS
       // (src/lib/article-url.ts), which made their canonical URL a bare root
       // slug -- no category prefix for a wildcard rule above to catch. Removed
       // from that set as part of the same retirement (their real CMS category
       // is one of the 11 retired ones), so each needs its own explicit 301
       // rather than falling through to a 404 for a URL that was previously live.
-      { source: '/divorce-law-in-maryland', destination: '/', permanent: true },
-      { source: '/how-divorce-works-in-the-us', destination: '/', permanent: true },
-      { source: '/us-constitution-how-laws-are-made', destination: '/', permanent: true },
-      { source: '/how-the-us-legal-system-works', destination: '/', permanent: true },
-      { source: '/how-many-laws-are-there-in-the-us', destination: '/', permanent: true },
-      { source: '/is-sharia-law-legal-in-the-united-states', destination: '/', permanent: true },
-      { source: '/muslim-law-and-legal-practices-in-the-us', destination: '/', permanent: true },
-      { source: '/weird-silly-crazy-laws-in-the-usa', destination: '/', permanent: true },
-      { source: '/best-law-schools-in-the-usa', destination: '/', permanent: true },
-      { source: '/law-enforcement-in-1900s-america', destination: '/', permanent: true },
       // Same reasoning, second pass: these 6 used to live in
       // ROOT_FLAT_ARTICLE_SLUGS (src/lib/article-url.ts) as bare-root guides
       // for the now-retired Boating Accidents / Car Accidents categories.
-      { source: '/boating-accident-lawyer', destination: '/', permanent: true },
-      { source: '/what-to-do-after-a-boating-accident', destination: '/', permanent: true },
-      { source: '/boating-accident-statute-of-limitations', destination: '/', permanent: true },
-      { source: '/boating-accident-liability-and-fault', destination: '/', permanent: true },
-      { source: '/best-car-accident-lawyer', destination: '/', permanent: true },
-      { source: '/what-does-a-car-accident-lawyer-do', destination: '/', permanent: true },
       // Third retirement pass, 2026-09-25 (see src/lib/category-slugs.ts's
       // CURRENT_CATEGORY_SLUGS comment): narrowed the live site further,
       // while still mid-AdSense-review. Of the previously-live set, the 5
@@ -319,11 +283,6 @@ const nextConfig: NextConfig = {
       // CURRENT_CATEGORY_SLUGS). Their CMS content was never touched, these
       // are 301s, and this block comes out entirely once AdSense approves
       // the site and the rest is restored.
-      { source: '/movies/:path*', destination: '/', permanent: true },
-      { source: '/music/:path*', destination: '/', permanent: true },
-      { source: '/television/:path*', destination: '/', permanent: true },
-      { source: '/streaming/:path*', destination: '/', permanent: true },
-      { source: '/celebrity-news/:path*', destination: '/', permanent: true },
       // Same pass: the standalone content pillars (people/entertainment/
       // sports/countries/topics/legal cases+courts) also stay up but drop
       // out of indexing/sitemap below -- these aren't
@@ -332,12 +291,6 @@ const nextConfig: NextConfig = {
       // Videos and Podcasts were kept live (real content: Stuff You Should
       // Know, Desert Island Discs, The Rest Is Football; real Bigg Boss
       // episodes) -- not retired here, see sitemap.ts.
-      { source: '/entertainment/:path*', destination: '/', permanent: true },
-      { source: '/sports/:path*', destination: '/', permanent: true },
-      { source: '/people/:path*', destination: '/', permanent: true },
-      { source: '/countries/:path*', destination: '/', permanent: true },
-      { source: '/topics/:path*', destination: '/', permanent: true },
-      { source: '/legal/:path*', destination: '/', permanent: true },
     ];
   },
 

@@ -16,7 +16,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune baalvion-admin-platform --docker
+RUN pnpm dlx turbo@2.9.14 prune admin.baalvion.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots (e.g. uuid@11) from the pruned lockfile, which a frozen install rejects.

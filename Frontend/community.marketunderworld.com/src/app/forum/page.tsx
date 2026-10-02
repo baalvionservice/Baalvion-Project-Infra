@@ -1,65 +1,185 @@
 import Link from "next/link";
-import { Hash, ArrowRight, KeyRound } from "lucide-react";
+import Image from "next/image";
 import { getCommunities } from "@/lib/api/community";
 import { CommunityCard } from "@/components/forums/community-card";
-
-/**
- * @fileOverview Forum hub — real communities from community-service, replacing the mock
- * geographic "region" hubs. Each community is a distinct topical space (cybersecurity,
- * education, investors & founders, trading, general, …) with its own access model.
- *
- * Platform-wide access tiers (marketplace-access/global-elite/vip-access) share the same
- * community-service membership/billing plumbing but are NOT discussion forums — they're
- * filtered out here (isForum: false) and pointed at /access instead, so this hub only ever
- * lists spaces you can actually browse into.
- */
+import { XenCategoryTable } from "@/components/forums/xen-category-table";
+import { FORUM_CATEGORIES } from "@/lib/forum-data";
 
 export default async function ForumHubPage() {
   const allCommunities = await getCommunities();
   const communities = allCommunities.filter((c) => c.isForum);
 
   return (
-    <div className="container max-w-[1440px] mx-auto px-6 pt-44 pb-32">
-      <header className="mb-20 space-y-8">
-        <div className="flex items-center gap-3 text-cyan-400 font-bold text-[12px] uppercase tracking-[0.2em]">
-          <Hash className="w-4 h-4" /> COMMUNITY
-        </div>
-        <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-white leading-[0.9]">
-          Communities.
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl font-medium">
-          Real, moderated spaces for people who think differently — security researchers,
-          educators, investors and founders, and everyone building in the open.
-        </p>
-      </header>
+    <div className="baal-page">
 
-      {communities.length === 0 ? (
-        <div className="mu-card p-16 text-center border border-white/5 bg-[#111118]">
-          <p className="text-gray-500 font-medium">No communities are available right now — check back soon.</p>
+      {/* ── EPIC HERO ── */}
+      <section className="baal-hero">
+        <div className="baal-hero-bg">
+          <Image
+            src="/baal_hero_bg.jpg"
+            alt="Baal — god of storms"
+            fill
+            priority
+            style={{ objectFit: "cover", objectPosition: "center 20%" }}
+          />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {communities.map((community) => (
-            <CommunityCard key={community.slug} community={community} />
+
+        {/* Animated lightning vignette overlay */}
+        <div className="baal-hero-vignette" />
+        <div className="baal-hero-scanlines" />
+
+        {/* Particle sparks */}
+        <div className="baal-sparks" aria-hidden="true">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <span key={i} className="baal-spark" style={{ "--i": i } as React.CSSProperties} />
           ))}
         </div>
-      )}
 
-      <Link
-        href="/access"
-        className="mt-12 flex items-center justify-between gap-6 rounded-3xl border border-fuchsia-500/20 bg-fuchsia-500/[0.04] p-8 hover:border-fuchsia-500/40 transition-all group"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/20 flex items-center justify-center shrink-0">
-            <KeyRound className="w-5 h-5 text-fuchsia-400" />
+        <div className="baal-hero-content">
+          <div className="baal-eyebrow">
+            <span className="baal-eyebrow-icon">⚡</span>
+            MarketUnderworld Communities
           </div>
-          <div>
-            <p className="text-white font-bold">Looking for Marketplace, Global Elite, or VIP access?</p>
-            <p className="text-gray-500 text-sm">Those are platform-wide tiers, not browsable communities — unlock them on the Access page.</p>
+          <h1 className="baal-title">
+            <span className="baal-title-glow">BAAL</span>
+            <span className="baal-title-sub">בַּעַל</span>
+          </h1>
+          <p className="baal-subtitle">
+            Lord &bull; Master &bull; Storm-bringer
+          </p>
+          <div className="baal-hero-divider">
+            <span />
+            <span className="baal-divider-rune">𓂀</span>
+            <span />
+          </div>
+          <p className="baal-hero-desc">
+            Canaanite god of fertility, storms, lightning, thunder, and rain.
+            Worshiped across ancient Canaan — his name means <em>"lord"</em> or <em>"master."</em>
+          </p>
+          <a href="#communities" className="baal-cta">
+            Enter the Communities
+            <span className="baal-cta-arrow">↓</span>
+          </a>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="baal-scroll-hint" aria-hidden="true">
+          <div className="baal-scroll-line" />
+        </div>
+      </section>
+
+      {/* ── ATTRIBUTES STRIP ── */}
+      <section className="baal-attrs">
+        {[
+          { icon: "⚡", label: "Lightning", sub: "Storm-wielder" },
+          { icon: "🌩️", label: "Thunder",   sub: "Sky sovereign" },
+          { icon: "🌧️", label: "Rain",       sub: "Fertility god" },
+          { icon: "👑", label: "Lord",       sub: "Master & King" },
+          { icon: "🔥", label: "Sacrifice",  sub: "Worshiped in fire" },
+        ].map((a) => (
+          <div key={a.label} className="baal-attr-item">
+            <div className="baal-attr-icon">{a.icon}</div>
+            <div className="baal-attr-label">{a.label}</div>
+            <div className="baal-attr-sub">{a.sub}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* ── LORE + IDOL SECTION ── */}
+      <section className="baal-lore">
+        <div className="baal-lore-inner">
+          <div className="baal-lore-text">
+            <div className="baal-section-eyebrow">Ancient Lore</div>
+            <h2 className="baal-section-title">The Definition of Baal</h2>
+            <div className="baal-lore-body">
+              <p>
+                <span className="baal-dropcap">B</span>aal was the supreme deity in the Canaanite pantheon —
+                the rider of clouds, hurler of lightning, master of storms. His name, meaning{" "}
+                <strong>"lord"</strong> or <strong>"master,"</strong> was not merely a title but a proclamation
+                of absolute dominion over sky, earth, and sea.
+              </p>
+              <p>
+                As god of fertility, storms, lightning, thunder, and rain, Baal was seen as the force
+                that brought life-giving rains to parched fields — and the terrifying power that could
+                destroy with a single bolt from the heavens. He was worshiped across ancient Canaan in ways
+                described as <em>horrible</em> by biblical accounts.
+              </p>
+              <p>
+                Israel itself was seduced into his worship — the tension between the monotheistic covenant
+                and the allure of Baal's storms forms one of the Bible's defining conflicts.
+              </p>
+            </div>
+            <div className="baal-tags">
+              {["Canaanite", "Storm God", "Fertility", "Ancient Near East", "Hebrew Mind", "Biblical History"].map(tag => (
+                <span key={tag} className="baal-tag">#{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="baal-idol-wrap">
+            <div className="baal-idol-glow" />
+            <Image
+              src="/baal_stone_idol.jpg"
+              alt="Ancient Baal stone idol"
+              width={380}
+              height={507}
+              className="baal-idol-img"
+            />
+            <div className="baal-idol-caption">
+              <span>Baal • c. 1400–1200 BCE</span>
+              <span>Storm & Fertility Deity · Canaan</span>
+            </div>
           </div>
         </div>
-        <ArrowRight className="w-5 h-5 text-fuchsia-400 shrink-0 group-hover:translate-x-1 transition-transform" />
-      </Link>
+      </section>
+
+      {/* ── COMMUNITIES ── */}
+      <section className="baal-communities" id="communities">
+        <div className="baal-communities-inner">
+          <div className="baal-section-eyebrow">Explore</div>
+          <h2 className="baal-section-title">Join a Community</h2>
+          <p className="baal-communities-lead">
+            Real, moderated spaces for those who think differently — security researchers, educators,
+            investors, traders, and builders.
+          </p>
+
+          {/* ── XENFORO CATEGORIES TABLE (Matching altenens.is) ── */}
+          <div className="mb-14 space-y-6">
+            {FORUM_CATEGORIES.map((category) => (
+              <XenCategoryTable key={category.slug} category={category} />
+            ))}
+          </div>
+
+          {communities.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-xl font-bold text-gray-300 mb-6">Additional Communities</h3>
+              <div className="baal-grid">
+                {communities.map((community) => (
+                  <CommunityCard key={community.slug} community={community} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Access tiers notice */}
+          <Link href="/access" className="baal-access-notice">
+            <div className="baal-access-notice-icon">🔑</div>
+            <div className="baal-access-notice-text">
+              <strong>Looking for Marketplace, Global Elite, or VIP access?</strong>
+              <p>Those are platform-wide tiers — unlock them on the Access page.</p>
+            </div>
+            <div className="baal-access-arrow">→</div>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── CINEMATIC DIVIDER ── */}
+      <div className="baal-cinematic-divider">
+        <div className="baal-cinematic-line" />
+        <span className="baal-cinematic-glyph">⚡ BAALVION ⚡</span>
+        <div className="baal-cinematic-line" />
+      </div>
+
     </div>
   );
 }

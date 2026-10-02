@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { name: 'My Cards', path: '/my-cards' },
   { name: 'Live Sessions', path: '/live-sessions' },
   { name: 'Forum', path: '/forum' },
+  { name: 'Locals', path: '/locals' },
   { name: 'Access', path: '/access' },
   { name: 'About', path: '/about' },
 ];

@@ -21,7 +21,7 @@ WORKDIR /app
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune canwemarry-web --docker
+RUN pnpm dlx turbo@2.9.14 prune canwemarry.baalvion.com --docker
 
 # 2) Install the pruned dependency set.
 #    --no-frozen-lockfile: turbo prune can drop catalog/override snapshots that a frozen

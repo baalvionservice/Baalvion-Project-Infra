@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title,
   description,
   keywords: ['legal guide search', 'find legal resources', 'legal article search', 'search legal topics'],
+  robots: { index: false, follow: true },
   alternates: { canonical: `${SITE}/search` },
   openGraph: { type: 'website', url: `${SITE}/search`, title, description },
   twitter: { card: 'summary_large_image', title, description },
