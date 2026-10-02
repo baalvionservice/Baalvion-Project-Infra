@@ -170,36 +170,53 @@ export default function MarketplacePage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredDigitalGoods.map(good => {
-                  const Icon = DIGITAL_ICONS[good.imageIcon] || ShieldCheck;
-                  const finalPrice = promoApplied ? (good.priceUsd * 0.85).toFixed(2) : good.priceUsd;
-                  return (
-                    <div key={good.id} className="group relative flex flex-col bg-white/[0.02] border border-white/10 hover:border-fuchsia-500/30 rounded-3xl p-6 transition-colors overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                        <Icon className="w-24 h-24" />
-                      </div>
-                      <div className="w-12 h-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center mb-6">
-                        <Icon className="w-6 h-6 text-fuchsia-400" />
-                      </div>
-                      <h3 className="font-bold text-lg mb-2 group-hover:text-fuchsia-400 transition-colors">{good.title}</h3>
-                      <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3">{good.description}</p>
-                      
-                      <div className="flex items-end justify-between mt-auto">
-                        <div>
-                          <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Price</div>
-                          <div className="flex items-center gap-2">
-                            <div className="font-black text-2xl">${finalPrice}</div>
-                            {promoApplied && <div className="text-sm text-gray-500 line-through">${good.priceUsd}</div>}
-                          </div>
+              <div className="space-y-16">
+                {["Methods", "Tutorials Keys", "Application Working Keys", "Personal Information Keys"]
+                  .filter(cat => indieCategory === "All" || indieCategory === cat)
+                  .map(categoryName => {
+                    const goodsInCategory = filteredDigitalGoods.filter(g => g.category === categoryName);
+                    if (goodsInCategory.length === 0) return null;
+
+                    return (
+                      <div key={categoryName} className="space-y-6">
+                        <div className="flex items-center gap-4">
+                          <h2 className="text-2xl font-black">{categoryName}</h2>
+                          <div className="h-[1px] flex-1 bg-white/10"></div>
                         </div>
-                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 flex items-center justify-center transition-colors group-hover:bg-fuchsia-500">
-                          <ShoppingCart className="w-4 h-4 text-white" />
-                        </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                          {goodsInCategory.map(good => {
+                            const Icon = DIGITAL_ICONS[good.imageIcon] || ShieldCheck;
+                            const finalPrice = promoApplied ? (good.priceUsd * 0.85).toFixed(2) : good.priceUsd;
+                            return (
+                              <div key={good.id} className="group relative flex flex-col bg-white/[0.02] border border-white/10 hover:border-fuchsia-500/30 rounded-3xl p-6 transition-colors overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                                  <Icon className="w-24 h-24" />
+                                </div>
+                                <div className="w-12 h-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center mb-6">
+                                  <Icon className="w-6 h-6 text-fuchsia-400" />
+                                </div>
+                                <h3 className="font-bold text-lg mb-2 group-hover:text-fuchsia-400 transition-colors">{good.title}</h3>
+                                <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3">{good.description}</p>
+                                
+                                <div className="flex items-end justify-between mt-auto">
+                                  <div>
+                                    <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Price</div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="font-black text-2xl">${finalPrice}</div>
+                                      {promoApplied && <div className="text-sm text-gray-500 line-through">${good.priceUsd}</div>}
+                                    </div>
+                                  </div>
+                                  <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 flex items-center justify-center transition-colors group-hover:bg-fuchsia-500">
+                                    <ShoppingCart className="w-4 h-4 text-white" />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    );
+                  })}
               </div>
             </motion.div>
           )}
