@@ -158,3 +158,32 @@ describe('the hierarchy itself', () => {
     ROLE_HIERARCHY.forEach((role, i) => expect(roleLevel(role)).toBe(i));
   });
 });
+
+describe('website-scoped writer (invited via CMS, no org role)', () => {
+  // A person who accepted a CMS invite holds cms_author on one site and no console org role.
+  const writer = P(['cms_author']);
+
+  it('can open only the CMS workspace, media, notifications and their own profile', () => {
+    for (const path of ['/dashboard', '/welcome', '/cms', '/cms/websites/law-elite-network', '/media', '/notifications', '/settings/profile']) {
+      expect(can(writer, path), path).toBe(true);
+    }
+  });
+
+  it('is locked out of every other section', () => {
+    for (const path of [
+      '/analytics', '/commerce', '/jobs', '/ctm', '/imperialpedia', '/news-intelligence', '/law', '/newsroom',
+      '/crm', '/ir', '/marketplace', '/users', '/staff', '/people', '/payments', '/billing', '/revenue',
+      '/security', '/audit-logs', '/settings', '/status', '/pending-features', '/infrastructure', '/rbac',
+    ]) {
+      expect(can(writer, path), path).toBe(false);
+    }
+  });
+
+  it('still lets higher roles into the sections that were opened up to everyone before', () => {
+    expect(can(PEOPLE.editor, '/law')).toBe(true);
+    expect(can(PEOPLE.manager, '/jobs')).toBe(true);
+    expect(can(PEOPLE.viewer, '/jobs')).toBe(false);
+    expect(can(PEOPLE.admin, '/status')).toBe(true);
+    expect(can(PEOPLE.superAdmin, '/commerce')).toBe(true);
+  });
+});

@@ -57,12 +57,48 @@ function useNavVisibility() {
   };
 }
 
+/** Who a locked section is limited to, for the tooltip ("Administrators", "Managers and above"). */
+function useLockedReason() {
+  const { checkRoute } = useAccess();
+  return (item: NavItem): string => {
+    const required = /^https?:\/\//.test(item.href) ? undefined : checkRoute(toPathname(item.href)).required;
+    return required ? `Locked — limited to ${required}` : 'Locked — you don’t have access to this section';
+  };
+}
+
+/** A section the signed-in user can see exists but not open: dimmed, padlocked, not a link. */
+function LockedItem({ item, collapsed, reason }: { item: NavItem; collapsed: boolean; reason: string }) {
+  const IconComp = Icons[item.iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }> | undefined;
+  return (
+    <div
+      role="link"
+      aria-disabled="true"
+      tabIndex={0}
+      title={reason}
+      className={cn(
+        'flex cursor-not-allowed select-none items-center gap-3 rounded-md px-3 py-2 text-sm font-medium',
+        'text-sidebar-foreground/35',
+        collapsed && 'justify-center px-2',
+      )}
+    >
+      {IconComp && <IconComp className="h-4 w-4 shrink-0" />}
+      {!collapsed && (
+        <>
+          <span className="flex-1">{item.title}</span>
+          <Icons.Lock className="h-3 w-3 shrink-0" aria-label="Locked" />
+        </>
+      )}
+    </div>
+  );
+}
+
 function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(() => item.children?.some((c) => pathname.startsWith(c.href)) ?? false);
   const isVisible = useNavVisibility();
+  const lockedReason = useLockedReason();
 
-  if (!isVisible(item)) return null;
+  if (!isVisible(item)) return <LockedItem item={item} collapsed={collapsed} reason={lockedReason(item)} />;
 
   const IconComp = Icons[item.iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }> | undefined;
   const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -150,8 +186,6 @@ function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
 
 export default function Sidebar() {
   const { sidebarCollapsed } = useUIStore();
-  const isVisible = useNavVisibility();
-
   return (
     <aside
       className={cn(
@@ -178,11 +212,6 @@ export default function Sidebar() {
       <ScrollArea className="flex-1 py-4">
         <nav className="px-2 space-y-6">
           {NAVIGATION.map((group) => {
-            // Skip a whole group when the current role can't access any of its items,
-            // so we never render a bare section header with no links beneath it.
-            const visibleItems = group.items.filter(isVisible);
-            if (visibleItems.length === 0) return null;
-
             return (
               <div key={group.label}>
                 {!sidebarCollapsed && (
@@ -191,7 +220,7 @@ export default function Sidebar() {
                   </p>
                 )}
                 <div className="space-y-0.5">
-                  {visibleItems.map((item) => (
+                  {group.items.map((item) => (
                     <SidebarLink key={item.href} item={item} collapsed={sidebarCollapsed} />
                   ))}
                 </div>
