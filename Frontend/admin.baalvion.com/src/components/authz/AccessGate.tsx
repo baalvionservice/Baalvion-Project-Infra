@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import AccessDenied from './AccessDenied';
 import { useAccess } from '@/lib/authz/useAccess';
 import { useAuthzVersion } from '@/lib/authz/version';
+import { useSiteAccess } from '@/lib/authz/useSiteAccess';
 import { policyFor } from '@/lib/authz/policy';
 import type { AccessRequirement } from '@/lib/authz/access';
 
@@ -40,6 +41,7 @@ export default function AccessGate({
   const pathname = usePathname() ?? '/';
   const { check, checkRoute, isReady } = useAccess();
   const authzVersion = useAuthzVersion();
+  const { canOpen } = useSiteAccess();
 
   // Legacy mode reproduces the original console: no route gating at all, exactly as it
   // behaved before the policy engine. Hooks stay above this branch so the order is stable.
@@ -57,6 +59,9 @@ export default function AccessGate({
     );
   }
 
+  if (decision.allowed && !requirement && !canOpen(pathname)) {
+    return <AccessDenied required="members of this website" section="This website" />;
+  }
   if (decision.allowed) return <>{children}</>;
   if (silent) return <>{fallback ?? null}</>;
 

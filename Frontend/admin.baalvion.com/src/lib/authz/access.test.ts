@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { evaluate, hasPermission, permissionMatches, type Principal } from './access';
 import { policyFor, ROUTE_POLICIES } from './policy';
+import { canOpenSitePath, siteKeyOf } from './siteScope';
 import { roleLevel, isRoleAtLeast, FUNCTIONAL_ROLE_TIER, ROLE_HIERARCHY } from './hierarchy';
 
 /**
@@ -185,5 +186,30 @@ describe('website-scoped writer (invited via CMS, no org role)', () => {
     expect(can(PEOPLE.viewer, '/jobs')).toBe(false);
     expect(can(PEOPLE.admin, '/status')).toBe(true);
     expect(can(PEOPLE.superAdmin, '/commerce')).toBe(true);
+  });
+});
+
+describe('website scoping', () => {
+  const mine = new Set(['law-elite-network', 'ec574a0b-519a-460d-b7cf-4ccd4fe0cf1e']);
+
+  it('reads the site out of /cms/websites/<site>/…', () => {
+    expect(siteKeyOf('/cms/websites/imperialpedia/analytics')).toBe('imperialpedia');
+    expect(siteKeyOf('/cms/websites/ir.baalvion.com/members')).toBe('ir.baalvion.com');
+    expect(siteKeyOf('/cms/websites')).toBeNull();
+    expect(siteKeyOf('/cms/posts')).toBeNull();
+  });
+
+  it('lets a member open their own site and locks every other one', () => {
+    const roles = ['cms_author'];
+    expect(canOpenSitePath('/cms/websites/law-elite-network/members', roles, mine)).toBe(true);
+    expect(canOpenSitePath('/cms/websites/imperialpedia', roles, mine)).toBe(false);
+    expect(canOpenSitePath('/cms/websites/ir.baalvion.com/seo', roles, mine)).toBe(false);
+    expect(canOpenSitePath('/cms/posts', roles, mine)).toBe(true);
+  });
+
+  it('does not lock while memberships are still loading, and never locks platform admins', () => {
+    expect(canOpenSitePath('/cms/websites/imperialpedia', ['cms_author'], null)).toBe(true);
+    expect(canOpenSitePath('/cms/websites/imperialpedia', ['admin'], mine)).toBe(true);
+    expect(canOpenSitePath('/cms/websites/imperialpedia', ['super_admin'], new Set())).toBe(true);
   });
 });

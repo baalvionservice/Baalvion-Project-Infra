@@ -13,6 +13,8 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { NAVIGATION, type NavItem } from '@/lib/constants/navigation';
 import { useAccess } from '@/lib/authz/useAccess';
 import { useAuthzVersion } from '@/lib/authz/version';
+import { useSiteAccess } from '@/lib/authz/useSiteAccess';
+import { siteKeyOf } from '@/lib/authz/siteScope';
 import type { UserRole } from '@/lib/types/auth.types';
 
 interface SidebarLinkProps {
@@ -44,6 +46,7 @@ const toPathname = (href: string): string => href.split(/[?#]/)[0];
  */
 function useNavVisibility() {
   const { checkRoute } = useAccess();
+  const { canOpen } = useSiteAccess();
   const user = useAuthStore((s) => s.user);
   const authzVersion = useAuthzVersion();
 
@@ -53,7 +56,8 @@ function useNavVisibility() {
 
     const isExternal = item.external || /^https?:\/\//.test(item.href);
     if (isExternal) return hasAccess(item, user?.role);
-    return checkRoute(toPathname(item.href)).allowed;
+    const pathname = toPathname(item.href);
+    return checkRoute(pathname).allowed && canOpen(pathname);
   };
 }
 
@@ -61,6 +65,9 @@ function useNavVisibility() {
 function useLockedReason() {
   const { checkRoute } = useAccess();
   return (item: NavItem): string => {
+    if (checkRoute(toPathname(item.href)).allowed && siteKeyOf(toPathname(item.href))) {
+      return 'Locked — you have not been given access to this website';
+    }
     const required = /^https?:\/\//.test(item.href) ? undefined : checkRoute(toPathname(item.href)).required;
     return required ? `Locked — limited to ${required}` : 'Locked — you don’t have access to this section';
   };
