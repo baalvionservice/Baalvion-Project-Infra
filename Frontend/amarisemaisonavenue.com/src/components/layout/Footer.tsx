@@ -242,6 +242,9 @@ export function Footer() {
                         <p className="text-[9px] text-black text-center md:text-right">
                             {config.copyrightText}
                         </p>
+                        <p className="text-[9px] text-gray-600 text-center md:text-right">
+                            Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com
+                        </p>
                     </div>
                     <div className="flex items-center text-[10px] underline justify-between gap-4">
                         {withComplianceLinks(config.legalLinks).map((link) => (

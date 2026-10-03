@@ -102,7 +102,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/7 pt-5 flex flex-col sm:flex-row justify-between items-center gap-2.5 flex-wrap text-xs">
           <span>
-            © 2026 ControlTheMarket —{" "}
+            © 2026 Baalvion Industries Private Limited. ControlTheMarket —{" "}
             <Link href="https://controlthemarket.com" className="text-white/35 hover:text-white transition-colors no-underline">
               controlthemarket.com
             </Link>
@@ -122,6 +122,7 @@ export default function Footer() {
             ))}
           </span>
         </div>
+        <p className="mt-4 text-xs text-white/35">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
       </div>
     </footer>
   );

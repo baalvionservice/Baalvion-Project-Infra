@@ -62,13 +62,15 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-10 border-t border-[#1F232B] flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="pt-10 border-t border-[#1F232B] flex flex-col md:flex-row md:flex-wrap items-center justify-between gap-6">
+          <p className="w-full text-[10px] leading-relaxed text-[#6B7280]">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
           <div className="text-[9px] font-bold text-[#3D4450] uppercase tracking-[0.3em] flex items-center gap-2">
             <Terminal className="w-3 h-3" />
             V2.4.0 OPERATIONAL • SECURE TUNNEL ACTIVE
           </div>
           <div className="flex gap-8">
             <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+              <Link href="/about" className="hover:text-white">About</Link>
               <Link href="/terms" className="hover:text-white">Terms</Link>
               <Link href="/privacy" className="hover:text-white">Privacy</Link>
               <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
