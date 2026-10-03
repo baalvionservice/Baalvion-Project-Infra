@@ -7,6 +7,7 @@
   ],
   "main": "vinext/server/fetch-handler",
   "routes": [
+    { "pattern": "newaiskillsteam.baalvion.com", "custom_domain": true },
     { "pattern": "testrank.baalvion.com", "custom_domain": true }
   ],
   "assets": {

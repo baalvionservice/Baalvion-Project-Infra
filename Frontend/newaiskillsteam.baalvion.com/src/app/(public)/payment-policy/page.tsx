@@ -194,7 +194,7 @@ export default function PaymentPolicyPage() {
               <ol className="mt-4 space-y-3">
                 <li className="flex gap-3">
                   <span className="text-primary">1.</span>
-                  <span className="text-foreground/80">Contact us at <a href="mailto:billing@controlthemarket.com" className="text-primary underline">billing@controlthemarket.com</a> within 30 days</span>
+                  <span className="text-foreground/80">Contact us at <a href="mailto:billing@baalvion.com" className="text-primary underline">billing@baalvion.com</a> within 30 days</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary">2.</span>
@@ -214,8 +214,8 @@ export default function PaymentPolicyPage() {
             <div className="mt-8 rounded-lg bg-primary/5 border border-primary/10 p-4">
               <p className="text-sm text-foreground/80">
                 <strong>Payment questions?</strong> Contact us at{' '}
-                <a href="mailto:support@controlthemarket.com" className="text-primary underline">
-                  support@controlthemarket.com
+                <a href="mailto:support@baalvion.com" className="text-primary underline">
+                  support@baalvion.com
                 </a>
               </p>
             </div>

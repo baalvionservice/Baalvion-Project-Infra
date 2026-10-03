@@ -61,7 +61,7 @@ export default function RefundPolicyPage() {
               <ol className="mt-4 space-y-3">
                 <li className="flex gap-3">
                   <span className="text-primary">1.</span>
-                  <span className="text-foreground/80">Contact our support team at <a href="mailto:support@controlthemarket.com" className="text-primary underline">support@controlthemarket.com</a></span>
+                  <span className="text-foreground/80">Contact our support team at <a href="mailto:support@baalvion.com" className="text-primary underline">support@baalvion.com</a></span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary">2.</span>
@@ -110,8 +110,8 @@ export default function RefundPolicyPage() {
             <div className="mt-8 rounded-lg bg-primary/5 border border-primary/10 p-4">
               <p className="text-sm text-foreground/80">
                 <strong>Questions about our refund policy?</strong> Contact us at{' '}
-                <a href="mailto:support@controlthemarket.com" className="text-primary underline">
-                  support@controlthemarket.com
+                <a href="mailto:support@baalvion.com" className="text-primary underline">
+                  support@baalvion.com
                 </a>
               </p>
             </div>

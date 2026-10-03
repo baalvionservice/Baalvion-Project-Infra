@@ -199,7 +199,7 @@ export default function DataDeletionPage() {
                 If you cannot access your account or prefer a manual process, you can submit a deletion request directly:
               </p>
               <div className="mt-4 rounded-lg bg-secondary/5 border border-secondary/20 p-4 space-y-2">
-                <p className="font-semibold text-foreground">Email: <a href="mailto:privacy@controlthemarket.com" className="text-primary underline">privacy@controlthemarket.com</a></p>
+                <p className="font-semibold text-foreground">Email: <a href="mailto:privacy@baalvion.com" className="text-primary underline">privacy@baalvion.com</a></p>
                 <p className="text-sm text-foreground/80">Subject: "Account Deletion Request"</p>
                 <p className="text-sm text-foreground/80">Include: Your email address, account username, and reason for deletion (optional)</p>
                 <p className="text-sm text-foreground/80">Response time: Within 48 hours</p>
@@ -233,8 +233,8 @@ export default function DataDeletionPage() {
             <div className="mt-8 rounded-lg bg-primary/5 border border-primary/10 p-4 space-y-3">
               <p className="text-sm text-foreground/80">
                 <strong>Questions about data deletion?</strong> Contact our Privacy Team at{' '}
-                <a href="mailto:privacy@controlthemarket.com" className="text-primary underline">
-                  privacy@controlthemarket.com
+                <a href="mailto:privacy@baalvion.com" className="text-primary underline">
+                  privacy@baalvion.com
                 </a>
               </p>
               <p className="text-sm text-foreground/80">
