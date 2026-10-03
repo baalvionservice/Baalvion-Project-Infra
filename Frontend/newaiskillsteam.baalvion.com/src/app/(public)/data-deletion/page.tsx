@@ -19,7 +19,7 @@ export default function DataDeletionPage() {
           <div className="mb-8">
             <h1 className="text-4xl font-bold tracking-tight text-foreground">Data Deletion & Account Removal</h1>
             <p className="mt-4 text-lg text-muted-foreground">How to Delete Your Account and Data</p>
-            <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-sm text-muted-foreground">Last updated: October 4, 2026</p>
           </div>
 
           <section className="space-y-6 py-8 border-t border-border">

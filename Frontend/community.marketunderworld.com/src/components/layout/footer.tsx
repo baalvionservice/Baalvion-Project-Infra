@@ -28,7 +28,7 @@ export const Footer = () => {
               <span className="text-white font-bold tracking-tight uppercase font-display italic">Market Underworld</span>
             </div>
             <p className="text-[#6B7280] max-w-sm text-sm leading-relaxed font-mono uppercase">
-              The world's premier distributed intelligence and commodity exchange network.
+              An online community and marketplace for members: forums, classes, and goods from independent sellers.
             </p>
           </div>
 
@@ -56,19 +56,30 @@ export const Footer = () => {
             <h4 className="text-[10px] font-bold text-semantic-warning uppercase tracking-[0.2em] mb-8">Access Control</h4>
             <ul className="space-y-4 text-xs font-bold text-[#6B7280] uppercase tracking-widest">
               <li><Link href="/access" className="hover:text-[#39FF14]">Get Access</Link></li>
-              <li><Link href="/auth/signin" className="hover:text-white">Operator Sign In</Link></li>
+              <li><Link href="/auth/signin" className="hover:text-white">Sign In</Link></li>
               <li><Link href="/seller/onboarding" className="hover:text-white">Become a Seller</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="pt-10 border-t border-[#1F232B] flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="pt-10 border-t border-[#1F232B] flex flex-col md:flex-row md:flex-wrap items-center justify-between gap-6">
+          <p className="w-full text-[10px] leading-relaxed text-[#6B7280]">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
           <div className="text-[9px] font-bold text-[#3D4450] uppercase tracking-[0.3em] flex items-center gap-2">
             <Terminal className="w-3 h-3" />
             V2.4.0 OPERATIONAL • SECURE TUNNEL ACTIVE
           </div>
           <div className="flex gap-8">
-            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 UNDERWORLD PROTOCOL</span>
+            <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+              <Link href="/about" className="hover:text-white">About</Link>
+              <Link href="/terms" className="hover:text-white">Terms</Link>
+              <Link href="/privacy" className="hover:text-white">Privacy</Link>
+              <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
+              <Link href="/shipping-policy" className="hover:text-white">Delivery</Link>
+              <Link href="/payments" className="hover:text-white">Payments</Link>
+              <Link href="/grievance" className="hover:text-white">Grievance</Link>
+              <Link href="/contact" className="hover:text-white">Contact</Link>
+            </nav>
+            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 Baalvion Industries Private Limited</span>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { BaalvionLogo } from '@/components/icons';
 import * as React from 'react';
 import { PATHS } from '@/lib/paths';
-import { copyrightLine } from '@baalvion/company';
+import { copyrightLine, formatAddress, OPERATING_ADDRESS, CIN } from '@baalvion/company';
 
 /**
  * @file institutional-footer.tsx
@@ -77,10 +77,17 @@ export function InstitutionalFooter() {
                     </div>
                 </div>
                 <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between text-sm">
-                    <p className='mb-4 sm:mb-0'>{year ? copyrightLine(year) : ''}</p>
+                    <div className='mb-4 sm:mb-0'>
+                        <p>{year ? copyrightLine(year) : ''}</p>
+                        <p className='mt-1 text-xs'>{formatAddress(OPERATING_ADDRESS)} · +91 89512 84770 · support@baalvion.com · CIN {CIN}</p>
+                    </div>
                     <div className="flex items-center gap-4">
                         <Link href={PATHS.PRIVACY_POLICY} className="hover:text-foreground">Privacy Policy</Link>
                         <Link href={PATHS.TERMS_OF_USE} className="hover:text-foreground">Terms of Use</Link>
+                        <Link href={PATHS.REFUND_POLICY} className="hover:text-foreground">Refunds</Link>
+                        <Link href={PATHS.SHIPPING_POLICY} className="hover:text-foreground">Delivery</Link>
+                        <Link href={PATHS.PAYMENT_TERMS} className="hover:text-foreground">Payment terms</Link>
+                        <Link href={PATHS.GRIEVANCE} className="hover:text-foreground">Grievance</Link>
                         <Link href={PATHS.CONTACT} className="hover:text-foreground">Contact</Link>
                     </div>
                 </div>

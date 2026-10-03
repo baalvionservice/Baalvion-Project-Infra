@@ -34,6 +34,9 @@ const footerLinks = {
     { label: "Privacy Policy", path: "/privacy" },
     { label: "Acceptable Use", path: "/aup" },
     { label: "Refund Policy", path: "/refund" },
+    { label: "Shipping & Delivery", path: "/shipping-policy" },
+    { label: "Payments", path: "/payments" },
+    { label: "Grievance Redressal", path: "/grievance" },
     { label: "Cookie Policy", path: "/cookies" },
     { label: "Compliance", path: "/compliance-info" },
     { label: "Transparency", path: "/transparency" },
@@ -85,9 +88,10 @@ export function PublicFooter() {
           ))}
         </div>
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Baalvion NetStack. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Baalvion Industries Private Limited. All rights reserved.</p>
           <p className="text-xs text-muted-foreground">Baalvion NetStack is a product of Baalvion Industries Private Limited.</p>
         </div>
+        <p className="mt-4 text-xs text-muted-foreground">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
       </div>
     </footer>
   );

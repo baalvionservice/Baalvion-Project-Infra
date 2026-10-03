@@ -19,6 +19,8 @@ const routes: Array<{ path: string; priority: number; changeFrequency: MetadataR
   { path: "/legal/terms", priority: 0.2, changeFrequency: "yearly" },
   { path: "/legal/refund-policy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/legal/shipping-policy", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/legal/payments", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/legal/grievance", priority: 0.2, changeFrequency: "yearly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

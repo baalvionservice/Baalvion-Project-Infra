@@ -34,6 +34,9 @@ import AboutPage from "@/pages/public/AboutPage";
 import PrivacyPolicyPage from "@/pages/public/PrivacyPolicyPage";
 import AcceptableUsePolicyPage from "@/pages/public/AcceptableUsePolicyPage";
 import RefundPolicyPage from "@/pages/public/RefundPolicyPage";
+import ShippingPolicyPage from "@/pages/public/ShippingPolicyPage";
+import GrievancePage from "@/pages/public/GrievancePage";
+import PaymentsPage from "@/pages/public/PaymentsPage";
 import TermsOfServicePage from "@/pages/public/TermsOfServicePage";
 import ContactPage from "@/pages/public/ContactPage";
 import SecurityPage from "@/pages/public/SecurityPage";
@@ -160,6 +163,10 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />
                   <Route path="/aup" element={<AcceptableUsePolicyPage />} />
                   <Route path="/refund" element={<RefundPolicyPage />} />
+                  <Route path="/refund-policy" element={<RefundPolicyPage />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                  <Route path="/grievance" element={<GrievancePage />} />
+                  <Route path="/payments" element={<PaymentsPage />} />
                   <Route path="/terms" element={<TermsOfServicePage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/security" element={<SecurityPage />} />

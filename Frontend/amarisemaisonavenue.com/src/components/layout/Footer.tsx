@@ -19,6 +19,23 @@ import { useParams } from "next/navigation";
 import { getFooterConfig, type FooterConfig, type FooterSocialIcon } from "@/lib/cms";
 import { FOOTER_FALLBACK } from "@/lib/mock-data";
 
+// Payment-gateway reviewers look for these in the footer. The CMS owns the list, so any that it
+// does not already carry are appended rather than hoping the CMS entry gets edited.
+const REQUIRED_LEGAL_LINKS = [
+    { label: "Our Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms-of-service" },
+    { label: "Refund & Cancellation", href: "/refund-policy" },
+    { label: "Shipping & Delivery", href: "/shipping-policy" },
+    { label: "Payments", href: "/payments" },
+    { label: "Grievance Redressal", href: "/grievance" },
+    { label: "Contact", href: "/contact" },
+];
+
+function withComplianceLinks(links: { label: string; href: string }[]) {
+    const have = new Set(links.map((l) => l.href));
+    return [...links, ...REQUIRED_LEGAL_LINKS.filter((l) => !have.has(l.href))];
+}
+
 const SOCIAL_ICON_MAP: Record<FooterSocialIcon, LucideIcon> = {
     phone: Phone,
     email: Mail,
@@ -225,9 +242,12 @@ export function Footer() {
                         <p className="text-[9px] text-black text-center md:text-right">
                             {config.copyrightText}
                         </p>
+                        <p className="text-[9px] text-gray-600 text-center md:text-right">
+                            Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com
+                        </p>
                     </div>
                     <div className="flex items-center text-[10px] underline justify-between gap-4">
-                        {config.legalLinks.map((link) => (
+                        {withComplianceLinks(config.legalLinks).map((link) => (
                             <Link key={link.label} href={`/${countryCode}${link.href}`}>
                                 {link.label}
                             </Link>

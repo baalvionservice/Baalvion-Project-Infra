@@ -57,6 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/live-sessions`, priority: 0.5, changeFrequency: 'weekly' },
     { url: `${SITE_URL}/match`, priority: 0.4, changeFrequency: 'monthly' },
     { url: `${SITE_URL}/premium`, priority: 0.4, changeFrequency: 'monthly' },
+    ...['about', 'terms', 'privacy', 'contact', 'refund-policy', 'shipping-policy', 'payments', 'grievance'].map(
+      (slug) => ({ url: `${SITE_URL}/${slug}`, priority: 0.2, changeFrequency: 'yearly' as const }),
+    ),
   ];
 
   const forumRoutes: MetadataRoute.Sitemap = forumSlugs.map((slug) => ({
