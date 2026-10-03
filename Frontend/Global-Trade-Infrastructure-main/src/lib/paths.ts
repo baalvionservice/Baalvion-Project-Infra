@@ -39,7 +39,7 @@ export const PATHS = {
   REFUND_POLICY: '/refund-policy',
   SHIPPING_POLICY: '/shipping-policy',
   GRIEVANCE: '/grievance',
-  PAYMENTS: '/payments',
+  PAYMENT_TERMS: '/payment-terms',
 
   // --- CORE OPERATIONAL COMMAND ---
   DASHBOARD: '/dashboard',

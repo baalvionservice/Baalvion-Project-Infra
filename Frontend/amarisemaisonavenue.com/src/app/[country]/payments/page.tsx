@@ -39,7 +39,7 @@ export default async function PaymentsPage({ params }: PageProps) {
           </section>
           <section className="space-y-4">
             <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">2. How payments are processed</h2>
-            <p className="text-md text-gray-600 font-light leading-relaxed">Payments are taken through RBI-authorised payment aggregators and gateways. Card, UPI and net-banking details are entered on the gateway&apos;s hosted payment page or secure fields and are handled under PCI DSS by the gateway. We never see or store your full card number, CVV or banking password.</p>
+            <p className="text-md text-gray-600 font-light leading-relaxed">Payments are taken through third-party payment gateways: PayU, Razorpay and Cashfree for card, UPI and net-banking payments, and Skydo for receiving international payments by bank transfer. The gateway used for your payment is shown at checkout. Card, UPI and net-banking details are entered on the gateway&apos;s hosted payment page or secure fields and are handled under PCI DSS by the gateway. We never see or store your full card number, CVV or banking password.</p>
           </section>
           <section className="space-y-4">
             <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">3. Payment methods</h2>
@@ -53,7 +53,7 @@ export default async function PaymentsPage({ params }: PageProps) {
             <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">4. Currencies and international payments</h2>
             <p className="text-md text-gray-600 font-light leading-relaxed">Prices are shown in the currency of the country storefront you are browsing. Your order is charged in that currency at the rate displayed at checkout.</p>
             <p className="text-md text-gray-600 font-light leading-relaxed">If you pay with a card issued outside India, or in a currency other than the one shown, your card network and issuing bank set the conversion rate and may add a foreign-exchange or cross-border fee. These fees are charged by them, not by us, and are not refundable by us.</p>
-            <p className="text-md text-gray-600 font-light leading-relaxed">Funds from international customers are received into our Indian bank account through authorised payment channels. Where a gateway or bank requires purpose-of-payment information, we supply it truthfully from the invoice.</p>
+            <p className="text-md text-gray-600 font-light leading-relaxed">International customers can pay by card through the gateways above, or by international bank transfer collected through Skydo. Funds are received into our Indian bank account through authorised payment channels. Where a gateway or bank requires purpose-of-payment information, we supply it truthfully from the invoice.</p>
           </section>
           <section className="space-y-4">
             <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">4A. Taxes</h2>

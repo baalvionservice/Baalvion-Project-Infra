@@ -83,7 +83,7 @@ export function InstitutionalFooter() {
                         <Link href={PATHS.TERMS_OF_USE} className="hover:text-foreground">Terms of Use</Link>
                         <Link href={PATHS.REFUND_POLICY} className="hover:text-foreground">Refunds</Link>
                         <Link href={PATHS.SHIPPING_POLICY} className="hover:text-foreground">Delivery</Link>
-                        <Link href={PATHS.PAYMENTS} className="hover:text-foreground">Payments</Link>
+                        <Link href={PATHS.PAYMENT_TERMS} className="hover:text-foreground">Payment terms</Link>
                         <Link href={PATHS.GRIEVANCE} className="hover:text-foreground">Grievance</Link>
                         <Link href={PATHS.CONTACT} className="hover:text-foreground">Contact</Link>
                     </div>

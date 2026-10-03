@@ -24,7 +24,7 @@ export default function PaymentsPage() {
               </section>
               <section className="mb-8">
                 <h2 className="text-2xl font-bold mb-4">2. How payments are processed</h2>
-                <p className="text-muted-foreground mb-4">Payments are taken through RBI-authorised payment aggregators and gateways. Card, UPI and net-banking details are entered on the gateway&apos;s hosted payment page or secure fields and are handled under PCI DSS by the gateway. We never see or store your full card number, CVV or banking password.</p>
+                <p className="text-muted-foreground mb-4">Payments are taken through third-party payment gateways: PayU, Razorpay and Cashfree for card, UPI and net-banking payments, and Skydo for receiving international payments by bank transfer. The gateway used for your payment is shown at checkout. Card, UPI and net-banking details are entered on the gateway&apos;s hosted payment page or secure fields and are handled under PCI DSS by the gateway. We never see or store your full card number, CVV or banking password.</p>
               </section>
               <section className="mb-8">
                 <h2 className="text-2xl font-bold mb-4">3. Payment methods</h2>
@@ -38,7 +38,7 @@ export default function PaymentsPage() {
                 <h2 className="text-2xl font-bold mb-4">4. Currencies and international payments</h2>
                 <p className="text-muted-foreground mb-4">Plans are priced in US dollars as shown on the pricing page. Customers in India may be charged in Indian rupees at the rate shown at checkout.</p>
                 <p className="text-muted-foreground mb-4">If you pay with a card issued outside India, or in a currency other than the one shown, your card network and issuing bank set the conversion rate and may add a foreign-exchange or cross-border fee. These fees are charged by them, not by us, and are not refundable by us.</p>
-                <p className="text-muted-foreground mb-4">Funds from international customers are received into our Indian bank account through authorised payment channels. Where a gateway or bank requires purpose-of-payment information, we supply it truthfully from the invoice.</p>
+                <p className="text-muted-foreground mb-4">International customers can pay by card through the gateways above, or by international bank transfer collected through Skydo. Funds are received into our Indian bank account through authorised payment channels. Where a gateway or bank requires purpose-of-payment information, we supply it truthfully from the invoice.</p>
               </section>
               <section className="mb-8">
                 <h2 className="text-2xl font-bold mb-4">4A. Taxes</h2>

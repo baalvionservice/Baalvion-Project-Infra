@@ -88,7 +88,7 @@ export const PUBLIC_EXACT: ReadonlySet<string> = new Set([
   '/refund-policy',
   '/shipping-policy',
   '/grievance',
-  '/payments',
+  '/payment-terms',
   '/platform',
   '/platform/map',
   '/trust',

@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/refund-policy', changeFrequency: 'yearly', priority: 0.2 },
     { path: '/shipping-policy', changeFrequency: 'yearly', priority: 0.2 },
     { path: '/grievance', changeFrequency: 'yearly', priority: 0.2 },
-    { path: '/payments', changeFrequency: 'yearly', priority: 0.2 },
+    { path: '/payment-terms', changeFrequency: 'yearly', priority: 0.2 },
   ];
 
   const staticEntries: MetadataRoute.Sitemap = routes.map((r) => ({

@@ -28,7 +28,7 @@ export default function robots(): MetadataRoute.Robots {
           '/refund-policy',
           '/shipping-policy',
           '/grievance',
-          '/payments',
+          '/payment-terms',
           '/countries',
           '/ports',
           '/tariffs',
