@@ -20,6 +20,7 @@ const PUBLIC_PREFIXES = [
   '/auth',
   '/demos', '/blog', '/badges', '/companies', '/contact',
   '/leaderboard', '/pricing', '/privacy', '/terms', '/about',
+  '/refund-policy', '/payment-policy', '/shipping-policy', '/grievance', '/data-deletion',
 ];
 
 // `(public)/candidate/[id]` and `(public)/company/[id]` are PUBLIC, crawlable profile

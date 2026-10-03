@@ -727,7 +727,7 @@ export const FOOTER_FALLBACK: FooterConfig = {
   brandName: "AMARISÉ",
   brandSuffix: "MAISON AVENUE",
   copyrightText:
-    "© 2026 Amarisé Maison Avenue. All Rights Reserved. Amarisé Maison Avenue is a registered Trademark of Amarisé Maison Avenue Inc.",
+    "© 2026 Baalvion Industries Private Limited (CIN U43121OD2025PTC048479). All rights reserved. Amarisé Maison Avenue is operated by Baalvion Industries Private Limited.",
   legalLinks: [
     { label: "Our Privacy Policy", href: "/privacy-policy" },
     { label: "Terms of Service", href: "/terms-of-service" },

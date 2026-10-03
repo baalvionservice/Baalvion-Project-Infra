@@ -38,6 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/collections",
     "/journal",
     "/contact",
+    "/refund-policy",
+    "/shipping-policy",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/grievance",
+    "/payments",
   ];
 
   // 1. Core Platform Pages

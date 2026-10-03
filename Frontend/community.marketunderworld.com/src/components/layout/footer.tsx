@@ -68,7 +68,16 @@ export const Footer = () => {
             V2.4.0 OPERATIONAL • SECURE TUNNEL ACTIVE
           </div>
           <div className="flex gap-8">
-            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 UNDERWORLD PROTOCOL</span>
+            <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+              <Link href="/terms" className="hover:text-white">Terms</Link>
+              <Link href="/privacy" className="hover:text-white">Privacy</Link>
+              <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
+              <Link href="/shipping-policy" className="hover:text-white">Delivery</Link>
+              <Link href="/payments" className="hover:text-white">Payments</Link>
+              <Link href="/grievance" className="hover:text-white">Grievance</Link>
+              <Link href="/contact" className="hover:text-white">Contact</Link>
+            </nav>
+            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 Baalvion Industries Private Limited</span>
           </div>
         </div>
       </div>

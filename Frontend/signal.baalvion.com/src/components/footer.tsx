@@ -37,6 +37,8 @@ const columns = [
       { href: "/legal/terms", label: "Terms" },
       { href: "/legal/refund-policy", label: "Refund & Cancellation" },
       { href: "/legal/shipping-policy", label: "Shipping & Delivery" },
+      { href: "/legal/payments", label: "Payments" },
+      { href: "/legal/grievance", label: "Grievance Redressal" },
     ],
   },
 ];

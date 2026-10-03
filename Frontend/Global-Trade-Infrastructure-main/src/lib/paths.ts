@@ -36,6 +36,10 @@ export const PATHS = {
   LOGIN: '/login',
   PRIVACY_POLICY: '/privacy',
   TERMS_OF_USE: '/terms',
+  REFUND_POLICY: '/refund-policy',
+  SHIPPING_POLICY: '/shipping-policy',
+  GRIEVANCE: '/grievance',
+  PAYMENTS: '/payments',
 
   // --- CORE OPERATIONAL COMMAND ---
   DASHBOARD: '/dashboard',
