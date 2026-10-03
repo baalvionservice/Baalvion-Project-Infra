@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 
 export default function TermsOfUsePage() {
-  const lastUpdated = "October 26, 2023";
+  const lastUpdated = "October 4, 2026";
 
   return (
     <div className="bg-background text-foreground">
@@ -63,7 +63,7 @@ export default function TermsOfUsePage() {
             
             <h2 className="text-2xl font-medium text-foreground tracking-tight border-b pb-2 pt-4">6. Governing Law and Dispute Resolution</h2>
             <p className="text-muted-foreground leading-relaxed">
-              These Terms shall be governed by and construed in accordance with the laws of the Republic of India, without regard to its conflict of law principles. Any dispute arising from these Terms shall be subject to the exclusive jurisdiction of the courts in New Delhi, India.
+              These Terms shall be governed by and construed in accordance with the laws of the Republic of India, without regard to its conflict of law principles. Any dispute arising from these Terms shall be subject to the exclusive jurisdiction of the courts at Virar, Maharashtra, India, where Baalvion has its operating office.
             </p>
 
             <h2 className="text-2xl font-medium text-foreground tracking-tight border-b pb-2 pt-4">7. Modifications to Terms</h2>

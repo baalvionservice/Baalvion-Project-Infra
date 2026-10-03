@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 
 export default function PrivacyPolicyPage() {
-  const lastUpdated = "October 26, 2023";
+  const lastUpdated = "October 4, 2026";
 
   return (
     <div className="bg-background text-foreground">

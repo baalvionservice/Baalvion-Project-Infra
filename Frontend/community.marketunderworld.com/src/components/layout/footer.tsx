@@ -28,7 +28,7 @@ export const Footer = () => {
               <span className="text-white font-bold tracking-tight uppercase font-display italic">Market Underworld</span>
             </div>
             <p className="text-[#6B7280] max-w-sm text-sm leading-relaxed font-mono uppercase">
-              The world's premier distributed intelligence and commodity exchange network.
+              An online community and marketplace for members: forums, classes, and goods from independent sellers.
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export const Footer = () => {
             <h4 className="text-[10px] font-bold text-semantic-warning uppercase tracking-[0.2em] mb-8">Access Control</h4>
             <ul className="space-y-4 text-xs font-bold text-[#6B7280] uppercase tracking-widest">
               <li><Link href="/access" className="hover:text-[#39FF14]">Get Access</Link></li>
-              <li><Link href="/auth/signin" className="hover:text-white">Operator Sign In</Link></li>
+              <li><Link href="/auth/signin" className="hover:text-white">Sign In</Link></li>
               <li><Link href="/seller/onboarding" className="hover:text-white">Become a Seller</Link></li>
             </ul>
           </div>
