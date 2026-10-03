@@ -103,8 +103,8 @@ export default function Footer() {
         <div className="border-t border-white/7 pt-5 flex flex-col sm:flex-row justify-between items-center gap-2.5 flex-wrap text-xs">
           <span>
             © 2026 Baalvion Industries Private Limited. ControlTheMarket —{" "}
-            <Link href="https://controlthemarket.com" className="text-white/35 hover:text-white transition-colors no-underline">
-              controlthemarket.com
+            <Link href="https://newaiskillsteam.baalvion.com" className="text-white/35 hover:text-white transition-colors no-underline">
+              newaiskillsteam.baalvion.com
             </Link>
           </span>
           <span className="flex gap-2 items-center">

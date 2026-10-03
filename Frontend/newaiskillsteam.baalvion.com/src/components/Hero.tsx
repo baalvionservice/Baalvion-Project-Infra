@@ -137,7 +137,7 @@ export default function Hero() {
             <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
             <div className="flex-1 bg-white rounded-[5px] h-[22px] mx-2 sm:mx-3 flex items-center px-2 sm:px-2.5 text-[10px] sm:text-[11px] text-gray-400 font-mono overflow-hidden">
-              <span className="truncate">controlthemarket.com/dashboard</span>
+              <span className="truncate">newaiskillsteam.baalvion.com/dashboard</span>
             </div>
           </div>
 

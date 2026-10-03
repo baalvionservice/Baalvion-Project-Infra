@@ -29,7 +29,7 @@ export default function CTASection() {
           Ready to <em className="text-green-500 not-italic">control the market</em>?
         </h2>
         <p className="text-base text-white/55 mb-9 leading-[1.65]">
-          Whether you're looking for the best talent or want to prove you are the best — your journey starts at controlthemarket.com
+          Whether you're looking for the best talent or want to prove you are the best — your journey starts at newaiskillsteam.baalvion.com
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link
