@@ -1,164 +1,86 @@
 "use client";
 
-import React, { useState } from 'react';
-import { LifeBuoy, Search, MessageSquare, Clock, CheckCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from "react";
+import { TicketThread } from "@/components/support/ticket-thread";
+import { supportAdmin, type Ticket, type TicketDetail, type TicketStatus } from "@/lib/api/staff";
 
-const MOCK_TICKETS = [
-  { id: "TKT-3301", user: "angry_buyer99", subject: "I paid but never received my files", category: "Purchase Issue", priority: "High", status: "Open", date: "2026-10-02", messages: 2 },
-  { id: "TKT-3302", user: "new_user_84", subject: "Cannot access premium area after upgrade", category: "Access Problem", priority: "Medium", status: "In Progress", date: "2026-10-02", messages: 5 },
-  { id: "TKT-3303", user: "seller_dispute", subject: "Buyer is threatening chargeback without reason", category: "Dispute", priority: "High", status: "Open", date: "2026-10-01", messages: 1 },
-  { id: "TKT-3304", user: "crypto_sender", subject: "Sent wrong USDT network — TRC20 vs ERC20", category: "Payment Issue", priority: "Low", status: "Resolved", date: "2026-09-30", messages: 8 },
-];
+const box = "bg-white rounded-xl shadow-sm border border-gray-100";
+const STATUS_STYLE: Record<TicketStatus, string> = { open: "bg-amber-100 text-amber-800", pending: "bg-blue-100 text-blue-800", resolved: "bg-green-100 text-green-800", closed: "bg-gray-200 text-gray-700" };
+const msg = (e: unknown, f: string) => (e instanceof Error ? e.message : f);
 
-function priorityClass(priority: string) {
-  if (priority === 'High') return 'bg-red-500/10 text-red-400 border border-red-500/20';
-  if (priority === 'Medium') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-  return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-}
+export default function SupportTicketsPage() {
+  const [status, setStatus] = useState<TicketStatus | "all">("open");
+  const [mine, setMine] = useState(false);
+  const [q, setQ] = useState("");
+  const [items, setItems] = useState<Ticket[]>([]);
+  const [counts, setCounts] = useState<Partial<Record<TicketStatus, number>>>({});
+  const [open, setOpen] = useState<TicketDetail | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-function statusClass(status: string) {
-  if (status === 'Open') return 'bg-red-500/10 text-red-400 border border-red-500/20';
-  if (status === 'In Progress') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-  if (status === 'Resolved') return 'bg-green-500/10 text-green-400 border border-green-500/20';
-  return 'bg-white/10 text-gray-400';
-}
+  const load = useCallback(async () => {
+    try {
+      setError("");
+      const res = await supportAdmin.list({ status: status === "all" ? undefined : status, assigned: mine ? "me" : undefined, q: q.trim() || undefined });
+      setItems(res.items);
+      setCounts(res.counts);
+    } catch (e) { setError(msg(e, "Could not load tickets")); } finally { setLoading(false); }
+  }, [status, mine, q]);
 
-type Ticket = typeof MOCK_TICKETS[0];
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(load, 250);
+    return () => clearTimeout(t);
+  }, [load]);
 
-export default function SupportTickets() {
-  const [tickets, setTickets] = useState(MOCK_TICKETS);
-  const [selected, setSelected] = useState<Ticket | null>(null);
-  const [reply, setReply] = useState("");
-
-  const resolveTicket = (id: string) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: "Resolved" } : t));
-    setSelected(prev => prev?.id === id ? { ...prev, status: "Resolved" } : prev);
-  };
-
-  const sendReply = () => {
-    if (!reply.trim() || !selected) return;
-    setReply("");
-    alert("Reply sent to user.");
+  const show = async (id: string) => { try { setOpen(await supportAdmin.get(id)); } catch (e) { setError(msg(e, "Could not open the ticket")); } };
+  const update = async (d: Parameters<typeof supportAdmin.update>[1]) => {
+    if (!open) return;
+    try { await supportAdmin.update(open.id, d); setOpen(await supportAdmin.get(open.id)); await load(); } catch (e) { setError(msg(e, "Could not update the ticket")); }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <LifeBuoy className="w-6 h-6 text-blue-400" />
-          Support Tickets
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">Reply to and resolve user support requests.</p>
+        <h1 className="text-3xl font-bold">Support tickets</h1>
+        <p className="text-gray-500 mt-2">A reply moves the ticket to &ldquo;pending&rdquo; and emails the member. When the member writes back it returns to &ldquo;open&rdquo;.</p>
       </div>
+      <div className="flex flex-wrap gap-2 items-center">
+        {(["open", "pending", "resolved", "closed", "all"] as const).map((s) => (
+          <button key={s} onClick={() => setStatus(s)} className={`px-4 py-2 rounded-lg text-sm capitalize border ${status === s ? "bg-fuchsia-600 text-white border-fuchsia-600" : "bg-white border-gray-200 text-gray-600"}`}>
+            {s}{s !== "all" && counts[s] ? ` (${counts[s]})` : ""}
+          </button>
+        ))}
+        <label className="flex items-center gap-2 text-sm ml-2"><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> Assigned to me</label>
+        <input className="border p-2 rounded-lg text-sm ml-auto outline-none focus:border-fuchsia-500" placeholder="Search subject" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Left: Ticket List */}
-        <div className="lg:col-span-2 bg-[#121217] border border-white/5 rounded-xl overflow-hidden flex flex-col" style={{ height: '700px' }}>
-          <div className="p-4 border-b border-white/5 shrink-0">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search tickets..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto divide-y divide-white/5">
-            {tickets.map(ticket => (
-              <button
-                key={ticket.id}
-                onClick={() => setSelected(ticket)}
-                className={`w-full text-left p-4 hover:bg-white/5 transition-colors ${selected?.id === ticket.id ? 'bg-white/10' : ''}`}
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="font-bold text-white text-sm truncate">{ticket.subject}</span>
-                  <ChevronRight className="w-4 h-4 text-gray-500 shrink-0" />
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${priorityClass(ticket.priority)}`}>{ticket.priority}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${statusClass(ticket.status)}`}>{ticket.status}</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                  <span>{ticket.user}</span>
-                  <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{ticket.messages}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{ticket.date}</span>
-                </div>
-              </button>
-            ))}
-          </div>
+      <div className="grid lg:grid-cols-5 gap-6">
+        <div className={`${box} lg:col-span-2 divide-y divide-gray-50 max-h-[640px] overflow-y-auto`}>
+          {loading && <p className="p-8 text-center text-gray-400 text-sm">Loading…</p>}
+          {!loading && items.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">No tickets here.</p>}
+          {items.map((t) => (
+            <button key={t.id} onClick={() => show(t.id)} className={`w-full text-left p-4 hover:bg-gray-50 ${open?.id === t.id ? "bg-fuchsia-50" : ""}`}>
+              <div className="flex justify-between gap-2"><span className="font-medium line-clamp-1">{t.subject}</span>{t.priority === "high" && <span className="text-xs font-semibold text-red-600">HIGH</span>}</div>
+              <div className="text-xs text-gray-500 mt-0.5">{t.user ?? "Member"} · {t.category} · {new Date(t.lastMessageAt).toLocaleString("en-IN")}</div>
+              <div className="flex items-center gap-2 mt-1"><span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${STATUS_STYLE[t.status]}`}>{t.status}</span>{t.assignedLabel && <span className="text-xs text-gray-400">→ {t.assignedLabel}</span>}</div>
+            </button>
+          ))}
         </div>
 
-        {/* Right: Ticket Detail */}
-        <div className="lg:col-span-3 bg-[#121217] border border-white/5 rounded-xl flex flex-col" style={{ height: '700px' }}>
-          {selected ? (
-            <>
-              <div className="p-5 border-b border-white/5 shrink-0">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="font-mono text-xs text-gray-500 mb-1">{selected.id}</div>
-                    <h2 className="text-lg font-bold text-white">{selected.subject}</h2>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-sm text-fuchsia-400 font-bold">{selected.user}</span>
-                      <span className="text-xs text-gray-500">· {selected.category}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${priorityClass(selected.priority)}`}>{selected.priority}</span>
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${statusClass(selected.status)}`}>{selected.status}</span>
-                  </div>
+        <div className={`${box} lg:col-span-3 p-5`}>
+          {!open ? <p className="text-sm text-gray-400 text-center py-16">Select a ticket.</p> : (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div><h2 className="text-lg font-semibold">{open.subject}</h2><div className="text-xs text-gray-500">{open.user} · {open.category} · opened {new Date(open.createdAt).toLocaleDateString("en-IN")}</div></div>
+                <div className="flex flex-wrap gap-2">
+                  <select value={open.priority} onChange={(e) => update({ priority: e.target.value as "low" | "normal" | "high" })} className="border rounded-lg px-2 py-1.5 text-sm"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option></select>
+                  <select value={open.status} onChange={(e) => update({ status: e.target.value as TicketStatus })} className="border rounded-lg px-2 py-1.5 text-sm"><option value="open">Open</option><option value="pending">Pending</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select>
+                  {open.assignedTo ? <button onClick={() => update({ assignedTo: null })} className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm">Unassign ({open.assignedLabel})</button> : <button onClick={() => update({ assignedTo: "me" })} className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm">Assign to me</button>}
                 </div>
               </div>
-
-              <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-xs font-bold text-fuchsia-400 mb-2">{selected.user} (User)</div>
-                  <p className="text-sm text-gray-300">
-                    Hello, I have a problem: {selected.subject.toLowerCase()}. This is urgent and I need help as soon as possible. I have attached all relevant information.
-                  </p>
-                  <div className="text-xs text-gray-600 mt-3">{selected.date} · 09:42 AM</div>
-                </div>
-
-                {selected.messages > 1 && (
-                  <div className="bg-blue-500/5 rounded-xl p-4 border border-blue-500/20">
-                    <div className="text-xs font-bold text-blue-400 mb-2">Support Team (Admin)</div>
-                    <p className="text-sm text-gray-300">
-                      Thank you for reaching out. We are currently investigating your issue and will get back to you shortly. Can you please provide your order ID?
-                    </p>
-                    <div className="text-xs text-gray-600 mt-3">{selected.date} · 10:15 AM</div>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-5 border-t border-white/5 shrink-0 space-y-3">
-                <textarea
-                  value={reply}
-                  onChange={e => setReply(e.target.value)}
-                  placeholder="Type your reply to the user..."
-                  className="w-full h-24 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 resize-none"
-                />
-                <div className="flex gap-3">
-                  <button
-                    onClick={sendReply}
-                    className="flex-1 flex items-center justify-center gap-2 h-10 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition-colors"
-                  >
-                    <MessageSquare className="w-4 h-4" /> Send Reply
-                  </button>
-                  <button
-                    onClick={() => resolveTicket(selected.id)}
-                    disabled={selected.status === 'Resolved'}
-                    className="flex items-center gap-2 px-4 h-10 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 font-bold rounded-xl text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    <CheckCircle className="w-4 h-4" /> Resolve
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500">
-              <AlertCircle className="w-16 h-16 mb-4 opacity-30" />
-              <p>Select a ticket from the list to view the conversation and reply.</p>
+              <TicketThread tone="light" ticket={open} disabled={open.status === "closed"} onSend={async (b) => { const m = await supportAdmin.reply(open.id, b); await load(); return m; }} />
             </div>
           )}
         </div>

@@ -42,6 +42,7 @@ const QUICK_LINKS = [
   { label: "My Orders", description: "Full order & payment history", href: "/invoices", icon: Package },
   { label: "Wishlist", description: "Items you've saved", href: "/wishlist", icon: Heart },
   { label: "Gift Cards", description: "Your redeemable cards", href: "/my-cards", icon: Gift },
+  { label: "Help & support", description: "Open a ticket, track replies", href: "/support", icon: MessageSquare },
   { label: "Settings", description: "Notifications & language", href: "/settings/notifications", icon: Settings },
 ]
 

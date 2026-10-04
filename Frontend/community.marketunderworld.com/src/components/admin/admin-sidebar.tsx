@@ -1,5 +1,6 @@
 "use client"
 
+import { useAdminAccess, requirementFor } from "@/components/admin/admin-access"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -126,6 +127,7 @@ const ADMIN_NAV = [
   {
     group: "SYSTEM CORE",
     items: [
+      { name: "Staff & Access", path: "/admin/staff", icon: ShieldCheck },
       { name: "Global Announcements", path: "/admin/system/announcements", icon: Radio },
       { name: "Staff Audit Logs", path: "/admin/system/audit", icon: ScrollText },
       { name: "Security Node", path: "/admin/security", icon: Lock },
@@ -136,6 +138,10 @@ const ADMIN_NAV = [
 
 export const AdminSidebar = () => {
   const pathname = usePathname();
+  const { tier, can } = useAdminAccess();
+  const visible = ADMIN_NAV
+    .map((group) => ({ ...group, items: group.items.filter((item) => can(requirementFor(item.path))) }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="flex flex-col h-full bg-[#050508] border-r border-white/5 w-72 fixed left-0 top-0 z-50">
@@ -146,13 +152,13 @@ export const AdminSidebar = () => {
           </div>
           <div>
             <span className="font-bold text-xl tracking-tight text-white block leading-none">NEXUS</span>
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Super Admin</span>
+            <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{tier === "super" ? "Super Admin" : tier === "admin" ? "Admin" : "Moderator"}</span>
           </div>
         </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-6 space-y-10 no-scrollbar">
-        {ADMIN_NAV.map((group) => (
+        {visible.map((group) => (
           <div key={group.group}>
             <h4 className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4 px-4">{group.group}</h4>
             <div className="space-y-1">

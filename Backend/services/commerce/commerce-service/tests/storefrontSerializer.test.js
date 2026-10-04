@@ -98,3 +98,40 @@ test('detail serializer carries the same aggregate + department + media', () => 
     assert.equal(out.media.length, 2);
     assert.equal(out.description, ''); // detail-only field present
 });
+
+// ── KYC flag + whitelisted investment details ────────────────────────────────
+{
+    const { test } = require('node:test');
+    const assert = require('node:assert/strict');
+    const { serializeProductListItem, serializeProductDetail } = require('../utils/storefrontSerializer');
+    const base = { id: 'p1', name: 'Channel stake', slug: 'channel-stake', variants: [{ price: 100, isActive: true }] };
+
+    test('kycRequired is true only for an explicit requiresKyc flag', () => {
+        assert.equal(serializeProductListItem({ ...base, customFields: { requiresKyc: true } }).kycRequired, true);
+        assert.equal(serializeProductListItem({ ...base, customFields: { requiresKyc: 'true' } }).kycRequired, false);
+        assert.equal(serializeProductListItem({ ...base, customFields: {} }).kycRequired, false);
+    });
+
+    test('investment details expose only whitelisted, sanitised keys', () => {
+        const d = serializeProductDetail({
+            ...base,
+            customFields: { investment: { creatorName: 'Kay', channelUrl: 'https://youtube.com/@kay', investmentAmount: '5000', investorSharePct: 20, secretInternalNote: 'do not leak', channelUrlEvil: 'javascript:alert(1)' } },
+        });
+        assert.equal(d.investment.creatorName, 'Kay');
+        assert.equal(d.investment.investmentAmount, 5000);
+        assert.equal(d.investment.channelUrl, 'https://youtube.com/@kay');
+        assert.equal('secretInternalNote' in d.investment, false);
+        assert.equal(serializeProductDetail({ ...base, customFields: { investment: { channelUrl: 'javascript:alert(1)' } } }).investment.channelUrl, undefined);
+        assert.equal(serializeProductDetail({ ...base, customFields: {} }).investment, undefined);
+    });
+
+    test('verification exposes only booleans and a date; unchecked is never reported as checked', () => {
+        const checked = serializeProductDetail({ ...base, customFields: { investment: { creatorName: 'Kay', verification: { channelOwnershipChecked: true, revenueEvidenceSeen: 'yes', checkedAt: '2026-10-04T10:00:00Z', notes: 'private note', checkedBy: 'admin-7' } } } });
+        assert.deepEqual(checked.investment.verification, { channelOwnershipChecked: true, revenueEvidenceSeen: false, checkedAt: '2026-10-04' });
+        const none = serializeProductDetail({ ...base, customFields: { investment: { creatorName: 'Kay' } } });
+        assert.equal(none.investment.verification.channelOwnershipChecked, false);
+        assert.equal(none.investment.verification.revenueEvidenceSeen, false);
+        assert.equal(JSON.stringify(checked).includes('private note'), false);
+        assert.equal(JSON.stringify(checked).includes('admin-7'), false);
+    });
+}

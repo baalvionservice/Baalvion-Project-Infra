@@ -1,149 +1,84 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Radio, Send, Globe, Bell, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from "react";
+import { announcementsAdmin, type Announcement, type Severity } from "@/lib/api/staff";
 
-const ANNOUNCEMENT_TYPES = ["General", "Maintenance", "New Feature", "Urgent Alert", "Promotion"];
-const TARGETS = ["All Users", "Forum Members Only", "Marketplace Sellers", "Locals Hub Users", "Education Students"];
+const box = "bg-white rounded-xl shadow-sm border border-gray-100";
+const input = "w-full border p-2.5 rounded-lg outline-none focus:border-fuchsia-500 text-sm";
+const SEV: Record<Severity, string> = { info: "bg-blue-100 text-blue-800", warning: "bg-amber-100 text-amber-800", critical: "bg-red-100 text-red-800" };
+const STATUS: Record<Announcement["status"], string> = { draft: "bg-gray-100 text-gray-600", published: "bg-green-100 text-green-800", archived: "bg-gray-200 text-gray-500" };
+const msg = (e: unknown, f: string) => (e instanceof Error ? e.message : f);
+// <input type="datetime-local"> gives local time without a zone; the API wants an ISO instant.
+const iso = (v: string) => (v ? new Date(v).toISOString() : undefined);
 
-const PAST_ANNOUNCEMENTS = [
-  { id: 1, title: "🔧 Scheduled Maintenance — Oct 5th 2AM UTC", type: "Maintenance", target: "All Users", sentAt: "2026-10-01 18:00", reach: 12400 },
-  { id: 2, title: "🎉 Locals Hub is Live — Mumbai Edition!", type: "New Feature", target: "All Users", sentAt: "2026-09-28 12:00", reach: 12100 },
-  { id: 3, title: "⚠️ Crypto Withdrawal Limit Increased to $10,000", type: "General", target: "Marketplace Sellers", sentAt: "2026-09-25 09:00", reach: 342 },
-];
+export default function AnnouncementsPage() {
+  const [items, setItems] = useState<Announcement[]>([]);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title: "", body: "", severity: "info" as Severity, linkUrl: "", startsAt: "", endsAt: "" });
 
-function typeIcon(type: string) {
-  if (type === 'Maintenance') return <AlertTriangle className="w-4 h-4 text-amber-400" />;
-  if (type === 'Urgent Alert') return <AlertTriangle className="w-4 h-4 text-red-400" />;
-  if (type === 'New Feature') return <CheckCircle className="w-4 h-4 text-green-400" />;
-  return <Bell className="w-4 h-4 text-blue-400" />;
-}
+  const load = useCallback(async () => { try { setError(""); setItems(await announcementsAdmin.list()); } catch (e) { setError(msg(e, "Could not load announcements")); } }, []);
+  useEffect(() => { load(); }, [load]);
 
-export default function GlobalAnnouncements() {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [type, setType] = useState("General");
-  const [target, setTarget] = useState("All Users");
-  const [sent, setSent] = useState(false);
-
-  const sendAnnouncement = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !body.trim()) return;
-    setSent(true);
-    setTitle("");
-    setBody("");
-    setTimeout(() => setSent(false), 4000);
+  const create = async (publish: boolean) => {
+    setSaving(true);
+    setError("");
+    try {
+      const created = await announcementsAdmin.create({
+        title: form.title, body: form.body, severity: form.severity, linkUrl: form.linkUrl || undefined,
+        startsAt: iso(form.startsAt), endsAt: form.endsAt ? iso(form.endsAt) : undefined,
+      });
+      if (publish) await announcementsAdmin.update(created.id, { status: "published" });
+      setForm({ title: "", body: "", severity: "info", linkUrl: "", startsAt: "", endsAt: "" });
+      await load();
+    } catch (e) { setError(msg(e, "Could not save the announcement")); } finally { setSaving(false); }
+  };
+  const setStatus = async (a: Announcement, status: Announcement["status"]) => {
+    try { await announcementsAdmin.update(a.id, { status }); await load(); } catch (e) { setError(msg(e, "Could not update")); }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Radio className="w-6 h-6 text-fuchsia-500" />
-          Global Announcements
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">Broadcast urgent messages, feature launches, or alerts to all platform users instantly.</p>
+        <h1 className="text-3xl font-bold">Announcements</h1>
+        <p className="text-gray-500 mt-2">Published announcements show as a banner at the top of every public page, between their start and end time. Visitors can dismiss one; it comes back if you change it.</p>
+      </div>
+      {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+
+      <div className={`${box} p-6 space-y-3`}>
+        <h2 className="font-semibold">New announcement</h2>
+        <div className="grid md:grid-cols-3 gap-3">
+          <input className={`${input} md:col-span-2`} placeholder="Headline" maxLength={160} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <select className={input} value={form.severity} onChange={(e) => setForm({ ...form, severity: e.target.value as Severity })}><option value="info">Info</option><option value="warning">Warning</option><option value="critical">Critical</option></select>
+        </div>
+        <textarea className={input} rows={2} placeholder="Message (max 1000 characters)" maxLength={1000} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+        <div className="grid md:grid-cols-3 gap-3">
+          <input className={input} placeholder="Link (optional): /support or https://…" value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} />
+          <label className="text-xs text-gray-500">Starts (blank = now)<input type="datetime-local" className={input} value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} /></label>
+          <label className="text-xs text-gray-500">Ends (blank = until archived)<input type="datetime-local" className={input} value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} /></label>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => create(true)} disabled={saving} className="px-5 py-2.5 rounded-lg bg-fuchsia-600 text-white text-sm font-medium disabled:opacity-60">Publish now</button>
+          <button onClick={() => create(false)} disabled={saving} className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium disabled:opacity-60">Save as draft</button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Compose Form */}
-        <div className="bg-[#121217] border border-fuchsia-500/20 rounded-xl p-6">
-          <h2 className="font-bold text-white flex items-center gap-2 mb-6">
-            <Send className="w-5 h-5 text-fuchsia-500" />
-            Compose Announcement
-          </h2>
-
-          {sent && (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400 text-sm font-bold">
-              <CheckCircle className="w-5 h-5" /> Announcement sent successfully to {target}!
+      <div className={`${box} divide-y divide-gray-50`}>
+        {items.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">No announcements yet.</p>}
+        {items.map((a) => (
+          <div key={a.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2"><span className="font-medium">{a.title}</span><span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${SEV[a.severity]}`}>{a.severity}</span><span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${STATUS[a.status]}`}>{a.status}</span></div>
+              <div className="text-sm text-gray-600">{a.body}</div>
+              <div className="text-xs text-gray-400">From {new Date(a.startsAt).toLocaleString("en-IN")}{a.endsAt ? ` until ${new Date(a.endsAt).toLocaleString("en-IN")}` : ""}</div>
             </div>
-          )}
-
-          <form onSubmit={sendAnnouncement} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Type</label>
-                <select
-                  value={type}
-                  onChange={e => setType(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-500/50"
-                >
-                  {ANNOUNCEMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Send To</label>
-                <select
-                  value={target}
-                  onChange={e => setTarget(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-500/50"
-                >
-                  {TARGETS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
+            <div className="flex gap-2 shrink-0">
+              {a.status !== "published" && a.status !== "archived" && <button onClick={() => setStatus(a, "published")} className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium">Publish</button>}
+              {a.status === "published" && <button onClick={() => setStatus(a, "draft")} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">Unpublish</button>}
+              {a.status !== "archived" && <button onClick={() => setStatus(a, "archived")} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">Archive</button>}
             </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Announcement Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="e.g. 🚨 Urgent: Platform Maintenance Tonight"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-500/50"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Message Body</label>
-              <textarea
-                value={body}
-                onChange={e => setBody(e.target.value)}
-                placeholder="Write the full announcement message here..."
-                className="w-full h-40 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-fuchsia-500/50 resize-none"
-                required
-              />
-            </div>
-
-            <div className="flex items-center gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-              <p className="text-xs text-amber-300">This will push a banner notification to <strong>{target}</strong>. This action cannot be undone.</p>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 h-12 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded-xl transition-colors"
-            >
-              <Globe className="w-5 h-5" /> Broadcast Now
-            </button>
-          </form>
-        </div>
-
-        {/* Past Announcements */}
-        <div className="bg-[#121217] border border-white/5 rounded-xl overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02]">
-            <h2 className="font-bold text-white">Previous Announcements</h2>
           </div>
-          <div className="flex-1 divide-y divide-white/5">
-            {PAST_ANNOUNCEMENTS.map(ann => (
-              <div key={ann.id} className="p-5 hover:bg-white/[0.02] transition-colors">
-                <div className="flex items-start gap-3">
-                  {typeIcon(ann.type)}
-                  <div className="flex-1">
-                    <div className="font-bold text-white text-sm">{ann.title}</div>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                      <span className="px-1.5 py-0.5 bg-white/10 rounded font-bold text-gray-400">{ann.type}</span>
-                      <span>{ann.target}</span>
-                      <span>{ann.sentAt}</span>
-                    </div>
-                    <div className="mt-2 text-xs text-fuchsia-400 font-bold">{ann.reach.toLocaleString()} users reached</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

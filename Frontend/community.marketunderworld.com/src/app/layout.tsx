@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AnnouncementBanner } from "@/components/announcements/announcement-banner";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { CryptoTicker } from "@/components/layout/ticker";
@@ -99,6 +100,7 @@ export default function RootLayout({
                     <Toaster />
                     <GlobalSearch />
                     <BountyChatWidget />
+                    <AnnouncementBanner />
                   </ScaryTransitionProvider>
                 </IdentityProvider>
               </NotificationProvider>
