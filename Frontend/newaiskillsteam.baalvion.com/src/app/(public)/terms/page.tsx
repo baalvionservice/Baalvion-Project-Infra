@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      content: "By accessing or using the ControlTheMarket platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
+      content: "ControlTheMarket is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India; references to \"we\" and \"us\" mean that company. By accessing or using the ControlTheMarket platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
     },
     {
       title: "2. Platform Usage",

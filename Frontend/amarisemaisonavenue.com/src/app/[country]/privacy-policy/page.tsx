@@ -42,6 +42,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
   ] },
   { title: '7. Contact', body: [
     'For privacy inquiries, reach our global concierge through the Contact page or your account dashboard.',
+    'The data controller is Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), which operates AMARISÉ MAISON AVENUE. Email legal@baalvion.com.',
   ] },
 ];
 
