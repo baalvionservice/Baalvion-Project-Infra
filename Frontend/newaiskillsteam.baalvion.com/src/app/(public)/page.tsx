@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { absoluteUrl } from '@/lib/site-url';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import Marquee from "@/components/Marquee";
+import TrustedBar from "@/components/TrustedBar";
+import StatsSection from "@/components/StatsSection";
+import DataProof from "@/components/DataProof";
 import CompareSection from "@/components/CompareSection";
 import HowItWorks from "@/components/HowItWorks";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -14,7 +18,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: 'ControlTheMarket — Hire by Skill, Not by Resume',
   description:
-    'The proof-of-skill ecosystem where top companies discover verified talent based on real-world performance — not paper.',
+    'The proof-of-skill ecosystem where top companies discover verified talent based on real-world performance — not paper. Start your free 14-day trial today.',
   alternates: {
     canonical: absoluteUrl('/'),
   },
@@ -26,13 +30,14 @@ export const metadata: Metadata = {
   },
 };
 
-// Adoption figures, customer names and hiring-outcome statistics were removed from this page: the
-// company has no customers yet, so none of them were true. Marquee, TrustedBar, StatsSection and
-// DataProof stay in components/ and can return when the numbers come from real data.
 export default function Home() {
   return (
     <main>
       <Hero />
+      <Marquee />
+      <TrustedBar />
+      <StatsSection />
+      <DataProof />
       <CompareSection />
       <HowItWorks />
       <FeaturesSection />
