@@ -37,6 +37,10 @@ export default function Error({
             Ref: {error.digest}
           </p>
         )}
+        <div className="mt-4 p-4 bg-red-950 text-red-200 text-left rounded text-xs font-mono overflow-auto max-h-48">
+          <p className="font-bold mb-2">Error: {error.message}</p>
+          <pre>{error.stack}</pre>
+        </div>
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button

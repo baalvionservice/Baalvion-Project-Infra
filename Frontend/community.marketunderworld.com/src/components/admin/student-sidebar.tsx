@@ -6,43 +6,38 @@ import {
   Home, 
   Zap, 
   ShoppingBag, 
-  Wallet, 
   Clock, 
   ChevronRight,
   LogOut
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { STUDENT_PROFILE } from "@/lib/mock-student-data"
+import { useAuth } from "@/context/auth-context"
 
 const STUDENT_NAV = [
   {
-    group: "HUB",
+    group: "LEARNING",
     items: [
-      { name: "Command Center", path: "/student-dashboard", icon: Home },
-      { name: "Live Sessions", path: "/student-dashboard/sessions", icon: Zap },
-    ]
-  },
-  {
-    group: "TRADE",
-    items: [
-      { name: "Purchases", path: "/student-dashboard/purchases", icon: ShoppingBag },
-      { name: "Wallet Protocol", path: "/student-dashboard/wallet", icon: Wallet },
+      { name: "Overview", path: "/student-dashboard", icon: Home },
+      { name: "My Sessions", path: "/student-dashboard/sessions", icon: Zap },
       { name: "History", path: "/student-dashboard/history", icon: Clock },
+      { name: "Find Teachers", path: "/education", icon: ShoppingBag },
     ]
   }
 ];
 
 export const StudentSidebar = () => {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const name = user?.email?.split('@')[0] ?? 'Student';
 
   return (
     <div className="flex flex-col h-full bg-[#050508] border-r border-white/5 w-72 fixed left-0 top-0 z-50">
       <div className="p-8 border-b border-white/5">
         <div className="flex items-center gap-4 mb-8">
-          <img src={STUDENT_PROFILE.avatar} className="w-12 h-12 rounded-xl object-cover border border-white/10" alt="Me" />
+          <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-white">{name.charAt(0).toUpperCase()}</div>
           <div>
-            <h3 className="font-bold text-white leading-none">{STUDENT_PROFILE.name}</h3>
-            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Learner Node</span>
+            <h3 className="font-bold text-white leading-none">{name}</h3>
+            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Student</span>
           </div>
         </div>
       </div>
@@ -77,7 +72,7 @@ export const StudentSidebar = () => {
         <Link href="/">
           <button className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all">
             <LogOut className="w-4 h-4" />
-            <span className="text-sm font-bold">Terminate Session</span>
+            <span className="text-sm font-bold">Back to site</span>
           </button>
         </Link>
       </div>

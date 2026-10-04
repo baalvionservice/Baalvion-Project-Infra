@@ -24,7 +24,9 @@ export function IdentityProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       
       // Artificial delay for "Scanning Node" effect
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await new Promise<void>(resolve => {
+        setTimeout(resolve, 1200);
+      });
 
       const randomRegion = REGIONS[Math.floor(Math.random() * REGIONS.length)];
       const randomCountry = (randomRegion.countries ?? [])[Math.floor(Math.random() * (randomRegion.countries?.length ?? 0))];

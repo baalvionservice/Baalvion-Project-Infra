@@ -1,93 +1,133 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { ListingCard, Badge } from '@/components/ui/ListingCard';
-import { AppButton } from '@/components/ui/AppButton';
-import { Play, Users, Clock, Zap, Plus, Video, Calendar, MoreVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useAuth } from "@/context/auth-context"
+import { useCallback, useEffect, useState } from "react"
+import { SignInNotice } from "@/components/nightlife/sign-in-notice"
+import { edu, isUnauthorized, formatWhen, type Enrollment, type Session } from "@/lib/api/education"
+import { cn } from "@/lib/utils"
+
+const input = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 outline-none focus:border-orange-500/50 text-white"
+const label = "block text-xs font-bold text-gray-400 uppercase mb-2"
 
 export default function TeacherSessionsPage() {
-  const [mounted, setMounted] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [needsLogin, setNeedsLogin] = useState(false)
+  const [error, setError] = useState("")
+  const [open, setOpen] = useState<string | null>(null)
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([])
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ title: "", description: "", startAt: "", durationMin: "60", capacity: "20", meetingUrl: "" })
+
+  const load = useCallback(async () => {
+    try {
+      setError("")
+      setSessions(await edu.mySessions())
+    } catch (err) {
+      if (isUnauthorized(err)) setNeedsLogin(true)
+      else setError(err instanceof Error ? err.message : "Could not load sessions")
+    }
+  }, [])
+
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (authLoading) return
+    if (!isAuthenticated) { setNeedsLogin(true); return }
+    load()
+  }, [authLoading, isAuthenticated, load])
 
-  if (!mounted) return null;
+  const create = async () => {
+    setSaving(true)
+    setError("")
+    try {
+      await edu.createSession({
+        title: form.title, description: form.description || undefined,
+        startAt: form.startAt ? new Date(form.startAt).toISOString() : "",
+        durationMin: Number(form.durationMin), capacity: Number(form.capacity), meetingUrl: form.meetingUrl,
+      })
+      setForm({ title: "", description: "", startAt: "", durationMin: "60", capacity: "20", meetingUrl: "" })
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not create the session")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const toggle = async (id: string) => {
+    if (open === id) return setOpen(null)
+    setOpen(id)
+    try { setEnrollments(await edu.sessionEnrollments(id)) } catch (err) { setError(err instanceof Error ? err.message : "Could not load requests") }
+  }
+
+  const decide = async (id: string, status: "approved" | "declined") => {
+    try {
+      await edu.decide(id, status)
+      if (open) setEnrollments(await edu.sessionEnrollments(open))
+      await load()
+    } catch (err) { setError(err instanceof Error ? err.message : "Could not update the request") }
+  }
+
+  const cancelSession = async (id: string) => {
+    if (!confirm("Cancel this session? Students will see it as cancelled.")) return
+    try { await edu.updateSession(id, { status: "cancelled" }); await load() } catch (err) { setError(err instanceof Error ? err.message : "Could not cancel") }
+  }
+
+  if (needsLogin) return <SignInNotice next="/teacher-dashboard/sessions" what="manage sessions" />
 
   return (
-    <div className="p-10 space-y-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Live Session Management</h1>
-          <p className="text-text-muted font-medium">Broadcast intelligence and manage student engagement.</p>
-        </div>
-        <div className="flex gap-4">
-          <AppButton className="bg-semantic-warning text-black px-8 h-12 font-bold uppercase text-[11px] tracking-widest">
-            <Plus className="w-4 h-4 mr-2" /> New Session Request
-          </AppButton>
-        </div>
-      </header>
+    <div className="max-w-4xl space-y-10 text-white">
+      <div>
+        <h1 className="text-3xl font-bold">Sessions & requests</h1>
+        <p className="text-gray-400 mt-1">Host on your own video link. Students only see the link after you approve them.</p>
+      </div>
+      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: 'Sessions Completed', val: '247', icon: Video, color: 'text-semantic-info' },
-          { label: 'Upcoming Today', val: '2', icon: Calendar, color: 'text-brand-green' },
-          { label: 'Avg Engagement', val: '92%', icon: Users, color: 'text-semantic-warning' },
-        ].map((stat, i) => (
-          <ListingCard key={i} variant="stats">
-            <div className="flex items-center justify-between mb-4">
-              <stat.icon className={cn("w-5 h-5", stat.color)} />
-            </div>
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{stat.label}</div>
-            <div className="text-2xl font-bold text-white mt-1 font-mono">{stat.val}</div>
-          </ListingCard>
-        ))}
+      <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 space-y-4">
+        <h2 className="font-bold">Schedule a session</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="md:col-span-2"><label className={label}>Title</label><input className={input} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+          <div><label className={label}>Starts</label><input type="datetime-local" className={input} value={form.startAt} onChange={(e) => setForm({ ...form, startAt: e.target.value })} /></div>
+          <div><label className={label}>Meeting link (https)</label><input type="url" className={input} placeholder="https://meet..." value={form.meetingUrl} onChange={(e) => setForm({ ...form, meetingUrl: e.target.value })} /></div>
+          <div><label className={label}>Duration (minutes)</label><input type="number" className={input} value={form.durationMin} onChange={(e) => setForm({ ...form, durationMin: e.target.value })} /></div>
+          <div><label className={label}>Capacity</label><input type="number" className={input} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} /></div>
+          <div className="md:col-span-2"><label className={label}>Description (optional)</label><textarea className={cn(input, "h-24 py-3")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+        </div>
+        <button onClick={create} disabled={saving} className="h-12 px-8 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-bold disabled:opacity-60">{saving ? "Saving…" : "Schedule"}</button>
       </div>
 
-      <div className="space-y-6">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted flex items-center gap-2">
-          <Activity className="w-4 h-4 text-brand-green" /> Scheduled Broadcasts
-        </h3>
-        
-        <div className="grid grid-cols-1 gap-4">
-          {[
-            { title: 'Advanced Organic Synthesis', time: 'Today, 4:00 PM', duration: '60 min', viewers: 124, status: 'upcoming' },
-            { title: 'Laboratory Safety Protocols', time: 'Tomorrow, 10:00 AM', duration: '45 min', viewers: 89, status: 'scheduled' },
-          ].map((session, i) => (
-            <ListingCard key={i} className="p-6 bg-brand-surface border-brand-border hover:border-semantic-warning transition-all group">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-semantic-warning border border-white/5">
-                    <Video className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white group-hover:text-semantic-warning transition-colors">{session.title}</h4>
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">
-                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {session.time}</span>
-                      <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <span>{session.duration}</span>
+      <div className="space-y-3">
+        {sessions.length === 0 && <p className="text-gray-500">No sessions yet.</p>}
+        {sessions.map((s) => (
+          <div key={s.id} className={cn("rounded-xl bg-white/[0.03] border border-white/10 overflow-hidden", s.status === "cancelled" && "opacity-50")}>
+            <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <div className="font-bold">{s.title} {s.status === "cancelled" && <span className="text-xs text-red-400 ml-2">CANCELLED</span>}</div>
+                <div className="text-xs text-gray-500">{formatWhen(s.startAt)} · {s.durationMin} min · {s.approved ?? 0}/{s.capacity} approved · {s.requested ?? 0} waiting</div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => toggle(s.id)} className="h-10 px-4 rounded-lg bg-white/5 hover:bg-white/10 text-sm font-bold">{open === s.id ? "Hide" : "Requests"}</button>
+                {s.status === "scheduled" && <button onClick={() => cancelSession(s.id)} className="h-10 px-4 rounded-lg bg-white/5 text-red-300 text-sm font-bold">Cancel</button>}
+              </div>
+            </div>
+            {open === s.id && (
+              <div className="border-t border-white/5 p-5 space-y-2">
+                {enrollments.length === 0 && <p className="text-sm text-gray-500">No requests yet.</p>}
+                {enrollments.map((e) => (
+                  <div key={e.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/[0.02]">
+                    <div className="text-sm"><span className="font-bold">{e.student ?? "Student"}</span>{e.note && <span className="text-gray-500"> — “{e.note}”</span>}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase text-gray-400">{e.status}</span>
+                      {e.status !== "cancelled" && e.status !== "approved" && <button onClick={() => decide(e.id, "approved")} className="h-8 px-3 rounded-lg bg-green-500/20 text-green-300 text-xs font-bold">Approve</button>}
+                      {e.status !== "cancelled" && e.status !== "declined" && <button onClick={() => decide(e.id, "declined")} className="h-8 px-3 rounded-lg bg-white/5 text-xs font-bold">Decline</button>}
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-8">
-                  <div className="text-right">
-                    <div className="text-[9px] font-bold text-text-ghost uppercase">Expected Load</div>
-                    <div className="text-sm font-bold text-white">{session.viewers} Students</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <AppButton size="sm" className="bg-semantic-warning text-black font-bold uppercase text-[10px]">Initialize</AppButton>
-                    <button className="p-2.5 rounded bg-white/5 border border-white/5 text-text-ghost hover:text-white transition-colors"><MoreVertical className="w-4 h-4" /></button>
-                  </div>
-                </div>
+                ))}
               </div>
-            </ListingCard>
-          ))}
-        </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
-  );
+  )
 }
-
-import { Activity } from 'lucide-react';

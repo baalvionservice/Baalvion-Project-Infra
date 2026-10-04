@@ -21,7 +21,7 @@ export default function LiveSessionsPage() {
             Operational <span className="text-semantic-error">Streams.</span>
           </h1>
           <p className="text-text-secondary text-xl max-w-2xl font-mono uppercase text-sm tracking-widest">
-            Connect to live intelligence feeds from expert operators across all global nodes.
+            Live sessions appear here while they are running.
           </p>
         </header>
 
@@ -69,14 +69,12 @@ export default function LiveSessionsPage() {
           ))}
         </div>
 
-        {/* Global Monitor Placeholder */}
-        <ListingCard className="mt-20 p-12 bg-brand-void border-brand-border flex flex-col items-center text-center space-y-8">
-          <div className="w-20 h-20 rounded-full border-4 border-brand-green/20 border-t-brand-green animate-spin" />
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold uppercase italic">Scanning Network...</h3>
-            <p className="text-text-muted font-mono text-[10px] uppercase tracking-widest">Waiting for synchronized broadcasts from EMEA and NA nodes.</p>
-          </div>
-        </ListingCard>
+        {LIVE_ACTIVITY_MOCK.activeSessions.length === 0 && (
+          <ListingCard className="p-12 bg-brand-void border-brand-border flex flex-col items-center text-center space-y-4">
+            <h3 className="text-xl font-bold uppercase italic">No live sessions right now</h3>
+            <p className="text-text-muted font-mono text-[10px] uppercase tracking-widest">Nothing is streaming. Scheduled sessions will be listed here.</p>
+          </ListingCard>
+        )}
       </main>
       <Footer />
     </div>

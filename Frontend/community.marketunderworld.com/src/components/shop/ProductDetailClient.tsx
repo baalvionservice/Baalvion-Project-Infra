@@ -82,6 +82,35 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
           )}
           <p className="text-2xl font-bold text-white">{product.price} <span className="text-sm opacity-50">{product.currencyCode}</span></p>
           <p className="text-sm text-gray-400 leading-relaxed">{product.description}</p>
+          {product.investment && (
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Investment details</h2>
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                {product.investment.creatorName && <><dt className="text-gray-500">Creator</dt><dd className="text-white">{product.investment.creatorName}{product.investment.platform ? ` · ${product.investment.platform}` : ""}</dd></>}
+                {product.investment.investmentAmount !== undefined && <><dt className="text-gray-500">Total sought</dt><dd className="text-white">{product.investment.investmentAmount.toLocaleString("en-US")} USD</dd></>}
+                {product.investment.expectedRevenue !== undefined && <><dt className="text-gray-500">Projected revenue</dt><dd className="text-white">{product.investment.expectedRevenue.toLocaleString("en-US")} USD <span className="text-gray-500">(estimate)</span></dd></>}
+                {product.investment.investorSharePct !== undefined && <><dt className="text-gray-500">Investor share</dt><dd className="text-white">{product.investment.investorSharePct}%</dd></>}
+                {product.investment.platformFeePct !== undefined && <><dt className="text-gray-500">Platform fee</dt><dd className="text-white">{product.investment.platformFeePct}%</dd></>}
+              </dl>
+              <ul className="text-xs space-y-1">
+                <li className={product.investment.verification?.channelOwnershipChecked ? "text-green-300" : "text-gray-500"}>
+                  {product.investment.verification?.channelOwnershipChecked ? "✓ Channel ownership checked by our team" : "Channel ownership has not been checked"}
+                </li>
+                <li className={product.investment.verification?.revenueEvidenceSeen ? "text-green-300" : "text-gray-500"}>
+                  {product.investment.verification?.revenueEvidenceSeen ? "✓ Revenue evidence reviewed by our team" : "Revenue figures are the creator's own claims and have not been verified"}
+                </li>
+                {product.investment.verification?.checkedAt && <li className="text-gray-500">Checked on {product.investment.verification.checkedAt}</li>}
+              </ul>
+              {product.investment.channelUrl && <a href={product.investment.channelUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-sm text-cyan-400 underline break-all">View the channel</a>}
+              <p className="text-xs text-amber-300/90 leading-relaxed">{product.investment.riskNote || "Projected revenue is an estimate, not a promise. You may lose some or all of the money you put in."}</p>
+            </div>
+          )}
+          {product.kycRequired && (
+            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 text-sm text-cyan-100 space-y-2">
+              <p>This listing can only be bought by identity-verified people. You verify once and it covers you for 24 months.</p>
+              <Link href={`/kyc?next=${encodeURIComponent(`/shop/${categorySlug}/${product.slug}`)}`} className="underline font-bold">Verify my identity</Link>
+            </div>
+          )}
           <p className="text-xs text-gray-500">{product.inStock ? `${product.stock} in stock` : "Out of stock"}</p>
           <div className="flex gap-3">
             <NexusButton onClick={handleAddToCart} disabled={!product.inStock} className="gap-2 h-12 px-8">

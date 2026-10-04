@@ -24,8 +24,10 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-16 mb-20">
           <div className="md:col-span-2 space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-[#39FF14] flex items-center justify-center text-black font-bold text-xs">MU</div>
-              <span className="text-white font-bold tracking-tight uppercase font-display italic">Market Underworld</span>
+              <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex items-center justify-center bg-black">
+                <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="text-white font-bold tracking-widest uppercase font-display">BAALVION</span>
             </div>
             <p className="text-[#6B7280] max-w-sm text-sm leading-relaxed font-mono uppercase">
               An online community and marketplace for members: forums, classes, and goods from independent sellers.

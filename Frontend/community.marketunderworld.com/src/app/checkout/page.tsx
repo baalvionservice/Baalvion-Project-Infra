@@ -20,7 +20,10 @@ declare global {
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (window.Razorpay) return resolve(true);
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.onload = () => resolve(true);
@@ -201,6 +204,12 @@ export default function CheckoutPage() {
       await clear();
       router.push(`/checkout/confirmation/${order.id}`);
     } catch (err) {
+      // Investment listings need a one-time identity check; send the buyer to complete it.
+      if ((err as { code?: string }).code === 'KYC_REQUIRED') {
+        toast({ title: 'Identity verification needed', description: 'This item can only be bought by verified people. Taking you to verification.' });
+        router.push('/kyc?next=/checkout');
+        return;
+      }
       toast({ variant: 'destructive', title: 'Payment failed', description: err instanceof Error ? err.message : 'Please try again.' });
     } finally {
       setIsProcessing(false);

@@ -11,6 +11,8 @@ import { ToastContainer } from "@/components/notifications/toast-container";
 import { Toaster } from "@/components/ui/toaster";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { GoogleAnalytics } from "@/components/layout/google-analytics";
+import { ScaryTransitionProvider } from "@/components/layout/scary-transition-provider";
+import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -42,8 +44,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Market Underworld | Elite Global Trade Network",
-    template: "%s | Market Underworld"
+    default: "Baalvion | Elite Global Trade Network",
+    template: "%s | Baalvion"
   },
   description: "The world's premier secure intelligence node for global knowledge exchange and commodity trade. Verified operators only.",
   // This app deploys to community.marketunderworld.com (wrangler worker
@@ -54,16 +56,12 @@ export const metadata: Metadata = {
   // Without an explicit canonical Next emits none at all, which is why this page had no
   // canonical link and search engines were left to guess which URL is authoritative.
   alternates: { canonical: '/' },
-  icons: {
-    icon: '/favicon.svg',
-    apple: '/apple-icon.png',
-  },
   openGraph: {
-    title: "Market Underworld",
+    title: "Baalvion",
     description: "Secure Trade & Intelligence Node",
     type: "website",
     url: "https://community.marketunderworld.com",
-    siteName: "Market Underworld",
+    siteName: "Baalvion",
   },
 };
 
@@ -75,6 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <link rel="icon" href="/favicon.jpg" />
         <GoogleAnalytics />
       </head>
       <body
@@ -89,15 +88,18 @@ export default function RootLayout({
             <CartProvider>
               <NotificationProvider>
                 <IdentityProvider>
-                  <header>
-                    <CryptoTicker />
-                  </header>
-                  <main className="flex-1 flex flex-col">
-                    {children}
-                  </main>
-                  <ToastContainer />
-                  <Toaster />
-                  <GlobalSearch />
+                  <ScaryTransitionProvider>
+                    <header>
+                      <CryptoTicker />
+                    </header>
+                    <main className="flex-1 flex flex-col">
+                      {children}
+                    </main>
+                    <ToastContainer />
+                    <Toaster />
+                    <GlobalSearch />
+                    <BountyChatWidget />
+                  </ScaryTransitionProvider>
                 </IdentityProvider>
               </NotificationProvider>
             </CartProvider>

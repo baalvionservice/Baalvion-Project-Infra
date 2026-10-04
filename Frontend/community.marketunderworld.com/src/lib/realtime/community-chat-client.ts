@@ -85,7 +85,10 @@ class CommunityChatClient {
   joinRoom(slug: string): Promise<void> {
     const room = `community:${slug}`;
     return new Promise((resolve, reject) => {
-      if (!this.socket) return reject(new Error('Not connected'));
+      if (!this.socket) {
+        reject(new Error('Not connected'));
+        return;
+      }
 
       const timeout = setTimeout(() => {
         cleanup();

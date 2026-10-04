@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff, ChevronLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, ChevronLeft, ArrowRight, Loader2, Skull } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/context/auth-context'
 import { ApiError } from '@baalvion/auth-sdk'
@@ -27,7 +27,7 @@ export default function Registration() {
     try {
       await register(email, password, fullName)
       toast({ title: "Access Authorized", description: "Your node is now live." })
-      router.push('/')
+      router.push('/bounty')
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Could not create your account. Try again.";
       toast({ variant: 'destructive', title: "Registration Failed", description: message })
@@ -50,9 +50,18 @@ export default function Registration() {
         className="max-w-md w-full space-y-10 relative z-10"
       >
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#39FF14] to-[#3B82F6] flex items-center justify-center text-black font-bold text-2xl">MU</div>
-          <h1 className="text-3xl font-bold tracking-tight text-white uppercase italic">Join the Network</h1>
-          <p className="text-sm text-gray-500 font-medium text-center">Create your Market Underworld operator account.</p>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-900 to-black border-2 border-red-600 flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+            <Skull className="w-10 h-10 animate-pulse text-red-500" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-red-500 uppercase italic drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">Join the Network</h1>
+          <p className="text-sm text-red-500/70 font-medium text-center">Create your Market Underworld operator account.</p>
+        </div>
+
+        <div className="bg-red-950/30 border border-red-600/50 p-4 rounded-xl text-center relative overflow-hidden">
+           <div className="absolute inset-0 bg-red-500/5 animate-pulse"></div>
+           <p className="text-[11px] text-red-400 font-mono leading-relaxed relative z-10 uppercase tracking-wide">
+             ⚠️ <strong className="text-red-500">ATTENTION HACKERS:</strong> Whoever can crack any password on this website and fix the bugs will be awarded <strong className="text-white">$500 in BTC</strong>. Take the challenge and enter.
+           </p>
         </div>
 
         <form onSubmit={handleRegister} className="bg-[#111318] border border-[#252A33] rounded-3xl p-8 space-y-6">
