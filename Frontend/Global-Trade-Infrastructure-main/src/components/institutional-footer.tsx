@@ -79,7 +79,7 @@ export function InstitutionalFooter() {
                 <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between text-sm">
                     <div className='mb-4 sm:mb-0'>
                         <p>{year ? copyrightLine(year) : ''}</p>
-                        <p className='mt-1 text-xs'>{formatAddress(OPERATING_ADDRESS)} · +91 89512 84770 · support@baalvion.com · CIN {CIN}</p>
+                        <p className='mt-1 text-xs'>{formatAddress(OPERATING_ADDRESS)} · +91 89512 84770 · support@baalvion.com · CIN {CIN} · GSTIN 21AANCB3490M1ZF</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <Link href={PATHS.PRIVACY_POLICY} className="hover:text-foreground">Privacy Policy</Link>

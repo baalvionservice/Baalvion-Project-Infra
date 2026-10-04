@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
   const sections = [
     {
       title: "1. Introduction",
-      content: "Welcome to ControlTheMarket. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
+      content: "Welcome to ControlTheMarket, operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), the data controller for the information described here. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
     },
     {
       title: "2. Information We Collect",

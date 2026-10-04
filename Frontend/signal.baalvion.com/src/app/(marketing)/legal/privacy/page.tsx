@@ -15,6 +15,14 @@ export default function PrivacyPage() {
 
       <div className="mt-8 space-y-6">
         <section>
+          <h2 className="text-2xl">Who we are</h2>
+          <p>
+            Baalvion Industries Private Limited (CIN U43121OD2025PTC048479) operates Baalvion
+            Intelligence and is responsible for the personal data described on this page. Contact:
+            legal@baalvion.com.
+          </p>
+        </section>
+        <section>
           <h2 className="text-2xl">Data we collect</h2>
           <p>
             We collect account information (name, email, organization), API usage metadata

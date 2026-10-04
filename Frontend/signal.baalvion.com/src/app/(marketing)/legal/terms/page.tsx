@@ -15,6 +15,14 @@ export default function TermsPage() {
 
       <div className="mt-8 space-y-6">
         <section>
+          <h2 className="text-2xl">Who we are</h2>
+          <p>
+            Baalvion Intelligence is operated by Baalvion Industries Private Limited (CIN
+            U43121OD2025PTC048479), a company incorporated in India. &ldquo;We&rdquo; and
+            &ldquo;us&rdquo; mean that company.
+          </p>
+        </section>
+        <section>
           <h2 className="text-2xl">Use of the API</h2>
           <p>
             Your use of the Baalvion Intelligence API is subject to the request quota of your

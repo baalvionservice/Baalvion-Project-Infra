@@ -83,7 +83,7 @@ export default function ShippingDirectoryLayout({ children }: { children: React.
       <div className="wsd-ink-field text-white">
         <div className="mx-auto flex max-w-[1340px] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-6 py-2">
           <p className="wsd-eyebrow !text-white/60">
-            A public reference property of Baalvion
+            A public reference published by Baalvion Industries Private Limited
           </p>
           <p className="wsd-eyebrow !text-white/60">
             Open data · every figure carries its source

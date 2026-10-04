@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const SECTIONS: { title: string; body: string[] }[] = [
   { title: '1. Acceptance of Terms', body: [
     'By accessing the AMARISÉ MAISON platform or placing an acquisition, you agree to these Terms of Service. If you do not agree, please refrain from using the platform.',
+    'AMARISÉ MAISON AVENUE is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India. References to "we", "us" and "the Maison" mean that company.',
   ] },
   { title: '2. Eligibility', body: [
     'You must be of legal age in your jurisdiction and able to form a binding contract to place an acquisition.',
@@ -37,7 +38,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
     'Settlement is processed via our authorized payment partners. Bank transfer acquisitions are dispatched upon cleared funds.',
   ] },
   { title: '6. Intellectual Property', body: [
-    'All content, imagery, and marks on the platform are the property of AMARISÉ MAISON or its licensors and may not be reproduced without written permission.',
+    'All content, imagery, and marks on the platform are the property of Baalvion Industries Private Limited or its licensors and may not be reproduced without written permission.',
   ] },
   { title: '7. Limitation of Liability', body: [
     'To the maximum extent permitted by law, AMARISÉ MAISON is not liable for indirect or consequential losses arising from use of the platform. Nothing limits liability that cannot be excluded by law.',

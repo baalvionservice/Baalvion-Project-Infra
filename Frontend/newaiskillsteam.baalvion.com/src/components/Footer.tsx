@@ -122,7 +122,7 @@ export default function Footer() {
             ))}
           </span>
         </div>
-        <p className="mt-4 text-xs text-white/35">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
+        <p className="mt-4 text-xs text-white/35">Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · GSTIN 21AANCB3490M1ZF · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com</p>
       </div>
     </footer>
   );
