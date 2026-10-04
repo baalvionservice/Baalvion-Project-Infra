@@ -49,7 +49,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
         {/* Holographic Stamp Mock */}
         <div className="absolute top-48 right-12 w-48 h-48 border-4 border-emerald-500/20 rounded-full flex items-center justify-center rotate-[15deg] opacity-[0.15] pointer-events-none select-none">
           <div className="text-center font-bold text-emerald-600 uppercase">
-            <div className="text-2xl">MU</div>
+            <div className="text-2xl">BAAL</div>
             <div className="text-[10px] tracking-widest">VERIFIED ✓</div>
             <div className="text-xs">PAID</div>
           </div>
@@ -61,7 +61,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#1A1A2E] flex items-center justify-center text-white font-bold">NX</div>
-                <div className="font-bold text-xl text-[#1A1A2E] tracking-tight uppercase">Market Underworld Community</div>
+                <div className="font-bold text-xl text-[#1A1A2E] tracking-tight uppercase">Baal Marketplace</div>
               </div>
               <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-loose">
                 community.marketunderworld.com • support@baalvion.com <br />
