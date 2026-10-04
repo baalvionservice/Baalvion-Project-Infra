@@ -205,7 +205,7 @@ test("the 'community' brand renders the ritual theme for lifecycle and transacti
     for (const name of ['welcome', 'onboardingDay1', 'onboardingDay3', 'onboardingDay7', 'reengagement', 'emailVerification', 'passwordReset']) {
         const out = render(name, data);
         assert.match(out.html, /class="sigil"/, `${name} should use the ritual shell`);
-        assert.match(out.html, /community\.marketunderworld\.com/);
+        assert.ok(out.html.includes('https://community.marketunderworld.com'), `${name} should link to the community site`);
     }
     assert.match(render('emailVerification', data).html, /verify-email\?token=t/);
     assert.match(render('passwordReset', data).html, /reset-password\?token=t/);
