@@ -337,6 +337,7 @@ export interface ProductInput {
   tags?: string[];
   seoMetadata?: Record<string, unknown>;
   stockQuantity?: number;
+  customFields?: Record<string, unknown>;
 }
 
 export interface ProductPricingInput {

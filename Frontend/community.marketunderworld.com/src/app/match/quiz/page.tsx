@@ -63,7 +63,10 @@ export default function MatchQuiz() {
 
   const nextStep = () => {
     if (step < 3) setStep(step + 1)
-    else router.push("/match/analyzing")
+    else {
+      try { sessionStorage.setItem("match_answers", JSON.stringify(answers)) } catch { /* storage blocked: results fall back to showing all teachers */ }
+      router.push("/match/results")
+    }
   }
 
   const prevStep = () => {

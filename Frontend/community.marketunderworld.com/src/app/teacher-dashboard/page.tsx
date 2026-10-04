@@ -1,94 +1,104 @@
 "use client"
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ListingCard, Badge } from '@/components/ui/ListingCard';
-import { AppButton } from '@/components/ui/AppButton';
-import { Zap, Users, CreditCard, MessageSquare, Plus, ArrowUpRight, Play, Clock, TrendingUp } from 'lucide-react';
-import { STATS, LIVE_ACTIVITY_MOCK } from '@/data/mockData';
-import { cn } from '@/lib/utils';
+import { useAuth } from "@/context/auth-context"
+import { useEffect, useState } from "react"
+import { SignInNotice } from "@/components/nightlife/sign-in-notice"
+import { edu, isUnauthorized, type Teacher } from "@/lib/api/education"
+import { cn } from "@/lib/utils"
+import { ImageUpload } from "@/components/upload/image-upload"
 
-export default function TeacherDashboardOverview() {
+const REGIONS = ["sas", "eap", "mea", "eur", "nam", "lat", "afr"]
+const input = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 outline-none focus:border-orange-500/50 text-white"
+const label = "block text-xs font-bold text-gray-400 uppercase mb-2"
+
+const STATUS_COPY: Record<Teacher["status"], { text: string; cls: string }> = {
+  pending: { text: "Your application is waiting for admin review. You'll be listed once it's approved.", cls: "bg-amber-500/10 border-amber-500/20 text-amber-300" },
+  active: { text: "You're approved and listed on the Education page.", cls: "bg-green-500/10 border-green-500/20 text-green-300" },
+  rejected: { text: "Your application was not approved. Update it and save to resubmit.", cls: "bg-red-500/10 border-red-500/20 text-red-300" },
+  suspended: { text: "Your teacher account is suspended.", cls: "bg-red-500/10 border-red-500/20 text-red-300" },
+}
+
+export default function TeacherProfilePage() {
+  const [loading, setLoading] = useState(true)
+  const [needsLogin, setNeedsLogin] = useState(false)
+  const [teacher, setTeacher] = useState<Teacher | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null)
+  const [form, setForm] = useState({
+    displayName: "", subject: "", bio: "", longBio: "", regionId: "sas", country: "", priceNote: "", avatarUrl: "", tags: "",
+  })
+
+  const fill = (t: Teacher) =>
+    setForm({
+      displayName: t.name, subject: t.subject, bio: t.bio, longBio: t.longBio ?? "", regionId: t.regionId, country: t.country,
+      priceNote: t.priceNote ?? "", avatarUrl: t.avatarUrl ?? "", tags: t.tags.join(", "),
+    })
+
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
+  useEffect(() => {
+    if (authLoading) return
+    if (!isAuthenticated) {
+      setNeedsLogin(true)
+      setLoading(false)
+      return
+    }
+    edu.myTeacher()
+      .then((t) => { setTeacher(t); if (t) fill(t) })
+      .catch((err) => (isUnauthorized(err) ? setNeedsLogin(true) : setMessage({ text: err instanceof Error ? err.message : "Could not load your profile", ok: false })))
+      .finally(() => setLoading(false))
+  }, [authLoading, isAuthenticated])
+
+  const save = async () => {
+    setSaving(true)
+    setMessage(null)
+    try {
+      const saved = await edu.saveTeacher({
+        displayName: form.displayName, subject: form.subject, bio: form.bio, longBio: form.longBio || undefined,
+        regionId: form.regionId, country: form.country, priceNote: form.priceNote || undefined, avatarUrl: form.avatarUrl || undefined,
+        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        skills: teacher?.skills ?? [], education: teacher?.education ?? [],
+      })
+      setTeacher(saved)
+      setMessage({ text: "Saved.", ok: true })
+    } catch (err) {
+      setMessage({ text: err instanceof Error ? err.message : "Could not save", ok: false })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (needsLogin) return <SignInNotice next="/teacher-dashboard" what="apply to teach" />
+
   return (
-    <div className="p-10 space-y-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-2 text-white uppercase italic font-display">Operator <span className="text-semantic-warning">Terminal.</span></h1>
-          <p className="text-text-muted font-mono text-xs uppercase tracking-widest">Node: South Asia #847 • Clearance: Level 3</p>
-        </div>
-        <div className="flex gap-4">
-          <AppButton className="bg-semantic-warning text-black h-12 px-8 font-bold font-mono text-[11px] uppercase">
-            <Play className="w-4 h-4 mr-2" /> Initialize Broadcast
-          </AppButton>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'My Students', val: '1,240', icon: Users, color: 'text-semantic-info' },
-          { label: 'Total Revenue', val: '12.4 ETH', icon: CreditCard, color: 'text-brand-green' },
-          { label: 'Marketplace Volume', val: '842', icon: Zap, color: 'text-semantic-warning' },
-          { label: 'Active Codes', val: '3', icon: MessageSquare, color: 'text-white' },
-        ].map((stat, i) => (
-          <ListingCard key={i} variant="stats">
-            <div className="flex items-center justify-between mb-4">
-              <stat.icon className={cn("w-5 h-5", stat.color)} />
-              <ArrowUpRight className="w-4 h-4 text-text-muted" />
-            </div>
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{stat.label}</div>
-            <div className="text-2xl font-bold text-white mt-1 font-mono">{stat.val}</div>
-          </ListingCard>
-        ))}
+    <div className="max-w-3xl space-y-8 text-white">
+      <div>
+        <h1 className="text-3xl font-bold">{teacher ? "Your teacher profile" : "Apply to teach"}</h1>
+        <p className="text-gray-400 mt-1">Applications are reviewed by our team. Pricing is agreed directly with students; nothing is charged by this site.</p>
       </div>
+      {loading && <p className="text-gray-500">Loading…</p>}
+      {teacher && <div className={cn("p-4 rounded-xl border text-sm font-medium", STATUS_COPY[teacher.status].cls)}>{STATUS_COPY[teacher.status].text}{teacher.reviewNote ? ` Note: ${teacher.reviewNote}` : ""}</div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <ListingCard className="lg:col-span-8 p-10 border-brand-border bg-brand-surface">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-brand-green" /> Revenue Performance
-            </h3>
-            <Badge variant="success">SYNC: LIVE</Badge>
+      {!loading && (
+        <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-8 space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div><label className={label}>Display name</label><input className={input} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} /></div>
+            <div><label className={label}>Subject</label><input className={input} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></div>
+            <div><label className={label}>Region</label>
+              <select className={input} value={form.regionId} onChange={(e) => setForm({ ...form, regionId: e.target.value })}>{REGIONS.map((r) => <option key={r} value={r}>{r.toUpperCase()}</option>)}</select></div>
+            <div><label className={label}>Country</label><input className={input} value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></div>
+            <div><label className={label}>Price note (optional)</label><input className={input} placeholder="e.g. ₹1,500 per hour" value={form.priceNote} onChange={(e) => setForm({ ...form, priceNote: e.target.value })} /></div>
+            <ImageUpload label="Profile photo (optional)" purpose="teacher_avatar" value={form.avatarUrl} onChange={(url) => setForm({ ...form, avatarUrl: url })} />
           </div>
-          <div className="h-[350px] flex items-end justify-between gap-2 px-4">
-            {STATS.revenueData.map((d, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
-                <div className="w-full bg-brand-void rounded-t relative overflow-hidden h-full flex flex-col justify-end">
-                  <motion.div 
-                    initial={{ height: 0 }}
-                    animate={{ height: `${(d.value / 10000) * 100}%` }}
-                    className="w-full bg-semantic-warning opacity-20 group-hover:opacity-40 transition-all"
-                  />
-                  <div className="absolute top-2 w-full text-center text-[8px] font-mono text-text-ghost opacity-0 group-hover:opacity-100 transition-opacity">
-                    {d.value}
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold text-text-muted uppercase font-mono">{d.name}</span>
-              </div>
-            ))}
-          </div>
-        </ListingCard>
-
-        <ListingCard className="lg:col-span-4 p-10 space-y-8 border-brand-border bg-brand-surface">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted">Secret Discount Protocols</h3>
-          <div className="space-y-4">
-            {[
-              { code: 'SECRET70', discount: '70%', status: 'Active' },
-              { code: 'MU10', discount: '10%', status: 'Active' },
-            ].map(code => (
-              <div key={code.code} className="p-4 bg-brand-void rounded border border-brand-border flex justify-between items-center group hover:border-semantic-warning transition-all">
-                <div>
-                  <div className="font-mono font-bold text-white text-sm">{code.code}</div>
-                  <div className="text-[10px] text-text-muted uppercase font-bold">{code.discount} OFF</div>
-                </div>
-                <Badge variant="success" className="bg-brand-green/10 text-brand-green border-none">{code.status}</Badge>
-              </div>
-            ))}
-            <AppButton variant="secondary" className="w-full border-dashed border-brand-border h-12 font-mono text-[10px] uppercase">
-              <Plus className="w-4 h-4 mr-2" /> Generate Security Key
-            </AppButton>
-          </div>
-        </ListingCard>
-      </div>
+          <div><label className={label}>Short bio (shown on cards)</label><textarea className={cn(input, "h-24 py-3")} maxLength={400} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></div>
+          <div><label className={label}>Full bio (optional)</label><textarea className={cn(input, "h-40 py-3")} value={form.longBio} onChange={(e) => setForm({ ...form, longBio: e.target.value })} /></div>
+          <div><label className={label}>Tags, comma separated</label><input className={input} value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} /></div>
+          {message && <p role="alert" className={cn("text-sm", message.ok ? "text-green-400" : "text-red-400")}>{message.text}</p>}
+          <button onClick={save} disabled={saving || teacher?.status === "suspended"} className="w-full h-14 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-bold disabled:opacity-60">
+            {saving ? "Saving…" : teacher ? "Save changes" : "Submit application"}
+          </button>
+        </div>
+      )}
     </div>
-  );
+  )
 }

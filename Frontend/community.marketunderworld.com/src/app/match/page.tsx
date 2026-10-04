@@ -20,30 +20,30 @@ export default function AIMatchLanding() {
             <div className="absolute -inset-1 bg-gradient-to-r from-[#6C63FF] to-[#00D4FF] rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000" />
             <NexusBadge variant="info" className="relative bg-[#0A0A0F] border-none px-6 py-2">
               <span className="nexus-gradient-text flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> Powered by NEXUS AI
+                <Sparkles className="w-4 h-4" /> Teacher matching
               </span>
             </NexusBadge>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-[1.1]">
-            Find Your Perfect <br />
-            <span className="nexus-gradient-text">Teacher in 60 Seconds.</span>
+            Find a Teacher <br />
+            <span className="nexus-gradient-text">That Fits You.</span>
           </h1>
 
           <p className="text-gray-400 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-            Our AI analyzes your learning style, goals, schedule and preferences to match you with the ideal private teacher from 343 global experts.
+            Tell us what you want to learn and your goal. We list the approved teachers who teach that subject, best rated first.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">🎯 Personalized Match</NexusBadge>
-            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">🌍 From 7 Regions</NexusBadge>
-            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">⚡ 60-Second Quiz</NexusBadge>
+            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">🎯 Based on your answers</NexusBadge>
+            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">🌍 Approved teachers only</NexusBadge>
+            <NexusBadge variant="default" className="bg-white/5 border border-white/10 px-4 py-2">⚡ 3-Step Quiz</NexusBadge>
           </div>
 
           <div className="flex flex-col items-center gap-6">
             <Link href="/match/quiz">
               <NexusButton size="lg" className="px-16 h-20 text-xl shadow-2xl shadow-[#6C63FF]/30">
-                ✨ Start AI Matching <ChevronRight className="ml-2 w-6 h-6" />
+                ✨ Start the Quiz <ChevronRight className="ml-2 w-6 h-6" />
               </NexusButton>
             </Link>
             <Link href="/education" className="text-gray-500 hover:text-white transition-colors font-bold text-sm">
@@ -55,9 +55,9 @@ export default function AIMatchLanding() {
         {/* How it works */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-20">
           {[
-            { icon: Brain, color: "bg-purple-500/10 text-purple-400", title: "Answer 13 Questions", desc: "Tell us your goals, style and availability" },
-            { icon: Zap, color: "bg-cyan-500/10 text-cyan-400", title: "AI Analyzes 47 Factors", desc: "Our algorithm scores every teacher against your profile" },
-            { icon: Target, color: "bg-amber-500/10 text-amber-400", title: "Get Your Matches", desc: "Ranked by compatibility with detailed match explanations" },
+            { icon: Brain, color: "bg-purple-500/10 text-purple-400", title: "Answer 3 Steps", desc: "Pick your subjects, your goal and how much time you have" },
+            { icon: Zap, color: "bg-cyan-500/10 text-cyan-400", title: "We Filter Teachers", desc: "Only approved teachers who teach your subjects are shown" },
+            { icon: Target, color: "bg-amber-500/10 text-amber-400", title: "Pick and Request", desc: "Open a teacher, then request a place in one of their sessions" },
           ].map((step, i) => (
             <motion.div
               key={i}

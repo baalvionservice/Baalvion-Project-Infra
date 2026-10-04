@@ -35,7 +35,6 @@ export default function NotificationCenter() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const filtered = notifications.filter(n => {
     const matchesFilter = filter === 'all' || n.type === filter;
@@ -57,40 +56,6 @@ export default function NotificationCenter() {
     }
   };
 
-  const startDemo = () => {
-    setIsDemoMode(true);
-    addToast({
-      type: 'class',
-      title: 'Demo Started!',
-      message: 'Watch as mock notifications arrive.',
-      duration: 3000
-    });
-
-    setTimeout(() => {
-      addToast({
-        type: 'payment',
-        title: '0.02 ETH Received ✅',
-        message: 'From: Priya Sharma (class payment)',
-        duration: 5000
-      });
-      addNotification({
-        type: 'payment',
-        title: '0.02 ETH Payment Received',
-        body: 'Blockchain confirmation successful. Transaction verified.',
-        source: { name: 'NEXUS Wallet' }
-      });
-    }, 2000);
-
-    setTimeout(() => {
-      addToast({
-        type: 'achievement',
-        title: 'Achievement Unlocked! 🎉',
-        message: 'Crypto Whale — 84% complete. +50 XP earned.',
-        duration: 5000
-      });
-    }, 5000);
-  };
-
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white">
       <Navbar />
@@ -102,9 +67,6 @@ export default function NotificationCenter() {
             <p className="text-gray-500 text-lg">Your activity, updates and alerts — all in one place.</p>
           </div>
           <div className="flex gap-3">
-            <NexusButton variant="outline" size="sm" onClick={startDemo} className={cn("border-white/10", isDemoMode && "text-emerald-400")}>
-              <Play className="w-4 h-4 mr-2" /> Live Demo Mode
-            </NexusButton>
             <Link href="/settings/notifications">
               <NexusButton variant="outline" size="sm" className="border-white/10">
                 <Settings className="w-4 h-4 mr-2" /> Preferences
@@ -118,7 +80,7 @@ export default function NotificationCenter() {
           <div className="lg:col-span-8 space-y-8">
             <NexusCard className="p-6 bg-white/[0.02] border-white/5 flex flex-col md:flex-row items-center gap-6 justify-between">
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto">
-                {['all', 'class', 'payment', 'order', 'message', 'achievement'].map(cat => (
+                {['all', 'booking', 'application', 'verification', 'gig', 'education', 'bounty', 'message', 'kyc'].map(cat => (
                   <button
                     key={cat}
                     onClick={() => setFilter(cat)}

@@ -2,9 +2,12 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '@/context/auth-context';
+import { feed, type FeedItem } from '@/lib/api/notifications';
 
-export type NotificationType = 'class' | 'payment' | 'order' | 'message' | 'achievement' | 'forum' | 'system' | 'account';
+export type NotificationType =
+  | 'class' | 'payment' | 'order' | 'message' | 'achievement' | 'forum' | 'system' | 'account'
+  | 'booking' | 'application' | 'verification' | 'gig' | 'education' | 'bounty' | 'kyc';
 
 export interface Notification {
   id: string;
@@ -53,84 +56,62 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'notif_1',
-    type: 'class',
-    title: 'Chemistry Class in 10 Minutes!',
-    body: "Your scheduled class starts at 4:00 PM. Don't be late! Priya is already online.",
-    read: false,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 2), // 2 min ago
-    actionUrl: '/classroom/class-847',
-    actionLabel: 'Join Class',
-    source: { name: 'Priya Sharma', role: 'Teacher' }
-  },
-  {
-    id: 'notif_2',
-    type: 'payment',
-    title: '0.02 ETH Payment Confirmed ✅',
-    body: "Payment for Chemistry class confirmed on blockchain in 2.3 seconds. TX: 0x4f2a...8b3c",
-    read: false,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 min ago
-    actionUrl: '/student/dashboard/wallet',
-    actionLabel: 'View Receipt',
-    source: { name: 'NEXUS Wallet' }
-  },
-  {
-    id: 'notif_3',
-    type: 'message',
-    title: 'New Message from Priya Sharma',
-    body: "I've prepared some extra practice problems for today's class. Check the resources tab!",
-    read: false,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 min ago
-    actionUrl: '/messages/priya-sharma',
-    actionLabel: 'Reply',
-    source: { name: 'Priya Sharma', role: 'Teacher' }
-  },
-  {
-    id: 'notif_4',
-    type: 'order',
-    title: 'Order Shipped! 🚀',
-    body: "Your MacBook Air M4 order #NX-2026-01245 has been shipped. ETA: March 12.",
-    read: false,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1h ago
-    actionUrl: '/marketplace/orders/NX-2026-01245',
-    actionLabel: 'Track Order',
-    source: { name: 'TechGadgets Store' }
-  },
-  {
-    id: 'notif_5',
-    type: 'achievement',
-    title: 'Achievement Progress Update!',
-    body: "Crypto Whale badge: 84% complete! Just 0.158 ETH more to unlock.",
-    read: false,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2h ago
-    actionUrl: '/admin/student/achievements',
-    actionLabel: 'View Progress'
-  },
-  {
-    id: 'notif_6',
-    type: 'achievement',
-    title: 'New Badge Unlocked! 🎉',
-    body: "🌍 Global Learner badge earned! You enrolled with a teacher from a different country. +50 XP!",
-    read: true,
-    pinned: false,
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // Yesterday
-    actionUrl: '/admin/student/achievements',
-    actionLabel: 'View Badge'
-  }
-];
+// Notifications come from the server feed (community-service) while signed in. Anything raised
+// locally through addNotification is kept alongside it until the page reloads.
+const POLL_MS = 60_000;
+
+const fromFeed = (i: FeedItem): Notification => ({
+  id: i.id,
+  type: i.type as NotificationType,
+  title: i.title,
+  body: i.body,
+  read: i.read,
+  pinned: false,
+  timestamp: new Date(i.createdAt),
+  actionUrl: i.url ?? undefined,
+  actionLabel: i.url ? 'Open' : undefined,
+  metadata: { server: true },
+});
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  const { isAuthenticated } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const knownIds = React.useRef<Set<string> | null>(null);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const addToast = useCallback((t: Omit<Toast, 'id'>) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { ...t, id }].slice(-4)); // Max 4 toasts
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      knownIds.current = null;
+      setNotifications(prev => prev.filter(n => !n.metadata?.server));
+      return;
+    }
+    let alive = true;
+    const load = async () => {
+      try {
+        const data = await feed.list();
+        if (!alive || !data) return;
+        const items = data.items.map(fromFeed);
+        // After the first load, announce anything that arrived since the last poll.
+        if (knownIds.current) {
+          for (const n of items) {
+            if (!n.read && !knownIds.current.has(n.id)) addToast({ type: 'info', title: n.title, message: n.body, duration: 6000 });
+          }
+        }
+        knownIds.current = new Set(items.map(n => n.id));
+        setNotifications(prev => [...prev.filter(n => !n.metadata?.server), ...items]);
+      } catch { /* a missed poll is harmless; try again next tick */ }
+    };
+    load();
+    const timer = setInterval(load, POLL_MS);
+    return () => { alive = false; clearInterval(timer); };
+  }, [isAuthenticated, addToast]);
 
   const addNotification = useCallback((n: Omit<Notification, 'id' | 'read' | 'pinned' | 'timestamp'>) => {
     const newNotif: Notification = {
@@ -143,31 +124,31 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setNotifications(prev => [newNotif, ...prev]);
   }, []);
 
+  const isServer = (id: string) => notifications.find(n => n.id === id)?.metadata?.server === true;
+
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    if (isServer(id)) feed.markRead(id).catch(() => {});
   };
 
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    if (notifications.some(n => n.metadata?.server)) feed.markAllRead().catch(() => {});
   };
 
   const deleteNotification = (id: string) => {
+    if (isServer(id)) feed.remove(id).catch(() => {});
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   const clearAll = () => {
+    notifications.filter(n => n.metadata?.server).forEach(n => feed.remove(n.id).catch(() => {}));
     setNotifications([]);
   };
 
   const togglePin = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n));
   };
-
-  const addToast = useCallback((t: Omit<Toast, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newToast: Toast = { ...t, id };
-    setToasts(prev => [...prev, newToast].slice(-4)); // Max 4 toasts
-  }, []);
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));

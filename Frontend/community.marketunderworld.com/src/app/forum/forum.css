@@ -1,0 +1,747 @@
+/* ================================================================
+   BAAL FORUM THEME — Epic dark cinematic design
+   Inspired by the Canaanite god of storms, lightning & thunder
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Root ── */
+.baal-page {
+  min-height: 100vh;
+  background: #06040a;
+  color: #e8dcc8;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.baal-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.baal-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.baal-hero-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, transparent 0%, #06040a99 60%, #06040a 100%),
+    linear-gradient(to bottom, #06040acc 0%, transparent 30%, transparent 60%, #06040a 100%);
+}
+
+.baal-hero-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+}
+
+/* Animated sparks/particles */
+.baal-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.baal-spark {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 0 6px 2px #7c3aed88;
+  left: calc(var(--i) * 5% + 2%);
+  top: calc(100% + 10px);
+  animation: spark-rise calc(3s + var(--i) * 0.4s) ease-in infinite;
+  animation-delay: calc(var(--i) * 0.3s);
+  opacity: 0;
+}
+
+@keyframes spark-rise {
+  0%   { top: 100%; opacity: 0; transform: scale(0.5); }
+  10%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { top: -5%; opacity: 0; transform: scale(1.5) translateX(calc(var(--i) * 2px - 10px)); }
+}
+
+/* Hero content */
+.baal-hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0 24px;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding-top: 80px;
+}
+
+.baal-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #a78bfa;
+  border: 1px solid #7c3aed44;
+  padding: 6px 16px;
+  border-radius: 99px;
+  background: #7c3aed11;
+  backdrop-filter: blur(8px);
+}
+
+.baal-eyebrow-icon { font-size: 14px; }
+
+/* Main title */
+.baal-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.baal-title-glow {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(80px, 16vw, 180px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.1em;
+  color: transparent;
+  background: linear-gradient(
+    135deg,
+    #fbbf24 0%,
+    #f59e0b 20%,
+    #ffffff 45%,
+    #e5d08a 55%,
+    #c0392b 80%,
+    #7c3aed 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 60px #7c3aed88) drop-shadow(0 0 120px #c0392b44);
+  animation: title-pulse 4s ease-in-out infinite;
+}
+
+@keyframes title-pulse {
+  0%, 100% { filter: drop-shadow(0 0 60px #7c3aed88) drop-shadow(0 0 120px #c0392b44); }
+  50%       { filter: drop-shadow(0 0 90px #a78bfacc) drop-shadow(0 0 160px #e74c3c66); }
+}
+
+.baal-title-sub {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0.6em;
+  color: #a78bfa;
+  opacity: 0.8;
+}
+
+.baal-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(13px, 2vw, 18px);
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  color: #d4af7a;
+  margin: 0;
+}
+
+/* Divider */
+.baal-hero-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.baal-hero-divider span:not(.baal-divider-rune) {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #7c3aed66, transparent);
+}
+
+.baal-divider-rune {
+  font-size: 24px;
+  color: #a78bfa;
+  opacity: 0.7;
+}
+
+/* Hero description */
+.baal-hero-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #c4b5a0;
+  max-width: 560px;
+  margin: 0;
+  font-weight: 300;
+}
+
+.baal-hero-desc em {
+  color: #d4af7a;
+  font-style: normal;
+  font-weight: 600;
+  border-bottom: 1px solid #d4af7a66;
+}
+
+/* CTA */
+.baal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #7c3aed, #c0392b);
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border-radius: 4px;
+  border: 1px solid #9f5cff44;
+  transition: all 0.3s;
+  box-shadow: 0 0 30px #7c3aed44, 0 4px 20px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.baal-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, #ffffff22 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.4s;
+}
+
+.baal-cta:hover::before { transform: translateX(100%); }
+.baal-cta:hover { box-shadow: 0 0 50px #9f5cff66, 0 8px 30px rgba(0,0,0,0.6); transform: translateY(-2px); }
+
+.baal-cta-arrow {
+  font-size: 18px;
+  animation: bounce-down 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(4px); }
+}
+
+/* Scroll hint */
+.baal-scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.baal-scroll-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, #7c3aed, transparent);
+  margin: 0 auto;
+  animation: scroll-line 2s ease-in-out infinite;
+}
+
+@keyframes scroll-line {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); transform-origin: top; }
+  50%       { opacity: 1; transform: scaleY(1); transform-origin: top; }
+}
+
+/* ── ATTRIBUTES STRIP ── */
+.baal-attrs {
+  display: flex;
+  align-items: stretch;
+  background: linear-gradient(135deg, #0e0618 0%, #130b1e 50%, #0e0618 100%);
+  border-top: 1px solid #7c3aed33;
+  border-bottom: 1px solid #7c3aed33;
+  overflow-x: auto;
+}
+
+.baal-attr-item {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px;
+  border-right: 1px solid #7c3aed22;
+  transition: background 0.3s;
+  cursor: default;
+  gap: 4px;
+}
+
+.baal-attr-item:last-child { border-right: none; }
+.baal-attr-item:hover { background: #7c3aed11; }
+
+.baal-attr-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 0 8px #a78bfa88);
+}
+
+.baal-attr-label {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4af7a;
+  letter-spacing: 0.08em;
+}
+
+.baal-attr-sub {
+  font-size: 11px;
+  color: #7c6a8a;
+  letter-spacing: 0.05em;
+}
+
+/* ── LORE SECTION ── */
+.baal-lore {
+  padding: 100px 24px;
+  background: linear-gradient(180deg, #06040a 0%, #0d0818 50%, #06040a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.baal-lore::before {
+  content: 'בַּעַל';
+  position: absolute;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 300px;
+  color: #7c3aed05;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.baal-lore-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 80px;
+  align-items: start;
+}
+
+.baal-section-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.baal-section-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: #7c3aed;
+  display: inline-block;
+}
+
+.baal-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  color: #e8dcc8;
+  margin: 0 0 40px;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+}
+
+.baal-lore-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.baal-lore-body p {
+  font-size: 16px;
+  line-height: 1.85;
+  color: #b0a090;
+  margin: 0;
+  font-weight: 300;
+}
+
+.baal-lore-body strong {
+  color: #d4af7a;
+  font-weight: 600;
+}
+
+.baal-lore-body em {
+  color: #a78bfa;
+  font-style: italic;
+}
+
+/* Drop cap */
+.baal-dropcap {
+  float: left;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 72px;
+  line-height: 0.75;
+  margin-right: 10px;
+  color: #c0392b;
+  filter: drop-shadow(0 0 12px #c0392b66);
+}
+
+/* Tags */
+.baal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.baal-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a78bfa;
+  background: #7c3aed15;
+  border: 1px solid #7c3aed33;
+  padding: 4px 12px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.baal-tag:hover {
+  background: #7c3aed30;
+  border-color: #7c3aed66;
+  color: #c4b5fd;
+}
+
+/* Idol image */
+.baal-idol-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.baal-idol-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7c3aed33 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: idol-pulse 3s ease-in-out infinite;
+}
+
+@keyframes idol-pulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.baal-idol-img {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid #7c3aed33;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px #7c3aed22;
+  position: relative;
+  z-index: 1;
+}
+
+.baal-idol-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: #5c4e6e;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ── COMMUNITIES ── */
+.baal-communities {
+  padding: 80px 24px 100px;
+  background: #06040a;
+  position: relative;
+}
+
+.baal-communities::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #7c3aed44, transparent);
+}
+
+.baal-communities-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.baal-communities-lead {
+  font-size: 16px;
+  color: #7c6a8a;
+  margin: 0 0 48px;
+  font-weight: 300;
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+/* Grid */
+.baal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+/* Community card override for Baal theme */
+.forum-category-row {
+  background: linear-gradient(135deg, #0e0618 0%, #130a1e 100%) !important;
+  border: 1px solid #7c3aed33 !important;
+  border-radius: 8px !important;
+  padding: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  text-decoration: none !important;
+  transition: all 0.3s !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.forum-category-row::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #7c3aed, #c0392b, #7c3aed);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.forum-category-row:hover::before { opacity: 1; }
+.forum-category-row:hover {
+  border-color: #7c3aed66 !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 20px 50px rgba(124, 58, 237, 0.2) !important;
+}
+
+.forum-category-icon-wrap {
+  width: 44px !important;
+  height: 44px !important;
+  background: linear-gradient(135deg, #7c3aed22, #c0392b22) !important;
+  border: 1px solid #7c3aed44 !important;
+  border-radius: 10px !important;
+}
+
+.forum-category-icon {
+  color: #a78bfa !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.forum-category-info { display: flex; flex-direction: column; gap: 6px; }
+
+.forum-category-name {
+  font-family: 'Cinzel', serif !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #e8dcc8 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.forum-category-row:hover .forum-category-name { color: #d4af7a !important; }
+
+.forum-category-desc {
+  font-size: 13px !important;
+  color: #7c6a8a !important;
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  line-height: 1.6 !important;
+}
+
+.forum-category-access {
+  font-size: 11px !important;
+  color: #5c4e6e !important;
+}
+
+.forum-category-stats,
+.forum-category-last { display: none !important; }
+
+/* Access notice */
+.baal-access-notice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #130a1e 0%, #1a0a14 100%);
+  border: 1px solid #9b59b644;
+  border-radius: 8px;
+  padding: 20px 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s;
+}
+
+.baal-access-notice:hover {
+  border-color: #9b59b688;
+  box-shadow: 0 0 30px #9b59b622;
+}
+
+.baal-access-notice-icon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  background: #9b59b622;
+  border: 1px solid #9b59b644;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.baal-access-notice-text {
+  flex: 1;
+}
+
+.baal-access-notice-text strong {
+  display: block;
+  font-size: 14px;
+  color: #c4b5a0;
+  margin-bottom: 2px;
+}
+
+.baal-access-notice-text p {
+  font-size: 12px;
+  color: #7c6a8a;
+  margin: 0;
+}
+
+.baal-access-arrow {
+  font-size: 20px;
+  color: #9b59b6;
+  transition: transform 0.3s;
+}
+
+.baal-access-notice:hover .baal-access-arrow { transform: translateX(4px); }
+
+/* Empty state */
+.baal-empty {
+  text-align: center;
+  padding: 80px 24px;
+  background: #0e0618;
+  border: 1px solid #7c3aed22;
+  border-radius: 8px;
+  margin-bottom: 32px;
+}
+
+.baal-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 12px #a78bfa88);
+}
+
+.baal-empty p {
+  color: #5c4e6e;
+  font-size: 14px;
+}
+
+/* ── CINEMATIC DIVIDER ── */
+.baal-cinematic-divider {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, #0e0618 0%, #06040a 50%, #0e0618 100%);
+  border-top: 1px solid #7c3aed22;
+}
+
+.baal-cinematic-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #7c3aed44, transparent);
+}
+
+.baal-cinematic-glyph {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #7c3aed66;
+  white-space: nowrap;
+}
+
+/* ── BADGE OVERRIDES ── */
+.forum-badge--open   { background: #0a2a0a !important; color: #4ade80 !important; border-color: #1a4a1a !important; }
+.forum-badge--apply  { background: #2a1a00 !important; color: #fb923c !important; border-color: #3a2a00 !important; }
+.forum-badge--invite { background: #0a1a35 !important; color: #60a5fa !important; border-color: #0a2a55 !important; }
+.forum-badge--paid   { background: #1a0a35 !important; color: #c084fc !important; border-color: #3a1a60 !important; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .baal-lore-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .baal-idol-wrap {
+    order: -1;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .baal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .baal-attrs {
+    flex-wrap: wrap;
+  }
+
+  .baal-attr-item {
+    min-width: calc(50% - 1px);
+  }
+}
+
+@media (max-width: 480px) {
+  .baal-hero-content { padding-top: 120px; }
+  .baal-attrs { flex-direction: column; }
+  .baal-attr-item { min-width: 100%; }
+}

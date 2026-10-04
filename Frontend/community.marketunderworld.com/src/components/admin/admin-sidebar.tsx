@@ -19,7 +19,23 @@ import {
   ClipboardList,
   FileCheck,
   RotateCcw,
-  Tag
+  Tag,
+  MapPin,
+  MessageSquare,
+  Megaphone,
+  AlertOctagon,
+  Scale,
+  Award,
+  Wallet,
+  Bitcoin,
+  Percent,
+  LifeBuoy,
+  Undo2,
+  Video,
+  GraduationCap,
+  Fingerprint,
+  Radio,
+  ScrollText
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -48,8 +64,70 @@ const ADMIN_NAV = [
     ]
   },
   {
-    group: "MONITORING",
+    group: "FORUM CONTROL",
     items: [
+      { name: "Thread Queue", path: "/admin/forum/queue", icon: Scale },
+      { name: "Warn & Strike System", path: "/admin/forum/strikes", icon: AlertOctagon },
+      { name: "Rank & Badges", path: "/admin/forum/badges", icon: Award },
+    ]
+  },
+  {
+    group: "MARKETPLACE ESCROW",
+    items: [
+      { name: "Escrow Manager", path: "/admin/marketplace/escrow", icon: Wallet },
+      { name: "Crypto Payouts", path: "/admin/marketplace/payouts", icon: Bitcoin },
+      { name: "Commission Tiers", path: "/admin/marketplace/commissions", icon: Percent },
+    ]
+  },
+  {
+    group: "SUPPORT DESK",
+    items: [
+      { name: "Support Tickets", path: "/admin/support/tickets", icon: LifeBuoy },
+      { name: "Refund Reversals", path: "/admin/support/refunds", icon: Undo2 },
+    ]
+  },
+  {
+    group: "EDUCATION HUB",
+    items: [
+      { name: "Teacher Approvals", path: "/admin/education/approvals", icon: GraduationCap },
+      { name: "Sessions", path: "/admin/education/live", icon: Video },
+    ]
+  },
+  {
+    group: "VERIFICATION",
+    items: [
+      { name: "Identity KYC", path: "/admin/kyc", icon: Fingerprint },
+      { name: "Investment Listings", path: "/admin/investments", icon: Tag },
+    ]
+  },
+  {
+    group: "BUG BOUNTY",
+    items: [
+      { name: "Tasks, Reports & Inbox", path: "/admin/bounty", icon: ShieldCheck },
+    ]
+  },
+  {
+    group: "NIGHTLIFE",
+    items: [
+      { name: "Clubs Directory", path: "/admin/clubs", icon: MapPin },
+      { name: "Events Calendar", path: "/admin/clubs/events", icon: MapPin },
+      { name: "Guest List & VIP Requests", path: "/admin/clubs/bookings", icon: MessageSquare },
+      { name: "Staffing Verification", path: "/nightlife/verify", icon: ShieldCheck },
+    ]
+  },
+  {
+    group: "LOCALS HUB",
+    items: [
+      { name: "Manage Listings", path: "/admin/locals", icon: MapPin },
+      { name: "Applications Inbox", path: "/admin/locals/applications", icon: MessageSquare },
+      { name: "Post Casting Call", path: "/admin/locals/new", icon: Megaphone },
+    ]
+  },
+  {
+    group: "SYSTEM CORE",
+    items: [
+      { name: "Global Announcements", path: "/admin/system/announcements", icon: Radio },
+      { name: "Staff Audit Logs", path: "/admin/system/audit", icon: ScrollText },
       { name: "Security Node", path: "/admin/security", icon: Lock },
       { name: "System Logs", path: "/admin/forum/logs", icon: Database },
     ]
