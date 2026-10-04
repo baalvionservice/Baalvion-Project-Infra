@@ -14,6 +14,7 @@
 const { BRANDS } = require('./brands');
 const { CONTENT } = require('./content');
 const { header, footer, resourcesGrid, stepsList, shell } = require('./shell');
+const ritual = require('./ritual');
 
 function resolveBrand(slug) {
   return BRANDS[slug] && CONTENT[slug] ? { b: BRANDS[slug], c: CONTENT[slug] } : { b: BRANDS.baalvion, c: CONTENT.baalvion };
@@ -39,6 +40,7 @@ function escapeHtml(s) {
 
 function renderWelcome(brandSlug, { fullName } = {}) {
   const { b, c } = resolveBrand(brandSlug);
+  if (b.theme === 'ritual') return ritual.renderWelcome(b, { fullName });
   const { welcome: w, steps, resources } = c;
   const first = escapeHtml(firstNameOf(fullName));
   const body = `${header(b)}
@@ -65,6 +67,7 @@ ${footer(b)}`;
 
 function renderOnboardingDay(brandSlug, day, { fullName } = {}) {
   const { b, c } = resolveBrand(brandSlug);
+  if (b.theme === 'ritual') return ritual.renderOnboardingDay(b, day, { fullName });
   const d = c[`day${day}`];
   const { resources } = c;
   const partNumber = day === 1 ? 1 : day === 3 ? 2 : 3;
@@ -94,6 +97,7 @@ ${footer(b)}`;
 
 function renderReengagement(brandSlug, { fullName } = {}) {
   const { b, c } = resolveBrand(brandSlug);
+  if (b.theme === 'ritual') return ritual.renderReengagement(b, { fullName });
   const r = c.reengagement;
   const { steps } = c;
   const body = `${header(b)}
@@ -127,6 +131,7 @@ ${footer(b)}`;
 
 function renderLeadNotification(brandSlug, { formName = 'Contact form', fields = [], message } = {}) {
   const { b } = resolveBrand(brandSlug);
+  if (b.theme === 'ritual') return ritual.renderLead(b, { formName, fields, message });
   const safeFormName = escapeHtml(formName);
   const body = `${header(b)}
 <div class="hero" style="padding-bottom:24px;">
@@ -144,4 +149,12 @@ ${footer(b)}`;
   return { subject: `New ${formName.toLowerCase()} submission`, html: shell(b, `New ${formName.toLowerCase()} submission`, body) };
 }
 
-module.exports = { renderWelcome, renderOnboardingDay, renderReengagement, renderLeadNotification, BRANDS };
+// Brand-aware transactional emails. Returns null when the brand has no themed version, so
+// callers fall back to the generic template unchanged.
+function renderTransactional(kind, brandSlug, data = {}) {
+  const { b } = resolveBrand(brandSlug);
+  if (b.theme !== 'ritual') return null;
+  return { verify: ritual.renderVerify, reset: ritual.renderReset }[kind](b, data);
+}
+
+module.exports = { renderTransactional, renderWelcome, renderOnboardingDay, renderReengagement, renderLeadNotification, BRANDS };

@@ -199,3 +199,25 @@ test("'welcome' has no reachable plain-layout entry left in TEMPLATES (dead code
     const out = rawRender('welcome', { brand: 'baalvion', fullName: 'Asha' });
     assert.ok(out.html.length > 0);
 });
+
+test("the 'community' brand renders the ritual theme for lifecycle and transactional emails", () => {
+    const data = { brand: 'community', fullName: 'Asha', email: 'a@x.com', verifyUrl: 'https://community.marketunderworld.com/verify-email?token=t', resetUrl: 'https://community.marketunderworld.com/reset-password?token=t' };
+    for (const name of ['welcome', 'onboardingDay1', 'onboardingDay3', 'onboardingDay7', 'reengagement', 'emailVerification', 'passwordReset']) {
+        const out = render(name, data);
+        assert.match(out.html, /class="sigil"/, `${name} should use the ritual shell`);
+        assert.match(out.html, /community\.marketunderworld\.com/);
+    }
+    assert.match(render('emailVerification', data).html, /verify-email\?token=t/);
+    assert.match(render('passwordReset', data).html, /reset-password\?token=t/);
+});
+
+test('ritual emails escape user-controlled text and carry no invented numbers', () => {
+    const out = render('welcome', { brand: 'community', fullName: '<img src=x onerror=1>' });
+    assert.doesNotMatch(out.html, /<img src=x/);
+    assert.doesNotMatch(render('reengagement', { brand: 'community' }).html, /\d+ (new|members|playbooks)/i);
+});
+
+test('other brands keep the generic verification and reset emails', () => {
+    assert.strictEqual(render('passwordReset', { brand: 'baalvion', resetUrl: 'u' }).subject, 'Reset your Baalvion password');
+    assert.strictEqual(render('emailVerification', { email: 'a@x.com', verifyUrl: 'u' }).subject, 'Verify your Baalvion email address');
+});

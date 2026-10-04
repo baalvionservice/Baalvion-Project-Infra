@@ -32,6 +32,7 @@ const { userRepo, orgRepo, sessionRepo, auditRepo } = require('../repositories')
 const passwordUtil = require('../utils/password');
 const { hashToken } = require('../utils/crypto');
 const { sendMail, isMailerConfigured } = require('../utils/mailer');
+const { buildRitualOtpEmail } = require('../utils/ritualOtpEmail');
 const { generateNumericCode, classifyOtpAttempt } = require('./phoneVerificationService');
 const { assertGenuineEmail } = require('../utils/emailValidation');
 const { verifyTurnstile } = require('../utils/captcha');
@@ -72,7 +73,8 @@ const FONT_DISPLAY = "Georgia, 'Times New Roman', serif";
 const FONT_BODY = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
 const FONT_MONO = "'SF Mono', 'Courier New', monospace";
 
-function buildOtpEmail(code, minutes, firstName) {
+function buildOtpEmail(code, minutes, firstName, brand) {
+    if (brand === 'community') return buildRitualOtpEmail(code, minutes, firstName);
     const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi,';
     return {
         subject: `${code} is your ${BRAND} verification code`,
@@ -138,7 +140,7 @@ body{background:#f5f5f7;font-family:${FONT_BODY};color:#1d1d1f;-webkit-font-smoo
  * @param {{ email: string, firstName?: string, lastName?: string, captchaToken?: string, ipAddress?: string }} input
  * @returns {Promise<{ sentTo: string, expiresAt: string, resendAvailableInSeconds: number, resendsRemaining: number }>}
  */
-async function requestOtp({ email, firstName, lastName, captchaToken, ipAddress }) {
+async function requestOtp({ email, firstName, lastName, captchaToken, ipAddress, brand }) {
     const normEmail = String(email).toLowerCase().trim();
     const first = firstName ? String(firstName).trim() : null;
     const last  = lastName  ? String(lastName).trim()  : null;
@@ -191,7 +193,7 @@ async function requestOtp({ email, firstName, lastName, captchaToken, ipAddress 
     });
 
     const minutes = Math.round(OTP.ttlSeconds / 60);
-    const { subject, html } = buildOtpEmail(code, minutes, first);
+    const { subject, html } = buildOtpEmail(code, minutes, first, brand);
     try {
         // NOT fire-and-forget: a delivery failure must surface so the user can retry, and the
         // burned code is released so the cooldown does not block an immediate second attempt.

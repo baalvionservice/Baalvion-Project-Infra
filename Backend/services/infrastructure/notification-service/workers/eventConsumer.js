@@ -85,7 +85,10 @@ async function dispatch(eventType, payload, meta = {}) {
                 idempotencyKey: `emailverify:${payload.userId}:${payload.token}`,
                 data: {
                     email:     payload.email,
-                    verifyUrl: `${config.appUrl}/verify-email?token=${payload.verifyToken}`,
+                    // auth-service sends the finished link (built for the site the user signed up
+                    // on); the appUrl form is only a fallback for publishers that send a bare token.
+                    verifyUrl: payload.verifyUrl || `${config.appUrl}/verify-email?token=${payload.verifyToken}`,
+                    brand:     payload.brand || null,
                 },
             });
             break;
@@ -96,7 +99,8 @@ async function dispatch(eventType, payload, meta = {}) {
                 templateName:  'passwordReset',
                 idempotencyKey: `pwreset:${payload.token}`,
                 data: {
-                    resetUrl: `${config.appUrl}/reset-password?token=${payload.resetToken}`,
+                    resetUrl: payload.resetUrl || `${config.appUrl}/reset-password?token=${payload.resetToken}`,
+                    brand:    payload.brand || null,
                 },
             });
             break;
