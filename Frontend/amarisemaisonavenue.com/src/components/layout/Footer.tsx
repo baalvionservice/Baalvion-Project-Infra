@@ -240,7 +240,7 @@ export function Footer() {
                             </span>
                         </span>
                         <p className="text-[9px] text-black text-center md:text-right">
-                            © {new Date().getFullYear()} Baalvion Industries Private Limited (CIN U43121OD2025PTC048479). All rights reserved. Amarisé Maison Avenue is operated by Baalvion Industries Private Limited.
+                            © {new Date().getFullYear()} Baalvion Industries Private Limited (CIN U43121OD2025PTC048479, GSTIN 21AANCB3490M1ZF). All rights reserved. Amarisé Maison Avenue is operated by Baalvion Industries Private Limited.
                         </p>
                         <p className="text-[9px] text-gray-600 text-center md:text-right">
                             Baalvion Industries Private Limited · CIN U43121OD2025PTC048479 · Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India · Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India · +91 89512 84770 · support@baalvion.com

@@ -78,7 +78,7 @@ export function Footer() {
       <div className="border-t border-border py-6">
         <div className="section-container space-y-2">
           <p className="text-xs text-muted-foreground">
-            {legalEntity.name} &middot; CIN: {legalEntity.cin} &middot; Registered Office:{" "}
+            {legalEntity.name} &middot; CIN: {legalEntity.cin} &middot; GSTIN: {legalEntity.gstin} &middot; Registered Office:{" "}
             {legalEntity.registeredOffice}
           </p>
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
