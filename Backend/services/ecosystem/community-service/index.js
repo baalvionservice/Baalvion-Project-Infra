@@ -17,6 +17,10 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
+// KYC submissions carry two base64 images; give that one route a larger body limit, ahead of the global parser.
+app.use(['/v1/community/kyc', '/api/v1/community/kyc'], express.json({ limit: '6mb' }));
+// Image uploads are one base64 image (<= 1 MB raw, ~1.4 MB encoded).
+app.use(['/v1/community/media', '/api/v1/community/media'], express.json({ limit: '2mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(requestContext);
@@ -41,6 +45,7 @@ const start = async () => {
         console.error('[DB] Failed:', err.message);
         process.exit(1);
     }
+    require('./service/startupChecks').report();
     // Drain this service's payment outbox onto the platform bus. Each service owns its own
     // `pcl` schema, so each runs its own relay; without it payments record locally and never
     // reach the cross-estate panel. Flag-gated and never fatal.

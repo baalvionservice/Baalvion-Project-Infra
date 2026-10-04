@@ -1,5 +1,6 @@
 "use client"
 
+import { notifySellerApplication } from '@/lib/api/seller-notify';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { AppButton } from '@/components/ui/AppButton';
@@ -44,6 +45,7 @@ export default function SellerApplicationsPage() {
     setActingOn(app.id);
     try {
       await approveSellerApplication(app.id);
+      void notifySellerApplication(app, 'approved');
       toast({ title: 'Application approved', description: `${app.storeName} can now list products — the seller has been granted access to the marketplace.` });
       load(status);
     } catch (err) {
@@ -71,6 +73,7 @@ export default function SellerApplicationsPage() {
     setActingOn(app.id);
     try {
       await rejectSellerApplication(app.id, rejectReason.trim());
+      void notifySellerApplication(app, 'rejected', rejectReason.trim());
       toast({ title: 'Application rejected' });
       setRejectingId(null);
       setRejectReason('');

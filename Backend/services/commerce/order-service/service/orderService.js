@@ -19,6 +19,7 @@ const { sendOrderEmail } = require('./orderNotifications');
 const inventoryClient = require('./inventoryClient');
 const alerts = require('./alerts');
 const shippingService = require('./shippingService');
+const kycGate = require('./kycGate');
 // Exact money. Replaces float comparisons whose epsilons (`> 0.01`, `+ 1e-9`) were tolerating
 // a real short-payment of up to one minor unit on every single capture.
 const { Money, checkCapturedAmount } = require('@baalvion/money');
@@ -324,7 +325,7 @@ async function resolveAuthoritativeItems(storeId, items, marketCode = null) {
         }
 
         const [product] = await sequelize.query(
-            `SELECT id, name, status, store_id FROM commerce.commerce_products WHERE id = :productId AND store_id = :storeId LIMIT 1`,
+            `SELECT id, name, status, store_id, custom_fields FROM commerce.commerce_products WHERE id = :productId AND store_id = :storeId LIMIT 1`,
             { replacements: { productId, storeId }, type: QueryTypes.SELECT },
         );
         if (!product) throw new AppError('VALIDATION_ERROR', `Product ${productId} not found in this store`, 400);
@@ -362,6 +363,7 @@ async function resolveAuthoritativeItems(storeId, items, marketCode = null) {
         resolved.push({
             productId, variantId: variant.id, sku: variant.sku,
             name: product.name, variantName: variant.name || null,
+            requiresKyc: !!(product.custom_fields && product.custom_fields.requiresKyc === true),
             quantity: i.quantity,
             basePriceUsd: pricing.round2(baseUsd),
             price: unit.unitPrice,            // per-unit price in the order (market) currency
@@ -482,6 +484,9 @@ async function createOrder(storeId, body, actor) {
     // the order is priced at the SAME rate the storefront displayed.
     await fxRateProvider.primeFromCache().catch(() => {});
     const items = await resolveAuthoritativeItems(storeId, body.items, market);
+
+    // Opt-in: only items flagged customFields.requiresKyc trigger a lookup; other carts are untouched.
+    await kycGate.assertKycForItems(items, actor);
 
     // Server-computed, not client-supplied — see shippingService.js header.
     const shipping = shippingService.computeShipping(items);
