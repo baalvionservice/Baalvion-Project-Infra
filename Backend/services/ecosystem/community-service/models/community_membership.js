@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('CommunityMembership', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     community_id: { type: DataTypes.UUID, allowNull: false },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     role: { type: DataTypes.ENUM('member', 'moderator', 'admin'), allowNull: false, defaultValue: 'member' },
     status: {
         type: DataTypes.ENUM('invited', 'requested', 'approved', 'paid', 'rejected', 'banned', 'cancelled', 'expired'),
