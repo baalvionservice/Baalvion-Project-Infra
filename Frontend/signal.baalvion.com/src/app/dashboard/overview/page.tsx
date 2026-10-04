@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { fetchNewsService } from "@/lib/news-api.server";
 import type { StatsOverview, TrendingResponse } from "@/lib/types";
 
+// Live per-request data behind a server-side key; it cannot be frozen into a static page at build time.
+export const dynamic = "force-dynamic";
+
 export default async function OverviewPage() {
   const [stats, trending] = await Promise.all([
     fetchNewsService("/v1/stats/overview") as Promise<StatsOverview>,
