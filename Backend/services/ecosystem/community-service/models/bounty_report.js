@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('BountyReport', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     task_id: { type: DataTypes.UUID, allowNull: false },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     reporter_label: { type: DataTypes.STRING(80), allowNull: true },
     title: { type: DataTypes.STRING(200), allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
@@ -19,8 +19,8 @@ module.exports = (sequelize) => sequelize.define('BountyReport', {
     payout_currency: { type: DataTypes.STRING(8), allowNull: true },
     payout_reference: { type: DataTypes.STRING(200), allowNull: true },
     paid_at: { type: DataTypes.DATE, allowNull: true },
-    paid_by: { type: DataTypes.UUID, allowNull: true },
-    reviewed_by: { type: DataTypes.UUID, allowNull: true },
+    paid_by: { type: DataTypes.STRING(64), allowNull: true },
+    reviewed_by: { type: DataTypes.STRING(64), allowNull: true },
     reviewed_at: { type: DataTypes.DATE, allowNull: true },
 }, {
     tableName: 'bounty_reports', schema: 'community', underscored: true, timestamps: true,

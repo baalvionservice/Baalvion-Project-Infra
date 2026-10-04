@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('LocalApplication', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     listing_id: { type: DataTypes.UUID, allowNull: false },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     full_name: { type: DataTypes.STRING(160), allowNull: false },
     phone: { type: DataTypes.STRING(32), allowNull: false },
     email: { type: DataTypes.STRING(320), allowNull: true },

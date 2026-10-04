@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 // served to their owner, site admins and verified employers; 'public' ones to anyone.
 module.exports = (sequelize) => sequelize.define('MediaAsset', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    owner_id: { type: DataTypes.UUID, allowNull: false },
+    owner_id: { type: DataTypes.STRING(64), allowNull: false },
     purpose: { type: DataTypes.ENUM('profile_photo', 'teacher_avatar', 'club_image', 'event_poster'), allowNull: false },
     visibility: { type: DataTypes.ENUM('public', 'restricted'), allowNull: false },
     mime: { type: DataTypes.STRING(20), allowNull: false },

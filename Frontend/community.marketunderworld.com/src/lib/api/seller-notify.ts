@@ -5,7 +5,8 @@
 import { listSellerApplications, type AdminProductQueueItem, type SellerApplication } from "./commerce-admin";
 import { notifyUser } from "./staff";
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Platform user ids are whatever the auth service issues (numeric today), not UUIDs.
+const UUID = /^[A-Za-z0-9_-]{1,64}$/;
 let storeOwners: Map<string, string> | null = null;
 
 async function ownerOfStore(storeId: string): Promise<string | null> {

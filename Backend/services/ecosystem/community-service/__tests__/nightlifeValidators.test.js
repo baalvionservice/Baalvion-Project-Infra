@@ -99,7 +99,9 @@ describe('staff/support validators', () => {
         const base = { userId: '71717171-7171-4717-8717-717171717171', type: 'seller', title: 'Approved', body: 'Your store is live.' };
         expect(sv.notifySchema.safeParse({ ...base, url: '/seller/listings' }).success).toBe(true);
         for (const u of ['https://evil.com/x', '//evil.com', 'javascript:alert(1)']) expect(sv.notifySchema.safeParse({ ...base, url: u }).success).toBe(false);
-        expect(sv.notifySchema.safeParse({ ...base, userId: 'nope' }).success).toBe(false);
+        for (const bad of ['a b', '../x', '', 'x'.repeat(65)]) expect(sv.notifySchema.safeParse({ ...base, userId: bad }).success).toBe(false);
+        // The auth service issues numeric ids ("134"), not UUIDs; both forms must be accepted.
+        for (const ok of ['134', '0b0a5a4e-3b1f-4c53-8a5e-2f6b7c1d9e00']) expect(sv.notifySchema.safeParse({ ...base, userId: ok }).success).toBe(true);
     });
     it('only lets announcements link to site paths or https', () => {
         const base = { title: 'Heads up', body: 'Something', severity: 'info' };

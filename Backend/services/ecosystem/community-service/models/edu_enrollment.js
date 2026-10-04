@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('EduEnrollment', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     session_id: { type: DataTypes.UUID, allowNull: false },
-    student_id: { type: DataTypes.UUID, allowNull: false },
+    student_id: { type: DataTypes.STRING(64), allowNull: false },
     student_label: { type: DataTypes.STRING(80), allowNull: true },
     note: { type: DataTypes.STRING(1000), allowNull: true },
     status: { type: DataTypes.ENUM('requested', 'approved', 'declined', 'cancelled'), allowNull: false, defaultValue: 'requested' },
