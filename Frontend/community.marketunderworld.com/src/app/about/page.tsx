@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Footer } from '@/components/layout/footer';
 
 export const metadata: Metadata = {
   title: 'About Us',
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
+    <>
     <main className="min-h-screen bg-[#0B0C0F] text-white">
       <div className="mx-auto max-w-3xl px-6 py-24">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#39FF14]">About</p>
@@ -17,7 +19,7 @@ export default function AboutPage() {
             The Market Underworld Community is an online community and marketplace. Members take part in forums, join classes and live sessions, and buy goods from independent sellers.
           </p>
           <p>
-            It is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a private limited company incorporated in India on 11 March 2025. Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India. Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India.
+            It is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479, GSTIN 21AANCB3490M1ZF), a private limited company incorporated in India on 11 March 2025. Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India. Operating office: Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India.
           </p>
           <p>
             Contact: support@baalvion.com, +91 89512 84770. Our policies are linked in the footer of every page.
@@ -25,5 +27,7 @@ export default function AboutPage() {
         </div>
       </div>
     </main>
+    <Footer />
+    </>
   );
 }
