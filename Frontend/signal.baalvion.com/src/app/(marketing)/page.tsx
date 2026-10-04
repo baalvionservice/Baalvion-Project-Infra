@@ -90,6 +90,10 @@ const mcpConfigExample = `{
   }
 }`;
 
+// Reads live trending data with a server-only key. Without this, a build that lacks the key freezes
+// the page as static and the first runtime fetch then fails with "static to dynamic" (HTTP 500).
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   let trendingCategories: TrendingResponse["items"] = [];
   try {
