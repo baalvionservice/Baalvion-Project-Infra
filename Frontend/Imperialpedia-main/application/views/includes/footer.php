@@ -409,6 +409,20 @@ img.rounded-circle[width="56"]{width:56px !important;height:56px !important}
 .imp-network-text em{font-style:normal;font-size:.85rem;font-weight:800;color:#0F2440;border-bottom:2px solid #D6A84A}
 .imp-network-card:hover .imp-network-text em{color:#d00000;border-color:#d00000}
 .imp-network-card:hover img{filter:brightness(1.05)}
+/* "More from the Baalvion network" cards inside an article */
+.p6-article-body .imp-netstrip{margin:2.6rem 0 0;padding:1.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px}
+.imp-netstrip-head h3{margin:0 0 4px !important;padding:0 !important;border:0 !important;font-size:1.15rem !important;font-weight:800;color:#0f172a}
+.imp-netstrip-head p{margin:0 0 1.1rem !important;font-size:.9rem !important;color:#64748b;line-height:1.5}
+.imp-netstrip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.p6-article-body a.imp-netcard{display:flex;flex-direction:column;background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;text-decoration:none !important;color:#0f172a !important;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.p6-article-body a.imp-netcard:hover{transform:translateY(-3px);border-color:#cbd5e1;box-shadow:0 14px 30px rgba(15,23,42,.12)}
+.imp-netcard img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;margin:0 !important}
+.imp-netcard-body{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px;flex:1}
+.imp-netcard-body strong{font-size:1rem;font-weight:800;line-height:1.3}
+.imp-netcard-body span{font-size:.85rem;line-height:1.5;color:#475569}
+.imp-netcard-body em{margin-top:auto;padding-top:4px;font-style:normal;font-size:.8rem;font-weight:800;color:#0F2440;letter-spacing:.02em}
+.imp-netcard:hover em{color:#d00000}
+@media (max-width:575.98px){.p6-article-body .imp-netstrip{padding:1rem}.imp-netstrip-grid{grid-template-columns:1fr;gap:12px}.imp-netcard-body{padding:12px 14px 14px}}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){

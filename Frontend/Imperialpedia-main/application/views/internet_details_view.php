@@ -498,6 +498,7 @@ body {
             <!-- Article Body -->
             <article class="p6-article-body">
                <?php echo render_related_reading($row['post_desc']);?>
+               <?php $this->load->view('includes/network_strip', array('row' => $row)); ?>
             </article>
             <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
             <?php $this->load->view('includes/comments_view'); ?>
