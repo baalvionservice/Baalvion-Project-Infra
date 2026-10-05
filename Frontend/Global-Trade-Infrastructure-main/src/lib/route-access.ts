@@ -137,6 +137,27 @@ export function isAnonymousProperty(pathname: string): boolean {
   return pathname === SHIPPING_DIRECTORY_PREFIX || pathname.startsWith(`${SHIPPING_DIRECTORY_PREFIX}/`);
 }
 
+/**
+ * The anonymous marketing and reference pages. They never read the signed-in state, so asking the
+ * gateway who the visitor is only produces a failed request (and a console error whenever the
+ * gateway is unreachable) on every page view. The session is rehydrated when the visitor reaches
+ * an area that needs it instead.
+ */
+const PUBLIC_MARKETING_PREFIXES: readonly string[] = [
+  '/about', '/authorities', '/banks', '/compare', '/contact', '/countries', '/enterprises',
+  '/fta', '/governments', '/logistics', '/platform', '/ports', '/pricing', '/privacy',
+  '/tariffs', '/terms', '/trust', '/refund-policy', '/shipping-policy', '/grievance',
+  '/payment-terms',
+];
+
+export function skipsSessionRehydration(pathname: string): boolean {
+  return (
+    isAnonymousProperty(pathname) ||
+    pathname === '/' ||
+    matchesPrefix(PUBLIC_MARKETING_PREFIXES, pathname)
+  );
+}
+
 export function isAdminPath(pathname: string): boolean {
   return matchesPrefix(ADMIN_PREFIXES, pathname);
 }
