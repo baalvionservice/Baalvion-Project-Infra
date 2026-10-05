@@ -318,6 +318,8 @@
 .imp-rel-title{font-size:.95rem;line-height:1.38;font-weight:700;color:#111;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .p6-article-body a.imp-rel-card:hover .imp-rel-title{color:#d00000}
 .imp-rel-meta{margin-top:auto;padding-top:4px;font-size:.76rem;color:#64748b;font-weight:600}
+/* Pictures pasted from the editor carry fixed pixel sizes (e.g. 1200x675); keep their proportions at any width */
+.p6-content-box img,.p6-article-body img{max-width:100% !important;height:auto !important}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){

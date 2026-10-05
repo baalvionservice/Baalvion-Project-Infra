@@ -4,8 +4,8 @@ $sb = !empty($get_subcat_info[0]) ? $get_subcat_info[0] : (!empty($post[0]) ? $p
 if($sb){
    $sb_src = !empty($sb['sub_cat_image']) ? upload_image_url('subcategory', $sb['sub_cat_image'])
            : (!empty($sb['cat_image']) ? upload_image_url('category', $sb['cat_image']) : '');
-   // The article body often carries this same picture already; showing it twice looks like a bug.
-   if($sb_src !== '' && !empty($sb['sub_cat_desc']) && strpos($sb['sub_cat_desc'], basename(parse_url($sb_src, PHP_URL_PATH))) !== false){
+   // The description usually opens with its own picture (often the same graphic); showing the banner too puts two images back to back.
+   if($sb_src !== '' && !empty($sb['sub_cat_desc']) && stripos($sb['sub_cat_desc'], '<img') !== false){
       $sb_src = '';
    }
    if($sb_src !== ''){ ?>
