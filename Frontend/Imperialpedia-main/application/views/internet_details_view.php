@@ -511,7 +511,6 @@ body {
                at.insertAdjacentElement('afterend', t.content.firstElementChild);
             })();
             </script>
-            <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'baal', 'row' => $row)); ?>
             <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
             <?php $this->load->view('includes/comments_view'); ?>
          </div>
