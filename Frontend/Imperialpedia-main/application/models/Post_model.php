@@ -117,7 +117,11 @@ class Post_model extends CI_Model{
     // other category ki one one latest post
 
     public function unique_latest_posts(){
-      $query = $this->db->query("SELECT * FROM post WHERE status='published' AND posted_date IN (SELECT MAX(posted_date) FROM post WHERE status='published' GROUP BY sub_cat_id)");
+      // Posts in the switched-off cookies section must not surface on the homepage (their URLs return 410).
+      $this->load->model('Setting_model');
+      $cookies_on = $this->Setting_model->cookies_section_enabled();
+      $hide = $cookies_on ? '' : " AND cat_id NOT IN (SELECT cat_id FROM category WHERE cat_name='cookies')";
+      $query = $this->db->query("SELECT * FROM post WHERE status='published'" . $hide . " AND posted_date IN (SELECT MAX(posted_date) FROM post WHERE status='published'" . $hide . " GROUP BY sub_cat_id)");
       return $query->result_array();
     }
 
