@@ -80,7 +80,7 @@ class PostsCtrl extends CI_Controller{
 			$seg1 = $this->uri->segment(1);
 			$seg2 = $this->uri->segment(2);
 
-			if($seg1 == 'seo' && ($seg2 == 'web-seo' || $seg2 == 'high-traffic-niche-calculator')){
+			if($seg1 == 'seo' && $seg2 == 'high-traffic-niche-calculator'){   // /seo/web-seo is the real Web SEO sub-category, not the calculator
 				$this->load->view('includes/header', $data); 
 				$this->load->view('tools/niche_calculator_view', $data); 
 				$this->load->view('includes/footer');  
