@@ -26,7 +26,7 @@ $order = array('seo', 'marketing', 'internet', 'editor', 'insurance', 'news', 'a
 
 $posts = !empty($home_posts) ? $home_posts : array();
 $url_of = function ($p) { return base_url(str_replace(' ', '-', $p['cat_name']) . '/' . str_replace(' ', '-', $p['sub_cat_name']) . '/' . str_replace(' ', '-', $p['uri'])); };
-$img_of = function ($p) { return !empty($p['post_img']) ? upload_image_url('post', $p['post_img']) : ''; };
+$img_of = function ($p, $w = 640) { return !empty($p['post_img']) ? post_thumb($p['post_img'], $w) : ''; };
 $mins_of = function ($p) { return max(1, (int)ceil(($p['post_chars'] / 6) / 200)); };
 $ex_of = function ($p, $n = 140) { return seo_excerpt($p['post_sample'], $n); };
 $label_of = function ($c) use ($labels) { return isset($labels[$c]) ? $labels[$c] : ucwords(str_replace('-', ' ', $c)); };
@@ -137,7 +137,8 @@ body { background:#fff; }
 .mg-tile span.mg-m { margin-top:auto; font-size:.8rem; font-weight:600; color:#94a3b8; }
 
 /* CATEGORY SECTIONS */
-.mg-cat { padding:70px 0; }
+.mg-cat { padding:70px 0; content-visibility:auto; contain-intrinsic-size:auto 640px; }
+.mg-trust { content-visibility:auto; contain-intrinsic-size:auto 560px; }
 .mg-cat:nth-of-type(even) { background:#f8fafc; }
 .mg-cat-grid { display:grid; grid-template-columns:minmax(0, .8fr) minmax(0, 2.2fr); gap:48px; align-items:start; }
 .mg-cat-info { position:sticky; top:24px; }
@@ -208,6 +209,7 @@ body { background:#fff; }
 </style>
 
 <main>
+<?php if ($lead && $img_of($lead, 960) !== '') { ?><link rel="preload" as="image" href="<?php echo htmlspecialchars($img_of($lead, 960)); ?>" fetchpriority="high"><?php } ?>
 <?php if ($lead) { $lc = $accent_of($lead['cat_name']); ?>
 <section class="mg-hero mg-font" style="--c:<?php echo $lc; ?>">
    <div class="mg-wrap">
@@ -227,7 +229,7 @@ body { background:#fff; }
          </div>
          <?php if ($img_of($lead) !== '') { ?>
          <a class="mg-hero-img" href="<?php echo htmlspecialchars($url_of($lead)); ?>" aria-label="<?php echo htmlspecialchars(ucfirst($lead['post_title'])); ?>">
-            <img src="<?php echo htmlspecialchars($img_of($lead)); ?>" alt="" width="1280" height="800" fetchpriority="high" onerror="this.parentNode.style.display='none'">
+            <img src="<?php echo htmlspecialchars($img_of($lead, 960)); ?>" alt="" width="960" height="600" decoding="async" fetchpriority="high" onerror="this.parentNode.style.display='none'">
          </a>
          <?php } ?>
       </div>

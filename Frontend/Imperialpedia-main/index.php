@@ -1,4 +1,8 @@
 <?php
+// PHP sessions otherwise stamp every page 'no-store', which stops the browser's back/forward cache.
+ini_set('session.cache_limiter', '');
+header('Cache-Control: private, no-cache');
+
 // Move switch: set CANONICAL_HOST=imperialpedia.com in the container env and every request that
 // arrives on another real hostname is 301-redirected to the same path there. Unset = no redirect.
 // IPs and localhost are left alone so health checks keep working.

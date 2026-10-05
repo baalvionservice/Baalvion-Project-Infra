@@ -93,17 +93,35 @@
       <?php echo render_website_schema('Imperialpedia', base_url()); ?>
       <?php echo render_organization_schema('Imperialpedia', base_url()); ?>
       <!-- Resource Hints & Critical Performance Preloading -->
-      <link rel="dns-prefetch" href="//fonts.googleapis.com">
-      <link rel="dns-prefetch" href="//fonts.gstatic.com">
-      <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
       <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-      <link rel="preload" href="<?php echo base_url(); ?>assets/vendor/fa/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Oswald:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+      <link rel="preload" href="<?php echo base_url(); ?>assets/vendor/fa/webfonts/subset/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+      <link rel="preload" href="<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+      <style>
+/* One self-hosted typeface for the whole site. The other names are aliases so old rules that still ask for them render in the same face (no extra downloads). */
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Merriweather';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Merriweather';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Arial';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Arial';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Helvetica';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Helvetica';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Georgia';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Georgia';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+      </style>
       <!-- Bootstrap CSS --> 
       <link href="<?php echo base_url(); ?>assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="<?php echo base_url(); ?>assets/vendor/fa/css/all.min.css" media="print" onload="this.media='all'">
+      <link rel="stylesheet" href="<?php echo base_url(); ?>assets/vendor/fa/css/fa-subset.css">
       <link rel="stylesheet" href="<?php echo base_url() . 'assets/css/header-footer.css'; ?>">  
 
       <style>
@@ -544,7 +562,22 @@
       </style>
 
       <!-- Adsense -->
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170643011469769" crossorigin="anonymous"></script>
+      <meta name="google-adsense-account" content="ca-pub-8170643011469769">
+      <script>
+      (function(){
+         var done = false, evs = ['scroll', 'mousemove', 'touchstart', 'keydown', 'click'];
+         function load(){
+            if(done) return; done = true;
+            evs.forEach(function(e){ removeEventListener(e, load); });
+            var s = document.createElement('script');
+            s.async = true; s.crossOrigin = 'anonymous';
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170643011469769';
+            document.head.appendChild(s);
+         }
+         evs.forEach(function(e){ addEventListener(e, load, {once: true, passive: true}); });
+         setTimeout(load, 12000);
+      })();
+      </script>
    </head>
    <body>
       <!-- Main Masthead -->

@@ -1,8 +1,4 @@
 <!-- Page Six & NY Post Design System for Attorney Details View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-gold: #d97706;
@@ -281,7 +277,7 @@ body {
       <div class="col-lg-8">
          <?php if(!empty($post_details['file_name'])): ?>
          <div class="p6-featured-img-container">
-            <img src="<?php echo base_url().'assets/images/'.$post_details['file_name']; ?>" alt="Legal Report Featured Image" class="img-fluid">
+            <img loading="lazy" decoding="async" src="<?php echo base_url().'assets/images/'.$post_details['file_name']; ?>" alt="Legal Report Featured Image" class="img-fluid">
          </div>
          <?php else: ?>
          <div class="p6-featured-img-container" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; min-height: 280px;">

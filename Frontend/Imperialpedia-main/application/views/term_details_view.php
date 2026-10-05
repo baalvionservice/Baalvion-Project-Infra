@@ -332,7 +332,7 @@
 
                <div class="col-4">
 
-                    <img class="img-fluid" src="<?php echo base_url().'uploads/post/'.$rel_pst['post_img'].'?v=2';?>" alt="<?php echo ucfirst($rel_pst['post_alt_title']);?>">
+                    <img loading="lazy" decoding="async" class="img-fluid" src="<?php echo base_url().'uploads/post/'.$rel_pst['post_img'].'?v=2';?>" alt="<?php echo ucfirst($rel_pst['post_alt_title']);?>">
 
                </div>
 

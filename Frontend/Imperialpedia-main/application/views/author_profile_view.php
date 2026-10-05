@@ -4,10 +4,6 @@
  * URL: /author/{slug}
  */
 ?>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #e50914;
@@ -93,7 +89,7 @@ body {
   <div class="container">
     <div class="row align-items-center">
       <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
-        <img src="<?php echo htmlspecialchars($author['avatar']); ?>" alt="<?php echo htmlspecialchars($author['name']); ?>" class="profile-avatar">
+        <img loading="lazy" decoding="async" src="<?php echo htmlspecialchars($author['avatar']); ?>" alt="<?php echo htmlspecialchars($author['name']); ?>" class="profile-avatar">
       </div>
       <div class="col-md-9 text-center text-md-start">
         <div class="badge bg-danger text-uppercase fw-bold mb-2">

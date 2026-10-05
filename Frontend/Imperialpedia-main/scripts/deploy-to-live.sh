@@ -35,5 +35,7 @@ read -r -p "5/5 swap the new image into LIVE now? [y/N] " ans
 case "$ans" in y|Y|yes|YES|Yes) ;; *) echo "Stopped. Live NOT changed (image :new is built and waiting)."; exit 0;; esac
 ssh -o BatchMode=yes $HOST "docker tag $IMAGE:new $IMAGE:local && cd /opt/baalvion/stack && docker compose -f docker-compose.data.yml -f docker-compose.app.yml -f docker-compose.caddytest.yml up -d --no-build --no-deps app-imperialpedia-php-web 2>&1 | tail -1"
 sleep 12
+# image thumbnails are written by the web server; make sure it may create the folder
+ssh -o BatchMode=yes $HOST "docker exec -u root baalvion-app-imperialpedia-php-web-1 sh -c 'mkdir -p /var/www/html/uploads/post/thumbs && chown -R www-data:www-data /var/www/html/uploads/post/thumbs'" || true
 for u in '' editor/adobe/adobe-after-effects sitemap.xml; do echo "  live /$u $(curl -s -o /dev/null -m 25 -w '%{http_code}' https://imperialpedia.com/$u)"; done
 echo "Rollback if needed: ssh $HOST, retag $IMAGE:previous as :local, repeat the compose up."

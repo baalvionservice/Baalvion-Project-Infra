@@ -33,10 +33,6 @@ if (!function_exists('insert_ahref_tag')) {
 ?>
 
 <!-- Page Six & NY Post Design System for Cookies View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #d00000;
@@ -517,7 +513,7 @@ body {
             <div class="p6-meta-bar">
                <div class="p6-author-chip">
                   <?php if(!empty($sc_info['author_img'])){ ?>
-                     <img src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
                           onerror="this.onerror=null;this.style.display='none';" 
                           class="p6-author-avatar-sm" alt="Author">
                   <?php } ?>
@@ -664,7 +660,7 @@ body {
                <div class="p6-widget-box text-center p-3">
                   <span class="text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">SPONSORED</span>
                   <a href="https://www.neverendmoney.com/" target="_blank" class="d-block">
-                     <img src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
                   </a>
                </div>
 
@@ -695,7 +691,7 @@ body {
             <div class="col-6 col-md-4 col-xl-3">
                <a href="<?php echo base_url().'cookies/'.str_replace(' ','-',$gsl['sub_cat_name']);?>" class="p6-cookie-card">
                   <?php $gsl_img = !empty($gsl['sub_cat_image']) ? upload_image_url('subcategory', $gsl['sub_cat_image']) : (!empty($gsl['cat_image']) ? upload_image_url('category', $gsl['cat_image']) : ''); if($gsl_img !== ''){ ?>
-                  <img src="<?php echo htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars(brand_name($gsl['sub_cat_name'])); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
+                  <img loading="lazy" decoding="async" src="<?php echo htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars(brand_name($gsl['sub_cat_name'])); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
                   <?php } ?>
                   <div class="p6-cookie-card-header">
                      <div class="p6-cookie-card-title"><?php echo htmlspecialchars(brand_name($gsl['sub_cat_name']));?></div>

@@ -21,10 +21,6 @@ function tag_contents($string, $tag_open, $tag_close){
 ?>
 
 <!-- Page Six & NY Post Design System for SEO Master Category View (All Features Edition) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #e50914;
@@ -510,7 +506,7 @@ body {
             <div class="p6-meta-bar mb-3">
                <div class="p6-author-chip">
                   <?php if(!empty($sc_info['author_img'])){ ?>
-                     <img src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
                           onerror="this.onerror=null;this.style.display='none';" 
                           class="p6-author-avatar-sm" alt="Author">
                   <?php } ?>
@@ -611,7 +607,7 @@ body {
             
             <!-- EDITOR'S CHOICE SPOTLIGHT CARD -->
             <div class="p6-spotlight-card">
-              <img src="<?php echo base_url(); ?>uploads/post/seo_masterclass_banner.png" class="p6-spotlight-img" alt="Spotlight Story">
+              <img loading="lazy" decoding="async" src="<?php echo base_url(); ?>uploads/post/seo_masterclass_banner.png" class="p6-spotlight-img" alt="Spotlight Story">
               <div class="p-4">
                 <span class="badge bg-danger text-uppercase fw-bold mb-2">⭐ EDITOR'S CHOICE BREAKING STORY</span>
                 <h3 class="font-serif fw-bold mb-2">August 2026 Core Update: Content Provenance and Source Transparency</h3>
@@ -742,7 +738,7 @@ body {
             <div class="col-xl-3 col-lg-4 col-md-6 cat-grid-item">
                <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'seo/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-img-wrapper">
-                     <img src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
                           onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
                           alt="<?php echo !empty($pst['post_alt_title']) ? $pst['post_alt_title'] : 'Post Image'; ?>">
                   </div>

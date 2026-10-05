@@ -1,8 +1,4 @@
 <!-- Page Six & NY Post Design System for Editor View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 /* Page Six & NY Post Editorial Styles with Original Google Sans / Roboto Fonts */
 :root {
@@ -442,7 +438,7 @@ body {
                <div class="p6-widget-box text-center p-3">
                   <span class="text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">ADVERTISEMENT</span>
                   <a href="https://www.neverendmoney.com/" target="_blank" class="d-block">
-                     <img src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
                   </a>
                </div>
 
@@ -498,7 +494,7 @@ body {
             <div class="col-xl-3 col-lg-4 col-md-6">
                <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'editor/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-img-wrapper">
-                     <img src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
                           onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
                           alt="<?php echo !empty($pst['post_alt_title']) ? $pst['post_alt_title'] : 'Post Image'; ?>">
                   </div>

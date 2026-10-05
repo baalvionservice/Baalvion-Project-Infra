@@ -85,7 +85,7 @@ if (!function_exists('render_related_reading')) {
                 $url = base_url(str_replace(' ', '-', $row['cat_name']) . '/' . str_replace(' ', '-', $row['sub_cat_name']) . '/' . str_replace(' ', '-', $row['uri']));
                 $img = '';
                 if (!empty($row['post_img'])) {
-                    $src = (strpos($row['post_img'], 'http') === 0) ? $row['post_img'] : base_url('uploads/post/' . $row['post_img']);
+                    $src = post_thumb($row['post_img'], 480);
                     $img = '<span class="imp-rel-thumb"><img src="' . htmlspecialchars($src) . '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></span>';
                 }
                 $cards .= '<a class="imp-rel-card" href="' . htmlspecialchars($url) . '">' . $img
@@ -128,6 +128,43 @@ if (!function_exists('brand_name')) {
         static $map = array('envanto' => 'Envato', 'grammerly' => 'Grammarly', 'quillbot' => 'QuillBot', 'amazon prime' => 'Amazon Prime Video', 'hotstar' => 'Disney+ Hotstar');
         $key = strtolower(trim((string)$name));
         return isset($map[$key]) ? $map[$key] : ucwords($name);
+    }
+}
+
+if (!function_exists('post_thumb')) {
+    // URL of a resized WebP copy of an uploaded post image (made once with GD, then served as a plain file).
+    // Falls back to the original if the file is missing, remote, already small, or GD cannot read it.
+    function post_thumb($file, $width = 640) {
+        $file = trim((string)$file);
+        if ($file === '') return '';
+        if (preg_match('#^https?://#i', $file)) return $file;
+        $dir = FCPATH . 'uploads/post/';
+        $src = $dir . $file;
+        $orig = base_url('uploads/post/' . $file);
+        if (!is_file($src) || !function_exists('imagewebp')) return $orig;
+        $name = preg_replace('/[^A-Za-z0-9_.-]/', '_', pathinfo($file, PATHINFO_FILENAME));
+        $out = $dir . 'thumbs/' . (int)$width . '-' . $name . '.webp';
+        if (!is_file($out)) {
+            $info = @getimagesize($src);
+            if (!$info || $info[0] <= $width) return $orig;
+            switch ($info[2]) {
+                case IMAGETYPE_PNG:  $im = @imagecreatefrompng($src); break;
+                case IMAGETYPE_JPEG: $im = @imagecreatefromjpeg($src); break;
+                case IMAGETYPE_WEBP: $im = @imagecreatefromwebp($src); break;
+                default: return $orig;
+            }
+            if (!$im) return $orig;
+            $h = (int)round($info[1] * ($width / $info[0]));
+            $dst = imagecreatetruecolor((int)$width, $h);
+            imagealphablending($dst, false); imagesavealpha($dst, true);
+            imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+            imagecopyresampled($dst, $im, 0, 0, 0, 0, (int)$width, $h, $info[0], $info[1]);
+            if (!is_dir($dir . 'thumbs')) { @mkdir($dir . 'thumbs', 0775, true); }
+            $ok = @imagewebp($dst, $out, 78);
+            imagedestroy($im); imagedestroy($dst);
+            if (!$ok) return $orig;
+        }
+        return base_url('uploads/post/thumbs/' . (int)$width . '-' . $name . '.webp');
     }
 }
 

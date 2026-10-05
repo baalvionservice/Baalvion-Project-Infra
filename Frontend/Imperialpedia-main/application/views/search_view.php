@@ -1,8 +1,4 @@
 <!-- Page Six & NY Post Design System — Search Results View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #d00000;
@@ -213,7 +209,7 @@ body {
             <div class="col-xl-4 col-lg-6">
                <a href="<?php echo $post_url; ?>" class="p6-search-card">
                   <div class="p6-search-img-wrap">
-                     <img src="<?php echo $img_url; ?>" alt="<?php echo htmlspecialchars($res['post_title']); ?>" class="p6-search-img">
+                     <img loading="lazy" decoding="async" src="<?php echo $img_url; ?>" alt="<?php echo htmlspecialchars($res['post_title']); ?>" class="p6-search-img">
                   </div>
                   <div class="p6-search-body">
                      <span class="p6-search-badge"><?php echo strtoupper($res['sub_cat_name']); ?></span>

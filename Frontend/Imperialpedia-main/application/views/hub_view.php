@@ -158,7 +158,7 @@ $count = count($posts);
    <div class="hub-grid" id="hubGrid">
       <?php foreach ($posts as $i => $p) {
          $url = base_url($cat_slug . '/' . $sub_slug . '/' . str_replace(' ', '-', $p['uri']));
-         $img = !empty($p['post_img']) ? upload_image_url('post', $p['post_img']) : '';
+         $img = !empty($p['post_img']) ? post_thumb($p['post_img'], $i === 0 && $count > 2 ? 900 : 640) : '';
          $author = post_author($p);
          $mins = post_read_minutes($p['post_desc']);
          $ex = seo_excerpt($p['post_desc'], $i === 0 ? 220 : 130);

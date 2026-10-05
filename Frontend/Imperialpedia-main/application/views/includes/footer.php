@@ -236,7 +236,7 @@
          <div class="col-lg-2 col-md-6">
             <h4 class="p6-foot-col-title">Community</h4>
             <ul class="p6-foot-links">
-               <li><a href="https://twitter.com/ImperialPedia" target="_blank" rel="noopener noreferrer" aria-label="Imperialpedia Twitter/X Desk"><i class="fa-brands fa-x-twitter text-info"></i> Twitter / X</a></li>
+               <li><a href="https://twitter.com/ImperialPedia" target="_blank" rel="noopener noreferrer" aria-label="Imperialpedia Twitter/X Desk"><span class="text-info"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="vertical-align:-.125em"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span> Twitter / X</a></li>
                <li><a href="https://discord.gg/Qf2spryUbJ" target="_blank" rel="noopener noreferrer" aria-label="Imperialpedia Discord Hub"><i class="fa-brands fa-discord" style="color:#5865F2;"></i> Discord Hub</a></li>
                <li><a href="https://www.youtube.com/channel/UCSh8QP5s7VFiExTK9sYZdEQ" target="_blank" rel="noopener noreferrer" aria-label="Imperialpedia YouTube Channel"><i class="fa-brands fa-youtube text-danger"></i> YouTube Press</a></li>
                <li><a href="https://www.reddit.com/user/imperialpedia" target="_blank" rel="noopener noreferrer" aria-label="Imperialpedia Reddit Desk"><i class="fa-brands fa-reddit" style="color:#FF4500;"></i> Reddit Desk</a></li>
@@ -390,6 +390,9 @@ h1.p6-detail-title{font-size:1.6rem !important;line-height:1.28 !important;lette
 .p6-content-box.p6-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 85%);pointer-events:none}
 .p6-readmore{display:block;width:calc(100% - 32px);margin:10px 16px 0;padding:12px;border:1px solid #d00000;border-radius:10px;background:#fff;color:#d00000;font-weight:700;font-size:.95rem;cursor:pointer}
 }
+/* Skip layout and paint for content far below the first screen until the reader scrolls near it. */
+footer,.p6-grid-section,section.py-5.bg-white{content-visibility:auto;contain-intrinsic-size:auto 700px}
+.p6-article-body > *:nth-child(n+9){content-visibility:auto;contain-intrinsic-size:auto 180px}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){
@@ -399,9 +402,11 @@ h1.p6-detail-title{font-size:1.6rem !important;line-height:1.28 !important;lette
 .p6-content-box h2{font-size:1.35rem !important;margin-top:1.6rem !important}
 .p6-content-box img{margin:14px auto !important}
 }
-/* One typeface site-wide (Plus Jakarta Sans). Loaded last so it wins over each page's own font rules; icons and code keep theirs. */
+/* One typeface site-wide (Plus Jakarta Sans, self-hosted in the header). Old rules naming other fonts resolve to it through aliases, so no per-element override is needed. */
 :root{--p6-font-body:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--p6-font-headline:var(--p6-font-body);--p6-font-serif:var(--p6-font-body);--p6-font-accent:var(--p6-font-body)}
-body *:not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(code):not(pre):not(kbd):not(svg):not(svg *){font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif !important}
+body,button,input,select,textarea{font-family:var(--p6-font-body)}
+.font-monospace{font-family:var(--p6-font-body) !important}
+code,pre,kbd,samp{font-family:SFMono-Regular,Menlo,Consolas,monospace}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
