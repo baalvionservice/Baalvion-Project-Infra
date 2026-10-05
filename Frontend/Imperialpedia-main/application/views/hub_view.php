@@ -62,7 +62,10 @@ $count = count($posts);
 .hub-pill { padding:8px 14px; border:1px solid #e2e8f0; border-radius:999px; background:#fff; color:#334155; font-size:.82rem; font-weight:700; text-decoration:none; }
 .hub-pill:hover { border-color:var(--hub-accent); color:var(--hub-accent); }
 .hub-pill.is-on { background:var(--hub-accent); border-color:var(--hub-accent); color:#fff; }
-.hub-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:22px; margin-bottom:46px; }
+.hub-grid { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:22px; margin-bottom:46px; }
+.hub-grid > .hub-card { grid-column:span 2; }
+.hub-grid > .hub-card.span-3 { grid-column:span 3; }
+.hub-grid > .hub-card.span-6 { grid-column:span 6; }
 .hub-card { display:flex; flex-direction:column; background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; text-decoration:none; color:#0f172a; box-shadow:0 1px 2px rgba(15,23,42,.04); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .hub-card:hover { transform:translateY(-4px); border-color:#cbd5e1; box-shadow:0 16px 34px rgba(15,23,42,.11); color:#0f172a; }
 .hub-thumb { display:block; aspect-ratio:16/9; background:#e2e8f0; overflow:hidden; }
@@ -73,14 +76,17 @@ $count = count($posts);
 .hub-card h2 { font-size:1.08rem; line-height:1.38; font-weight:800; margin:0; color:#0f172a; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .hub-ex { font-size:.9rem; line-height:1.55; color:#64748b; margin:0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .hub-meta { margin-top:auto; padding-top:8px; display:flex; flex-wrap:wrap; gap:4px 12px; font-size:.78rem; font-weight:600; color:#64748b; }
-.hub-card.is-lead { grid-column:span 3; flex-direction:row; }
+.hub-card.is-lead { grid-column:span 6; flex-direction:row; }
+.hub-grid > .hub-card.span-6:not(.is-lead) { flex-direction:row; }
+.hub-grid > .hub-card.span-6:not(.is-lead) .hub-thumb { flex:0 0 44%; aspect-ratio:auto; min-height:240px; }
+.hub-grid > .hub-card.span-6:not(.is-lead) .hub-body { padding:26px 30px; justify-content:center; }
 .hub-card.is-lead .hub-thumb { flex:0 0 52%; aspect-ratio:auto; min-height:300px; }
 .hub-card.is-lead .hub-body { padding:30px 34px; justify-content:center; gap:12px; }
 .hub-card.is-lead h2 { font-size:1.75rem; line-height:1.28; -webkit-line-clamp:4; }
 .hub-card.is-lead .hub-ex { font-size:1rem; -webkit-line-clamp:4; }
 .hub-empty { padding:34px; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:14px; margin-bottom:40px; }
 .hub-guide-wrap { display:grid; grid-template-columns:260px minmax(0, 1fr); gap:30px; align-items:start; margin-bottom:56px; }
-.hub-guide-wrap.is-solo { grid-template-columns:minmax(0, 860px); }
+.hub-guide-wrap.is-solo { display:block; max-width:none; }
 .hub-toc { position:sticky; top:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px; }
 .hub-toc h3 { font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#475569; margin:0 0 10px; }
 .hub-toc a { display:block; padding:8px 10px; border-radius:8px; color:#334155; font-size:.9rem; line-height:1.4; text-decoration:none; font-weight:600; }
@@ -92,8 +98,8 @@ $count = count($posts);
 .hub-guide h3 { font-size:1.2rem; font-weight:800; color:#0f172a; margin:1.6rem 0 .6rem; }
 .hub-section-title { font-size:1.35rem; font-weight:800; color:#0f172a; margin:0 0 16px; }
 @media (max-width: 991.98px) {
-   .hub-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
-   .hub-card.is-lead { grid-column:span 2; }
+   .hub-grid > .hub-card, .hub-grid > .hub-card.span-3 { grid-column:span 3; }
+   .hub-grid > .hub-card.is-lead, .hub-grid > .hub-card.span-6 { grid-column:span 6; }
    .hub-card.is-lead .hub-thumb { flex-basis:46%; min-height:240px; }
    .hub-guide-wrap { grid-template-columns:1fr; }
    .hub-toc { position:static; }
@@ -103,7 +109,10 @@ $count = count($posts);
    .hub-title { font-size:1.75rem; }
    .hub-stand { font-size:1rem; }
    .hub-grid { grid-template-columns:1fr; gap:14px; margin-bottom:34px; }
-   .hub-card, .hub-card.is-lead { grid-column:auto; flex-direction:column; }
+   .hub-grid > .hub-card, .hub-grid > .hub-card.span-3, .hub-grid > .hub-card.span-6 { grid-column:auto; }
+   .hub-card, .hub-card.is-lead, .hub-grid > .hub-card.span-6:not(.is-lead) { flex-direction:column; }
+   .hub-grid > .hub-card.span-6:not(.is-lead) .hub-thumb { flex:none; min-height:0; aspect-ratio:16/9; }
+   .hub-grid > .hub-card.span-6:not(.is-lead) .hub-body { padding:16px 18px 18px; }
    .hub-card.is-lead .hub-thumb { flex:none; min-height:0; aspect-ratio:16/9; }
    .hub-card.is-lead .hub-body { padding:16px 18px 18px; }
    .hub-card.is-lead h2 { font-size:1.15rem; }
@@ -310,6 +319,17 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
    <?php if ($count === 0) { ?>
       <div class="hub-empty">New guides for this section are on the way.</div>
    <?php } else { ?>
+   <?php
+   // Keep rows full: the lead takes a whole row, then cards go three to a row; a last row of two splits in half, a lone last card takes the whole row.
+   $rest = $count > 2 ? $count - 1 : $count; $lead_on = $count > 2;
+   $hub_span = function ($i) use ($count, $rest, $lead_on) {
+      if ($lead_on && $i === 0) return '';
+      $k = $lead_on ? $i - 1 : $i; $rem = $rest % 3; $last_start = $rest - $rem;
+      if ($rem === 2 && $k >= $last_start) return ' span-3';
+      if ($rem === 1 && $k >= $last_start) return ' span-6';
+      return '';
+   };
+?>
    <div class="hub-grid" id="hubGrid">
       <?php foreach ($posts as $i => $p) {
          $url = base_url($cat_slug . '/' . $sub_slug . '/' . str_replace(' ', '-', $p['uri']));
@@ -318,7 +338,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
          $mins = post_read_minutes($p['post_desc']);
          $ex = seo_excerpt($p['post_desc'], $i === 0 ? 220 : 130);
       ?>
-      <a class="hub-card<?php echo ($i === 0 && $count > 2) ? ' is-lead' : ''; ?>" href="<?php echo htmlspecialchars($url); ?>" data-title="<?php echo htmlspecialchars(strtolower($p['post_title'] . ' ' . $ex)); ?>">
+      <a class="hub-card<?php echo ($i === 0 && $count > 2) ? ' is-lead' : ''; echo $hub_span($i); ?>" href="<?php echo htmlspecialchars($url); ?>" data-title="<?php echo htmlspecialchars(strtolower($p['post_title'] . ' ' . $ex)); ?>">
          <span class="hub-thumb"><?php if ($img !== '') { ?><img src="<?php echo htmlspecialchars($img); ?>" alt="" <?php echo $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?> onerror="this.parentNode.style.display='none'"><?php } ?></span>
          <span class="hub-body">
             <span class="hub-tag"><?php echo htmlspecialchars($sub_name); ?></span>
