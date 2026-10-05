@@ -393,6 +393,8 @@ h1.p6-detail-title{font-size:1.6rem !important;line-height:1.28 !important;lette
 /* Skip layout and paint for content far below the first screen until the reader scrolls near it. */
 footer,.p6-grid-section,section.py-5.bg-white{content-visibility:auto;contain-intrinsic-size:auto 700px}
 .p6-article-body > *:nth-child(n+9){content-visibility:auto;contain-intrinsic-size:auto 180px}
+/* Pictures pasted from the editor carry fixed pixel sizes (e.g. 1200x675); keep their proportions at any width */
+.p6-content-box img,.p6-article-body img,.hub-guide img{max-width:100% !important;height:auto !important}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){
