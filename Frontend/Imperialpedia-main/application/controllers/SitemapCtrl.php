@@ -33,6 +33,9 @@ class SitemapCtrl extends CI_Controller{
             'about', 'contact', 'careers', 'disclaimer', 'privacy-policy',
             'editorial-policy', 'terms-use', 'advertise', 'author',
         );
+        if($cookies_on){
+            $urls[] = array('loc' => $base . '/cookies', 'lastmod' => null, 'priority' => '0.7');
+        }
         foreach($static_pages as $p){
             $urls[] = array('loc' => $base . '/' . $p, 'lastmod' => null, 'priority' => '0.5');
         }

@@ -10,6 +10,7 @@ $route['term/(:any)/(:any)'] = 'TermCtrl/term/$1/$2';
 
 // footer 
 $route['about'] = 'AboutCtrl';
+$route['cookies'] = 'CookiesCtrl';
 $route['contact'] = 'ContactCtrl';
 $route['advertise'] = 'AdvertiseCtrl';
 $route['disclaimer'] = 'DisclaimerCtrl';
