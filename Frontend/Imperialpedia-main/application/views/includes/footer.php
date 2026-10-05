@@ -398,6 +398,17 @@ footer,.p6-grid-section,section.py-5.bg-white{content-visibility:auto;contain-in
 img.rounded-circle,img.p6-author-avatar,img.p6-author-avatar-sm,img.author-avatar,img[class*="avatar"]{aspect-ratio:1/1;object-fit:cover;object-position:center top;flex-shrink:0}
 img.rounded-circle[width="42"]{width:42px !important;height:42px !important}
 img.rounded-circle[width="56"]{width:56px !important;height:56px !important}
+/* "From our network" sidebar card */
+.imp-network{padding:0 !important;overflow:hidden;border-radius:14px}
+.imp-network-label{display:block;padding:10px 16px 8px;font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#64748b}
+.imp-network-card{display:block;text-decoration:none !important;color:#0f172a}
+.imp-network-card img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.imp-network-text{display:block;padding:14px 16px 16px;text-align:left}
+.imp-network-text strong{display:block;font-size:1rem;font-weight:800;margin-bottom:4px}
+.imp-network-text span{display:block;font-size:.85rem;line-height:1.5;color:#475569;margin-bottom:10px}
+.imp-network-text em{font-style:normal;font-size:.85rem;font-weight:800;color:#0F2440;border-bottom:2px solid #D6A84A}
+.imp-network-card:hover .imp-network-text em{color:#d00000;border-color:#d00000}
+.imp-network-card:hover img{filter:brightness(1.05)}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){

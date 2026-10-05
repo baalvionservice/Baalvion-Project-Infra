@@ -434,13 +434,7 @@ body {
                   </ul>
                </div>
 
-               <!-- Ad Promo Box -->
-               <div class="p6-widget-box text-center p-3">
-                  <span class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">SPONSORED</span>
-                  <a href="https://www.neverendmoney.com/" target="_blank" class="d-block mt-2">
-                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
-                  </a>
-               </div>
+               <?php $this->load->view('includes/network_box'); ?>
 
             </div>
          </div>
