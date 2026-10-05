@@ -43,8 +43,7 @@ foreach ($items as $it) { $w = news_when($it['date']); $groups[$w['key']]['label
       </a>
       <?php } ?>
    </section>
-   <?php if ($gi === 1) { $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'trade')); } ?>
+   <?php if ($gi === 1) { $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'trade')); } if ($gi === 3) { $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'signal')); } ?>
    <?php } ?>
-   <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'signal')); ?>
-   <?php $this->load->view('includes/network_box'); ?>
+   <?php if ($gi < 3) { $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'signal')); } ?>
 </main>

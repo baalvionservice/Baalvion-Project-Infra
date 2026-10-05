@@ -270,3 +270,20 @@ if (!function_exists('news_feed')) {
     }
 }
 
+if (!function_exists('indexnow_ping')) {
+    // Tell IndexNow (Bing, Yandex, Seznam, Naver and others) that URLs were added or changed. Google does not use
+    // IndexNow, so for Google keep the sitemaps current and use Search Console "Request indexing" for the very newest URLs.
+    // Only runs on the live host, never from localhost, and never blocks saving an article.
+    function indexnow_ping($urls) {
+        $host = parse_url(base_url(), PHP_URL_HOST);
+        if (!$host || in_array($host, array('localhost', '127.0.0.1'), true) || substr($host, -6) === '.local') return false;
+        $urls = array_values(array_unique(array_filter((array)$urls)));
+        if (!$urls) return false;
+        $key = 'c7c33f9575897a0f49ced6a1b94b16fb';
+        $payload = json_encode(array('host' => $host, 'key' => $key, 'keyLocation' => base_url($key . '.txt'), 'urlList' => $urls), JSON_UNESCAPED_SLASHES);
+        $ctx = stream_context_create(array('http' => array('method' => 'POST', 'header' => "Content-Type: application/json; charset=utf-8\r\n", 'content' => $payload, 'timeout' => 4, 'ignore_errors' => true)));
+        @file_get_contents('https://api.indexnow.org/indexnow', false, $ctx);
+        return true;
+    }
+}
+

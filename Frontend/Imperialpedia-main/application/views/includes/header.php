@@ -76,6 +76,7 @@
       <meta property="article:modified_time" content="<?php echo $mod_date; ?>"/>
       <meta property="article:section" content="<?php echo htmlspecialchars(ucwords(str_replace('-', ' ', $this->uri->segment(1)))); ?>"/>
       <?php } ?>
+      <link rel="alternate" type="application/rss+xml" title="Imperialpedia" href="<?php echo base_url('feed.xml'); ?>">
       <link rel="icon" type="image/x-icon" href="<?php echo base_url() . 'assets/img/favicon.png'; ?>">
 
       <?php if($ld_is_article){

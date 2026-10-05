@@ -984,6 +984,7 @@ class AdminCtrl extends CI_Controller{
                 $res_id = $this->Admin_model->post_add($data);
                 if (!empty($res_id)) {
                     $this->save_post_meta($data['cat_id'], $data['sub_cat_id'], $uri);
+                    if($data['status'] === 'published'){ indexnow_ping(array(base_url($this->build_page_url($data['cat_id'], $data['sub_cat_id'], $uri)), base_url('sitemap.xml'))); }
                     $this->session->set_flashdata('msg', 'Post Added Successfully');
                     redirect(base_url() . "imp-admin/post");
                 }
@@ -1109,6 +1110,7 @@ class AdminCtrl extends CI_Controller{
             $res_id = $this->Admin_model->post_update($data,$upd_id);
             if (!empty($res_id)){
                 $this->save_post_meta($data['cat_id'], $data['sub_cat_id'], $uri);
+                if($data['status'] === 'published'){ indexnow_ping(array(base_url($this->build_page_url($data['cat_id'], $data['sub_cat_id'], $uri)), base_url('sitemap.xml'))); }
                 $this->session->set_flashdata('msg', 'Post Update Successfully');
                 redirect(base_url() . "imp-admin/post");
             }
@@ -1281,6 +1283,7 @@ public function add_subcat(){
             $res = $this->Admin_model->subcat_add($data);
             if ($res == true) {
                 $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name']);
+                indexnow_ping(array(base_url($this->subcat_page_url($data['cat_id'], $data['sub_cat_name'])), base_url('sitemap.xml'), base_url('news-sitemap.xml')));
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category added, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category added Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');
@@ -1346,6 +1349,7 @@ public function update_subcat(){
             $res = $this->Admin_model->subcat_update($data, $upd_id);
             if ($res == true) {
                 $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name'], $old_url);
+                indexnow_ping(array(base_url($this->subcat_page_url($data['cat_id'], $data['sub_cat_name'])), base_url('sitemap.xml'), base_url('news-sitemap.xml')));
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category updated, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category updated Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');

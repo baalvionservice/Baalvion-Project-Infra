@@ -13,10 +13,10 @@ cd "$HERE"
 if [ -n "$(git status --porcelain -- .)" ]; then echo "Uncommitted changes here. Commit first so live matches git."; exit 1; fi
 
 echo "1/5 backing up the server's current code..."
-ssh -o BatchMode=yes $HOST "cd $STAGE && tar czf $BACKUPS/code-pre-deploy-\$(date +%Y%m%d-%H%M%S).tgz application assets index.php sql .htaccess"
+ssh -o BatchMode=yes $HOST "cd $STAGE && tar czf $BACKUPS/code-pre-deploy-\$(date +%Y%m%d-%H%M%S).tgz application assets index.php sql .htaccess ads.txt c7c33f9575897a0f49ced6a1b94b16fb.txt"
 
 echo "2/5 uploading code from commit $(git rev-parse --short HEAD)..."
-git archive HEAD application assets index.php sql .htaccess | ssh -o BatchMode=yes $HOST "cd $STAGE && tar xf - 2>/dev/null"
+git archive HEAD application assets index.php sql .htaccess ads.txt c7c33f9575897a0f49ced6a1b94b16fb.txt | ssh -o BatchMode=yes $HOST "cd $STAGE && tar xf - 2>/dev/null"
 
 echo "3/5 building image..."
 ssh -o BatchMode=yes $HOST "cd $STAGE && docker tag $IMAGE:local $IMAGE:previous && docker build -t $IMAGE:new . 2>&1 | tail -1"

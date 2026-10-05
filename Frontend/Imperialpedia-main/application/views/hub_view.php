@@ -177,6 +177,8 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
 .na-more-card{display:block;padding:16px 18px;border:1px solid #e2e8f0;border-radius:12px;text-decoration:none;color:#0f172a;background:#fff;transition:all .15s ease}
 .na-more-card:hover{border-color:var(--hub-accent);box-shadow:0 10px 24px rgba(15,23,42,.1);transform:translateY(-2px);color:#0f172a}
 .na-more-card strong{display:block;font-size:1rem;margin-bottom:4px}.na-more-card span{font-size:.85rem;color:#64748b;line-height:1.5}
+.na-mob-only{display:none}
+@media (max-width:991.98px){.na-desk-only{display:none}.na-mob-only{display:block;margin:0 0 30px}}
 .na-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#d00000}
 .na-line span{color:#64748b;letter-spacing:.04em;font-weight:700;text-transform:none}
 .na-progress{position:fixed;left:0;top:0;right:0;height:3px;z-index:3000;background:transparent}.na-progress i{display:block;height:100%;width:0;background:#d00000;transition:width .08s linear}
@@ -242,8 +244,10 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
          <div class="na-box"><h3>In this article</h3><div class="na-toc" id="naToc"><?php foreach ($toc as $t) { ?><a href="#<?php echo $t[0]; ?>"><?php echo htmlspecialchars(ucfirst($t[1])); ?></a><?php } ?></div>
          <?php if (count($toc) > 3) { ?><button type="button" class="p6-toc-toggle" id="naTocBtn" style="display:none" onclick="var t=document.getElementById('naToc');this.textContent=t.classList.toggle('is-open')?'Show fewer':'Show all sections'">Show all sections</button><?php } ?></div>
          <?php } ?>
-         <?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'signal')); ?>
-         <?php $this->load->view('includes/network_box'); ?>
+         <div class="na-desk-only">
+            <?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'signal')); ?>
+            <?php $this->load->view('includes/network_box'); ?>
+         </div>
       </aside>
    </div>
    <?php if ($more_news) { ?>
@@ -263,6 +267,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
       <?php } ?></div>
    </section>
    <?php } ?>
+<div class="na-mob-only"><?php $this->load->view('includes/network_box'); ?></div>
 </main>
 <script>(function(){var bar=document.querySelector('#naProg i');if(bar){var f=function(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%';};addEventListener('scroll',f,{passive:true});f();}var b=document.getElementById('naTocBtn');if(b&&window.matchMedia('(max-width:767.98px)').matches){b.style.display='block';}})();</script>
 <?php return; } ?>

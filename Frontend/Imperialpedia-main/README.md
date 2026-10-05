@@ -43,6 +43,11 @@ A plain Instagram (`/p/`, `/reel/`) or Facebook (post, photo, video, reel, `fb.w
 ## Google News / Discover
 Articles (posts, and sub-categories that are themselves the article) output `NewsArticle` + `BreadcrumbList` JSON-LD, `og:type=article`, real publish/modified dates, author and a 600x60 publisher logo (`assets/img/publisher-logo.png`); other pages do not. `/news-sitemap.xml` lists news-section articles from the last 2 days (listed in robots.txt). Discover needs a large (1200 px wide) original image on each article: set the cover/banner image in the admin.
 
+## Getting indexed quickly
+- **Google:** keep `/sitemap.xml` and `/news-sitemap.xml` current (they are generated live), link every new article from a section page and the homepage, then use Search Console > URL inspection > Request indexing for the newest URLs. Google does not support IndexNow.
+- **Bing, Yandex and others:** saving a published post or sub-category in the admin sends an IndexNow ping (`indexnow_ping()`, live host only). The key file is `c7c33f9575897a0f49ced6a1b94b16fb.txt.txt` in the web root.
+- **Feeds:** `/feed.xml` is an RSS feed of the 30 newest articles, advertised in the page head.
+
 ## Performance rules (keep Lighthouse mobile at 90+)
 - One self-hosted font (Plus Jakarta Sans) in `assets/fonts/`; old font names are aliased to it in the header. No Google Fonts.
 - Icons come from a trimmed Font Awesome (`assets/vendor/fa/css/fa-subset.css`). **After using a new `fa-…` icon run `python3 scripts/build-icon-subset.py` (needs `pip install fonttools brotli`) and commit the result.**

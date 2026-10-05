@@ -59,6 +59,26 @@ class SitemapCtrl extends CI_Controller{
         echo '</urlset>';
     }
 
+    // RSS 2.0 feed of the 30 newest published articles (feed readers and search engines use it to find new pages fast).
+    public function feed(){
+        $base = rtrim(base_url(), '/');
+        $slug = function($v){ return strtolower(str_replace(' ', '-', trim($v))); };
+        $rows = $this->db->query("SELECT p.post_title, p.uri, p.post_desc, p.posted_date, p.post_updated, c.cat_name, s.sub_cat_name
+            FROM post p JOIN category c ON c.cat_id = p.cat_id JOIN sub_category s ON s.sub_cat_id = p.sub_cat_id
+            WHERE p.status = 'published' AND c.cat_name <> 'cookies' ORDER BY p.posted_date DESC LIMIT 30")->result_array();
+        $this->load->helper('common');
+        header('Content-Type: application/rss+xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>' . "\n";
+        echo "<title>Imperialpedia</title><link>" . $base . "/</link><description>SEO guides and practical education.</description><language>en</language>\n";
+        echo '<atom:link href="' . $base . '/feed.xml" rel="self" type="application/rss+xml"/>' . "\n";
+        foreach($rows as $r){
+            $url = $base . '/' . $slug($r['cat_name']) . '/' . $slug($r['sub_cat_name']) . '/' . $slug($r['uri']);
+            echo "<item><title>" . htmlspecialchars(ucfirst($r['post_title']), ENT_XML1) . "</title><link>" . htmlspecialchars($url, ENT_XML1) . "</link><guid isPermaLink=\"true\">" . htmlspecialchars($url, ENT_XML1) . "</guid>";
+            echo "<pubDate>" . date('r', strtotime($r['posted_date'])) . "</pubDate><description>" . htmlspecialchars(seo_excerpt($r['post_desc'], 300), ENT_XML1) . "</description></item>\n";
+        }
+        echo '</channel></rss>';
+    }
+
     public function index(){
         $base = rtrim(base_url(), '/');
         $slug = function($v){ return strtolower(str_replace(' ', '-', trim($v))); };
