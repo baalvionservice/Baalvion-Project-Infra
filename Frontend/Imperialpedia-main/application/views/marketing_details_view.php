@@ -389,17 +389,7 @@ body {
                   <span class="p6-img-caption mb-4"><i class="fa-solid fa-camera me-1 text-danger"></i> <?php echo !empty($row['post_alt_title']) ? $row['post_alt_title'] : 'Marketing Strategy Feature'; ?></span>
                <?php } ?>
 
-               <!-- Page Six & NY Post Signature Inline Story Recommendation ("SEE ALSO") -->
-               <?php if(!empty($post) && count($post) > 0){ $rec = $post[0]; ?>
-                  <div class="p6-see-also-box">
-                     <span class="p6-see-also-label"><i class="fa-solid fa-bolt me-1"></i> SEE ALSO</span>
-                     <a href="<?php echo base_url().str_replace(' ','-',$rec['cat_name']).'/'.str_replace(' ','-',$rec['sub_cat_name']).'/'.str_replace(' ','-',$rec['uri']); ?>" class="p6-see-also-link">
-                        <?php echo ucfirst($rec['post_title']); ?> &rarr;
-                     </a>
-                  </div>
-               <?php } ?>
-
-               <div class="p6-article-body">
+<div class="p6-article-body">
                   <?php echo render_content($row['post_desc']); ?>
                </div>
 
