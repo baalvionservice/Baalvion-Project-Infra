@@ -305,6 +305,14 @@
    });
 </script>
 <style>
+/* Related reading: the in-article run-on sentence becomes a tidy list of link cards. */
+.p6-article-body p.imp-related-reading{font-size:0;line-height:0;margin:2.2rem 0;padding:1.1rem 1.25rem 1.25rem;background:#f8f9fa;border:1px solid #e2e8f0;border-left:4px solid #d00000;border-radius:8px}
+.p6-article-body p.imp-related-reading::before{content:"Related reading";display:block;font-size:.72rem;line-height:1;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#d00000;margin-bottom:.8rem}
+.p6-article-body p.imp-related-reading a{display:block;font-size:1rem;line-height:1.45;font-weight:600;color:#111;text-decoration:none;padding:.7rem 0;border-top:1px solid #e2e8f0}
+.p6-article-body p.imp-related-reading a:first-of-type{border-top:0;padding-top:.1rem}
+.p6-article-body p.imp-related-reading a:last-of-type{padding-bottom:0}
+.p6-article-body p.imp-related-reading a::after{content:" \2192";color:#d00000;font-weight:700}
+.p6-article-body p.imp-related-reading a:hover{color:#d00000}
 /* One typeface site-wide (Plus Jakarta Sans). Loaded last so it wins over each page's own font rules; icons and code keep theirs. */
 :root{--p6-font-body:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--p6-font-headline:var(--p6-font-body);--p6-font-serif:var(--p6-font-body);--p6-font-accent:var(--p6-font-body)}
 body *:not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(code):not(pre):not(kbd):not(svg):not(svg *){font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif !important}
