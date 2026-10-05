@@ -2,7 +2,7 @@
 /**
  * Imperialpedia — homepage (bold magazine layout).
  * Everything shown comes from the database; nothing here is a placeholder or an invented figure.
- * Earlier designs are kept in home_view_legacy.php.
+ *
  */
 $labels = array(
    'insurance' => 'Insurance', 'marketing' => 'Marketing', 'internet' => 'Internet', 'seo' => 'SEO',
