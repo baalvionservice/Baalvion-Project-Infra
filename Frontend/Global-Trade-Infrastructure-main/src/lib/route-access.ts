@@ -148,6 +148,8 @@ const PUBLIC_MARKETING_PREFIXES: readonly string[] = [
   '/fta', '/governments', '/logistics', '/platform', '/ports', '/pricing', '/privacy',
   '/tariffs', '/terms', '/trust', '/refund-policy', '/shipping-policy', '/grievance',
   '/payment-terms',
+  // Public application forms: they submit to an anonymous intake and grant no access.
+  '/onboard',
 ];
 
 export function skipsSessionRehydration(pathname: string): boolean {
