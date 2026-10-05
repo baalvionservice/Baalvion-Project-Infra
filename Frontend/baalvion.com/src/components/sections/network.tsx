@@ -37,22 +37,37 @@ export function Network() {
               <p className="body mb-2 text-sm">{group.note}</p>
 
               <div>
-                {group.entries.map((entry) => (
-                  <a key={entry.node} href={entry.href} className="ledger-row group">
-                    <span className="mono-caption">{entry.node}</span>
-                    <span className="flex flex-col gap-1.5">
-                      <span className="font-display text-lg leading-tight text-foreground">
-                        {entry.name}
+                {group.entries.map((entry) => {
+                  const body = (
+                    <>
+                      <span className="mono-caption">{entry.node}</span>
+                      <span className="flex flex-col gap-1.5">
+                        <span className="font-display text-lg leading-tight text-foreground">
+                          {entry.name}
+                        </span>
+                        <span className="text-sm leading-relaxed text-muted">
+                          {entry.description}
+                        </span>
                       </span>
-                      <span className="text-sm leading-relaxed text-muted">
-                        {entry.description}
-                      </span>
-                    </span>
-                    <span className="mono-caption md:text-right">
-                      {entry.domain} <span aria-hidden="true">↗</span>
-                    </span>
-                  </a>
-                ))}
+                      {entry.live === false ? (
+                        <span className="mono-caption md:text-right">In development</span>
+                      ) : (
+                        <span className="mono-caption md:text-right">
+                          {entry.domain} <span aria-hidden="true">↗</span>
+                        </span>
+                      )}
+                    </>
+                  );
+                  return entry.live === false ? (
+                    <div key={entry.node} className="ledger-row">
+                      {body}
+                    </div>
+                  ) : (
+                    <a key={entry.node} href={entry.href} className="ledger-row group">
+                      {body}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </Reveal>
