@@ -47,6 +47,8 @@ Rollback: on the server retag `baalvion-legacy-imperialpedia-web:previous` as `:
 ## Admin guards (`AdminCtrl.php`)
 Every saved article or sub-category description is cleaned: fixed pixel sizes on pasted pictures removed, own-site links made relative, `<h1>` → `<h2>`, empty paragraphs collapsed. Posts need a sub-category that belongs to the chosen category, a cover image before publishing, and get a hyphenated slug. Covers are resized to ≤1200 px / ≤300 KB.
 
+Sub-category forms (`/imp-admin/add_subcat`, edit) also hold the **meta title, meta description** (with character counters and a live Google-style preview) and **tags**; the meta is stored in table `meta` under `category/sub-category` and follows the sub-category if it is renamed or moved.
+
 ## Database changes
 `sql/migrations/NNN_*.sql` are numbered, written to be safe to run twice, and applied to **live by hand** (phpMyAdmin or `mysql < file`) after a backup. Numbering has a gap at 008 (a draft that was replaced by 009–012). 001–004 are the original schema/content syncs; 005–012 are the October 2026 cleanup. Old one-off content scripts and database dumps were deleted; they remain in git history.
 

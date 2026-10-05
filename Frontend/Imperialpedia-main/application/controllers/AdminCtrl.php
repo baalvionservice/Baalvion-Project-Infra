@@ -1203,6 +1203,33 @@ public function sub_cat(){
     $this->load->view('admin/includes/footer');
 }
 
+    // Meta title/description for a sub-category page, stored under its public address "category/sub-category".
+    // Empty fields leave an existing row alone; when the sub-category is renamed or moved, its row follows it.
+    private function subcat_page_url($cat_id, $sub_cat_name){
+        return $this->build_page_url_two($cat_id, $sub_cat_name);
+    }
+    private function build_page_url_two($cat_id, $sub_cat_name){
+        $cat_name = '';
+        foreach($this->Admin_model->cat_list() as $c){ if($c['cat_id'] == $cat_id){ $cat_name = $c['cat_name']; break; } }
+        return $this->slugify_uri($cat_name) . '/' . $this->slugify_uri($sub_cat_name);
+    }
+    private function save_subcat_meta($cat_id, $sub_cat_name, $old_url = null){
+        $url = $this->subcat_page_url($cat_id, $sub_cat_name);
+        $title = trim($this->input->post('meta_title'));
+        $desc  = trim($this->input->post('meta_desc'));
+        $existing = $this->Admin_model->get_meta_by_url($old_url !== null ? $old_url : $url);
+        if(!empty($existing) && $old_url !== null && $old_url !== $url){
+            $this->db->where('meta_id', $existing['meta_id'])->update('meta', array('page_url' => $url));
+        }
+        if($title === '' && $desc === ''){ return; }
+        if(!empty($existing)){
+            $this->Admin_model->meta_update(array('meta_title' => $title, 'meta_desc' => $desc, 'updated_date' => date('Y-m-d H:i:s')), $existing['meta_id']);
+        }else{
+            $this->Admin_model->meta_add(array('page_url' => $url, 'meta_title' => $title, 'meta_desc' => $desc,
+                'added_date' => date('Y-m-d H:i:s'), 'updated_date' => date('Y-m-d H:i:s')));
+        }
+    }
+
 public function add_subcat(){ 
     $this->check_login(); 
     $data['get_cats'] = $this->Admin_model->cat_list();
@@ -1240,6 +1267,7 @@ public function add_subcat(){
             if($img !== '' && $img !== false){ $data['sub_cat_image'] = $img; }
             $res = $this->Admin_model->subcat_add($data);
             if ($res == true) {
+                $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name']);
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category added, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category added Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');
@@ -1257,6 +1285,10 @@ public function subcat_edit($edit_id){
     $data['catss'] = $this->Admin_model->cat_list();
     $data['res'] = $this->Admin_model->get_subcat($edit_id);
     $data['get_cats'] = $this->Admin_model->cat_list();
+    $data['meta_row'] = array();
+    if(!empty($data['res'][0])){
+        $data['meta_row'] = $this->Admin_model->get_meta_by_url($this->subcat_page_url($data['res'][0]['cat_id'], $data['res'][0]['sub_cat_name']));
+    }
     $this->load->view('admin/includes/header', $data);
     $this->load->view('admin/includes/sidebar');
     $this->load->view('admin/view_subCat_edit');
@@ -1269,6 +1301,8 @@ public function update_subcat(){
 
     if (!empty($this->input->post('submit'))) {
         $upd_id = $this->input->post('upd_id');
+        $old_sub = $this->db->get_where('sub_category', array('sub_cat_id' => (int)$upd_id))->row_array();
+        $old_url = !empty($old_sub) ? $this->subcat_page_url($old_sub['cat_id'], $old_sub['sub_cat_name']) : null;
         $data = array(
             'cat_id' => $this->input->post('subcat_id'),
             'sub_cat_name' => strtolower(trim($this->input->post('subcat_name'))),
@@ -1297,6 +1331,7 @@ public function update_subcat(){
 
             $res = $this->Admin_model->subcat_update($data, $upd_id);
             if ($res == true) {
+                $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name'], $old_url);
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category updated, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category updated Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');

@@ -40,7 +40,8 @@
             <input type="file" name="aimg"/>
          </div>
          <br/>
-         <label for="last name"><b>Tags:</b></label>
+         <?php $this->load->view('admin/includes/seo_fields'); ?>
+         <label for="last name"><b>Tags:</b> <small class="text-muted">(comma separated keywords for this sub-category)</small></label>
          <input type="text" class="form-control" id="tags"  name="tags" value="">
          <br/>
          <label for="last name" id="cookieLevel"><b>Cookie:</b></label> 
