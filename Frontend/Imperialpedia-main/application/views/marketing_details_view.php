@@ -404,7 +404,7 @@ body {
                <?php } ?>
 
                <div class="p6-article-body">
-                  <?php echo $row['post_desc']; ?>
+                  <?php echo render_related_reading($row['post_desc']); ?>
                </div>
 
 

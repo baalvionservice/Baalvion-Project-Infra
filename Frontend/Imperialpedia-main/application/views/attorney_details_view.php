@@ -296,7 +296,7 @@ body {
          <div class="p6-article-body bg-white p-4 p-md-5 rounded border shadow-sm">
             <?php 
             if(!empty($post_details['post_desc'])){
-               echo $post_details['post_desc'];
+               echo render_related_reading($post_details['post_desc']);
             } else {
             ?>
             <p class="lead fw-bold text-dark mb-4">

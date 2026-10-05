@@ -305,14 +305,19 @@
    });
 </script>
 <style>
-/* Related reading: the in-article run-on sentence becomes a tidy list of link cards. */
-.p6-article-body p.imp-related-reading{font-size:0;line-height:0;margin:2.2rem 0;padding:1.1rem 1.25rem 1.25rem;background:#f8f9fa;border:1px solid #e2e8f0;border-left:4px solid #d00000;border-radius:8px}
-.p6-article-body p.imp-related-reading::before{content:"Related reading";display:block;font-size:.72rem;line-height:1;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#d00000;margin-bottom:.8rem}
-.p6-article-body p.imp-related-reading a{display:block;font-size:1rem;line-height:1.45;font-weight:600;color:#111;text-decoration:none;padding:.7rem 0;border-top:1px solid #e2e8f0}
-.p6-article-body p.imp-related-reading a:first-of-type{border-top:0;padding-top:.1rem}
-.p6-article-body p.imp-related-reading a:last-of-type{padding-bottom:0}
-.p6-article-body p.imp-related-reading a::after{content:" \2192";color:#d00000;font-weight:700}
-.p6-article-body p.imp-related-reading a:hover{color:#d00000}
+/* Related reading: card grid built by render_related_reading() */
+.p6-article-body .imp-related{margin:2.4rem 0;padding:1.4rem 1.4rem 1.5rem;background:#f8f9fa;border:1px solid #e2e8f0;border-top:3px solid #d00000;border-radius:10px}
+.p6-article-body .imp-related-head{margin:0 0 1rem;padding:0;border:0;font-size:.78rem;line-height:1;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#d00000}
+.imp-rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.p6-article-body a.imp-rel-card{display:flex;flex-direction:column;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-decoration:none;color:#111;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.p6-article-body a.imp-rel-card:hover{transform:translateY(-2px);border-color:#d00000;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.imp-rel-thumb{display:block;aspect-ratio:16/9;background:#e9ecef;overflow:hidden}
+.imp-rel-thumb img{width:100%;height:100%;object-fit:cover;display:block;margin:0}
+.imp-rel-body{display:flex;flex-direction:column;gap:6px;padding:.85rem .95rem 1rem;flex:1}
+.imp-rel-tag{font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#d00000}
+.imp-rel-title{font-size:.95rem;line-height:1.38;font-weight:700;color:#111;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.p6-article-body a.imp-rel-card:hover .imp-rel-title{color:#d00000}
+.imp-rel-meta{margin-top:auto;padding-top:4px;font-size:.76rem;color:#64748b;font-weight:600}
 /* One typeface site-wide (Plus Jakarta Sans). Loaded last so it wins over each page's own font rules; icons and code keep theirs. */
 :root{--p6-font-body:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--p6-font-headline:var(--p6-font-body);--p6-font-serif:var(--p6-font-body);--p6-font-accent:var(--p6-font-body)}
 body *:not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(code):not(pre):not(kbd):not(svg):not(svg *){font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif !important}

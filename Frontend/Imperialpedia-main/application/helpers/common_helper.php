@@ -61,3 +61,40 @@ if (!function_exists('post_read_minutes')) {
         return max(1, (int)ceil(str_word_count(strip_tags((string)$html)) / 200));
     }
 }
+
+if (!function_exists('render_related_reading')) {
+    // Turns the "Related reading: <a>…</a>, <a>…</a>" sentence stored in article bodies into a card grid
+    // (image, section, title, read time). Cards are built from the database, so links always use the real URL.
+    function render_related_reading($html) {
+        if (strpos((string)$html, 'imp-related-reading') === false) return $html;
+        return preg_replace_callback('#<p class="imp-related-reading">(.*?)</p>#s', function ($m) {
+            if (!preg_match_all('#<a [^>]*href="([^"]+)"#i', $m[1], $links)) return $m[0];
+            $CI =& get_instance();
+            $CI->load->database();
+            $cards = '';
+            foreach (array_unique($links[1]) as $href) {
+                $uri = basename(rtrim(parse_url($href, PHP_URL_PATH) ?: '', '/'));
+                if ($uri === '') continue;
+                $row = $CI->db->select('p.post_title, p.uri, p.post_img, p.post_desc, c.cat_name, s.sub_cat_name')
+                    ->from('post p')
+                    ->join('category c', 'c.cat_id = p.cat_id')
+                    ->join('sub_category s', 's.sub_cat_id = p.sub_cat_id')
+                    ->where('p.uri', $uri)->where('p.status', 'published')
+                    ->get()->row_array();
+                if (!$row) continue;
+                $url = base_url(str_replace(' ', '-', $row['cat_name']) . '/' . str_replace(' ', '-', $row['sub_cat_name']) . '/' . str_replace(' ', '-', $row['uri']));
+                $img = '';
+                if (!empty($row['post_img'])) {
+                    $src = (strpos($row['post_img'], 'http') === 0) ? $row['post_img'] : base_url('uploads/post/' . $row['post_img']);
+                    $img = '<span class="imp-rel-thumb"><img src="' . htmlspecialchars($src) . '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></span>';
+                }
+                $cards .= '<a class="imp-rel-card" href="' . htmlspecialchars($url) . '">' . $img
+                    . '<span class="imp-rel-body"><span class="imp-rel-tag">' . htmlspecialchars($row['sub_cat_name']) . '</span>'
+                    . '<span class="imp-rel-title">' . htmlspecialchars(ucfirst($row['post_title'])) . '</span>'
+                    . '<span class="imp-rel-meta">' . post_read_minutes($row['post_desc']) . ' min read</span></span></a>';
+            }
+            if ($cards === '') return $m[0];
+            return '<aside class="imp-related" aria-label="Related reading"><h3 class="imp-related-head">Related reading</h3><div class="imp-rel-grid">' . $cards . '</div></aside>';
+        }, $html);
+    }
+}
