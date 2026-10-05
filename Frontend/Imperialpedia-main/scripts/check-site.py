@@ -15,6 +15,7 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:8000').rstrip('/
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *a, **k): return None
 opener = urllib.request.build_opener(NoRedirect)
+opener.addheaders = [('User-Agent', 'Mozilla/5.0 (compatible; Imperialpedia-site-check)')]   # Cloudflare rejects the default Python agent
 
 def get(url):
     try:
@@ -27,7 +28,7 @@ def get(url):
 status, sitemap = get(BASE + '/sitemap.xml')
 queue = [re.sub(r'^https?://[^/]+', BASE, u) for u in re.findall(r'<loc>([^<]+)</loc>', sitemap)] or [BASE + '/']
 seen, problems = {}, []
-skip = re.compile(r'\.(jpe?g|png|webp|svg|css|js|pdf|ico|xml|txt|gif|woff2?)$|^/(imp-admin|assets|uploads|web-story|google-login|submit-job-application)')
+skip = re.compile(r'\.(jpe?g|png|webp|svg|css|js|pdf|ico|xml|txt|gif|woff2?)$|^/(imp-admin|assets|uploads|web-story|google-login|submit-job-application|cdn-cgi)')
 while queue:
     url = urldefrag(queue.pop())[0]
     path = urlparse(url).path
