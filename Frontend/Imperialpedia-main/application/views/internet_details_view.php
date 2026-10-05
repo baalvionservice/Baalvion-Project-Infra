@@ -498,7 +498,7 @@ body {
             <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'trade', 'row' => $row)); ?>
             <!-- Article Body -->
             <article class="p6-article-body">
-               <?php echo render_related_reading($row['post_desc']);?>
+               <?php echo render_content($row['post_desc']);?>
             </article>
             <template id="imp-ad-inline"><?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'ships', 'row' => $row)); ?></template>
             <script>

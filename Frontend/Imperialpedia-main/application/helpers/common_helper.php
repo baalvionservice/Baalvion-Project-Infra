@@ -168,3 +168,47 @@ if (!function_exists('post_thumb')) {
     }
 }
 
+if (!function_exists('embed_social')) {
+    // Turns plain Instagram and Facebook post addresses typed or pasted into an article into embedded posts.
+    // Works at display time, so nothing in the database changes. Uses the platforms' own iframe embeds
+    // (no script is loaded) with lazy loading, and keeps a "view on ..." link underneath.
+    function embed_social($html) {
+        $html = (string)$html;
+        if (stripos($html, 'instagram.com') === false && stripos($html, 'facebook.com') === false && stripos($html, 'fb.watch') === false) return $html;
+
+        // 1) An anchor whose visible text is just the address becomes the bare address.
+        $html = preg_replace('#<a\b[^>]*href=["\'](https?://(?:www\.)?(?:instagram\.com|facebook\.com|m\.facebook\.com|fb\.watch)/[^"\']+)["\'][^>]*>\s*(?:https?://[^<]+|www\.[^<]+)\s*</a>#i', '$1', $html);
+
+        $make_ig = function ($m) {
+            $url = 'https://www.instagram.com/' . $m[1] . '/' . $m[2] . '/';
+            return '<div class="imp-embed imp-embed--ig"><iframe src="' . $url . 'embed/" loading="lazy" title="Instagram post" allowtransparency="true" scrolling="no" frameborder="0"></iframe>'
+                 . '<a class="imp-embed-link" href="' . $url . '" target="_blank" rel="noopener nofollow">View this post on Instagram &rarr;</a></div>';
+        };
+        // 2) Instagram posts, reels and IGTV (not already inside an attribute).
+        $html = preg_replace_callback('#(?<![="\'/\w])https?://(?:www\.)?instagram\.com/(p|reel|reels|tv)/([A-Za-z0-9_-]+)/?(?:\?[^\s<"\']*)?#i', function ($m) use ($make_ig) {
+            return $make_ig(array(0, $m[1] === 'reels' ? 'reel' : strtolower($m[1]), $m[2]));
+        }, $html);
+
+        // 3) Facebook posts, photos, videos and reels.
+        $html = preg_replace_callback('#(?<![="\'/\w])https?://(?:www\.|m\.|web\.)?(?:facebook\.com|fb\.watch)/[^\s<"\']+#i', function ($m) {
+            $url = rtrim(html_entity_decode($m[0]), '.,;)');
+            $is_video = (bool)preg_match('#(fb\.watch|/videos?/|/watch|/reel/)#i', $url);
+            if (!$is_video && !preg_match('#(/posts/|/permalink|/photo|/photos/|/share/|/story\.php|story_fbid|/pfbid)#i', $url)) { return $m[0]; }   // a profile or page address: leave as text
+            $plugin = $is_video ? 'video' : 'post';
+            $src = 'https://www.facebook.com/plugins/' . $plugin . '.php?href=' . rawurlencode($url) . '&show_text=true&width=500';
+            return '<div class="imp-embed imp-embed--fb' . ($is_video ? ' imp-embed--fbv' : '') . '"><iframe src="' . htmlspecialchars($src) . '" loading="lazy" title="Facebook post" allowfullscreen="true" scrolling="no" frameborder="0" allow="clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>'
+                 . '<a class="imp-embed-link" href="' . htmlspecialchars($url) . '" target="_blank" rel="noopener nofollow">View this post on Facebook &rarr;</a></div>';
+        }, $html);
+        // A block-level embed cannot sit inside <p>; unwrap paragraphs that hold only an embed.
+        $html = preg_replace('#<p\b[^>]*>(?:\s|<br\s*/?>|&nbsp;)*(<div class="imp-embed.*?</div>)(?:\s|<br\s*/?>|&nbsp;)*</p>#is', '$1', $html);
+        return $html;
+    }
+}
+
+if (!function_exists('render_content')) {
+    // Everything an article body needs at display time: related-reading cards and social embeds.
+    function render_content($html) {
+        return embed_social(render_related_reading($html));
+    }
+}
+

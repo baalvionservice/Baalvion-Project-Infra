@@ -37,6 +37,9 @@ Rollback: on the server retag `baalvion-legacy-imperialpedia-web:previous` as `:
 - **Sitemap / robots:** generated from the database (`SitemapCtrl`).
 - **Section on/off switches:** table `site_setting` (`cookies_section_enabled`).
 
+## Social embeds
+A plain Instagram (`/p/`, `/reel/`) or Facebook (post, photo, video, reel, `fb.watch`) address pasted into an article or sub-category description is shown as an embedded post at display time (`embed_social()` in `common_helper.php`); the stored text is unchanged. Facebook page/profile addresses stay as text.
+
 ## Performance rules (keep Lighthouse mobile at 90+)
 - One self-hosted font (Plus Jakarta Sans) in `assets/fonts/`; old font names are aliased to it in the header. No Google Fonts.
 - Icons come from a trimmed Font Awesome (`assets/vendor/fa/css/fa-subset.css`). **After using a new `fa-…` icon run `python3 scripts/build-icon-subset.py` (needs `pip install fonttools brotli`) and commit the result.**

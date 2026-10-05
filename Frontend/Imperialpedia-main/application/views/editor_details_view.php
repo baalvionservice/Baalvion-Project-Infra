@@ -534,7 +534,7 @@ body {
 
             <!-- Article Body -->
             <article class="p6-article-body">
-               <?php echo render_related_reading($row['post_desc']);?>
+               <?php echo render_content($row['post_desc']);?>
             </article>
             <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
             <?php $this->load->view('includes/comments_view'); ?>

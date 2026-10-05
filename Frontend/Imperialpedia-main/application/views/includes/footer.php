@@ -453,6 +453,15 @@ img.rounded-circle[width="56"]{width:56px !important;height:56px !important}
 .imp-ad--sky{max-width:320px;margin-left:auto;margin-right:auto}
 .imp-ad--sky .imp-ad-box{min-height:420px}
 }
+/* Embedded Instagram / Facebook posts (see embed_social()) */
+.p6-content-box .imp-embed,.p6-article-body .imp-embed,.hub-guide .imp-embed{display:block;margin:1.6rem auto;max-width:540px;text-align:center}
+.imp-embed iframe{display:block;width:100%;max-width:100%;border:1px solid #e2e8f0;border-radius:12px;background:#fff;margin:0 auto}
+.imp-embed--ig iframe{height:700px}
+.imp-embed--fb iframe{height:640px}
+.imp-embed--fbv iframe{height:420px}
+.imp-embed-link{display:inline-block;margin-top:8px;font-size:.82rem;font-weight:700;color:#475569 !important;text-decoration:none !important}
+.imp-embed-link:hover{color:#d00000 !important}
+@media (max-width:575.98px){.imp-embed--ig iframe{height:640px}.imp-embed--fb iframe{height:560px}}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){

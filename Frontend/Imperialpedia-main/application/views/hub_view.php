@@ -191,7 +191,7 @@ $count = count($posts);
          <?php if (count($toc) > 6) { ?><button type="button" class="p6-toc-toggle" id="hubTocBtn" style="display:none">Show all <?php echo count($toc); ?> sections</button><?php } ?>
       </aside>
       <?php } ?>
-      <article class="hub-guide p6-content-box"><?php echo $guide_html; ?></article>
+      <article class="hub-guide p6-content-box"><?php echo embed_social($guide_html); ?></article>
    </div>
    <?php } ?>
 </main>

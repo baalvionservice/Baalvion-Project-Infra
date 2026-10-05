@@ -400,7 +400,7 @@ body {
                <?php } ?>
 
                <div class="p6-article-body">
-                  <?php echo render_related_reading($row['post_desc']); ?>
+                  <?php echo render_content($row['post_desc']); ?>
                </div>
 
 
