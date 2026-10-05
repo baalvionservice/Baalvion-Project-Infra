@@ -62,10 +62,10 @@ if (!function_exists('post_read_minutes')) {
     }
 }
 
-if (!function_exists('render_related_reading')) {
+if (!function_exists('render_related_reading_cards')) {
     // Turns the "Related reading: <a>…</a>, <a>…</a>" sentence stored in article bodies into a card grid
     // (image, section, title, read time). Cards are built from the database, so links always use the real URL.
-    function render_related_reading($html) {
+    function render_related_reading_cards($html) {
         if (strpos((string)$html, 'imp-related-reading') === false) return $html;
         return preg_replace_callback('#<p class="imp-related-reading">(.*?)</p>#s', function ($m) {
             if (!preg_match_all('#<a [^>]*href="([^"]+)"#i', $m[1], $links)) return $m[0];
@@ -287,3 +287,23 @@ if (!function_exists('indexnow_ping')) {
     }
 }
 
+
+
+if (!function_exists('render_related_reading')) {
+    // Related-reading cards for the "Related reading: ..." sentence stored in an article body.
+    // If that sentence was pasted inside a layout block (a column of a pasted grid) the cards would be squeezed into
+    // the column and overlap their neighbours, so in that case they are moved to the end of the content.
+    function render_related_reading($html) {
+        $html = (string)$html;
+        $tag = '<p class="imp-related-reading">';
+        $pos = strpos($html, $tag);
+        if ($pos === false) return $html;
+        $before = substr($html, 0, $pos);
+        $depth = preg_match_all('#<div\b#i', $before) - preg_match_all('#</div>#i', $before);
+        if ($depth > 0 && preg_match('#<p class="imp-related-reading">.*?</p>#s', $html, $pm)) {
+            $html = substr($html, 0, $pos) . substr($html, $pos + strlen($pm[0]));
+            return render_related_reading_cards($html) . render_related_reading_cards($pm[0]);
+        }
+        return render_related_reading_cards($html);
+    }
+}
