@@ -1,9 +1,8 @@
 RewriteEngine On
 RewriteBase /
 
-# Allow direct access to web-story directory or other assets
-RewriteCond %{REQUEST_URI} ^/web-story
-RewriteRule ^ - [L]
+# The web-story sub-app is not part of the live site (it has no database and only shows a PHP error): answer 410 Gone.
+RewriteRule ^web-story/?$ - [G,L]
 
 # Route all other requests through CodeIgniter front controller
 RewriteCond %{REQUEST_FILENAME} !-f
