@@ -891,11 +891,50 @@ class AdminCtrl extends CI_Controller{
         $this->load->view('admin/includes/footer');
     }
 
+    // ---- Content guards: keep whatever is pasted or uploaded from breaking the public layout ----
+
+    // Cleans editor HTML before it is stored: pasted pictures lose their fixed pixel sizes (they would
+    // overflow or squash on phones), absolute links to this site become relative (so they work on any host),
+    // stray <h1> tags become <h2> (the page already has its own h1) and runs of empty paragraphs collapse.
+    private function clean_editor_html($html){
+        $html = (string)$html;
+        $html = preg_replace_callback('/<img\b[^>]*>/i', function($m){
+            $t = $m[0];
+            $t = preg_replace('/\s(width|height)\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $t);
+            $t = preg_replace_callback('/\sstyle\s*=\s*("([^"]*)"|\'([^\']*)\')/i', function($sm){
+                $css = isset($sm[3]) && $sm[3] !== '' ? $sm[3] : (isset($sm[2]) ? $sm[2] : '');
+                $css = preg_replace('/(^|;)\s*(width|height|max-width|max-height|min-width|min-height)\s*:[^;]*/i', '$1', $css);
+                $css = trim(preg_replace('/;{2,}/', ';', $css), " ;");
+                return $css === '' ? '' : ' style="' . $css . '"';
+            }, $t);
+            return $t;
+        }, $html);
+        $html = preg_replace('#(src|href)=(["\'])https?://(?:www\.|legacy\.)?imperialpedia\.com/#i', '$1=$2/', $html);
+        $html = preg_replace('/<h1\b/i', '<h2', $html);
+        $html = preg_replace('/<\/h1>/i', '</h2>', $html);
+        $html = preg_replace('#(<p>(?:\s|&nbsp;|<br\s*/?>)*</p>\s*){2,}#i', '', $html);
+        return $html;
+    }
+
+    // URL slug for a post: lowercase words joined by hyphens (matches what the sitemap and links use).
+    private function slugify_uri($text){
+        $t = strtolower(trim((string)$text));
+        $t = preg_replace('/[^a-z0-9\s-]+/', ' ', $t);
+        return trim(preg_replace('/[\s-]+/', '-', $t), '-');
+    }
+
+    // The chosen sub-category must belong to the chosen category, otherwise the article lands in the wrong section.
+    private function subcat_matches_cat($cat_id, $sub_cat_id){
+        $row = $this->db->get_where('sub_category', array('sub_cat_id' => (int)$sub_cat_id))->row_array();
+        return !empty($row) && (int)$row['cat_id'] === (int)$cat_id;
+    }
+
     public function add_post(){
         $this->check_login();
         $data['catss'] = $this->Admin_model->cat_list();
         $data['get_category'] = $this->Admin_model->cat_list();
         $data['get_sub_cat'] = $this->Admin_model->subcat_list();
+        $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
         if (!empty($this->input->post('submit'))) {
             if(!empty($_FILES['pimg']['name'])) {
                 $config['upload_path']   = 'uploads/post';
@@ -906,11 +945,24 @@ class AdminCtrl extends CI_Controller{
                     $this->session->set_flashdata('msg', 'Image upload failed: ' . strip_tags($this->upload->display_errors()));
                     redirect(base_url() . "imp-admin/add_post");
                 }
-                $pimg = $this->shrink_image($config['upload_path'], $this->upload->data('file_name'));
+                $pimg = $this->shrink_image($config['upload_path'], $this->upload->data('file_name'), 300000, 1200);
             }else{$pimg='post.png';}
 
+                if($this->input->post('status') === 'published' && $pimg === 'post.png'){
+                    $this->session->set_flashdata('msg', 'Please add a cover image before publishing (a post without its own picture shows the generic placeholder on every card).');
+                    redirect(base_url() . "imp-admin/add_post");
+                }
+                if($this->input->post('status') === 'published' && !(int)$this->input->post('author_id')){
+                    $this->session->set_flashdata('msg', 'Please choose the author (Written by) before publishing, so the article shows a byline.');
+                    redirect(base_url() . "imp-admin/add_post");
+                }
+                if(!$this->subcat_matches_cat($this->input->post('cate'), $this->input->post('scat'))){
+                    $this->session->set_flashdata('msg', 'The sub-category you picked does not belong to that category. Choose the category first, then one of its sub-categories.');
+                    redirect(base_url() . "imp-admin/add_post");
+                }
+
                 $post_url = $this->input->post('post_url');
-                $uri = strtolower(trim(str_replace('-',' ',str_replace('?',' ',$post_url))));
+                $uri = $this->slugify_uri($post_url);
 
                 if($this->Admin_model->uri_exists($uri)){
                     $this->session->set_flashdata('msg', 'That post URL is already in use. Please choose a different one.');
@@ -923,14 +975,16 @@ class AdminCtrl extends CI_Controller{
                     'post_title' => strtolower(trim(str_replace('?',' ',$this->input->post('post_title')))),
                     'uri' => $uri,
                     'post_img' => $pimg,
+                    'author_id' => (int)$this->input->post('author_id') ?: null,
                     'post_alt_title' => $this->input->post('post_alt_title'),
-                    'post_desc' => $this->input->post('desc'),
+                    'post_desc' => $this->clean_editor_html($this->input->post('desc')),
                     'status' => $this->input->post('status') === 'published' ? 'published' : 'draft',
                     'posted_date' => date('Y-m-d H:i:s')
                 );
                 $res_id = $this->Admin_model->post_add($data);
                 if (!empty($res_id)) {
                     $this->save_post_meta($data['cat_id'], $data['sub_cat_id'], $uri);
+                    if($data['status'] === 'published'){ indexnow_ping(array(base_url($this->build_page_url($data['cat_id'], $data['sub_cat_id'], $uri)), base_url('sitemap.xml'))); }
                     $this->session->set_flashdata('msg', 'Post Added Successfully');
                     redirect(base_url() . "imp-admin/post");
                 }
@@ -989,6 +1043,7 @@ class AdminCtrl extends CI_Controller{
         $data['get_category'] = $this->Admin_model->cat_list();
         $data['get_sub_cat'] = $this->Admin_model->subcat_list();
         $data['res'] = $this->Admin_model->get_post_by_id($edit_id);
+        $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
         $data['meta'] = array('meta_title' => '', 'meta_desc' => '');
         foreach($data['res'] as $post){
             $page_url = $this->build_page_url($post['cat_id'], $post['sub_cat_id'], $post['uri']);
@@ -1018,11 +1073,19 @@ class AdminCtrl extends CI_Controller{
                     $this->session->set_flashdata('msg', 'Image upload failed: ' . strip_tags($this->upload->display_errors()));
                     redirect(base_url() . "imp-admin/edit_post/" . $upd_id);
                 }
-                $pimg = $this->shrink_image($config['upload_path'], $this->upload->data('file_name'));
+                $pimg = $this->shrink_image($config['upload_path'], $this->upload->data('file_name'), 300000, 1200);
             }
 
+            if($this->input->post('status') === 'published' && !(int)$this->input->post('author_id')){
+                $this->session->set_flashdata('msg', 'Please choose the author (Written by) before publishing, so the article shows a byline.');
+                redirect(base_url() . "imp-admin/edit_post/" . $upd_id);
+            }
+            if(!$this->subcat_matches_cat($this->input->post('cate'), $this->input->post('scat'))){
+                $this->session->set_flashdata('msg', 'The sub-category you picked does not belong to that category. Choose the category first, then one of its sub-categories.');
+                redirect(base_url() . "imp-admin/edit_post/" . $upd_id);
+            }
             $post_url = $this->input->post('post_url');
-            $uri = strtolower(trim(str_replace('-',' ',str_replace('?',' ',$post_url))));
+            $uri = $this->slugify_uri($post_url);
 
             if($this->Admin_model->uri_exists($uri, $upd_id)){
                 $this->session->set_flashdata('msg', 'That post URL is already in use. Please choose a different one.');
@@ -1034,8 +1097,9 @@ class AdminCtrl extends CI_Controller{
                 'sub_cat_id' => $this->input->post('scat'),
                 'post_title' => strtolower(trim(str_replace('?',' ',$this->input->post('post_title')))),
                 'uri' => $uri,
+                'author_id' => (int)$this->input->post('author_id') ?: null,
                 'post_alt_title' => $this->input->post('post_alt_title'),
-                'post_desc' => $this->input->post('desc'),
+                'post_desc' => $this->clean_editor_html($this->input->post('desc')),
                 'status' => $this->input->post('status') === 'published' ? 'published' : 'draft',
                 'post_updated' => date('Y-m-d H:i:s')
             );
@@ -1046,6 +1110,7 @@ class AdminCtrl extends CI_Controller{
             $res_id = $this->Admin_model->post_update($data,$upd_id);
             if (!empty($res_id)){
                 $this->save_post_meta($data['cat_id'], $data['sub_cat_id'], $uri);
+                if($data['status'] === 'published'){ indexnow_ping(array(base_url($this->build_page_url($data['cat_id'], $data['sub_cat_id'], $uri)), base_url('sitemap.xml'))); }
                 $this->session->set_flashdata('msg', 'Post Update Successfully');
                 redirect(base_url() . "imp-admin/post");
             }
@@ -1152,10 +1217,38 @@ public function sub_cat(){
     $this->load->view('admin/includes/footer');
 }
 
+    // Meta title/description for a sub-category page, stored under its public address "category/sub-category".
+    // Empty fields leave an existing row alone; when the sub-category is renamed or moved, its row follows it.
+    private function subcat_page_url($cat_id, $sub_cat_name){
+        return $this->build_page_url_two($cat_id, $sub_cat_name);
+    }
+    private function build_page_url_two($cat_id, $sub_cat_name){
+        $cat_name = '';
+        foreach($this->Admin_model->cat_list() as $c){ if($c['cat_id'] == $cat_id){ $cat_name = $c['cat_name']; break; } }
+        return $this->slugify_uri($cat_name) . '/' . $this->slugify_uri($sub_cat_name);
+    }
+    private function save_subcat_meta($cat_id, $sub_cat_name, $old_url = null){
+        $url = $this->subcat_page_url($cat_id, $sub_cat_name);
+        $title = trim($this->input->post('meta_title'));
+        $desc  = trim($this->input->post('meta_desc'));
+        $existing = $this->Admin_model->get_meta_by_url($old_url !== null ? $old_url : $url);
+        if(!empty($existing) && $old_url !== null && $old_url !== $url){
+            $this->db->where('meta_id', $existing['meta_id'])->update('meta', array('page_url' => $url));
+        }
+        if($title === '' && $desc === ''){ return; }
+        if(!empty($existing)){
+            $this->Admin_model->meta_update(array('meta_title' => $title, 'meta_desc' => $desc, 'updated_date' => date('Y-m-d H:i:s')), $existing['meta_id']);
+        }else{
+            $this->Admin_model->meta_add(array('page_url' => $url, 'meta_title' => $title, 'meta_desc' => $desc,
+                'added_date' => date('Y-m-d H:i:s'), 'updated_date' => date('Y-m-d H:i:s')));
+        }
+    }
+
 public function add_subcat(){ 
     $this->check_login(); 
     $data['get_cats'] = $this->Admin_model->cat_list();
     $data['catss'] = $this->Admin_model->cat_list();
+    $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
     if (!empty($this->input->post('submit'))) {
         $author_img = 'user.png';
         $author_img_err = '';
@@ -1175,7 +1268,7 @@ public function add_subcat(){
             $data = array(
                 'cat_id' => $this->input->post('subcat_id'),
                 'sub_cat_name' => strtolower(trim($this->input->post('subcat_name'))),
-                'sub_cat_desc' => $this->input->post('desc'),
+                'sub_cat_desc' => $this->clean_editor_html($this->input->post('desc')),
                 'author_name' => strtolower(trim($this->input->post('author'))),
                 'author_img' => $author_img,
                 'tags' => strtolower(trim($this->input->post('tags'))),
@@ -1189,6 +1282,8 @@ public function add_subcat(){
             if($img !== '' && $img !== false){ $data['sub_cat_image'] = $img; }
             $res = $this->Admin_model->subcat_add($data);
             if ($res == true) {
+                $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name']);
+                indexnow_ping(array(base_url($this->subcat_page_url($data['cat_id'], $data['sub_cat_name'])), base_url('sitemap.xml'), base_url('news-sitemap.xml')));
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category added, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category added Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');
@@ -1206,6 +1301,11 @@ public function subcat_edit($edit_id){
     $data['catss'] = $this->Admin_model->cat_list();
     $data['res'] = $this->Admin_model->get_subcat($edit_id);
     $data['get_cats'] = $this->Admin_model->cat_list();
+    $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
+    $data['meta_row'] = array();
+    if(!empty($data['res'][0])){
+        $data['meta_row'] = $this->Admin_model->get_meta_by_url($this->subcat_page_url($data['res'][0]['cat_id'], $data['res'][0]['sub_cat_name']));
+    }
     $this->load->view('admin/includes/header', $data);
     $this->load->view('admin/includes/sidebar');
     $this->load->view('admin/view_subCat_edit');
@@ -1218,10 +1318,12 @@ public function update_subcat(){
 
     if (!empty($this->input->post('submit'))) {
         $upd_id = $this->input->post('upd_id');
+        $old_sub = $this->db->get_where('sub_category', array('sub_cat_id' => (int)$upd_id))->row_array();
+        $old_url = !empty($old_sub) ? $this->subcat_page_url($old_sub['cat_id'], $old_sub['sub_cat_name']) : null;
         $data = array(
             'cat_id' => $this->input->post('subcat_id'),
             'sub_cat_name' => strtolower(trim($this->input->post('subcat_name'))),
-            'sub_cat_desc' => $this->input->post('desc'),
+            'sub_cat_desc' => $this->clean_editor_html($this->input->post('desc')),
             'author_name' => strtolower(trim($this->input->post('author'))),
             'tags' => strtolower(trim($this->input->post('tags'))),
             'cookie' => $this->input->post('cookie'),
@@ -1246,6 +1348,8 @@ public function update_subcat(){
 
             $res = $this->Admin_model->subcat_update($data, $upd_id);
             if ($res == true) {
+                $this->save_subcat_meta($data['cat_id'], $data['sub_cat_name'], $old_url);
+                indexnow_ping(array(base_url($this->subcat_page_url($data['cat_id'], $data['sub_cat_name'])), base_url('sitemap.xml'), base_url('news-sitemap.xml')));
                 $errs = array_filter(array($author_img_err, $img_err));
                 $this->session->set_flashdata('msg', $errs ? 'Sub-category updated, but ' . lcfirst(implode(' Also, ', $errs)) : 'Sub-category updated Successfully');
                 redirect(base_url() . 'imp-admin/sub_cat');

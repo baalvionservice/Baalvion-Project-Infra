@@ -51,6 +51,8 @@
             <?php } ?>
          </select>
          <br/>
+         <?php $this->load->view('admin/includes/author_select', array('authors' => $authors, 'selected_author' => isset($val['author_id']) ? $val['author_id'] : 0)); ?>
+         <br/>
          <label for="status"><b>Status:</b></label>
          <select name="status" id="status" class="form-control">
             <option value="draft" <?php if($val['status']=='draft'){echo 'selected';} ?>>Draft</option>

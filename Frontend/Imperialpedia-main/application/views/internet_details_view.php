@@ -1,8 +1,4 @@
 <!-- Page Six & NY Post Design System for Internet Details View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #d00000;
@@ -414,7 +410,7 @@ body {
                <div class="d-none d-md-flex align-items-center gap-2 mt-2 mt-md-0">
                   <span class="text-uppercase text-muted fw-bold me-1" style="font-size: 0.75rem; letter-spacing: 1px;">Share:</span>
                   <a href="https://twitter.com/intent/tweet?text=<?php echo urlencode($row['post_title']); ?>&url=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-dark rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Share on Twitter/X">
-                     <i class="fa-brands fa-x-twitter"></i>
+                     <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="vertical-align:-.125em"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   </a>
                   <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Share on Facebook">
                      <i class="fa-brands fa-facebook-f"></i>
@@ -475,13 +471,7 @@ body {
                   </ul>
                </div>
 
-               <!-- Ad Promo Box -->
-               <div class="p6-widget-box text-center p-3">
-                  <span class="text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">ADVERTISEMENT</span>
-                  <a href="https://www.neverendmoney.com/" target="_blank" class="d-block">
-                     <img src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
-                  </a>
-               </div>
+               <?php $this->load->view('includes/network_box'); ?>
             </div>
          </div>
 
@@ -489,26 +479,28 @@ body {
          <div class="col-lg-6 col-md-8 mb-4">
             <!-- Featured Hero Image -->
             <div class="p6-featured-img-container mb-1">
-               <img src="<?php echo base_url().'uploads/post/'.$row['post_img'].'?v=2';?>" fetchpriority="high" decoding="async"
+               <img loading="lazy" decoding="async" src="<?php echo base_url().'uploads/post/'.$row['post_img'].'?v=2';?>" fetchpriority="high" decoding="async"
                     onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
                     alt="<?php echo !empty($row['post_alt_title']) ? $row['post_alt_title'] : 'Article Featured Image'; ?>">
             </div>
             <span class="p6-img-caption mb-4"><i class="fa-solid fa-camera me-1 text-danger"></i> Photo Credit: Imperialpedia Tech Archive &bull; <?php echo !empty($row['post_alt_title']) ? $row['post_alt_title'] : 'Internet Tech Feature'; ?></span>
 
-            <!-- Page Six & NY Post Signature Inline Story Recommendation ("SEE ALSO") -->
-            <?php if(!empty($post) && count($post) > 0){ $rec = $post[0]; ?>
-               <div class="p6-see-also-box">
-                  <span class="p6-see-also-label"><i class="fa-solid fa-bolt me-1"></i> SEE ALSO</span>
-                  <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'internet/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$rec['uri']); ?>" class="p6-see-also-link">
-                     <?php echo ucfirst($rec['post_title']); ?> &rarr;
-                  </a>
-               </div>
-            <?php } ?>
-
+<?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'trade', 'row' => $row)); ?>
             <!-- Article Body -->
             <article class="p6-article-body">
-               <?php echo $row['post_desc'];?>
+               <?php echo render_content($row['post_desc']);?>
             </article>
+            <template id="imp-ad-inline"><?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'ships', 'row' => $row)); ?></template>
+            <script>
+            (function(){
+               var t = document.getElementById('imp-ad-inline'), body = document.querySelector('.p6-article-body');
+               if(!t || !body || !t.content.firstElementChild) return;
+               var blocks = Array.prototype.filter.call(body.children, function(c){ return !c.matches('aside, .p6-endnav, .imp-ad, h2, h3'); });
+               if(blocks.length < 2) return;
+               var at = blocks[Math.min(blocks.length - 2, Math.max(1, Math.floor(blocks.length * 0.55)))];
+               at.insertAdjacentElement('afterend', t.content.firstElementChild);
+            })();
+            </script>
             <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
             <?php $this->load->view('includes/comments_view'); ?>
          </div>
@@ -529,6 +521,7 @@ body {
                      <?php } ?>
                   </div>
                </div>
+               <?php $this->load->view('includes/network_ad', array('format' => 'sky', 'site' => 'signal', 'row' => $row)); ?>
             </div>
          </div>
 
@@ -538,35 +531,4 @@ body {
 <?php }; ?>
 
 <!-- Bottom Grid: Related Articles -->
-<section class="p6-grid-section">
-   <div class="container-fluid px-lg-5">
-      <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-2 border-dark">
-         <h2 style="font-family: var(--p6-font-headline) !important; font-weight: 800 !important; color: #0f172a !important; letter-spacing: -0.025em; font-size: 1.75rem; font-weight: 700; margin: 0;">
-            More Articles in <?php echo str_replace('-',' ',ucfirst($this->uri->segment(2)))?>
-         </h2>
-         <span class="p6-meta-tag">CURATED STORIES</span>
-      </div>
-
-      <div class="row g-4">
-         <?php foreach($post as $pst){ if(isset($row) && $pst['post_id'] == $row['post_id']) continue;?>
-            <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'internet/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
-                  <div class="p6-img-wrapper">
-                     <img src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
-                          onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
-                          alt="<?php echo !empty($pst['post_alt_title']) ? $pst['post_alt_title'] : 'Post Image'; ?>">
-                  </div>
-                  <div class="p6-grid-body">
-                     <div class="p6-card-tag"><?php echo strtoupper(str_replace('-',' ',$this->uri->segment(2)));?></div>
-                     <h3 class="p6-card-title"><?php echo ucfirst($pst['post_title']);?></h3>
-                     <div class="p6-card-footer">
-                        <span><i class="fa-regular fa-calendar-days me-1"></i> <?php echo date('M d, Y', strtotime($pst['posted_date'])); ?></span>
-                        <span class="p6-read-btn">Read Article &rsaquo;</span>
-                     </div>
-                  </div>
-               </a>
-            </div>
-         <?php } ?>
-      </div>
-   </div>
-</section>
+<!-- The sibling articles are listed once, in the 'More Stories' column; a second grid of the same links was removed. -->

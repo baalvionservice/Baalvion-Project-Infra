@@ -1,8 +1,4 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" /> 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
-
-
-
 <!-- body text and heading  -->
 
 <style>.sub-text{color:#fff;padding-top:8vw;font-family:"Oswald",Sans-serif;font-weight:400}.pivacy h3{font-family:Roboto Regular,Helvetica,Arial,sans-serif;font-weight:800;font-size:1rem;line-height:1.5}.pivacy p{font-family:Roboto Regular,Helvetica,Arial,sans-serif;font-weight:400;font-size:18px;font-size:1rem;line-height:1.5}.pivacy ul li{list-style-type:disc;font-family:Roboto Regular,Helvetica,Arial,sans-serif;font-weight:500;font-size:1rem;line-height:2;font-style:italic}</style>
@@ -68,7 +64,7 @@
                   </aside>
                   <aside id="simpleimage-6" class="widget widget_simpleimage">
                      <p class="simple-image">
-                        <a href="#" target="_blank"><img width="500" height="352" src="<?php echo base_url()?>assets/img/banner1.jpg" class="attachment-full size-full" alt="" ></a>
+                        <a href="#" target="_blank"><img loading="lazy" decoding="async" width="500" height="352" src="<?php echo base_url()?>assets/img/banner1.jpg" class="attachment-full size-full" alt="" ></a>
                      </p>
                   </aside>
                   <aside id="twitter-profile-tracker-8" class="widget widget_twitter-profile-tracker " style="height: 350px;overflow: scroll;">
@@ -116,7 +112,7 @@
 
             <h2 id="<?php echo $pst['post_id']?>" class="sec-heading"><?php echo ucfirst($pst['post_title']);?></h2>
 
-            <img class="img-fluid w-100" src="<?php if(!empty($pst['post_img'])){echo base_url().'uploads/post/'.$pst['post_img'].'?v=2'; }?>" alt="<?php if(!empty($img_alt_title[1])){echo $img_alt_title[1];} ?>">
+            <img loading="lazy" decoding="async" class="img-fluid w-100" src="<?php if(!empty($pst['post_img'])){echo base_url().'uploads/post/'.$pst['post_img'].'?v=2'; }?>" alt="<?php if(!empty($img_alt_title[1])){echo $img_alt_title[1];} ?>">
 
             <p class="mt-3"><?php echo ucfirst($pst['post_desc']);?></p>
 
@@ -192,7 +188,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 
@@ -226,7 +222,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 
@@ -260,7 +256,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 
@@ -294,7 +290,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 
@@ -328,7 +324,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 
@@ -362,7 +358,7 @@
 
                <div class="class_box">
 
-                  <div class="class_Img"><img src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
+                  <div class="class_Img"><img loading="lazy" decoding="async" src="https://www.entiretimes.com/demos/school/images/thumb/blog1_1603685709.jpg" alt="">
 
                      <div class="time_box"><span>9:30am-1:30pm</span></div>
 

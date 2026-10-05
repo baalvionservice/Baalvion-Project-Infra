@@ -1,8 +1,4 @@
 <!-- Page Six & NY Post Design System for Online Education Details View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-amber: #d97706;
@@ -262,7 +258,7 @@ body {
          <div class="d-none d-md-flex align-items-center gap-2 mt-2 mt-md-0">
             <span class="text-uppercase text-muted fw-bold me-1" style="font-size: 0.75rem; letter-spacing: 1px;">Share:</span>
             <a href="https://twitter.com/intent/tweet?text=<?php echo urlencode(isset($post_details['post_title']) ? $post_details['post_title'] : 'Online Education Guide'); ?>&url=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-dark rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Share on Twitter/X">
-               <i class="fa-brands fa-x-twitter"></i>
+               <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="vertical-align:-.125em"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
             <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Share on Facebook">
                <i class="fa-brands fa-facebook-f"></i>
@@ -281,7 +277,7 @@ body {
       <div class="col-lg-8">
          <?php if(!empty($post_details['file_name'])): ?>
          <div class="p6-featured-img-container">
-            <img src="<?php echo base_url().'assets/images/'.$post_details['file_name']; ?>" alt="Education Report Featured Image" class="img-fluid">
+            <img loading="lazy" decoding="async" src="<?php echo base_url().'assets/images/'.$post_details['file_name']; ?>" alt="Education Report Featured Image" class="img-fluid">
          </div>
          <?php else: ?>
          <div class="p6-featured-img-container" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; min-height: 280px;">
@@ -296,7 +292,7 @@ body {
          <div class="p6-article-body bg-white p-4 p-md-5 rounded border shadow-sm">
             <?php 
             if(!empty($post_details['post_desc'])){
-               echo $post_details['post_desc'];
+               echo render_content($post_details['post_desc']);
             } else {
             ?>
             <p class="lead fw-bold text-dark mb-4">

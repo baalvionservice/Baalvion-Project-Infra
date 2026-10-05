@@ -1,9 +1,12 @@
 RewriteEngine On
 RewriteBase /
 
-# Allow direct access to web-story directory or other assets
-RewriteCond %{REQUEST_URI} ^/web-story
-RewriteRule ^ - [L]
+# /index.php is the same page as /: send it (and /index.php/anything) to the clean address with a 301.
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.php(?:/([^\s?]*))?(?:\?[^\s]*)?\sHTTP
+RewriteRule ^ /%1 [R=301,L,NE]
+
+# The old web-story mini-app was removed from the site: answer 410 Gone for it and anything under it.
+RewriteRule ^web-story(/|$) - [G,L]
 
 # Route all other requests through CodeIgniter front controller
 RewriteCond %{REQUEST_FILENAME} !-f

@@ -21,10 +21,6 @@ function tag_contents($string, $tag_open, $tag_close){
 ?>
 
 <!-- Page Six & NY Post Design System for SEO Master Category View (All Features Edition) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #e50914;
@@ -510,7 +506,7 @@ body {
             <div class="p6-meta-bar mb-3">
                <div class="p6-author-chip">
                   <?php if(!empty($sc_info['author_img'])){ ?>
-                     <img src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
                           onerror="this.onerror=null;this.style.display='none';" 
                           class="p6-author-avatar-sm" alt="Author">
                   <?php } ?>
@@ -524,30 +520,6 @@ body {
          </div>
 
          <!-- AUDIO PODCAST PLAYER WIDGET -->
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-danger text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50" id="audioTimer">0:00 / 4:45</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" id="playAudioBtn" onclick="toggleAudio()"><i class="fa-solid fa-play" id="audioIcon"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 5-Min Category Briefing</div>
-                     <div class="progress mt-1" style="height:4px; background:rgba(255,255,255,0.2);">
-                        <div class="progress-bar bg-danger" id="audioProgress" style="width: 0%;"></div>
-                     </div>
-                  </div>
-                  <select class="form-select form-select-sm bg-dark text-white border-secondary w-auto" id="speedSelect" onchange="changeSpeed()">
-                     <option value="1">1x</option>
-                     <option value="1.25">1.25x</option>
-                     <option value="1.5">1.5x</option>
-                     <option value="2">2x</option>
-                  </select>
-               </div>
-            </div>
-         </div>
-      </div>
    </div>
 </header>
 <?php $this->load->view('includes/section_banner'); ?>
@@ -635,7 +607,7 @@ body {
             
             <!-- EDITOR'S CHOICE SPOTLIGHT CARD -->
             <div class="p6-spotlight-card">
-              <img src="<?php echo base_url(); ?>uploads/post/seo_masterclass_banner.png" class="p6-spotlight-img" alt="Spotlight Story">
+              <img loading="lazy" decoding="async" src="<?php echo base_url(); ?>uploads/post/seo_masterclass_banner.png" class="p6-spotlight-img" alt="Spotlight Story">
               <div class="p-4">
                 <span class="badge bg-danger text-uppercase fw-bold mb-2">⭐ EDITOR'S CHOICE BREAKING STORY</span>
                 <h3 class="font-serif fw-bold mb-2">August 2026 Core Update: Content Provenance and Source Transparency</h3>
@@ -766,7 +738,7 @@ body {
             <div class="col-xl-3 col-lg-4 col-md-6 cat-grid-item">
                <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'seo/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-img-wrapper">
-                     <img src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
                           onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
                           alt="<?php echo !empty($pst['post_alt_title']) ? $pst['post_alt_title'] : 'Post Image'; ?>">
                   </div>

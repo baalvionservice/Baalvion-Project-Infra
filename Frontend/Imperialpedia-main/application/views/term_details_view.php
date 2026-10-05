@@ -284,7 +284,7 @@
               <div class="d-none d-md-flex align-items-center gap-2 mt-2 mt-md-0">
                  <span class="text-uppercase text-muted fw-bold me-1" style="font-size: 0.75rem; letter-spacing: 1px;">Share:</span>
                  <a href="https://twitter.com/intent/tweet?text=<?php echo urlencode($term_info['term_name']); ?>&url=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-dark rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
-                    <i class="fa-brands fa-x-twitter"></i>
+                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="vertical-align:-.125em"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                  </a>
                  <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
                     <i class="fa-brands fa-facebook-f"></i>
@@ -299,7 +299,7 @@
            <!-- section 3  related term --> 
            <h3 class="related-terms mt-4 mb-0">Related Terms</h3> 
                 <?php foreach($related_term as $rel_term){?> 
-                <h4 class="rel-terms"><a href="<?php echo base_url().'term/'.str_replace(' ','-',$rel_term['term_name']); ?>"><?php echo ucfirst($rel_term['term_name']); ?></a></h4> 
+                <h4 class="rel-terms"><a href="<?php echo base_url().'term/'.strtolower(substr($rel_term['term_name'],0,1)).'/'.str_replace(' ','-',$rel_term['term_name']); ?>"><?php echo ucfirst($rel_term['term_name']); ?></a></h4> 
                 <p class="rel-desc mb-3"> 
                 <?php   
                 $str=$rel_term['term_desc'];
@@ -310,7 +310,7 @@
 
                 ?> 
 
-                <a href="<?php echo base_url().'term/'.str_replace(' ','-',$rel_term['term_name']); ?>" class="read-mre">more</a></p>
+                <a href="<?php echo base_url().'term/'.strtolower(substr($rel_term['term_name'],0,1)).'/'.str_replace(' ','-',$rel_term['term_name']); ?>" class="read-mre">more</a></p>
 
                 <?php } ?>
 
@@ -332,7 +332,7 @@
 
                <div class="col-4">
 
-                    <img class="img-fluid" src="<?php echo base_url().'uploads/post/'.$rel_pst['post_img'].'?v=2';?>" alt="<?php echo ucfirst($rel_pst['post_alt_title']);?>">
+                    <img loading="lazy" decoding="async" class="img-fluid" src="<?php echo base_url().'uploads/post/'.$rel_pst['post_img'].'?v=2';?>" alt="<?php echo ucfirst($rel_pst['post_alt_title']);?>">
 
                </div>
 

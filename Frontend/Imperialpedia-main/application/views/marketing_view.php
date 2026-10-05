@@ -24,10 +24,6 @@ if(!function_exists('tag_contents')){
 ?>
 
 <!-- Page Six & NY Post Design System for Marketing Master Category View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-purple: #7c3aed;
@@ -238,21 +234,6 @@ body {
                <span class="badge bg-purple text-white text-uppercase" style="background:var(--p6-purple)">VERIFIED CAMPAIGN BLUEPRINTS</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-light text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">4:10 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing marketing briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 4-Min Growth &amp; Ads Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -268,13 +249,6 @@ body {
           <span class="input-group-text bg-purple text-white border-purple" style="background:var(--p6-purple)"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control" id="mktSearchInput" onkeyup="filterMkt()" placeholder="Search social ads, funnels, email, branding...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL MARKETING</a>
-        <a href="#" class="p6-filter-pill">🎯 PAID ADS &amp; ROAS</a>
-        <a href="#" class="p6-filter-pill">📧 EMAIL FUNNELS</a>
-        <a href="#" class="p6-filter-pill">📊 CAC OPTIMIZATION</a>
-        <a href="#" class="p6-filter-pill">✨ BRANDING</a>
       </div>
     </div>
   </div>
@@ -345,8 +319,8 @@ body {
                      <h4 class="fw-bold mb-0" style="color:var(--p6-purple)"><i class="fa-solid fa-bullhorn me-1"></i> Top Growth Guides</h4>
                   </div>
                   <?php $i = 1; foreach($post as $pst1){ ?>
-                     <a href="<?php echo base_url().'marketing/'.str_replace(' ','-',$pst1['uri']); ?>" class="d-flex gap-2 text-decoration-none text-dark py-2 border-bottom">
-                        <span class="fw-bold fs-5" style="color:var(--p6-purple)">0<?php echo $i++; ?></span>
+                     <a href="<?php echo base_url().str_replace(' ','-',$pst1['cat_name']).'/'.str_replace(' ','-',$pst1['sub_cat_name']).'/'.str_replace(' ','-',$pst1['uri']); ?>" class="d-flex gap-2 text-decoration-none text-dark py-2 border-bottom">
+                        <span class="fw-bold fs-5" style="color:var(--p6-purple)"><?php echo sprintf('%02d', $i++); ?></span>
                         <div class="fw-bold small"><?php echo ucfirst($pst1['post_title']);?></div>
                      </a>
                   <?php } ?>
@@ -365,7 +339,7 @@ body {
       <div class="row g-4">
          <?php foreach($post as $pst){?>
             <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url().'marketing/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
+               <a href="<?php echo base_url().str_replace(' ','-',$pst['cat_name']).'/'.str_replace(' ','-',$pst['sub_cat_name']).'/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-grid-body">
                      <span class="badge text-white w-auto me-auto mb-2" style="background:var(--p6-purple)">GROWTH DESK</span>
                      <h4 class="fw-bold font-serif fs-6"><?php echo ucfirst($pst['post_title']);?></h4>
