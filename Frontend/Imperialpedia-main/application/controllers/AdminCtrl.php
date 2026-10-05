@@ -934,6 +934,7 @@ class AdminCtrl extends CI_Controller{
         $data['catss'] = $this->Admin_model->cat_list();
         $data['get_category'] = $this->Admin_model->cat_list();
         $data['get_sub_cat'] = $this->Admin_model->subcat_list();
+        $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
         if (!empty($this->input->post('submit'))) {
             if(!empty($_FILES['pimg']['name'])) {
                 $config['upload_path']   = 'uploads/post';
@@ -949,6 +950,10 @@ class AdminCtrl extends CI_Controller{
 
                 if($this->input->post('status') === 'published' && $pimg === 'post.png'){
                     $this->session->set_flashdata('msg', 'Please add a cover image before publishing (a post without its own picture shows the generic placeholder on every card).');
+                    redirect(base_url() . "imp-admin/add_post");
+                }
+                if($this->input->post('status') === 'published' && !(int)$this->input->post('author_id')){
+                    $this->session->set_flashdata('msg', 'Please choose the author (Written by) before publishing, so the article shows a byline.');
                     redirect(base_url() . "imp-admin/add_post");
                 }
                 if(!$this->subcat_matches_cat($this->input->post('cate'), $this->input->post('scat'))){
@@ -970,6 +975,7 @@ class AdminCtrl extends CI_Controller{
                     'post_title' => strtolower(trim(str_replace('?',' ',$this->input->post('post_title')))),
                     'uri' => $uri,
                     'post_img' => $pimg,
+                    'author_id' => (int)$this->input->post('author_id') ?: null,
                     'post_alt_title' => $this->input->post('post_alt_title'),
                     'post_desc' => $this->clean_editor_html($this->input->post('desc')),
                     'status' => $this->input->post('status') === 'published' ? 'published' : 'draft',
@@ -1036,6 +1042,7 @@ class AdminCtrl extends CI_Controller{
         $data['get_category'] = $this->Admin_model->cat_list();
         $data['get_sub_cat'] = $this->Admin_model->subcat_list();
         $data['res'] = $this->Admin_model->get_post_by_id($edit_id);
+        $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
         $data['meta'] = array('meta_title' => '', 'meta_desc' => '');
         foreach($data['res'] as $post){
             $page_url = $this->build_page_url($post['cat_id'], $post['sub_cat_id'], $post['uri']);
@@ -1068,6 +1075,10 @@ class AdminCtrl extends CI_Controller{
                 $pimg = $this->shrink_image($config['upload_path'], $this->upload->data('file_name'), 300000, 1200);
             }
 
+            if($this->input->post('status') === 'published' && !(int)$this->input->post('author_id')){
+                $this->session->set_flashdata('msg', 'Please choose the author (Written by) before publishing, so the article shows a byline.');
+                redirect(base_url() . "imp-admin/edit_post/" . $upd_id);
+            }
             if(!$this->subcat_matches_cat($this->input->post('cate'), $this->input->post('scat'))){
                 $this->session->set_flashdata('msg', 'The sub-category you picked does not belong to that category. Choose the category first, then one of its sub-categories.');
                 redirect(base_url() . "imp-admin/edit_post/" . $upd_id);
@@ -1085,6 +1096,7 @@ class AdminCtrl extends CI_Controller{
                 'sub_cat_id' => $this->input->post('scat'),
                 'post_title' => strtolower(trim(str_replace('?',' ',$this->input->post('post_title')))),
                 'uri' => $uri,
+                'author_id' => (int)$this->input->post('author_id') ?: null,
                 'post_alt_title' => $this->input->post('post_alt_title'),
                 'post_desc' => $this->clean_editor_html($this->input->post('desc')),
                 'status' => $this->input->post('status') === 'published' ? 'published' : 'draft',
@@ -1234,6 +1246,7 @@ public function add_subcat(){
     $this->check_login(); 
     $data['get_cats'] = $this->Admin_model->cat_list();
     $data['catss'] = $this->Admin_model->cat_list();
+    $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
     if (!empty($this->input->post('submit'))) {
         $author_img = 'user.png';
         $author_img_err = '';
@@ -1285,6 +1298,7 @@ public function subcat_edit($edit_id){
     $data['catss'] = $this->Admin_model->cat_list();
     $data['res'] = $this->Admin_model->get_subcat($edit_id);
     $data['get_cats'] = $this->Admin_model->cat_list();
+    $data['authors'] = $this->db->order_by('name', 'ASC')->get('author')->result_array();
     $data['meta_row'] = array();
     if(!empty($data['res'][0])){
         $data['meta_row'] = $this->Admin_model->get_meta_by_url($this->subcat_page_url($data['res'][0]['cat_id'], $data['res'][0]['sub_cat_name']));

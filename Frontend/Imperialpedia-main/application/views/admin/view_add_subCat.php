@@ -34,6 +34,12 @@
          <br/>
          <label for="last name"><b>Author Info:</b></label>
          <div class="px-2" style="background-color: #3c8dbc1c">
+            <label for="author_pick">Choose a writer:</label>
+            <select id="author_pick" class="form-control w-50 d-inline" onchange="if(this.value){document.getElementById('author').value=this.value;}">
+               <option value="">-- Select from your writers (fills the name below) --</option>
+               <?php foreach($authors as $a){ ?><option value="<?php echo htmlspecialchars(strtolower($a['name'])); ?>"><?php echo htmlspecialchars($a['name']); ?></option><?php } ?>
+            </select>
+            <br/><br/>
             <label for="last name">Author name:</label>
             <input type="text" class="form-control w-50 d-inline" id="author" name="author" value="">
             <label for="last name" class="ml-4">Auther Image:</label>

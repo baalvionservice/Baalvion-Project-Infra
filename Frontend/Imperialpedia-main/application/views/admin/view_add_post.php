@@ -50,6 +50,8 @@
             <?php } ?>
          </select>
          <br/>
+         <?php $this->load->view('admin/includes/author_select', array('authors' => $authors)); ?>
+         <br/>
          <label for="last name"><b>Status:</b></label>
          <select name="status" id="status" class="form-control">
             <option value="draft">Draft</option>
