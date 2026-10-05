@@ -255,21 +255,6 @@ body {
                <span class="badge bg-warning text-dark text-uppercase">VERIFIED NEWS FEED</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-warning text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">4:15 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing news briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 4-Min Global News Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -285,13 +270,6 @@ body {
           <span class="input-group-text bg-dark text-white border-dark"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control border-dark" id="newsSearchInput" onkeyup="filterNews()" placeholder="Search news headlines, tech, world reports...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL NEWS</a>
-        <a href="#" class="p6-filter-pill">🌐 WORLD</a>
-        <a href="#" class="p6-filter-pill">💻 TECH NEWS</a>
-        <a href="#" class="p6-filter-pill">📈 MARKETS</a>
-        <a href="#" class="p6-filter-pill">🏛️ POLICY</a>
       </div>
     </div>
   </div>

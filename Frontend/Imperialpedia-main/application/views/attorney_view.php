@@ -239,21 +239,6 @@ body {
                <span class="badge bg-warning text-dark text-uppercase">VERIFIED LEGAL COUNSEL</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-warning text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">4:30 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing legal & visa briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 4-Min Visa &amp; Legal Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -269,13 +254,6 @@ body {
           <span class="input-group-text bg-primary text-white border-primary" style="background:var(--p6-blue)"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control" id="lawSearchInput" onkeyup="filterLaw()" placeholder="Search Golden Visas, citizenship, tax residency...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL LEGAL GUIDES</a>
-        <a href="#" class="p6-filter-pill">🌐 GOLDEN VISAS</a>
-        <a href="#" class="p6-filter-pill">🛂 SECOND CITIZENSHIP</a>
-        <a href="#" class="p6-filter-pill">⚖️ TAX RESIDENCY</a>
-        <a href="#" class="p6-filter-pill">🏛️ LAW FIRM INDEX</a>
       </div>
     </div>
   </div>

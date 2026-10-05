@@ -238,21 +238,6 @@ body {
                <span class="badge bg-info text-dark text-uppercase">VERIFIED TECH STANDARDS</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-info text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">3:40 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing web tech briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 3-Min Web Tech Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -268,13 +253,6 @@ body {
           <span class="input-group-text bg-info text-dark border-info" style="background:var(--p6-cyan)"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control" id="techSearchInput" onkeyup="filterTech()" placeholder="Search hosting, web dev, security, cloud...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL TECH</a>
-        <a href="#" class="p6-filter-pill">☁️ CLOUD HOSTING</a>
-        <a href="#" class="p6-filter-pill">⚡ PERFORMANCE</a>
-        <a href="#" class="p6-filter-pill">🛡️ CYBERSECURITY</a>
-        <a href="#" class="p6-filter-pill">💻 WEB DEV</a>
       </div>
     </div>
   </div>

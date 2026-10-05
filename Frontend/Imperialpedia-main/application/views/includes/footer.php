@@ -318,9 +318,36 @@
 .imp-rel-title{font-size:.95rem;line-height:1.38;font-weight:700;color:#111;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .p6-article-body a.imp-rel-card:hover .imp-rel-title{color:#d00000}
 .imp-rel-meta{margin-top:auto;padding-top:4px;font-size:.76rem;color:#64748b;font-weight:600}
+/* Phones: short table of contents and tighter reading text on every section page */
+.p6-toc-toggle{display:none}
+@media (max-width: 767.98px){
+.p6-toc-list.p6-toc-collapsed > a:nth-of-type(n+6){display:none !important}
+.p6-toc-toggle{display:block;width:100%;margin-top:10px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#d00000;font-weight:700;font-size:.9rem;cursor:pointer}
+.p6-content-box{padding:20px 16px !important;line-height:1.7 !important;font-size:1rem !important}
+.p6-content-box h2{font-size:1.35rem !important;margin-top:1.6rem !important}
+.p6-content-box img{margin:14px auto !important}
+}
 /* One typeface site-wide (Plus Jakarta Sans). Loaded last so it wins over each page's own font rules; icons and code keep theirs. */
 :root{--p6-font-body:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--p6-font-headline:var(--p6-font-body);--p6-font-serif:var(--p6-font-body);--p6-font-accent:var(--p6-font-body)}
 body *:not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(code):not(pre):not(kbd):not(svg):not(svg *){font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif !important}
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+   document.querySelectorAll('.p6-toc-list').forEach(function(list){
+      var n = list.querySelectorAll('a').length;
+      if(n <= 5) return;
+      list.classList.add('p6-toc-collapsed');
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'p6-toc-toggle'; btn.setAttribute('aria-expanded', 'false');
+      btn.textContent = 'Show all ' + n + ' sections';
+      btn.addEventListener('click', function(){
+         var collapsed = list.classList.toggle('p6-toc-collapsed');
+         btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+         btn.textContent = collapsed ? 'Show all ' + n + ' sections' : 'Show fewer';
+      });
+      list.parentNode.insertBefore(btn, list.nextSibling);
+   });
+});
+</script>
 </body>
 </html>

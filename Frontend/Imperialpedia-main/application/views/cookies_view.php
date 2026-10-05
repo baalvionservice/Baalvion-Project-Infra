@@ -549,7 +549,7 @@ body {
                   <div class="p6-widget-header">
                      <h3><i class="fa-solid fa-list-ol text-danger me-1"></i> Table of Contents</h3>
                   </div>
-                  <nav class="p6-toc-list" id="p6TocList">
+                  <nav class="p6-toc-list">
                      <?php 
                         foreach($get_subcat_info as $subcat_info){
                            $desc = isset($subcat_info['sub_cat_desc']) ? $subcat_info['sub_cat_desc'] : '';
@@ -569,7 +569,6 @@ body {
                         }
                      ?>
                   </nav>
-                  <button type="button" class="p6-toc-toggle" id="p6TocToggle" aria-expanded="false" aria-controls="p6TocList">Show all sections</button>
                </div>
 
                <!-- Community Box -->
@@ -734,13 +733,7 @@ body {
 </script>
 <style>
 /* Phones: shorter table of contents, tighter reading text, compact "other cookies" cards */
-.p6-toc-toggle{display:none}
 @media (max-width: 767.98px){
-   .p6-toc-list:not(.is-open) .p6-toc-item:nth-child(n+6){display:none}
-   .p6-toc-toggle{display:block;width:100%;margin-top:10px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#d00000;font-weight:700;font-size:.9rem}
-   .p6-content-box{padding:20px 16px !important;line-height:1.7 !important;font-size:1rem !important}
-   .p6-content-box h2{font-size:1.35rem !important;margin-top:1.6rem !important}
-   .p6-content-box img{margin:14px auto !important}
    .p6-grid-section .row.g-4{--bs-gutter-x:.75rem;--bs-gutter-y:.75rem}
    .p6-cookie-card img{aspect-ratio:16/9;object-fit:cover;height:auto}
    .p6-cookie-card-header{padding:10px 8px !important}
@@ -750,17 +743,3 @@ body {
    .p6-cookie-card-btn{font-size:.8rem !important;border-top:0 !important;padding-top:0 !important}
 }
 </style>
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-   var list = document.getElementById('p6TocList'), btn = document.getElementById('p6TocToggle');
-   if(!list || !btn) return;
-   var n = list.querySelectorAll('.p6-toc-item').length;
-   if(n <= 5){ btn.style.display = 'none'; return; }
-   btn.textContent = 'Show all ' + n + ' sections';
-   btn.addEventListener('click', function(){
-      var open = list.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = open ? 'Show fewer' : 'Show all ' + n + ' sections';
-   });
-});
-</script>

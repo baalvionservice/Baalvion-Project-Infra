@@ -237,21 +237,6 @@ body {
                <span class="badge bg-warning text-dark text-uppercase">ACCREDITED DEGREE ADVISORY</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-warning text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">4:05 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing EdTech briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 4-Min Online Degree &amp; EdTech Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -267,13 +252,6 @@ body {
           <span class="input-group-text bg-warning text-dark border-warning" style="background:var(--p6-amber)"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control" id="eduSearchInput" onkeyup="filterEdu()" placeholder="Search online degrees, certifications, bootcamps...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL PROGRAMS</a>
-        <a href="#" class="p6-filter-pill">🎓 ONLINE DEGREES</a>
-        <a href="#" class="p6-filter-pill">📜 CERTIFICATIONS</a>
-        <a href="#" class="p6-filter-pill">💻 BOOTCAMPS</a>
-        <a href="#" class="p6-filter-pill">🏛️ ACCREDITATION</a>
       </div>
     </div>
   </div>

@@ -238,21 +238,6 @@ body {
                <span class="badge bg-success text-uppercase">VERIFIED COVERAGE ADVISORY</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-success text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">3:50 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing insurance briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 3-Min Insurance &amp; Risk Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -268,13 +253,6 @@ body {
           <span class="input-group-text bg-success text-white border-success"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control border-success" id="insSearchInput" onkeyup="filterIns()" placeholder="Search health, auto, life, claims guides...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL GUIDES</a>
-        <a href="#" class="p6-filter-pill">🏥 HEALTH INSURANCE</a>
-        <a href="#" class="p6-filter-pill">🚗 AUTO &amp; LIFE</a>
-        <a href="#" class="p6-filter-pill">🏢 BUSINESS RISK</a>
-        <a href="#" class="p6-filter-pill">📋 CLAIMS ADVISORY</a>
       </div>
     </div>
   </div>

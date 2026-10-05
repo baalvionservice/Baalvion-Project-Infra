@@ -524,30 +524,6 @@ body {
          </div>
 
          <!-- AUDIO PODCAST PLAYER WIDGET -->
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-danger text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50" id="audioTimer">0:00 / 4:45</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" id="playAudioBtn" onclick="toggleAudio()"><i class="fa-solid fa-play" id="audioIcon"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 5-Min Category Briefing</div>
-                     <div class="progress mt-1" style="height:4px; background:rgba(255,255,255,0.2);">
-                        <div class="progress-bar bg-danger" id="audioProgress" style="width: 0%;"></div>
-                     </div>
-                  </div>
-                  <select class="form-select form-select-sm bg-dark text-white border-secondary w-auto" id="speedSelect" onchange="changeSpeed()">
-                     <option value="1">1x</option>
-                     <option value="1.25">1.25x</option>
-                     <option value="1.5">1.5x</option>
-                     <option value="2">2x</option>
-                  </select>
-               </div>
-            </div>
-         </div>
-      </div>
    </div>
 </header>
 <?php $this->load->view('includes/section_banner'); ?>

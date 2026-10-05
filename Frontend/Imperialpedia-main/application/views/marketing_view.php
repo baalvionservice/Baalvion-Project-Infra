@@ -238,21 +238,6 @@ body {
                <span class="badge bg-purple text-white text-uppercase" style="background:var(--p6-purple)">VERIFIED CAMPAIGN BLUEPRINTS</span>
             </div>
          </div>
-
-         <div class="col-lg-4">
-            <div class="p6-audio-player-box">
-               <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-light text-dark text-uppercase fw-bold">AUDIO BRIEFING</span>
-                  <span class="small text-white-50">4:10 Min</span>
-               </div>
-               <div class="d-flex align-items-center gap-3">
-                  <button class="p6-audio-btn" onclick="alert('Playing marketing briefing...')"><i class="fa-solid fa-play"></i></button>
-                  <div class="flex-grow-1">
-                     <div class="fw-bold small">Listen to 4-Min Growth &amp; Ads Briefing</div>
-                  </div>
-               </div>
-            </div>
-         </div>
       </div>
    </div>
 </header>
@@ -268,13 +253,6 @@ body {
           <span class="input-group-text bg-purple text-white border-purple" style="background:var(--p6-purple)"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input type="text" class="form-control" id="mktSearchInput" onkeyup="filterMkt()" placeholder="Search social ads, funnels, email, branding...">
         </div>
-      </div>
-      <div class="col-lg-8 text-lg-end overflow-x-auto text-nowrap">
-        <a href="#" class="p6-filter-pill active">ALL MARKETING</a>
-        <a href="#" class="p6-filter-pill">🎯 PAID ADS &amp; ROAS</a>
-        <a href="#" class="p6-filter-pill">📧 EMAIL FUNNELS</a>
-        <a href="#" class="p6-filter-pill">📊 CAC OPTIMIZATION</a>
-        <a href="#" class="p6-filter-pill">✨ BRANDING</a>
       </div>
     </div>
   </div>
