@@ -4,12 +4,9 @@
  *   leader (wide strip), rect (300x250 box), sky (300x600 tall).
  * Usage: $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'trade', 'row' => $row));
  * Plain editorial links between sites we run: no ad network, no payment. They are labelled "From our network"
- * (never "Ad"/"Advertisement"/"Sponsored"), and use rel="noopener nofollow". Shown only on the posts listed in $show_on.
+ * (never "Ad"/"Advertisement"/"Sponsored"), and use rel="noopener nofollow". Loaded only by the internet article template, so they appear on internet articles and nowhere else.
  */
-$show_on = array('best-cloud-web-hosting-high-traffic-under-10');
-$slug = isset($row['uri']) ? str_replace(' ', '-', $row['uri']) : '';
-if (!in_array($slug, $show_on, true)) { return; }
-
+// Only the internet section uses these banners (internet_details_view.php is the only template that loads this file).
 $sites = array(
    'trade' => array('url' => 'https://trade.baalvion.com/', 'name' => 'Baalvion Trade', 'host' => 'trade.baalvion.com',
       'line' => 'Sourcing to settlement.', 'sub' => 'Sourcing, quotes, payments, compliance and logistics for global trade, in one place.', 'cta' => 'Explore',
