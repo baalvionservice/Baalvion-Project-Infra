@@ -176,7 +176,9 @@ class PostsCtrl extends CI_Controller{
 				return;
 			}
 			$this->load->view('includes/header', $data); 
-			$this->load->view($this->uri->segment(1).'_view', $data); 
+			// Every content section shares one hub layout; cookies keeps its own service page.
+			$hub_sections = array('insurance','internet','marketing','news','attorney','online-education','editor','seo');
+			$this->load->view(in_array($this->uri->segment(1), $hub_sections, true) && !empty($data['get_subcat_info']) ? 'hub_view' : $this->uri->segment(1).'_view', $data); 
 			$this->load->view('includes/footer');  
 		}else{ 
 			redirect(base_url()); 
