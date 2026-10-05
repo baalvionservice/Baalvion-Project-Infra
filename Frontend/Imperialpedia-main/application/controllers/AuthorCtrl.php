@@ -87,14 +87,18 @@ class AuthorCtrl extends CI_Controller {
 
 	// Published articles written by one author, newest first.
 	private function _articles_by($author_id) {
-		$rows = $this->db->select('p.post_title, p.uri, p.post_desc, p.posted_date, c.cat_name, s.sub_cat_name')
+		$this->load->model('Setting_model');
+		$cookies_on = $this->Setting_model->cookies_section_enabled();
+		$this->db->select('p.post_title, p.uri, p.post_desc, p.posted_date, c.cat_name, s.sub_cat_name')
 			->from('post p')
 			->join('category c', 'c.cat_id = p.cat_id', 'left')
 			->join('sub_category s', 's.sub_cat_id = p.sub_cat_id', 'left')
 			->where('p.author_id', (int)$author_id)
-			->where('p.status', 'published')
-			->order_by('p.posted_date', 'DESC')
-			->get()->result_array();
+			->where('p.status', 'published');
+		if (!$cookies_on) {
+			$this->db->where('c.cat_name !=', 'cookies');
+		}
+		$rows = $this->db->order_by('p.posted_date', 'DESC')->get()->result_array();
 		$out = [];
 		foreach ($rows as $r) {
 			$out[] = [

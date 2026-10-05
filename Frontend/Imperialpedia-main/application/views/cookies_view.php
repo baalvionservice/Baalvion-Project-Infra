@@ -33,10 +33,6 @@ if (!function_exists('insert_ahref_tag')) {
 ?>
 
 <!-- Page Six & NY Post Design System for Cookies View -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
    --p6-red: #d00000;
@@ -511,21 +507,27 @@ body {
             <div class="p6-breadcrumb">
                <span class="p6-meta-tag"><?php echo strtoupper($sc_info['cat_name']); ?></span>
                <span>&rsaquo;</span>
-               <span><?php echo strtoupper(str_replace('-',' ',$sc_info['sub_cat_name'])); ?> COOKIES</span>
+               <span><?php echo strtoupper(brand_name(str_replace('-',' ',$sc_info['sub_cat_name']))); ?> COOKIES</span>
             </div>
-            <h1 class="p6-main-title"><?php echo ucfirst($sc_info['sub_cat_name']); ?> Premium Cookies (Hourly Updated)</h1>
+            <h1 class="p6-main-title"><?php echo htmlspecialchars(brand_name($sc_info['sub_cat_name'])); ?> Premium Cookies (Hourly Updated)</h1>
             <div class="p6-meta-bar">
                <div class="p6-author-chip">
                   <?php if(!empty($sc_info['author_img'])){ ?>
-                     <img src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
+                     <img loading="lazy" decoding="async" src="<?php echo base_url()?>uploads/author/<?php echo $sc_info['author_img']?>" 
                           onerror="this.onerror=null;this.style.display='none';" 
                           class="p6-author-avatar-sm" alt="Author">
                   <?php } ?>
                   <span>By <strong><?php echo ucfirst($sc_info['author_name']); ?></strong></span>
                </div>
                <span>&bull;</span>
-               <span><i class="fa-regular fa-calendar-days me-1"></i> <?php echo date('F d, Y', strtotime($sc_info['added_date'])); ?></span>
+               <?php
+                  // Show when this service was last written about, not the year the section was created.
+                  $svc_dates = array();
+                  if(!empty($post)){ foreach($post as $pp){ $svc_dates[] = strtotime(!empty($pp['post_updated']) ? $pp['post_updated'] : $pp['posted_date']); } }
+                  if(!empty($svc_dates)){ ?>
+               <span><i class="fa-regular fa-calendar-days me-1"></i> Updated <?php echo date('F j, Y', max($svc_dates)); ?></span>
                <span>&bull;</span>
+               <?php } ?>
                <span><i class="fa-solid fa-shield-halved me-1"></i> 100% Working List</span>
             </div>
          </div>
@@ -655,12 +657,7 @@ body {
                </div>
 
                <!-- Ad Banner Box -->
-               <div class="p6-widget-box text-center p-3">
-                  <span class="text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">SPONSORED</span>
-                  <a href="https://www.neverendmoney.com/" target="_blank" class="d-block">
-                     <img src="<?php echo base_url()?>assets/img/banner1.jpg" class="img-fluid rounded" alt="Imperialpedia Ad">
-                  </a>
-               </div>
+               <?php $this->load->view('includes/network_box'); ?>
 
             </div>
          </div>
@@ -680,20 +677,25 @@ body {
       </div>
 
       <div class="row g-4">
-         <?php foreach($get_subcat_list as $gsl){ ?>
-            <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url().'cookies/'.$gsl['sub_cat_name'];?>" class="p6-cookie-card">
-                  <?php $gsl_img = !empty($gsl['sub_cat_image']) ? 'uploads/subcategory/'.$gsl['sub_cat_image'] : (!empty($gsl['cat_image']) ? 'uploads/category/'.$gsl['cat_image'] : ''); if($gsl_img !== ''){ ?>
-                  <img src="<?php echo base_url().htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars($gsl['sub_cat_name']); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
+         <?php
+            $current_services = array();
+            if(!empty($get_subcat_info)){ foreach($get_subcat_info as $cur){ $current_services[] = $cur['sub_cat_name']; } }
+            foreach($get_subcat_list as $gsl){
+               if(in_array($gsl['sub_cat_name'], $current_services, true)){ continue; }
+         ?>
+            <div class="col-6 col-md-4 col-xl-3">
+               <a href="<?php echo base_url().'cookies/'.str_replace(' ','-',$gsl['sub_cat_name']);?>" class="p6-cookie-card">
+                  <?php $gsl_img = !empty($gsl['sub_cat_image']) ? upload_image_url('subcategory', $gsl['sub_cat_image']) : (!empty($gsl['cat_image']) ? upload_image_url('category', $gsl['cat_image']) : ''); if($gsl_img !== ''){ ?>
+                  <img loading="lazy" decoding="async" src="<?php echo htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars(brand_name($gsl['sub_cat_name'])); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
                   <?php } ?>
                   <div class="p6-cookie-card-header">
-                     <div class="p6-cookie-card-title"><?php echo $gsl['sub_cat_name'];?></div>
+                     <div class="p6-cookie-card-title"><?php echo htmlspecialchars(brand_name($gsl['sub_cat_name']));?></div>
                      <div class="p6-cookie-card-sub">Session Cookies</div>
                   </div>
                   <div class="p6-cookie-card-body">
-                     <p class="p6-cookie-card-desc">
-                        <?php if(!empty($gsl['sub_cat_desc'])){echo get_words(strip_tags($gsl['sub_cat_desc'])).'...';}?>
-                     </p>
+                     <?php $gsl_txt = !empty($gsl['sub_cat_desc']) ? trim(get_words(strip_tags($gsl['sub_cat_desc']))) : ''; if($gsl_txt !== ''){ ?>
+                     <p class="p6-cookie-card-desc"><?php echo htmlspecialchars($gsl_txt); ?>...</p>
+                     <?php } ?>
                      <div class="p6-cookie-card-btn">
                         <span>Get Active Cookies</span>
                         <span>&rarr;</span>
@@ -726,3 +728,15 @@ body {
       }
    }  
 </script>
+<style>
+/* Phones: shorter table of contents, tighter reading text, compact "other cookies" cards */
+@media (max-width: 767.98px){
+   .p6-grid-section .row.g-4{--bs-gutter-x:.75rem;--bs-gutter-y:.75rem}
+   .p6-cookie-card img{aspect-ratio:16/9;object-fit:cover;height:auto}
+   .p6-cookie-card-header{padding:10px 8px !important}
+   .p6-cookie-card-title{font-size:.95rem !important;margin:0 !important}
+   .p6-cookie-card-sub,.p6-cookie-card-desc{display:none !important}
+   .p6-cookie-card-body{padding:8px 10px 10px !important}
+   .p6-cookie-card-btn{font-size:.8rem !important;border-top:0 !important;padding-top:0 !important}
+}
+</style>

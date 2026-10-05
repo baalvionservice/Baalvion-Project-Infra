@@ -41,9 +41,9 @@
             <div id="login">
                <div class="error"><?php if($this->session->err_msg){ echo $this->session->err_msg; $this->session->unset_userdata('err_msg'); }?></div>  
                <div class="form-group text-center my-3">
-                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="<?php echo base_url('google-login')?>"><img src="https://img.icons8.com/color/20/000000/google-logo.png"> Google </a>  
-                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="#"><img src="https://img.icons8.com/fluency/20/undefined/facebook-new.png"> Facebook </a>
-                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="#"><img src="https://img.icons8.com/color/20/undefined/twitter--v1.png"> Twitter </a>
+                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="<?php echo base_url('google-login')?>"><img loading="lazy" decoding="async" src="https://img.icons8.com/color/20/000000/google-logo.png"> Google </a>  
+                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="#"><img loading="lazy" decoding="async" src="https://img.icons8.com/fluency/20/undefined/facebook-new.png"> Facebook </a>
+                     <a class="btn btn-lg btn-google btn-block text-uppercase btn-outline" href="#"><img loading="lazy" decoding="async" src="https://img.icons8.com/color/20/undefined/twitter--v1.png"> Twitter </a>
                </div>
                <div class="or-container"><div class="line-separator"></div> <div class="or-label">or</div><div class="line-separator"></div></div>
                <div class="form-group">

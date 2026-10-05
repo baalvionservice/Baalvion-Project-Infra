@@ -28,6 +28,10 @@ class CareersCtrl extends CI_Controller{
 
 
 	public function add_application(){ 
+		if ($this->input->method() !== 'post'){
+			redirect(base_url('careers'), 'location', 301);
+			return;
+		}
 		if (empty($this->input->post('submit'))){
 			$data['fname'] = $this->input->post('fname');
 			$data['lname'] = $this->input->post('lname');

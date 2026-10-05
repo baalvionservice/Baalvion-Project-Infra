@@ -18,9 +18,11 @@
             }
          }
 
+         // Google cuts descriptions at about 160 characters; keep stored ones to a clean sentence length.
+         if(mb_strlen($meta_desc) > 160){ $meta_desc = seo_excerpt($meta_desc, 157); }
          $page_uri = uri_string();
          if($meta_title === 'Imperialpedia Editorial & Tech Archive' && $page_uri !== ''){
-            $label = ucwords(str_replace(array('-', '_'), ' ', basename($page_uri)));
+            $label = brand_name(str_replace(array('-', '_'), ' ', basename($page_uri)));
             $meta_title = $label . ' - Imperialpedia';
             $meta_desc = $label . ' on Imperialpedia: independent guides and analysis on marketing, SEO, insurance and technology.';
          }
@@ -37,6 +39,21 @@
             if(!empty($pd['posted_date'])){ $pub_date = date('c', strtotime($pd['posted_date'])); }
             if(!empty($pd['post_updated'])){ $mod_date = date('c', strtotime($pd['post_updated'])); }
          }
+
+         // A sub-category with no separate posts is itself an article (see hub_view.php). Treat it like one for search.
+         $ld_is_article = !empty($post_details) && is_array($post_details);
+         $ld_sc = null;
+         if(!$ld_is_article && empty($post) && !empty($get_subcat_info[0]) && trim(strip_tags($get_subcat_info[0]['sub_cat_desc'])) !== ''){
+            $ld_sc = $get_subcat_info[0];
+            $ld_is_article = true;
+            $ci_h =& get_instance();
+            $ld_dates = $ci_h->db->select('added_date, updated_date')->get_where('sub_category', array('sub_cat_id' => (int)$ld_sc['sub_cat_id']))->row_array();
+            if(!empty($ld_dates['added_date'])){ $pub_date = date('c', strtotime($ld_dates['added_date'])); $mod_date = date('c', strtotime(!empty($ld_dates['updated_date']) ? $ld_dates['updated_date'] : $ld_dates['added_date'])); }
+            if(empty($meta_res['meta_desc'])){ $meta_desc = seo_excerpt($ld_sc['sub_cat_desc'], 155); }
+            if(!empty($ld_sc['sub_cat_image'])){ $meta_image = upload_image_url('subcategory', $ld_sc['sub_cat_image']); }
+            $ld_author_row = !empty($ld_sc['author_name']) ? $ci_h->db->query('SELECT * FROM author WHERE LOWER(name) = ? LIMIT 1', array(strtolower(trim($ld_sc['author_name']))))->row_array() : null;
+            if($ld_author_row){ $ld_author_row['url'] = base_url('author/' . $ld_author_row['slug']); }
+         }
       ?>
       <title><?php echo htmlspecialchars($meta_title); ?></title>
       <meta name="description" content="<?php echo htmlspecialchars($meta_desc); ?>" />
@@ -52,58 +69,80 @@
       <meta name="twitter:title" content="<?php echo htmlspecialchars($meta_title); ?>"/>
       <meta name="twitter:description" content="<?php echo htmlspecialchars($meta_desc); ?>"/>
       <meta name="twitter:image" content="<?php echo $meta_image; ?>"/>
-      <meta property="og:type" content="article"/>
+      <meta property="og:type" content="<?php echo $ld_is_article ? 'article' : 'website'; ?>"/>
       <meta property="og:description" content="<?php echo htmlspecialchars($meta_desc); ?>"/>
+      <?php if($ld_is_article){ ?>
       <meta property="article:published_time" content="<?php echo $pub_date; ?>"/>
       <meta property="article:modified_time" content="<?php echo $mod_date; ?>"/>
+      <meta property="article:section" content="<?php echo htmlspecialchars(ucwords(str_replace('-', ' ', $this->uri->segment(1)))); ?>"/>
+      <?php } ?>
+      <link rel="alternate" type="application/rss+xml" title="Imperialpedia" href="<?php echo base_url('feed.xml'); ?>">
       <link rel="icon" type="image/x-icon" href="<?php echo base_url() . 'assets/img/favicon.png'; ?>">
 
-      <!-- Google News & Discover Schema.org JSON-LD Structured Data -->
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "NewsArticle",
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": "<?php echo base_url().uri_string(); ?>"
-        },
-        "headline": <?php echo json_encode($meta_title); ?>,
-        "image": [
-          <?php echo json_encode($meta_image); ?>
-        ],
-        "datePublished": "<?php echo $pub_date; ?>",
-        "dateModified": "<?php echo $mod_date; ?>",
-        "author": <?php
-          $ld_author = !empty($pd) ? post_author($pd) : null;
-          echo $ld_author
-            ? json_encode(array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => $ld_author['url'], 'jobTitle' => $ld_author['title']), JSON_UNESCAPED_SLASHES)
-            : json_encode(array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()), JSON_UNESCAPED_SLASHES);
-        ?>,
-        "publisher": {
-          "@type": "Organization",
-          "name": "Imperialpedia",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "<?php echo base_url() . 'assets/img/brand-logo.png'; ?>"
-          }
-        },
-        "description": <?php echo json_encode($meta_desc); ?>
-      }
-      </script>
+      <?php if($ld_is_article){
+         $ld_author = !empty($pd) ? post_author($pd) : (!empty($ld_author_row) ? $ld_author_row : null);
+         $ld_kw = '';
+         if(!empty($ld_sc['tags'])){ $ld_kw = implode(', ', array_slice(array_filter(array_map('trim', explode(',', $ld_sc['tags']))), 0, 12)); }
+         $ld = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'NewsArticle',
+            'mainEntityOfPage' => array('@type' => 'WebPage', '@id' => rtrim(base_url() . uri_string(), '/')),
+            'headline' => mb_substr(html_entity_decode($meta_title), 0, 110),
+            'description' => $meta_desc,
+            'image' => array($meta_image),
+            'datePublished' => $pub_date,
+            'dateModified' => $mod_date,
+            'author' => $ld_author
+               ? array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => (isset($ld_author['url']) ? $ld_author['url'] : base_url('author/' . $ld_author['slug'])), 'jobTitle' => isset($ld_author['title']) ? $ld_author['title'] : '')
+               : array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()),
+            'publisher' => array('@type' => 'NewsMediaOrganization', 'name' => 'Imperialpedia', 'url' => base_url(),
+               'publishingPrinciples' => base_url('editorial-policy'), 'ethicsPolicy' => base_url('editorial-policy'), 'correctionsPolicy' => base_url('editorial-policy'),
+               'contactPoint' => array('@type' => 'ContactPoint', 'contactType' => 'editorial', 'url' => base_url('contact')),
+               'logo' => array('@type' => 'ImageObject', 'url' => base_url('assets/img/publisher-logo.png'), 'width' => 600, 'height' => 60)),
+            'articleSection' => ucwords(str_replace('-', ' ', $this->uri->segment(1))),
+            'inLanguage' => 'en',
+            'isAccessibleForFree' => true,
+         );
+         if($ld_kw !== ''){ $ld['keywords'] = $ld_kw; }
+         echo '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+         $segs = array_values(array_filter(explode('/', uri_string())));
+         $crumbs = array('Home' => base_url());
+         if(count($segs) >= 1){ $crumbs[ucwords(str_replace('-', ' ', $segs[0]))] = base_url($segs[0] . (count($segs) > 1 ? '/' . $segs[1] : '')); }
+         $crumbs[mb_substr(html_entity_decode($meta_title), 0, 80)] = rtrim(base_url() . uri_string(), '/');
+         echo render_breadcrumb_schema($crumbs);
+      } ?>
       <?php echo render_website_schema('Imperialpedia', base_url()); ?>
       <?php echo render_organization_schema('Imperialpedia', base_url()); ?>
       <!-- Resource Hints & Critical Performance Preloading -->
-      <link rel="dns-prefetch" href="//fonts.googleapis.com">
-      <link rel="dns-prefetch" href="//fonts.gstatic.com">
-      <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
       <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-      <link rel="preload" href="<?php echo base_url(); ?>assets/vendor/fa/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Oswald:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+      <link rel="preload" href="<?php echo base_url(); ?>assets/vendor/fa/webfonts/subset/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+      <link rel="preload" href="<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+      <style>
+/* One self-hosted typeface for the whole site. The other names are aliases so old rules that still ask for them render in the same face (no extra downloads). */
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Merriweather';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Merriweather';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Arial';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Arial';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Helvetica';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Helvetica';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Georgia';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Georgia';font-style:normal;font-weight:400 800;font-display:swap;src:url(<?php echo base_url(); ?>assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+      </style>
       <!-- Bootstrap CSS --> 
       <link href="<?php echo base_url(); ?>assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="<?php echo base_url(); ?>assets/vendor/fa/css/all.min.css" media="print" onload="this.media='all'">
+      <link rel="stylesheet" href="<?php echo base_url(); ?>assets/vendor/fa/css/fa-subset.css">
       <link rel="stylesheet" href="<?php echo base_url() . 'assets/css/header-footer.css'; ?>">  
 
       <style>
@@ -174,6 +213,7 @@
             text-transform: uppercase;
             line-height: 1;
          }
+         .p6-brand-logo img { display:block; height:34px; width:auto; max-width:100%; }
          .p6-brand-logo span {
             color: var(--p6-red);
          }
@@ -254,19 +294,27 @@
             background: #b00000;
             color: #fff;
          }
-         .p6-search-trigger {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #cbd5e1;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-         }
-         .p6-search-trigger:hover {
-            background: rgba(255,255,255,0.2);
-            color: #ffffff;
+         .p6-hsearch{position:relative;margin-left:auto}
+         .p6-hsearch form{position:relative;margin:0}
+         .p6-hsearch-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.8rem;color:#94a3b8;pointer-events:none}
+         .p6-hsearch input[type=search]{width:250px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 14px 7px 34px;border-radius:20px;font-size:.85rem;outline:0;transition:width .2s ease,background .2s ease,border-color .2s ease;-webkit-appearance:none;appearance:none}
+         .p6-hsearch input[type=search]::placeholder{color:#cbd5e1}
+         .p6-hsearch input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
+         .p6-hsearch input[type=search]:focus{width:340px;background:rgba(255,255,255,.18);border-color:#fff}
+         .p6-hsearch-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(440px,92vw);max-height:min(70vh,460px);overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.22);z-index:1200}
+         .p6-hsearch-panel[hidden]{display:none}
+         .p6-hs-item{display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:#0f172a;border-bottom:1px solid #f1f5f9}
+         .p6-hs-item:hover,.p6-hs-item:focus{background:#f8fafc;color:#0f172a}
+         .p6-hs-item img{width:56px;height:42px;object-fit:cover;border-radius:4px;flex:none;background:#e2e8f0}
+         .p6-hs-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+         .p6-hs-tag{font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d00000}
+         .p6-hs-title{font-size:.9rem;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+         .p6-hs-empty{padding:16px;text-align:center;color:#64748b;font-size:.9rem}
+         .p6-hs-all{display:block;padding:12px 14px;text-align:center;font-size:.85rem;font-weight:700;color:#d00000;text-decoration:none;background:#f8fafc}
+         @media (max-width:991.98px){
+            .p6-hsearch{width:100%;margin:10px 0 4px}
+            .p6-hsearch input[type=search],.p6-hsearch input[type=search]:focus{width:100%;font-size:16px;padding:10px 14px 10px 36px}
+            .p6-hsearch-panel{position:static;width:100%;margin-top:8px;max-height:50vh}
          }
 
          /* Ultra-Clean Lightweight Editorial Layout (Page Six / NY Post Style) */
@@ -536,7 +584,22 @@
       </style>
 
       <!-- Adsense -->
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170643011469769" crossorigin="anonymous"></script>
+      <meta name="google-adsense-account" content="ca-pub-8170643011469769">
+      <script>
+      (function(){
+         var done = false, evs = ['scroll', 'mousemove', 'touchstart', 'keydown', 'click'];
+         function load(){
+            if(done) return; done = true;
+            evs.forEach(function(e){ removeEventListener(e, load); });
+            var s = document.createElement('script');
+            s.async = true; s.crossOrigin = 'anonymous';
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170643011469769';
+            document.head.appendChild(s);
+         }
+         evs.forEach(function(e){ addEventListener(e, load, {once: true, passive: true}); });
+         setTimeout(load, 12000);
+      })();
+      </script>
    </head>
    <body>
       <!-- Main Masthead -->
@@ -544,9 +607,8 @@
          <div class="container-fluid px-lg-5">
             <div class="row align-items-center">
                <div class="col-md-4 col-6">
-                  <a href="<?php echo base_url(); ?>" class="p6-brand-logo">
-                     IMPERIAL<span>PEDIA</span>
-                     
+                  <a href="<?php echo base_url(); ?>" class="p6-brand-logo" aria-label="Imperialpedia home">
+                     <img src="<?php echo base_url(); ?>assets/img/imperialpedia-logo.svg" alt="Imperialpedia" width="302" height="34" decoding="async" fetchpriority="high">
                   </a>
                </div>
                <div class="col-md-8 col-6 text-end">
@@ -590,7 +652,7 @@
                                  <ul class="list-unstyled">
                                     <li>
                                        <a href="<?php echo base_url(); ?><?php echo str_replace(' ','-',$cat_res['cat_name']).'/'. str_replace(' ','-',$subcat_res['sub_cat_name'])?>">
-                                          <i class="fa-solid fa-angle-right me-1 text-danger"></i> <?php echo ucfirst($subcat_res['sub_cat_name']);?>
+                                          <i class="fa-solid fa-angle-right me-1 text-danger"></i> <?php echo htmlspecialchars(brand_name($subcat_res['sub_cat_name']));?>
                                        </a>
                                     </li>
                                  </ul>
@@ -603,86 +665,65 @@
                   <?php }} ?>
                </ul>
 
-               <!-- Global Quick Search Trigger & Modal -->
-               <div class="d-flex align-items-center">
-                  <button type="button" class="p6-search-trigger me-2 border-0" data-bs-toggle="modal" data-bs-target="#p6SearchModal" aria-label="Search articles">
-                     <i class="fa-solid fa-magnifying-glass me-1"></i> Search Articles &amp; Archives...
-                  </button>
+               <!-- Global search: inline field with a dropdown of instant matches -->
+               <div class="p6-hsearch" id="p6HSearch">
+                  <form action="<?php echo base_url(); ?>search" method="GET" id="p6HeaderSearchForm" role="search">
+                     <i class="fa-solid fa-magnifying-glass p6-hsearch-icon" aria-hidden="true"></i>
+                     <input type="search" name="q" id="p6ModalSearchInput" placeholder="Search articles &amp; archives" autocomplete="off" aria-label="Search articles" aria-controls="p6LiveSearchResults" required>
+                  </form>
+                  <div id="p6LiveSearchResults" class="p6-hsearch-panel" hidden></div>
                </div>
             </div>
          </div>
       </nav> 
 
-<!-- GLOBAL SEARCH MODAL -->
-<div class="modal fade" id="p6SearchModal" tabindex="-1" aria-labelledby="p6SearchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-      <div class="modal-header bg-dark text-white border-0 py-3">
-        <h5 class="modal-title font-monospace fw-bold text-uppercase" id="p6SearchModalLabel"><i class="fa-solid fa-bolt text-danger me-2"></i> Search Imperialpedia</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4 bg-light">
-        <form action="<?php echo base_url(); ?>search" method="GET" id="p6HeaderSearchForm">
-           <div class="position-relative mb-3">
-              <i class="fa-solid fa-magnifying-glass position-absolute start-0 top-50 translate-middle-y ms-3 text-danger fs-5"></i>
-              <input type="text" name="q" id="p6ModalSearchInput" class="form-control form-control-lg ps-5 rounded-pill border-2 border-dark" placeholder="Type keyword (e.g. Health Insurance, Core Update, SEO)..." autocomplete="off" required>
-           </div>
-        </form>
-        <div id="p6LiveSearchResults" class="list-group shadow-sm mt-2" style="display:none; max-height: 360px; overflow-y: auto;">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-   const searchInput = document.getElementById('p6ModalSearchInput');
-   const searchResults = document.getElementById('p6LiveSearchResults');
-
-   if(searchInput && searchResults){
-      let timer = null;
-      searchInput.addEventListener('input', function(){
-         clearTimeout(timer);
-         const q = this.value.trim();
-         if(q.length < 2){
-            searchResults.style.display = 'none';
-            searchResults.innerHTML = '';
-            return;
-         }
-         timer = setTimeout(() => {
-            fetch('<?php echo base_url(); ?>SearchCtrl/api?q=' + encodeURIComponent(q))
-               .then(res => res.json())
-               .then(data => {
-                  if(data.status === 'ok' && data.results.length > 0){
-                     let html = '';
-                     data.results.forEach(item => {
-                        html += `<a href="${item.url}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 p-3">
-                           <img src="${item.img}" alt="" loading="lazy" style="width:50px; height:40px; object-fit:cover; border-radius:4px;">
-                           <div>
-                              <span class="badge bg-danger text-uppercase mb-1" style="font-size:0.65rem;">${item.subcat}</span>
-                              <div class="fw-bold text-dark text-truncate mb-0" style="max-width:450px;">${item.title}</div>
-                           </div>
-                        </a>`;
-                     });
-                     searchResults.innerHTML = html;
-                     searchResults.style.display = 'block';
-                  } else {
-                     searchResults.innerHTML = '<div class="list-group-item text-muted text-center py-3">No instant matches. Press Enter to perform full archive search.</div>';
-                     searchResults.style.display = 'block';
-                  }
-               }).catch(err => console.error(err));
-         }, 250);
+(function(){
+   var box = document.getElementById('p6HSearch');
+   var input = document.getElementById('p6ModalSearchInput');
+   var panel = document.getElementById('p6LiveSearchResults');
+   if(!box || !input || !panel) return;
+   var timer = null, last = '';
+   var esc = function(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+   var close = function(){ panel.hidden = true; };
+   var render = function(q, results){
+      var html = '';
+      results.forEach(function(item){
+         html += '<a class="p6-hs-item" href="' + esc(item.url) + '">'
+            + (item.img ? '<img src="' + esc(item.img) + '" alt="" loading="lazy">' : '')
+            + '<span class="p6-hs-text"><span class="p6-hs-tag">' + esc(item.subcat) + '</span><span class="p6-hs-title">' + esc(item.title) + '</span></span></a>';
       });
-   }
-});
+      if(!results.length){ html = '<div class="p6-hs-empty">No instant matches for &ldquo;' + esc(q) + '&rdquo;.</div>'; }
+      html += '<a class="p6-hs-all" href="<?php echo base_url(); ?>search?q=' + encodeURIComponent(q) + '">See all results for &ldquo;' + esc(q) + '&rdquo; &rarr;</a>';
+      panel.innerHTML = html;
+      panel.hidden = false;
+   };
+   input.addEventListener('input', function(){
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if(q.length < 2){ close(); panel.innerHTML = ''; last = ''; return; }
+      timer = setTimeout(function(){
+         last = q;
+         fetch('<?php echo base_url(); ?>SearchCtrl/api?q=' + encodeURIComponent(q))
+            .then(function(r){ return r.json(); })
+            .then(function(data){ if(q === last){ render(q, data.status === 'ok' ? data.results : []); } })
+            .catch(function(){});
+      }, 250);
+   });
+   input.addEventListener('focus', function(){ if(panel.innerHTML) panel.hidden = false; });
+   document.addEventListener('click', function(e){ if(!box.contains(e.target)) close(); });
+   document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){ close(); input.blur(); }
+      if(e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '')){ e.preventDefault(); input.focus(); }
+   });
+})();
 </script>
 
 <!-- Sticky Mobile Social Action Bar (Page Six & NY Post Engagement System) -->
 <div class="p6-mobile-share-bar d-md-none">
    <div class="d-flex justify-content-around align-items-center h-100 px-3">
       <a href="https://twitter.com/intent/tweet?text=<?php echo urlencode($meta_title); ?>&url=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="p6-mob-share-btn p6-mob-twitter" title="Share on Twitter/X" aria-label="Share on Twitter/X">
-         <i class="fa-brands fa-x-twitter"></i>
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
       <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="p6-mob-share-btn p6-mob-facebook" title="Share on Facebook" aria-label="Share on Facebook">
          <i class="fa-brands fa-facebook-f"></i>

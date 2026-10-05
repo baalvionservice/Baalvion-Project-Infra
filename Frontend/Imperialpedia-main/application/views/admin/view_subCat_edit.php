@@ -39,6 +39,12 @@
          <br/> 
          <label for="last name"><b>Author Info:</b></label>
          <div class="px-2" style="background-color: #3c8dbc1c">
+            <label for="author_pick">Choose a writer:</label>
+            <select id="author_pick" class="form-control w-50 d-inline" onchange="if(this.value){document.getElementById('author').value=this.value;}">
+               <option value="">-- Select from your writers (fills the name below) --</option>
+               <?php foreach($authors as $a){ ?><option value="<?php echo htmlspecialchars(strtolower($a['name'])); ?>"><?php echo htmlspecialchars($a['name']); ?></option><?php } ?>
+            </select>
+            <br/><br/>
             <label for="last name">Author name:</label>
             <input type="text" class="form-control w-50 d-inline" id="author" name="author" value="<?php echo $val['author_name']; ?>">
             <label for="last name" class="ml-4">Auther Image:</label>
@@ -46,7 +52,8 @@
             <img src="<?php echo base_url()?>uploads/author/<?php echo $val['author_img']; ?>" height="50" width="50"/>
          </div>
          <br/>
-         <label for="last name"><b>Tags:</b></label>
+         <?php $this->load->view('admin/includes/seo_fields', array('seo_title' => isset($meta_row['meta_title']) ? $meta_row['meta_title'] : '', 'seo_desc' => isset($meta_row['meta_desc']) ? $meta_row['meta_desc'] : '')); ?>
+         <label for="last name"><b>Tags:</b> <small class="text-muted">(comma separated keywords for this sub-category)</small></label>
          <input type="text" class="form-control" id="tags"  name="tags" value="<?php echo $val['tags']; ?>">
          <br/>
          <label for="last name" id="cookieLevel"><b>Cookie:</b></label> 

@@ -256,7 +256,8 @@ public function subcat_pages_for_post_list(){
 	return $this->db->get()->result_array();
 }
 public function uri_exists($uri, $exclude_post_id = null){
-	$this->db->where('uri', $uri);
+	// Older posts were saved with spaces in the slug; treat "my post" and "my-post" as the same address.
+	$this->db->group_start()->where('uri', $uri)->or_where('uri', str_replace('-', ' ', $uri))->group_end();
 	if($exclude_post_id !== null){
 		$this->db->where('post_id !=', $exclude_post_id);
 	}
