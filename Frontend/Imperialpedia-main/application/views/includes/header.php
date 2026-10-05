@@ -94,7 +94,9 @@
             'author' => $ld_author
                ? array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => (isset($ld_author['url']) ? $ld_author['url'] : base_url('author/' . $ld_author['slug'])), 'jobTitle' => isset($ld_author['title']) ? $ld_author['title'] : '')
                : array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()),
-            'publisher' => array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url(),
+            'publisher' => array('@type' => 'NewsMediaOrganization', 'name' => 'Imperialpedia', 'url' => base_url(),
+               'publishingPrinciples' => base_url('editorial-policy'), 'ethicsPolicy' => base_url('editorial-policy'), 'correctionsPolicy' => base_url('editorial-policy'),
+               'contactPoint' => array('@type' => 'ContactPoint', 'contactType' => 'editorial', 'url' => base_url('contact')),
                'logo' => array('@type' => 'ImageObject', 'url' => base_url('assets/img/publisher-logo.png'), 'width' => 600, 'height' => 60)),
             'articleSection' => ucwords(str_replace('-', ' ', $this->uri->segment(1))),
             'inLanguage' => 'en',

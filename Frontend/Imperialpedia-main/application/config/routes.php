@@ -5,6 +5,7 @@ $route['default_controller'] = 'HomeCtrl';
 $route['search'] = 'SearchCtrl';
 $route['sitemap.xml'] = 'SitemapCtrl';
 $route['news-sitemap.xml'] = 'SitemapCtrl/news';
+$route['news'] = 'NewsCtrl';
 $route['privacy-policy'] = 'PrivacyCtrl';
 $route['terms/(:any)'] = 'TermsCtrl/load/$1';
 $route['term/(:any)/(:any)'] = 'TermCtrl/term/$1/$2';

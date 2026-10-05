@@ -212,3 +212,61 @@ if (!function_exists('render_content')) {
     }
 }
 
+if (!function_exists('news_when')) {
+    // Human labels for a database timestamp (stored in UTC), shown in Indian Standard Time and computed against
+    // the current moment, so "Today" becomes "Yesterday" by itself at midnight.
+    //   abs  "Oct 5, 2026, 3:23 PM IST"   day  "Today" | "Yesterday" | "Oct 3, 2026"
+    //   time "3:23 PM IST"                ago  "12 minutes ago" | "3 hours ago" | ""
+    function news_when($db_datetime) {
+        $utc = new DateTimeZone('UTC'); $ist = new DateTimeZone('Asia/Kolkata');
+        $t = new DateTimeImmutable((string)$db_datetime, $utc);
+        $local = $t->setTimezone($ist);
+        $now = new DateTimeImmutable('now', $ist);
+        $days = (int)$now->setTime(0, 0)->diff($local->setTime(0, 0))->format('%r%a');
+        $day = $days === 0 ? 'Today' : ($days === -1 ? 'Yesterday' : $local->format('M j, Y'));
+        $secs = $now->getTimestamp() - $t->getTimestamp();
+        if ($secs < 0) { $ago = ''; }
+        elseif ($secs < 3600) { $m = max(1, (int)floor($secs / 60)); $ago = $m . ' minute' . ($m > 1 ? 's' : '') . ' ago'; }
+        elseif ($secs < 86400) { $h = (int)floor($secs / 3600); $ago = $h . ' hour' . ($h > 1 ? 's' : '') . ' ago'; }
+        else { $ago = ''; }
+        return array(
+            'abs' => $local->format('M j, Y, g:i A') . ' IST', 'day' => $day, 'time' => $local->format('g:i A') . ' IST',
+            'ago' => $ago, 'date' => $local->format('l, F j, Y'), 'key' => $local->format('Y-m-d'), 'ts' => $t->getTimestamp(),
+        );
+    }
+}
+
+if (!function_exists('news_feed')) {
+    // Newest first: published posts of the "news" section plus news sub-categories that are themselves the article.
+    function news_feed($limit = 60, $exclude_url = '') {
+        $CI =& get_instance(); $CI->load->database();
+        $slug = function ($v) { return strtolower(str_replace(' ', '-', trim($v))); };
+        $items = array();
+        $rows = $CI->db->query("SELECT p.post_title, p.uri, p.post_img, p.posted_date, p.post_desc, p.author_id, c.cat_name, s.sub_cat_name
+            FROM post p JOIN category c ON c.cat_id = p.cat_id JOIN sub_category s ON s.sub_cat_id = p.sub_cat_id
+            WHERE p.status = 'published' AND c.cat_name = 'news'")->result_array();
+        foreach ($rows as $r) {
+            $a = $r['author_id'] ? post_author($r) : null;
+            $items[] = array('title' => ucfirst($r['post_title']), 'url' => base_url($slug($r['cat_name']) . '/' . $slug($r['sub_cat_name']) . '/' . $slug($r['uri'])),
+                'date' => $r['posted_date'], 'image' => !empty($r['post_img']) ? post_thumb($r['post_img'], 480) : '',
+                'excerpt' => seo_excerpt($r['post_desc'], 150), 'author' => $a ? $a['name'] : '', 'section' => ucwords($r['sub_cat_name']));
+        }
+        $subs = $CI->db->query("SELECT s.sub_cat_name, s.sub_cat_desc, s.sub_cat_image, s.author_name, s.added_date, c.cat_name, m.meta_title, m.meta_desc,
+                (SELECT COUNT(*) FROM post p WHERE p.sub_cat_id = s.sub_cat_id AND p.status = 'published') AS n
+            FROM sub_category s JOIN category c ON c.cat_id = s.cat_id
+            LEFT JOIN meta m ON m.page_url = CONCAT(REPLACE(c.cat_name, ' ', '-'), '/', REPLACE(s.sub_cat_name, ' ', '-'))
+            WHERE c.cat_name = 'news' AND CHAR_LENGTH(s.sub_cat_desc) > 200")->result_array();
+        foreach ($subs as $r) {
+            if ((int)$r['n'] > 0) { continue; }
+            $items[] = array('title' => !empty($r['meta_title']) ? $r['meta_title'] : ucwords($r['sub_cat_name']),
+                'url' => base_url($slug($r['cat_name']) . '/' . $slug($r['sub_cat_name'])), 'date' => $r['added_date'],
+                'image' => !empty($r['sub_cat_image']) ? upload_image_url('subcategory', $r['sub_cat_image']) : '',
+                'excerpt' => !empty($r['meta_desc']) ? $r['meta_desc'] : seo_excerpt($r['sub_cat_desc'], 150),
+                'author' => ucwords($r['author_name']), 'section' => 'News');
+        }
+        usort($items, function ($a, $b) { return strtotime($b['date']) - strtotime($a['date']); });
+        if ($exclude_url !== '') { $items = array_values(array_filter($items, function ($i) use ($exclude_url) { return rtrim($i['url'], '/') !== rtrim($exclude_url, '/'); })); }
+        return array_slice($items, 0, $limit);
+    }
+}
+

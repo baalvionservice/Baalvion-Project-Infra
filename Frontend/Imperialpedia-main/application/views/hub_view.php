@@ -129,6 +129,10 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
    // The page query joins the category table, whose dates overwrite the sub-category's; read the real dates directly.
    $dates = $CI->db->select('added_date, updated_date')->get_where('sub_category', array('sub_cat_id' => (int)$sc['sub_cat_id']))->row_array();
    $pub = strtotime($dates['added_date']); $upd = !empty($dates['updated_date']) ? strtotime($dates['updated_date']) : 0;
+   $w_pub = news_when($dates['added_date']);
+   $w_upd = ($upd && abs($upd - $pub) > 300) ? news_when($dates['updated_date']) : null;
+   $is_news = ($cat_slug === 'news');
+   $more_news = $is_news ? news_feed(5, base_url(uri_string())) : array();
    $mins = max(1, (int)ceil(str_word_count(strip_tags($guide_html)) / 200));
    $page_url = base_url(uri_string());
    $others = array();
@@ -173,12 +177,40 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
 .na-more-card{display:block;padding:16px 18px;border:1px solid #e2e8f0;border-radius:12px;text-decoration:none;color:#0f172a;background:#fff;transition:all .15s ease}
 .na-more-card:hover{border-color:var(--hub-accent);box-shadow:0 10px 24px rgba(15,23,42,.1);transform:translateY(-2px);color:#0f172a}
 .na-more-card strong{display:block;font-size:1rem;margin-bottom:4px}.na-more-card span{font-size:.85rem;color:#64748b;line-height:1.5}
+.na-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#d00000}
+.na-line span{color:#64748b;letter-spacing:.04em;font-weight:700;text-transform:none}
+.na-progress{position:fixed;left:0;top:0;right:0;height:3px;z-index:3000;background:transparent}.na-progress i{display:block;height:100%;width:0;background:#d00000;transition:width .08s linear}
+.na-by-meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}.na-by-meta b{color:#0f172a}.na-by-meta em{font-style:normal;color:#d00000;font-weight:700}
+.na-more-list{border-top:1px solid #e2e8f0}.na-more-row{display:block;padding:14px 0;border-bottom:1px solid #e2e8f0;text-decoration:none;color:#0f172a}
+.na-more-row:hover strong{color:#d00000}.na-more-time{display:block;font-size:.74rem;font-weight:800;color:#d00000;margin-bottom:3px}.na-more-row strong{font-size:1rem;line-height:1.4;font-weight:800;transition:color .15s ease}
+.na-more-all{display:inline-block;margin-top:14px;font-weight:800;font-size:.9rem;color:#0f172a;text-decoration:none}.na-more-all:hover{color:#d00000}
+@media (max-width:767.98px){
+.na-head{padding:14px 0 0}
+.na-line{font-size:.72rem;margin-top:4px}
+.na-title{font-size:1.85rem;line-height:1.12;margin:8px 0 10px;letter-spacing:-.025em}
+.na-stand{font-size:1.02rem;line-height:1.5;margin-bottom:12px;color:#334155;font-weight:500}
+.na-by{gap:8px 14px;padding:12px 0;border-bottom:0}
+.na-by-who{width:100%}.na-by-who span span{font-size:.74rem}
+.na-by-meta{width:100%;font-size:.78rem;gap:2px 10px}
+.na-share{margin:0;padding:10px 0 12px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;width:100%}
+.na-share a,.na-share button{flex:1;border-radius:10px;height:42px;width:auto}.na-share span{display:none}
+.na-grid{padding-top:14px;gap:12px}
+.na-side{display:block}.na-box{padding:12px 14px}.na-box h3{margin-bottom:6px}
+.na-toc a{padding:6px 4px}.na-toc a:nth-child(n+4){display:none}.na-toc.is-open a:nth-child(n+4){display:block}
+.na-body{font-size:1.06rem;line-height:1.72}
+.na-body>p:first-of-type{font-size:1.14rem;line-height:1.65;color:#0f172a;font-weight:500}
+.na-body h2{font-size:1.25rem;margin-top:1.8rem}
+.na-body .imp-embed{margin-left:-16px;margin-right:-16px;max-width:none}.na-body .imp-embed iframe{border-radius:0;border-left:0;border-right:0}
+.na-wrap{padding-bottom:10px}
+}
 @media (max-width:991.98px){.na-grid{grid-template-columns:1fr;gap:20px}.na-side{position:static;order:-1}}
-@media (max-width:767.98px){.na-wrap{padding:0 16px}.na-head{padding-top:20px}.na-stand{font-size:1.02rem}.na-body{font-size:1.02rem;line-height:1.75}.na-share{margin-left:0;width:100%}.na-body h2{font-size:1.3rem}.na-toc a:nth-child(n+6){display:none}.na-toc.is-open a:nth-child(n+6){display:block}}
+@media (max-width:767.98px){.na-wrap{padding:0 16px}.na-head{padding-top:20px}.na-stand{font-size:1.02rem}.na-body{font-size:1.02rem;line-height:1.75}.na-share{margin-left:0;width:100%}.na-body h2{font-size:1.3rem}}
 </style>
+<div class="na-progress" id="naProg" aria-hidden="true"><i></i></div>
 <main class="na-wrap">
    <header class="na-head">
       <div class="hub-crumb"><span class="hub-chip"><?php echo htmlspecialchars(strtoupper($cat_label)); ?></span><span>&rsaquo;</span><span><?php echo htmlspecialchars(strtoupper($sub_name)); ?></span></div>
+      <div class="na-line"><?php echo htmlspecialchars($is_news ? ($w_pub['day'] === 'Today' ? 'Today\'s news' : 'News') : $cat_label); ?> <span><?php echo htmlspecialchars($w_pub['date']); ?></span></div>
       <h1 class="na-title"><?php echo htmlspecialchars($sub_name); ?></h1>
       <?php if ($stand !== '') { ?><p class="na-stand"><?php echo htmlspecialchars($stand); ?></p><?php } ?>
       <div class="na-by">
@@ -187,7 +219,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
             <span style="display:block"><strong><a href="<?php echo $au['url']; ?>" rel="author" style="color:inherit;text-decoration:none"><?php echo htmlspecialchars($au['name']); ?></a></strong><span><?php echo htmlspecialchars($au['title']); ?></span></span>
             <?php } else { ?><span style="display:block"><strong>Imperialpedia editorial team</strong></span><?php } ?>
          </div>
-         <div class="na-by-meta">Published <?php echo date('M j, Y', $pub); ?><?php if ($upd && date('Y-m-d', $upd) !== date('Y-m-d', $pub)) { ?> &bull; Updated <?php echo date('M j, Y', $upd); ?><?php } ?> &bull; <?php echo $mins; ?> min read</div>
+         <div class="na-by-meta"><span class="na-when"><b><?php echo htmlspecialchars($w_pub['day'] === 'Today' || $w_pub['day'] === 'Yesterday' ? $w_pub['day'] . ', ' . $w_pub['time'] : $w_pub['abs']); ?></b><?php if ($w_pub['ago'] !== '') { ?> <em>(<?php echo htmlspecialchars($w_pub['ago']); ?>)</em><?php } ?></span><?php if ($w_upd) { ?> <span class="na-upd">Updated <?php echo htmlspecialchars($w_upd['ago'] !== '' ? $w_upd['ago'] : $w_upd['abs']); ?></span><?php } ?> <span class="na-read"><?php echo $mins; ?> min read</span></div>
          <div class="na-share"><span>Share</span>
             <a href="https://api.whatsapp.com/send?text=<?php echo rawurlencode($sub_name . ' ' . $page_url); ?>" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
             <a href="https://twitter.com/intent/tweet?text=<?php echo rawurlencode($sub_name); ?>&amp;url=<?php echo rawurlencode($page_url); ?>" target="_blank" rel="noopener" aria-label="Share on X"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
@@ -200,6 +232,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
       <article>
          <?php if ($hero !== '') { ?><div class="na-hero"><img src="<?php echo htmlspecialchars($hero); ?>" alt="<?php echo htmlspecialchars($sub_name); ?>" width="1100" height="620" fetchpriority="high"></div><?php } ?>
          <div class="na-body"><?php echo embed_social($guide_html); ?></div>
+         <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'ships')); ?>
          <?php if (!empty($sc['tags'])) { $tg = array_slice(array_filter(array_map('trim', explode(',', $sc['tags']))), 0, 8); if ($tg) { ?>
          <div class="na-tags"><?php foreach ($tg as $t) { ?><span><?php echo htmlspecialchars($t); ?></span><?php } ?></div>
          <?php } } ?>
@@ -207,11 +240,23 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
       <aside class="na-side">
          <?php if (count($toc) > 1) { ?>
          <div class="na-box"><h3>In this article</h3><div class="na-toc" id="naToc"><?php foreach ($toc as $t) { ?><a href="#<?php echo $t[0]; ?>"><?php echo htmlspecialchars(ucfirst($t[1])); ?></a><?php } ?></div>
-         <?php if (count($toc) > 5) { ?><button type="button" class="p6-toc-toggle" id="naTocBtn" style="display:none" onclick="var t=document.getElementById('naToc');this.textContent=t.classList.toggle('is-open')?'Show fewer':'Show all sections'">Show all sections</button><?php } ?></div>
+         <?php if (count($toc) > 3) { ?><button type="button" class="p6-toc-toggle" id="naTocBtn" style="display:none" onclick="var t=document.getElementById('naToc');this.textContent=t.classList.toggle('is-open')?'Show fewer':'Show all sections'">Show all sections</button><?php } ?></div>
          <?php } ?>
+         <?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'signal')); ?>
+         <?php $this->load->view('includes/network_box'); ?>
       </aside>
    </div>
-   <?php if ($others) { ?>
+   <?php if ($more_news) { ?>
+   <section class="na-more"><h2>More news</h2>
+      <div class="na-more-list"><?php foreach ($more_news as $mn) { $mw = news_when($mn['date']); ?>
+         <a class="na-more-row" href="<?php echo htmlspecialchars($mn['url']); ?>">
+            <span class="na-more-time"><?php echo htmlspecialchars($mw['day']); ?> &middot; <?php echo htmlspecialchars($mw['time']); ?></span>
+            <strong><?php echo htmlspecialchars($mn['title']); ?></strong>
+         </a>
+      <?php } ?>
+      <a class="na-more-all" href="<?php echo base_url('news'); ?>">All news &rarr;</a></div>
+   </section>
+   <?php } elseif ($others) { ?>
    <section class="na-more"><h2>More in <?php echo htmlspecialchars($cat_label); ?></h2>
       <div class="na-more-grid"><?php foreach ($others as $o) { ?>
          <a class="na-more-card" href="<?php echo base_url($cat_slug . '/' . str_replace(' ', '-', $o['sub_cat_name'])); ?>"><strong><?php echo htmlspecialchars(brand_name($o['sub_cat_name'])); ?></strong><span><?php echo htmlspecialchars(seo_excerpt($o['sub_cat_desc'], 110)); ?></span></a>
@@ -219,7 +264,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
    </section>
    <?php } ?>
 </main>
-<script>(function(){var b=document.getElementById('naTocBtn');if(b&&window.matchMedia('(max-width:767.98px)').matches){b.style.display='block';}})();</script>
+<script>(function(){var bar=document.querySelector('#naProg i');if(bar){var f=function(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%';};addEventListener('scroll',f,{passive:true});f();}var b=document.getElementById('naTocBtn');if(b&&window.matchMedia('(max-width:767.98px)').matches){b.style.display='block';}})();</script>
 <?php return; } ?>
 <header class="hub-head">
    <div class="container-fluid px-lg-5">
