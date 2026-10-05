@@ -24,15 +24,16 @@ usort($posts, function ($a, $b) { return strtotime($b['posted_date']) - strtotim
 $cat_slug = $this->uri->segment(1);
 $labels = array(
    'insurance' => 'Insurance', 'internet' => 'Internet', 'marketing' => 'Marketing', 'news' => 'News',
-   'attorney' => 'Legal', 'online-education' => 'Online Education', 'editor' => 'Editor', 'seo' => 'SEO',
+   'attorney' => 'Legal', 'online-education' => 'Online Education', 'editor' => 'Editor', 'seo' => 'SEO', 'cookies' => 'Cookies',
 );
 $accents = array(
    'insurance' => '#15803d', 'internet' => '#0369a1', 'marketing' => '#6d28d9', 'news' => '#b45309',
-   'attorney' => '#1d4ed8', 'online-education' => '#c2410c', 'editor' => '#be185d', 'seo' => '#047857',
+   'attorney' => '#1d4ed8', 'online-education' => '#c2410c', 'editor' => '#be185d', 'seo' => '#047857', 'cookies' => '#0f766e',
 );
 $cat_label = isset($labels[$cat_slug]) ? $labels[$cat_slug] : ucwords(str_replace('-', ' ', $cat_slug));
 $accent = isset($accents[$cat_slug]) ? $accents[$cat_slug] : '#0f172a';
-$sub_name = $sc ? ucwords($sc['sub_cat_name']) : '';
+$brands = array('envanto' => 'Envato', 'grammerly' => 'Grammarly', 'quillbot' => 'QuillBot', 'amazon prime' => 'Amazon Prime Video');
+$sub_name = $sc ? (isset($brands[$sc['sub_cat_name']]) ? $brands[$sc['sub_cat_name']] : ucwords($sc['sub_cat_name'])) : '';
 $sub_slug = $sc ? str_replace(' ', '-', $sc['sub_cat_name']) : '';
 
 $guide_html = $sc ? preg_replace(array('/<h1\b/i', '/<\/h1>/i'), array('<h2', '</h2>'), $sc['sub_cat_desc']) : '';   // the page's own h1 is the title above
@@ -146,7 +147,7 @@ $count = count($posts);
          <?php foreach ($get_subcat_list as $s) {
             $slug = str_replace(' ', '-', $s['sub_cat_name']);
             $on = ($s['sub_cat_name'] === $sc['sub_cat_name']); ?>
-            <a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(ucwords($s['sub_cat_name'])); ?></a>
+            <a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(isset($brands[$s['sub_cat_name']]) ? $brands[$s['sub_cat_name']] : ucwords($s['sub_cat_name'])); ?></a>
          <?php } ?>
       </nav>
       <?php } ?>
