@@ -254,19 +254,27 @@
             background: #b00000;
             color: #fff;
          }
-         .p6-search-trigger {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #cbd5e1;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-         }
-         .p6-search-trigger:hover {
-            background: rgba(255,255,255,0.2);
-            color: #ffffff;
+         .p6-hsearch{position:relative;margin-left:auto}
+         .p6-hsearch form{position:relative;margin:0}
+         .p6-hsearch-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.8rem;color:#94a3b8;pointer-events:none}
+         .p6-hsearch input[type=search]{width:250px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 14px 7px 34px;border-radius:20px;font-size:.85rem;outline:0;transition:width .2s ease,background .2s ease,border-color .2s ease;-webkit-appearance:none;appearance:none}
+         .p6-hsearch input[type=search]::placeholder{color:#cbd5e1}
+         .p6-hsearch input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
+         .p6-hsearch input[type=search]:focus{width:340px;background:rgba(255,255,255,.18);border-color:#fff}
+         .p6-hsearch-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(440px,92vw);max-height:min(70vh,460px);overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.22);z-index:1200}
+         .p6-hsearch-panel[hidden]{display:none}
+         .p6-hs-item{display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:#0f172a;border-bottom:1px solid #f1f5f9}
+         .p6-hs-item:hover,.p6-hs-item:focus{background:#f8fafc;color:#0f172a}
+         .p6-hs-item img{width:56px;height:42px;object-fit:cover;border-radius:4px;flex:none;background:#e2e8f0}
+         .p6-hs-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+         .p6-hs-tag{font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d00000}
+         .p6-hs-title{font-size:.9rem;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+         .p6-hs-empty{padding:16px;text-align:center;color:#64748b;font-size:.9rem}
+         .p6-hs-all{display:block;padding:12px 14px;text-align:center;font-size:.85rem;font-weight:700;color:#d00000;text-decoration:none;background:#f8fafc}
+         @media (max-width:991.98px){
+            .p6-hsearch{width:100%;margin:10px 0 4px}
+            .p6-hsearch input[type=search],.p6-hsearch input[type=search]:focus{width:100%;font-size:16px;padding:10px 14px 10px 36px}
+            .p6-hsearch-panel{position:static;width:100%;margin-top:8px;max-height:50vh}
          }
 
          /* Ultra-Clean Lightweight Editorial Layout (Page Six / NY Post Style) */
@@ -603,86 +611,65 @@
                   <?php }} ?>
                </ul>
 
-               <!-- Global Quick Search Trigger & Modal -->
-               <div class="d-flex align-items-center">
-                  <button type="button" class="p6-search-trigger me-2 border-0" data-bs-toggle="modal" data-bs-target="#p6SearchModal" aria-label="Search articles">
-                     <i class="fa-solid fa-magnifying-glass me-1"></i> Search Articles &amp; Archives...
-                  </button>
+               <!-- Global search: inline field with a dropdown of instant matches -->
+               <div class="p6-hsearch" id="p6HSearch">
+                  <form action="<?php echo base_url(); ?>search" method="GET" id="p6HeaderSearchForm" role="search">
+                     <i class="fa-solid fa-magnifying-glass p6-hsearch-icon" aria-hidden="true"></i>
+                     <input type="search" name="q" id="p6ModalSearchInput" placeholder="Search articles &amp; archives" autocomplete="off" aria-label="Search articles" aria-controls="p6LiveSearchResults" required>
+                  </form>
+                  <div id="p6LiveSearchResults" class="p6-hsearch-panel" hidden></div>
                </div>
             </div>
          </div>
       </nav> 
 
-<!-- GLOBAL SEARCH MODAL -->
-<div class="modal fade" id="p6SearchModal" tabindex="-1" aria-labelledby="p6SearchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-      <div class="modal-header bg-dark text-white border-0 py-3">
-        <h5 class="modal-title font-monospace fw-bold text-uppercase" id="p6SearchModalLabel"><i class="fa-solid fa-bolt text-danger me-2"></i> Search Imperialpedia</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4 bg-light">
-        <form action="<?php echo base_url(); ?>search" method="GET" id="p6HeaderSearchForm">
-           <div class="position-relative mb-3">
-              <i class="fa-solid fa-magnifying-glass position-absolute start-0 top-50 translate-middle-y ms-3 text-danger fs-5"></i>
-              <input type="text" name="q" id="p6ModalSearchInput" class="form-control form-control-lg ps-5 rounded-pill border-2 border-dark" placeholder="Type keyword (e.g. Health Insurance, Core Update, SEO)..." autocomplete="off" required>
-           </div>
-        </form>
-        <div id="p6LiveSearchResults" class="list-group shadow-sm mt-2" style="display:none; max-height: 360px; overflow-y: auto;">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-   const searchInput = document.getElementById('p6ModalSearchInput');
-   const searchResults = document.getElementById('p6LiveSearchResults');
-
-   if(searchInput && searchResults){
-      let timer = null;
-      searchInput.addEventListener('input', function(){
-         clearTimeout(timer);
-         const q = this.value.trim();
-         if(q.length < 2){
-            searchResults.style.display = 'none';
-            searchResults.innerHTML = '';
-            return;
-         }
-         timer = setTimeout(() => {
-            fetch('<?php echo base_url(); ?>SearchCtrl/api?q=' + encodeURIComponent(q))
-               .then(res => res.json())
-               .then(data => {
-                  if(data.status === 'ok' && data.results.length > 0){
-                     let html = '';
-                     data.results.forEach(item => {
-                        html += `<a href="${item.url}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 p-3">
-                           <img src="${item.img}" alt="" loading="lazy" style="width:50px; height:40px; object-fit:cover; border-radius:4px;">
-                           <div>
-                              <span class="badge bg-danger text-uppercase mb-1" style="font-size:0.65rem;">${item.subcat}</span>
-                              <div class="fw-bold text-dark text-truncate mb-0" style="max-width:450px;">${item.title}</div>
-                           </div>
-                        </a>`;
-                     });
-                     searchResults.innerHTML = html;
-                     searchResults.style.display = 'block';
-                  } else {
-                     searchResults.innerHTML = '<div class="list-group-item text-muted text-center py-3">No instant matches. Press Enter to perform full archive search.</div>';
-                     searchResults.style.display = 'block';
-                  }
-               }).catch(err => console.error(err));
-         }, 250);
+(function(){
+   var box = document.getElementById('p6HSearch');
+   var input = document.getElementById('p6ModalSearchInput');
+   var panel = document.getElementById('p6LiveSearchResults');
+   if(!box || !input || !panel) return;
+   var timer = null, last = '';
+   var esc = function(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+   var close = function(){ panel.hidden = true; };
+   var render = function(q, results){
+      var html = '';
+      results.forEach(function(item){
+         html += '<a class="p6-hs-item" href="' + esc(item.url) + '">'
+            + (item.img ? '<img src="' + esc(item.img) + '" alt="" loading="lazy">' : '')
+            + '<span class="p6-hs-text"><span class="p6-hs-tag">' + esc(item.subcat) + '</span><span class="p6-hs-title">' + esc(item.title) + '</span></span></a>';
       });
-   }
-});
+      if(!results.length){ html = '<div class="p6-hs-empty">No instant matches for &ldquo;' + esc(q) + '&rdquo;.</div>'; }
+      html += '<a class="p6-hs-all" href="<?php echo base_url(); ?>search?q=' + encodeURIComponent(q) + '">See all results for &ldquo;' + esc(q) + '&rdquo; &rarr;</a>';
+      panel.innerHTML = html;
+      panel.hidden = false;
+   };
+   input.addEventListener('input', function(){
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if(q.length < 2){ close(); panel.innerHTML = ''; last = ''; return; }
+      timer = setTimeout(function(){
+         last = q;
+         fetch('<?php echo base_url(); ?>SearchCtrl/api?q=' + encodeURIComponent(q))
+            .then(function(r){ return r.json(); })
+            .then(function(data){ if(q === last){ render(q, data.status === 'ok' ? data.results : []); } })
+            .catch(function(){});
+      }, 250);
+   });
+   input.addEventListener('focus', function(){ if(panel.innerHTML) panel.hidden = false; });
+   document.addEventListener('click', function(e){ if(!box.contains(e.target)) close(); });
+   document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){ close(); input.blur(); }
+      if(e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '')){ e.preventDefault(); input.focus(); }
+   });
+})();
 </script>
 
 <!-- Sticky Mobile Social Action Bar (Page Six & NY Post Engagement System) -->
 <div class="p6-mobile-share-bar d-md-none">
    <div class="d-flex justify-content-around align-items-center h-100 px-3">
       <a href="https://twitter.com/intent/tweet?text=<?php echo urlencode($meta_title); ?>&url=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="p6-mob-share-btn p6-mob-twitter" title="Share on Twitter/X" aria-label="Share on Twitter/X">
-         <i class="fa-brands fa-x-twitter"></i>
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
       <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(base_url().uri_string()); ?>" target="_blank" class="p6-mob-share-btn p6-mob-facebook" title="Share on Facebook" aria-label="Share on Facebook">
          <i class="fa-brands fa-facebook-f"></i>
