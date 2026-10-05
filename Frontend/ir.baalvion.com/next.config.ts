@@ -1,6 +1,8 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  // The container image runs the standalone server (see Dockerfile); a plain `next build` is unchanged.
+  ...(process.env.BUILD_STANDALONE === '1' ? { output: 'standalone' as const } : {}),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the

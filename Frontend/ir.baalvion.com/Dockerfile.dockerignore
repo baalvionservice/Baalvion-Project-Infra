@@ -1,0 +1,122 @@
+# Keep the monorepo build context lean (used by the repo-root Docker builds).
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/.terraform
+**/*.tfstate*
+.git
+.github
+**/*.log
+**/.env
+**/.env.local
+**/.env.*.local
+# Frontend is excluded from the lean backend build contexts, EXCEPT the apps whose own
+# Dockerfile runs `turbo prune` from the repo root (see scripts/discover-images.mjs's
+# needsRootContext check). Each needs an explicit re-include below, or its source never
+# enters the build context and `turbo prune <name>` fails "package not found".
+Frontend/*
+!Frontend/about.baalvion.com
+!Frontend/admin.baalvion.com
+!Frontend/amarisemaisonavenue.com
+!Frontend/auth.baalvion.com
+!Frontend/baalvionstack.com
+!Frontend/canwemarry.baalvion.com
+!Frontend/dashboard.baalvion.com
+!Frontend/jobs.baalvion.com
+!Frontend/lawelitenetwork.com
+!Frontend/marketunderworld.com
+!Frontend/newaiskillsteam.baalvion.com
+!Frontend/proxy.baalvionstack.com
+Frontend/about.baalvion.com/node_modules
+Frontend/about.baalvion.com/.next
+Frontend/about.baalvion.com/.turbo
+Frontend/admin.baalvion.com/node_modules
+Frontend/admin.baalvion.com/.next
+Frontend/admin.baalvion.com/.turbo
+Frontend/amarisemaisonavenue.com/node_modules
+Frontend/amarisemaisonavenue.com/.next
+Frontend/amarisemaisonavenue.com/.turbo
+Frontend/auth.baalvion.com/node_modules
+Frontend/auth.baalvion.com/.next
+Frontend/auth.baalvion.com/.turbo
+Frontend/baalvionstack.com/node_modules
+Frontend/baalvionstack.com/.next
+Frontend/baalvionstack.com/.turbo
+Frontend/canwemarry.baalvion.com/node_modules
+Frontend/canwemarry.baalvion.com/.next
+Frontend/canwemarry.baalvion.com/.turbo
+Frontend/dashboard.baalvion.com/node_modules
+Frontend/dashboard.baalvion.com/.next
+Frontend/dashboard.baalvion.com/.turbo
+Frontend/jobs.baalvion.com/node_modules
+Frontend/jobs.baalvion.com/.next
+Frontend/jobs.baalvion.com/.turbo
+Frontend/lawelitenetwork.com/node_modules
+Frontend/lawelitenetwork.com/.next
+Frontend/lawelitenetwork.com/.turbo
+Frontend/marketunderworld.com/node_modules
+Frontend/marketunderworld.com/dist
+Frontend/newaiskillsteam.baalvion.com/node_modules
+Frontend/newaiskillsteam.baalvion.com/.next
+Frontend/newaiskillsteam.baalvion.com/.turbo
+Frontend/proxy.baalvionstack.com/node_modules
+Frontend/proxy.baalvionstack.com/dist
+# .dockerignore matches like .gitignore -- last match wins. Every `!Frontend/X`
+# re-include above re-includes X's ENTIRE tree, which silently un-excludes the
+# **/.env* rules above for anything under it too, since those come earlier in
+# the file. A real local-dev .env.local leaking into a re-included app's Docker
+# build context gets picked up by Next's own env loading during static
+# generation -- baking dev URLs into prod ISR pages regardless of the
+# Dockerfile's own ENV/ARG values. Re-exclude env files for every re-included
+# app, the same way node_modules/.next/.turbo already are above.
+Frontend/about.baalvion.com/.env
+Frontend/about.baalvion.com/.env.local
+Frontend/about.baalvion.com/.env.*.local
+Frontend/admin.baalvion.com/.env
+Frontend/admin.baalvion.com/.env.local
+Frontend/admin.baalvion.com/.env.*.local
+Frontend/amarisemaisonavenue.com/.env
+Frontend/amarisemaisonavenue.com/.env.local
+Frontend/amarisemaisonavenue.com/.env.*.local
+Frontend/auth.baalvion.com/.env
+Frontend/auth.baalvion.com/.env.local
+Frontend/auth.baalvion.com/.env.*.local
+Frontend/baalvionstack.com/.env
+Frontend/baalvionstack.com/.env.local
+Frontend/baalvionstack.com/.env.*.local
+Frontend/canwemarry.baalvion.com/.env
+Frontend/canwemarry.baalvion.com/.env.local
+Frontend/canwemarry.baalvion.com/.env.*.local
+Frontend/dashboard.baalvion.com/.env
+Frontend/dashboard.baalvion.com/.env.local
+Frontend/dashboard.baalvion.com/.env.*.local
+Frontend/jobs.baalvion.com/.env
+Frontend/jobs.baalvion.com/.env.local
+Frontend/jobs.baalvion.com/.env.*.local
+Frontend/lawelitenetwork.com/.env
+Frontend/lawelitenetwork.com/.env.local
+Frontend/lawelitenetwork.com/.env.*.local
+Frontend/marketunderworld.com/.env
+Frontend/marketunderworld.com/.env.local
+Frontend/marketunderworld.com/.env.*.local
+Frontend/newaiskillsteam.baalvion.com/.env
+Frontend/newaiskillsteam.baalvion.com/.env.local
+Frontend/newaiskillsteam.baalvion.com/.env.*.local
+Frontend/proxy.baalvionstack.com/.env
+Frontend/proxy.baalvionstack.com/.env.local
+Frontend/proxy.baalvionstack.com/.env.*.local
+e2e
+docs
+*.md
+
+# ir.baalvion.com (the shared list above still allows apps by their pre-rename folder names)
+!Frontend/ir.baalvion.com
+Frontend/ir.baalvion.com/node_modules
+Frontend/ir.baalvion.com/.next
+Frontend/ir.baalvion.com/.turbo
+Frontend/ir.baalvion.com/.env
+Frontend/ir.baalvion.com/.env.local
+Frontend/ir.baalvion.com/.env.*.local
