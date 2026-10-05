@@ -291,19 +291,14 @@ if (!function_exists('indexnow_ping')) {
 
 if (!function_exists('render_related_reading')) {
     // Related-reading cards for the "Related reading: ..." sentence stored in an article body.
-    // If that sentence was pasted inside a layout block (a column of a pasted grid) the cards would be squeezed into
-    // the column and overlap their neighbours, so in that case they are moved to the end of the content.
+    // The cards always go at the END of the article: a reader who has finished is the one who clicks on, and in
+    // the middle of the text they interrupt reading (and, inside a pasted grid, overlap neighbouring boxes).
     function render_related_reading($html) {
         $html = (string)$html;
-        $tag = '<p class="imp-related-reading">';
-        $pos = strpos($html, $tag);
-        if ($pos === false) return $html;
-        $before = substr($html, 0, $pos);
-        $depth = preg_match_all('#<div\b#i', $before) - preg_match_all('#</div>#i', $before);
-        if ($depth > 0 && preg_match('#<p class="imp-related-reading">.*?</p>#s', $html, $pm)) {
-            $html = substr($html, 0, $pos) . substr($html, $pos + strlen($pm[0]));
-            return render_related_reading_cards($html) . render_related_reading_cards($pm[0]);
-        }
-        return render_related_reading_cards($html);
+        if (!preg_match_all('#<p class="imp-related-reading">.*?</p>#s', $html, $pm)) return $html;
+        $html = str_replace($pm[0], '', $html);
+        $cards = '';
+        foreach ($pm[0] as $one) { $cards .= render_related_reading_cards($one); }
+        return $html . $cards;
     }
 }
