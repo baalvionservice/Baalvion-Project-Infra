@@ -325,7 +325,7 @@ body {
                   </div>
                   <?php $i = 1; foreach($post as $pst1){ ?>
                      <a href="<?php echo base_url().str_replace(' ','-',$pst1['cat_name']).'/'.str_replace(' ','-',$pst1['sub_cat_name']).'/'.str_replace(' ','-',$pst1['uri']); ?>" class="d-flex gap-2 text-decoration-none text-dark py-2 border-bottom">
-                        <span class="fw-bold fs-5" style="color:var(--p6-blue)">0<?php echo $i++; ?></span>
+                        <span class="fw-bold fs-5" style="color:var(--p6-blue)"><?php echo sprintf('%02d', $i++); ?></span>
                         <div class="fw-bold small"><?php echo ucfirst($pst1['post_title']);?></div>
                      </a>
                   <?php } ?>

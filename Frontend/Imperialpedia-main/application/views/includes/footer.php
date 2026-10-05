@@ -320,6 +320,38 @@
 .imp-rel-meta{margin-top:auto;padding-top:4px;font-size:.76rem;color:#64748b;font-weight:600}
 /* Pictures pasted from the editor carry fixed pixel sizes (e.g. 1200x675); keep their proportions at any width */
 .p6-content-box img,.p6-article-body img{max-width:100% !important;height:auto !important}
+/* Back navigation on article pages */
+.p6-backbar{display:inline-flex;align-items:center;gap:6px;margin:0 0 14px;padding:7px 14px 7px 10px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;color:#0f172a;font-size:.85rem;font-weight:700;text-decoration:none;line-height:1}
+.p6-backbar:hover{border-color:#d00000;color:#d00000}
+.p6-article-body .p6-endnav{display:flex;flex-wrap:wrap;gap:10px;margin:2rem 0 0 !important;padding:1.1rem 1.25rem !important;box-sizing:border-box;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;align-items:center}
+.p6-article-body .p6-endnav span{flex:1 1 100%;font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b}
+.p6-article-body .p6-endnav a,.p6-article-body .p6-endnav button{flex:1 1 auto;color:#fff !important;text-decoration:none !important;text-align:center;padding:11px 16px;border-radius:8px;border:1px solid #d00000;background:#d00000;color:#fff;font-weight:700;font-size:.92rem;text-decoration:none;cursor:pointer}
+.p6-article-body .p6-endnav button{background:#fff;color:#d00000 !important}
+.p6-totop{position:fixed;right:14px;bottom:76px;width:46px;height:46px;border-radius:50%;border:0;background:#d00000;color:#fff;font-size:1.2rem;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.28);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;z-index:9990}
+.p6-totop.is-on{opacity:1;visibility:visible;transform:none}
+@media (min-width: 768px){ .p6-totop{bottom:24px} }
+.p6-article-body a.imp-rel-card,.p6-article-body a.imp-rel-card *{text-decoration:none !important}
+.p6-article-body .imp-related-head{font-size:.78rem !important;line-height:1 !important;margin:0 0 .9rem !important;padding:0 !important;border:0 !important;letter-spacing:.14em !important}
+@media (max-width: 767.98px){
+h1.p6-detail-title{font-size:1.6rem !important;line-height:1.28 !important;letter-spacing:-.01em !important;margin-bottom:12px !important}
+.p6-article-body .imp-related{margin:1.6rem 0;padding:1rem .9rem 1rem}
+.imp-rel-grid{grid-template-columns:1fr;gap:10px}
+.p6-article-body a.imp-rel-card{flex-direction:row;align-items:stretch}
+.imp-rel-thumb{flex:none;width:118px;aspect-ratio:16/9;min-height:0;align-self:center;margin-left:10px;border-radius:6px}
+.p6-article-body .imp-rel-thumb img{height:100% !important;width:100% !important;object-fit:cover;margin:0 !important}
+.imp-rel-body{padding:.65rem .75rem;gap:4px;justify-content:center}
+.imp-rel-title{font-size:.9rem;-webkit-line-clamp:3}
+.imp-rel-meta{margin-top:2px;padding-top:0}
+}
+/* Section hub pages on phones: jump to the article list; long intro essay starts collapsed */
+.p6-jumpbar{display:none}
+@media (max-width: 767.98px){
+.p6-jumpbar{display:block;margin:12px 16px 4px}
+.p6-jumpbar a{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;background:#0f172a;color:#fff !important;font-weight:700;font-size:.95rem;text-decoration:none !important}
+.p6-content-box.p6-collapsed{max-height:560px;overflow:hidden;position:relative}
+.p6-content-box.p6-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 85%);pointer-events:none}
+.p6-readmore{display:block;width:calc(100% - 32px);margin:10px 16px 0;padding:12px;border:1px solid #d00000;border-radius:10px;background:#fff;color:#d00000;font-weight:700;font-size:.95rem;cursor:pointer}
+}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){
@@ -349,6 +381,74 @@ document.addEventListener('DOMContentLoaded', function(){
       });
       list.parentNode.insertBefore(btn, list.nextSibling);
    });
+});
+</script>
+<script>
+(function(){
+   var title = document.querySelector('.p6-detail-title');
+   if(!title) return;
+   var parts = location.pathname.split('/').filter(Boolean);
+   if(parts.length < 3) return;
+   var subUrl = '/' + parts.slice(0, 2).join('/');
+   var crumb = title.parentNode.querySelector('.p6-breadcrumb');
+   var subName = (crumb && crumb.lastElementChild ? crumb.lastElementChild.textContent.trim() : parts[1].replace(/-/g, ' '));
+   subName = subName.toLowerCase().replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+
+   // 1. back link above the headline
+   var back = document.createElement('a');
+   back.className = 'p6-backbar'; back.href = subUrl;
+   back.innerHTML = '&larr; Back to ' + subName.replace(/</g, '&lt;');
+   title.parentNode.insertBefore(back, crumb || title);
+
+   // 2. what to do when the article ends
+   var body = document.querySelector('.p6-article-body');
+   if(body){
+      var end = document.createElement('div');
+      end.className = 'p6-endnav';
+      end.innerHTML = '<span>Finished reading?</span><a href="' + subUrl + '">&larr; More in ' + subName.replace(/</g, '&lt;') + '</a><button type="button" id="p6EndTop">&uarr; Back to top</button>';
+      body.appendChild(end);
+      document.getElementById('p6EndTop').addEventListener('click', function(){ window.scrollTo({top: 0, behavior: 'smooth'}); });
+   }
+
+   // 3. floating back-to-top once the reader is well into a long article
+   var fab = document.createElement('button');
+   fab.type = 'button'; fab.className = 'p6-totop'; fab.setAttribute('aria-label', 'Back to top'); fab.innerHTML = '&uarr;';
+   fab.addEventListener('click', function(){ window.scrollTo({top: 0, behavior: 'smooth'}); });
+   document.body.appendChild(fab);
+   var tick = false;
+   window.addEventListener('scroll', function(){
+      if(tick) return; tick = true;
+      requestAnimationFrame(function(){ fab.classList.toggle('is-on', window.scrollY > 900); tick = false; });
+   }, {passive: true});
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+   var firstCard = document.querySelector('a.p6-grid-card');
+   var grid = firstCard ? firstCard.closest('section') : null;
+   var box = document.querySelector('.p6-content-box');
+   if(!grid || !box || document.querySelector('.p6-detail-title')) return;
+   var n = grid.querySelectorAll('a.p6-grid-card').length;
+   var heading = grid.querySelector('h2,h3');
+   if(!grid.id) grid.id = 'p6-articles';
+   if(n > 0){
+      var bar = document.createElement('div');
+      bar.className = 'p6-jumpbar';
+      bar.innerHTML = '<a href="#' + grid.id + '">&darr; Jump to all ' + n + ' articles</a>';
+      var anchor = document.querySelector('.p6-search-bar-wrap') || document.querySelector('header');
+      if(anchor && anchor.parentNode){ anchor.parentNode.insertBefore(bar, anchor.nextSibling); }
+   }
+   if(window.matchMedia('(max-width: 767.98px)').matches && box.scrollHeight > 900){
+      box.classList.add('p6-collapsed');
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'p6-readmore'; btn.textContent = 'Read the full guide';
+      btn.addEventListener('click', function(){
+         var c = box.classList.toggle('p6-collapsed');
+         btn.textContent = c ? 'Read the full guide' : 'Show less';
+         if(c){ box.scrollIntoView({behavior: 'smooth', block: 'start'}); }
+      });
+      box.parentNode.insertBefore(btn, box.nextSibling);
+   }
 });
 </script>
 </body>

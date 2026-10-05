@@ -866,7 +866,7 @@ body {
             $t_url = base_url().str_replace(' ','-',$t_cat).'/'.str_replace(' ','-',$t_sub_cat).'/'.str_replace(' ','-',$t_post['uri']);
         ?>
         <a href="<?php echo $t_url; ?>" class="p6-trending-item">
-          <div class="p6-trending-num">0<?php echo $trend_idx++; ?></div>
+          <div class="p6-trending-num"><?php echo sprintf('%02d', $trend_idx++); ?></div>
           <div>
             <div class="p6-trending-title"><?php echo ucfirst($t_post['post_title']); ?></div>
             <div class="p6-trending-meta"><?php echo strtoupper($t_sub_cat); ?></div>
