@@ -299,7 +299,7 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
 
 <main class="container-fluid px-lg-5">
    <div class="hub-tools">
-      <?php if ($count > 3) { ?>
+      <?php if ($count > 8) { ?>
       <div class="hub-search">
          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
          <input type="search" id="hubFilter" placeholder="Search <?php echo (int)$count; ?> articles in <?php echo htmlspecialchars($sub_name); ?>" aria-label="Filter articles">
@@ -324,9 +324,12 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
    $rest = $count > 2 ? $count - 1 : $count; $lead_on = $count > 2;
    $hub_span = function ($i) use ($count, $rest, $lead_on) {
       if ($lead_on && $i === 0) return '';
-      $k = $lead_on ? $i - 1 : $i; $rem = $rest % 3; $last_start = $rest - $rem;
-      if ($rem === 2 && $k >= $last_start) return ' span-3';
-      if ($rem === 1 && $k >= $last_start) return ' span-6';
+      $k = $lead_on ? $i - 1 : $i;
+      if ($rest === 1) return ' span-6';
+      if ($rest === 2) return ' span-3';
+      $rem = $rest % 3;
+      if ($rem === 1) { return ($k >= $rest - 4) ? ' span-3' : ''; }   // 4 left over: two rows of two
+      if ($rem === 2) { return ($k >= $rest - 2) ? ' span-3' : ''; }   // 2 left over: one row of two
       return '';
    };
 ?>
