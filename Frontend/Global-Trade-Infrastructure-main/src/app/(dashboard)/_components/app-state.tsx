@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { USER_ROLES, UserRole } from '@/core/roles';
 export { USER_ROLES } from '@/core/roles';
 export type { UserRole } from '@/core/roles';
@@ -26,7 +27,7 @@ import {
 } from '@/core/organizations';
 import { AuthzContext } from '@/core/authorization';
 import { clearSessionOrgCache } from '@/services/session-org';
-import { isAnonymousProperty } from '@/lib/route-access';
+import { skipsSessionRehydration } from '@/lib/route-access';
 
 // SECURITY (P0): the forgeable base64 `baalvion_trade_session` role cookie has been REMOVED.
 // The session is the httpOnly `refresh_token` cookie (set by trade-service) + the in-memory access
@@ -128,19 +129,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Session rehydration: on mount, ask the gateway who we are (httpOnly cookie). This keeps a
   // full page reload signed-in without any JS-readable token — the cookie is the source of truth.
   //
-  // Skipped entirely on the anonymous public properties. The shipping directory has no session by
-  // design, so asking is guaranteed to answer 401 — which reaches the browser as a console error on
-  // every page of a public reference site, and costs a round trip per navigation to learn nothing.
+  // Skipped on the anonymous public pages (the shipping directory and the marketing site): they
+  // have no session by design, so asking only produces a failed request per page view, which the
+  // browser reports as a console error. The check runs once, the first time the visitor is on a
+  // page that can use a session, so a signed-in user who lands on a marketing page and then opens
+  // the dashboard is still recognised.
+  const pathname = usePathname();
+  const rehydrationAttempted = useRef(false);
   useEffect(() => {
-    if (typeof window !== 'undefined' && isAnonymousProperty(window.location.pathname)) {
+    if (rehydrationAttempted.current) return;
+    const path = pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
+    if (skipsSessionRehydration(path)) {
       setAuthResolved(true);
       return;
     }
-    let cancelled = false;
+    rehydrationAttempted.current = true;
+    setAuthResolved(false);
     (async () => {
       try {
         const me = await authApi.me();
-        if (cancelled) return;
         if (me) {
           // An explicit grant made in the admin console wins; the org role is only the
           // fallback for principals who have none. Resolving from the FULL role set
@@ -156,10 +163,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setIsAuthenticated(true);
         }
       } catch { /* anonymous — stay logged out */ }
-      finally { if (!cancelled) setAuthResolved(true); }
+      finally { setAuthResolved(true); }
     })();
-    return () => { cancelled = true; };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (isDemoMode) {
