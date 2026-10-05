@@ -27,6 +27,12 @@ const SHIPPING_DIRECTORY_HOSTS = (process.env.SHIPPING_DIRECTORY_HOSTS || 'ships
   .map((h) => h.trim().toLowerCase())
   .filter(Boolean);
 
+/**
+ * Root-level metadata files (icon, favicon, manifest, social images). They live at the app
+ * root, not under the directory prefix, so rewriting them 404s on the directory host.
+ */
+const ROOT_METADATA_FILE = /^\/(icon\.svg|favicon\.ico|manifest\.webmanifest|(opengraph|twitter)-image(\.[a-z]+)?)$/;
+
 function isDirectoryHost(request: NextRequest): boolean {
   const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
   return host.length > 0 && SHIPPING_DIRECTORY_HOSTS.includes(host);
@@ -37,7 +43,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // Subdomain -> route group. Done before the auth gate because every directory route is
   // anonymous; rewriting after it would make the gate judge the pre-rewrite path.
-  if (isDirectoryHost(request) && !pathname.startsWith('/_next') && !pathname.startsWith('/api/')) {
+  if (
+    isDirectoryHost(request) &&
+    !pathname.startsWith('/_next') &&
+    !pathname.startsWith('/api/') &&
+    !ROOT_METADATA_FILE.test(pathname)
+  ) {
     if (pathname.startsWith(SHIPPING_DIRECTORY_PREFIX)) {
       // Canonical URL on this host omits the prefix; keep one address per page.
       const canonical = request.nextUrl.clone();
