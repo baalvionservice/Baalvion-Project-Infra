@@ -519,8 +519,8 @@ document.addEventListener('DOMContentLoaded', function(){
       var seen = {};
       body.querySelectorAll('a.imp-rel-card').forEach(function(a){ seen[a.getAttribute('href')] = 1; });
       var next = [];
-      document.querySelectorAll('a.p6-grid-card').forEach(function(a){
-         var h = a.getAttribute('href'), t = a.querySelector('.p6-card-title, h3'), im = a.querySelector('img');
+      document.querySelectorAll('a.p6-article-mini-item').forEach(function(a){
+         var h = a.getAttribute('href'), t = a.querySelector('.p6-mini-title, h4'), im = null;
          if(!h || !t || seen[h] || next.length >= 2) return;
          seen[h] = 1;
          next.push('<a class="p6-end-card" href="' + esc(h) + '">' + (im ? '<img src="' + esc(im.getAttribute('src')) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') + '<strong>' + esc(t.textContent.trim()) + '</strong></a>');
@@ -529,7 +529,6 @@ document.addEventListener('DOMContentLoaded', function(){
       var end = document.createElement('div');
       end.className = 'p6-endnav';
       end.innerHTML = '<h3>Found this useful?</h3><p class="p6-end-sub">Keep going with the next read, or send it to someone who needs it.</p>'
-         + (next.length ? '<span class="p6-end-label">Up next</span><div class="p6-end-next">' + next.join('') + '</div>' : '')
          + '<div class="p6-end-actions">'
          + '<a class="p6-end-btn" href="' + subUrl + '">&larr; More in ' + esc(subName) + '</a>'
          + '<button type="button" class="p6-end-btn p6-ghost" id="p6EndTop">&uarr; Back to top</button>'

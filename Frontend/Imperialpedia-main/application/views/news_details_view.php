@@ -531,35 +531,4 @@ body {
 <?php }; ?>
 
 <!-- Bottom Grid: Related Articles -->
-<section class="p6-grid-section">
-   <div class="container-fluid px-lg-5">
-      <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-2 border-dark">
-         <h2 style="font-family: var(--p6-font-headline) !important; font-weight: 800 !important; color: #0f172a !important; letter-spacing: -0.025em; font-size: 1.75rem; font-weight: 700; margin: 0;">
-            More Articles in <?php echo str_replace('-',' ',ucfirst($this->uri->segment(2)))?> News
-         </h2>
-         <span class="p6-meta-tag">CURATED STORIES</span>
-      </div>
-
-      <div class="row g-4">
-         <?php foreach($post as $pst){ if(isset($row) && $pst['post_id'] == $row['post_id']) continue;?>
-            <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'news/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
-                  <div class="p6-img-wrapper">
-                     <img loading="lazy" decoding="async" src="<?php echo base_url() ?>uploads/post/<?php echo !empty($pst['post_img']) ? $pst['post_img'] : 'post.png'; ?>" 
-                          onerror="this.onerror=null;this.src='<?php echo base_url() ?>assets/img/banner1.jpg';" 
-                          alt="<?php echo !empty($pst['post_alt_title']) ? $pst['post_alt_title'] : 'Post Image'; ?>">
-                  </div>
-                  <div class="p6-grid-body">
-                     <div class="p6-card-tag"><?php echo strtoupper(str_replace('-',' ',$this->uri->segment(2)));?> NEWS</div>
-                     <h3 class="p6-card-title"><?php echo ucfirst($pst['post_title']);?></h3>
-                     <div class="p6-card-footer">
-                        <span><i class="fa-regular fa-calendar-days me-1"></i> <?php echo date('M d, Y', strtotime(!empty($pst['posted_date']) ? $pst['posted_date'] : 'now')); ?></span>
-                        <span class="p6-read-btn">Read Article &rsaquo;</span>
-                     </div>
-                  </div>
-               </a>
-            </div>
-         <?php } ?>
-      </div>
-   </div>
-</section>
+<!-- The sibling articles are listed once, in the 'More Stories' column; a second grid of the same links was removed. -->
