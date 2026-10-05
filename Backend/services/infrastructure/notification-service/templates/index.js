@@ -348,7 +348,16 @@ for (const [name, tmpl] of Object.entries(TEMPLATES)) {
     };
 }
 
+// Transactional emails with a brand-themed variant. A brand without one (everything but
+// `community` today) falls through to the generic template below, unchanged.
+const THEMED_TRANSACTIONAL = { emailVerification: 'verify', passwordReset: 'reset' };
+
 function render(templateName, data) {
+    const themedKind = THEMED_TRANSACTIONAL[templateName];
+    if (themedKind && data && data.brand) {
+        const themed = premium.renderTransactional(themedKind, data.brand, data);
+        if (themed) return themed;
+    }
     if (PREMIUM_RENDERERS[templateName]) return PREMIUM_RENDERERS[templateName](data || {});
 
     const tmpl = compiled[templateName];

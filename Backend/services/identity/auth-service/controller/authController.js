@@ -228,6 +228,7 @@ exports.requestEmailOtp = async (req, res, next) => {
             lastName:     parsed.data.lastName,
             captchaToken: parsed.data.captchaToken,
             ipAddress:    req.ip,
+            brand:        brandFromRequest(req),
         });
         req.audit?.log('email_otp_requested', { metadata: { email: parsed.data.email } });
         sendSuccess(req, res, result);

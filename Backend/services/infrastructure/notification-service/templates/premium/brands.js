@@ -220,6 +220,23 @@ const BRANDS = {
     fontMono: MONO,
     logoMark: `<rect x="1" y="6" width="12" height="2.4" fill="white" opacity="0.9"/><rect x="1" y="2" width="8" height="2.4" fill="white" opacity="0.6"/><rect x="1" y="10" width="10" height="2.4" fill="white" opacity="0.45"/>`,
   },
+  // community.marketunderworld.com — the site registry's `community` id, distinct from the
+  // apex (Baalvion Insiders). Rendered by premium/ritual.js, not the white lifecycle shell.
+  community: {
+    folder: 'community',
+    brandName: 'Market Underworld',
+    tagline: 'Nightlife, locals and the marketplace',
+    domain: 'https://community.marketunderworld.com',
+    mode: 'dark',
+    theme: 'ritual',
+    accent: '#c1121f',
+    accentSoft: '#2a0d12',
+    headerBg: '#0a0506',
+    fontDisplay: SERIF_WARM,
+    fontBody: MONO,
+    fontMono: MONO,
+    logoMark: '',
+  },
 };
 
 module.exports = { BRANDS };

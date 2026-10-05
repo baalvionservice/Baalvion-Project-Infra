@@ -20,6 +20,9 @@ const HOST_BRAND = {
     'mining.baalvion.com': 'mining',
     'jobs.baalvion.com': 'jobs',
     'connect.baalvion.com': 'brand-connector',
+    // This app is its own site (registry id `community`), distinct from the apex, which is
+    // Baalvion Insiders. Exact hosts are looked up before the apex suffix, so this wins.
+    'community.marketunderworld.com': 'community',
     'canwemarry.com': 'canwemarry',
     'www.canwemarry.com': 'canwemarry',
 };

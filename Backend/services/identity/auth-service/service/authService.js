@@ -263,6 +263,7 @@ async function register({ email, password: plainPw, fullName, orgName, accountTy
         email:      user.email,
         verifyUrl:  `${frontendUrl}/verify-email?token=${verifyToken}`,
         expiresAt:  new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        brand,
     }).catch(() => {});
 
     return {
@@ -504,6 +505,7 @@ async function forgotPassword({ email, ipAddress }) {
         resetUrl,
         expiresAt: expires_at.toISOString(),
         ipAddress,
+        brand:     user.signup_brand || null,
     }).catch(() => {});
 
     // Direct SMTP fallback (runs if notification-service is unavailable)
@@ -603,6 +605,7 @@ async function resendVerification({ email, ipAddress, brand }) {
         email:     user.email,
         verifyUrl,
         expiresAt: expires_at.toISOString(),
+        brand:     brand || user.signup_brand || null,
     }).catch(() => {});
 
     await auditRepo.append({ userId: user.id, action: 'user.verification_resent', ipAddress });

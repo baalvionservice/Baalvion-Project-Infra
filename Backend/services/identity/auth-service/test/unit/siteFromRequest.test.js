@@ -26,6 +26,12 @@ describe('siteFromRequest', () => {
     expect(siteFromRequest(reqWith({ origin: 'https://www.lawelitenetwork.com' }))).toBe('law');
   });
 
+  it('treats community.marketunderworld.com as its own site, not the apex', () => {
+    expect(siteFromRequest(reqWith({ origin: 'https://community.marketunderworld.com' }))).toBe('community');
+    expect(brandFromRequest(reqWith({ origin: 'https://community.marketunderworld.com' }))).toBe('community');
+    expect(brandFromRequest(reqWith({ origin: 'https://marketunderworld.com' }))).toBe('marketunderworld');
+  });
+
   it('falls back to Referer when Origin is absent', () => {
     expect(siteFromRequest(reqWith({ referer: 'https://imperialpedia.com/some/article' }))).toBe('imperialpedia');
   });

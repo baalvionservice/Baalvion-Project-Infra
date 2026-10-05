@@ -374,6 +374,9 @@ const CONTENT = {
     ], hlH: 'Not seeing results yet?', hlP: 'Most members who stall haven\'t tried the inner circle strategies yet.', hlBtn: 'Request inner circle access' },
     reengagement: { h1: 'The signal\'s been quiet on your end.', p: 'Here\'s what\'s new since you were last active.', stats: [{ num: '18', lbl: 'New playbooks' }, { num: '9', lbl: 'Trending plays' }, { num: '1', lbl: 'Reason to come back' }], offerH: 'What\'s trending right now', offerP: 'The plays getting the most traction across the network this week.', offerBtn: 'See what\'s trending' },
   },
+
+  // Copy for `community` lives in premium/ritual.js; this entry only lets resolveBrand() find the brand.
+  community: { steps: [], resources: [] },
 };
 
 module.exports = { CONTENT };
