@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { requestEmailOtp, verifyEmailOtp, isApiError, type AuthUser } from '@/lib/auth-api';
 import { Turnstile, captchaEnabled } from './turnstile';
@@ -244,7 +245,7 @@ export function SignInForm() {
           {next ? (
             <a href={next} className={`${btnCls} inline-block no-underline`}>Continue</a>
           ) : (
-            <a href="/" className={`${btnCls} inline-block no-underline`}>Return to baalvion.com</a>
+            <Link href="/" className={`${btnCls} inline-block no-underline`}>Return to baalvion.com</Link>
           )}
         </div>
       )}
