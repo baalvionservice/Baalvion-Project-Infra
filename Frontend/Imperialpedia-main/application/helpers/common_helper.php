@@ -302,3 +302,20 @@ if (!function_exists('render_related_reading')) {
         return $html . $cards;
     }
 }
+
+if (!function_exists('sentence_excerpt')) {
+    // Plain-text summary made of whole sentences (never cut mid-sentence): up to $max characters, at least one sentence.
+    function sentence_excerpt($html, $max = 200) {
+        $t = trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string)$html), ENT_QUOTES, 'UTF-8')));
+        if (mb_strlen($t) <= $max) return $t;
+        $parts = preg_split('/(?<=[.!?])\s+(?=[A-Z0-9"\'])/u', $t);
+        $out = '';
+        foreach ($parts as $sent) {
+            if ($out !== '' && mb_strlen($out . ' ' . $sent) > $max) break;
+            $out = ($out === '') ? $sent : $out . ' ' . $sent;
+            if (mb_strlen($out) >= $max * 0.6) break;
+        }
+        return mb_strlen($out) > $max * 1.3 ? seo_excerpt($t, $max) : $out;
+    }
+}
+

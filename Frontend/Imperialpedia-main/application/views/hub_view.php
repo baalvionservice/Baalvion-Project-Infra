@@ -39,7 +39,7 @@ $guide_html = $sc ? preg_replace(array('/<h1\b/i', '/<\/h1>/i'), array('<h2', '<
 list($toc, $guide_html) = hub_headings($guide_html);
 // Short standfirst: the first paragraph of the guide.
 $stand = '';
-if (preg_match('/<p[^>]*>(.*?)<\/p>/is', $guide_html, $pm)) { $stand = seo_excerpt($pm[1], 230); }
+if (preg_match('/<p[^>]*>(.*?)<\/p>/is', $guide_html, $pm)) { $stand = sentence_excerpt($pm[1], 220); }
 
 $latest = !empty($posts) ? strtotime($posts[0]['post_updated'] ?: $posts[0]['posted_date']) : 0;
 $count = count($posts);
@@ -58,6 +58,8 @@ $count = count($posts);
 .hub-search i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.85rem; }
 .hub-search input { width:100%; padding:11px 14px 11px 38px; border:1px solid #cbd5e1; border-radius:999px; font-size:.95rem; outline:0; background:#fff; }
 .hub-search input:focus { border-color:var(--hub-accent); box-shadow:0 0 0 3px rgba(15,23,42,.06); }
+.hub-thumb{position:relative}.hub-new{position:absolute;left:14px;top:14px;z-index:2;font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#d00000;border-radius:999px;padding:4px 10px;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.hub-also{margin:10px 0 40px}
 .hub-pills { display:flex; flex-wrap:wrap; gap:8px; }
 .hub-pill { padding:8px 14px; border:1px solid #e2e8f0; border-radius:999px; background:#fff; color:#334155; font-size:.82rem; font-weight:700; text-decoration:none; }
 .hub-pill:hover { border-color:var(--hub-accent); color:var(--hub-accent); }
@@ -87,12 +89,15 @@ $count = count($posts);
 .hub-empty { padding:34px; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:14px; margin-bottom:40px; }
 .hub-guide-wrap { display:grid; grid-template-columns:260px minmax(0, 1fr); gap:30px; align-items:start; margin-bottom:56px; }
 .hub-guide-wrap.is-solo { display:block; max-width:none; }
-.hub-toc { position:sticky; top:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px; }
+.hub-toc { max-height:560px; overflow-y:auto; position:sticky; top:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px; }
 .hub-toc h3 { font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#475569; margin:0 0 10px; }
 .hub-toc a { display:block; padding:8px 10px; border-radius:8px; color:#334155; font-size:.9rem; line-height:1.4; text-decoration:none; font-weight:600; }
 .hub-toc a:hover { background:#fff; color:var(--hub-accent); }
 .hub-guide { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:34px 38px; font-size:1.05rem; line-height:1.85; color:#2c3e50; }
 .hub-guide h1 { display:none; }
+.hub-guide.p6-collapsed{max-height:520px;overflow:hidden;position:relative}
+.hub-guide.p6-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:140px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 85%);pointer-events:none}
+.hub-readmore{display:block;margin:12px auto 0;padding:12px 26px;border:1px solid #0f172a;border-radius:999px;background:#fff;color:#0f172a;font-weight:800;font-size:.92rem;cursor:pointer}
 .hub-guide h2 { font-size:1.5rem; font-weight:800; color:#0f172a; margin:2rem 0 .8rem; padding-left:14px; border-left:4px solid var(--hub-accent); line-height:1.3; }
 .hub-guide h2:first-of-type { margin-top:0; }
 .hub-guide h3 { font-size:1.2rem; font-weight:800; color:#0f172a; margin:1.6rem 0 .6rem; }
@@ -109,7 +114,7 @@ $count = count($posts);
    .hub-title { font-size:1.75rem; }
    .hub-stand { font-size:1rem; }
    .hub-grid { grid-template-columns:1fr; gap:14px; margin-bottom:34px; }
-   .hub-grid > .hub-card, .hub-grid > .hub-card.span-3, .hub-grid > .hub-card.span-6 { grid-column:auto; }
+   .hub-grid > .hub-card, .hub-grid > .hub-card.span-3, .hub-grid > .hub-card.span-6, .hub-grid > .hub-card.is-lead { grid-column:1 / -1; }
    .hub-card, .hub-card.is-lead, .hub-grid > .hub-card.span-6:not(.is-lead) { flex-direction:column; }
    .hub-grid > .hub-card.span-6:not(.is-lead) .hub-thumb { flex:none; min-height:0; aspect-ratio:16/9; }
    .hub-grid > .hub-card.span-6:not(.is-lead) .hub-body { padding:16px 18px 18px; }
@@ -305,15 +310,6 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
          <input type="search" id="hubFilter" placeholder="Search <?php echo (int)$count; ?> articles in <?php echo htmlspecialchars($sub_name); ?>" aria-label="Filter articles">
       </div>
       <?php } ?>
-      <?php if (!empty($get_subcat_list) && count($get_subcat_list) > 1) { ?>
-      <nav class="hub-pills" aria-label="More in <?php echo htmlspecialchars($cat_label); ?>">
-         <?php foreach ($get_subcat_list as $s) {
-            $slug = str_replace(' ', '-', $s['sub_cat_name']);
-            $on = ($s['sub_cat_name'] === $sc['sub_cat_name']); ?>
-            <a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(brand_name($s['sub_cat_name'])); ?></a>
-         <?php } ?>
-      </nav>
-      <?php } ?>
    </div>
 
    <?php if ($count === 0) { ?>
@@ -339,10 +335,10 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
          $img = !empty($p['post_img']) ? post_thumb($p['post_img'], $i === 0 && $count > 2 ? 900 : 640) : '';
          $author = post_author($p);
          $mins = post_read_minutes($p['post_desc']);
-         $ex = seo_excerpt($p['post_desc'], $i === 0 ? 220 : 130);
+         $ex = sentence_excerpt($p['post_desc'], $i === 0 ? 230 : 140);
       ?>
       <a class="hub-card<?php echo ($i === 0 && $count > 2) ? ' is-lead' : ''; echo $hub_span($i); ?>" href="<?php echo htmlspecialchars($url); ?>" data-title="<?php echo htmlspecialchars(strtolower($p['post_title'] . ' ' . $ex)); ?>">
-         <span class="hub-thumb"><?php if ($img !== '') { ?><img src="<?php echo htmlspecialchars($img); ?>" alt="" <?php echo $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?> onerror="this.parentNode.style.display='none'"><?php } ?></span>
+         <span class="hub-thumb"><?php if ($i === 0 && $count > 1) { ?><span class="hub-new">Newest</span><?php } ?><?php if ($img !== '') { ?><img src="<?php echo htmlspecialchars($img); ?>" alt="" <?php echo $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?> onerror="this.parentNode.style.display='none'"><?php } ?></span>
          <span class="hub-body">
             <span class="hub-tag"><?php echo htmlspecialchars($sub_name); ?></span>
             <h2><?php echo htmlspecialchars(ucfirst($p['post_title'])); ?></h2>
@@ -357,6 +353,19 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
       <?php } ?>
    </div>
    <p class="hub-empty" id="hubNone" style="display:none">No articles match that search.</p>
+   <?php } ?>
+   <?php if (!empty($get_subcat_list) && count($get_subcat_list) > 1) { ?>
+   <section class="hub-also"><h2 class="hub-section-title">Also in <?php echo htmlspecialchars($cat_label); ?></h2>
+      <?php if (!empty($get_subcat_list) && count($get_subcat_list) > 1) { ?>
+      <nav class="hub-pills" aria-label="More in <?php echo htmlspecialchars($cat_label); ?>">
+         <?php foreach ($get_subcat_list as $s) {
+            $slug = str_replace(' ', '-', $s['sub_cat_name']);
+            $on = ($s['sub_cat_name'] === $sc['sub_cat_name']); ?>
+            <?php if ($on) { continue; } ?><a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(brand_name($s['sub_cat_name'])); ?></a>
+         <?php } ?>
+      </nav>
+      <?php } ?>
+   </section>
    <?php } ?>
 
    <?php if (trim(strip_tags($guide_html)) !== '') { ?>
@@ -390,10 +399,10 @@ if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
       });
    }
    var guide = document.querySelector('.hub-guide');
-   if(guide && window.matchMedia('(max-width: 767.98px)').matches && guide.scrollHeight > 900){
+   if(guide && guide.scrollHeight > 760){
       guide.classList.add('p6-collapsed');
       var more = document.createElement('button');
-      more.type = 'button'; more.className = 'p6-readmore'; more.textContent = 'Read the full guide';
+      more.type = 'button'; more.className = 'hub-readmore'; more.textContent = 'Read the full guide';
       more.addEventListener('click', function(){
          var c = guide.classList.toggle('p6-collapsed');
          more.textContent = c ? 'Read the full guide' : 'Show less';
