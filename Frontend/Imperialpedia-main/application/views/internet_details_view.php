@@ -495,11 +495,23 @@ body {
                </div>
             <?php } ?>
 
+            <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'trade', 'row' => $row)); ?>
             <!-- Article Body -->
             <article class="p6-article-body">
                <?php echo render_related_reading($row['post_desc']);?>
-               <?php $this->load->view('includes/network_strip', array('row' => $row)); ?>
             </article>
+            <template id="imp-ad-inline"><?php $this->load->view('includes/network_ad', array('format' => 'rect', 'site' => 'ships', 'row' => $row)); ?></template>
+            <script>
+            (function(){
+               var t = document.getElementById('imp-ad-inline'), body = document.querySelector('.p6-article-body');
+               if(!t || !body || !t.content.firstElementChild) return;
+               var blocks = Array.prototype.filter.call(body.children, function(c){ return !c.matches('aside, .p6-endnav, .imp-ad, h2, h3'); });
+               if(blocks.length < 2) return;
+               var at = blocks[Math.min(blocks.length - 2, Math.max(1, Math.floor(blocks.length * 0.55)))];
+               at.insertAdjacentElement('afterend', t.content.firstElementChild);
+            })();
+            </script>
+            <?php $this->load->view('includes/network_ad', array('format' => 'leader', 'site' => 'baal', 'row' => $row)); ?>
             <?php $this->load->view('includes/author_box', array('row'=>$row)); ?>
             <?php $this->load->view('includes/comments_view'); ?>
          </div>
@@ -520,6 +532,7 @@ body {
                      <?php } ?>
                   </div>
                </div>
+               <?php $this->load->view('includes/network_ad', array('format' => 'sky', 'site' => 'signal', 'row' => $row)); ?>
             </div>
          </div>
 
