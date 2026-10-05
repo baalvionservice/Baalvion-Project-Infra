@@ -1,6 +1,10 @@
 RewriteEngine On
 RewriteBase /
 
+# /index.php is the same page as /: send it (and /index.php/anything) to the clean address with a 301.
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.php(?:/([^\s?]*))?(?:\?[^\s]*)?\sHTTP
+RewriteRule ^ /%1 [R=301,L,NE]
+
 # The web-story sub-app is not part of the live site (it has no database and only shows a PHP error): answer 410 Gone.
 RewriteRule ^web-story/?$ - [G,L]
 

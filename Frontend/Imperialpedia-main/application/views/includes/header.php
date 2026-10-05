@@ -18,6 +18,8 @@
             }
          }
 
+         // Google cuts descriptions at about 160 characters; keep stored ones to a clean sentence length.
+         if(mb_strlen($meta_desc) > 160){ $meta_desc = seo_excerpt($meta_desc, 157); }
          $page_uri = uri_string();
          if($meta_title === 'Imperialpedia Editorial & Tech Archive' && $page_uri !== ''){
             $label = brand_name(str_replace(array('-', '_'), ' ', basename($page_uri)));
