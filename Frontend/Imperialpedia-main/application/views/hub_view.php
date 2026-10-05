@@ -39,7 +39,7 @@ $guide_html = $sc ? preg_replace(array('/<h1\b/i', '/<\/h1>/i'), array('<h2', '<
 list($toc, $guide_html) = hub_headings($guide_html);
 // Short standfirst: the first paragraph of the guide.
 $stand = '';
-if (preg_match('/<p[^>]*>(.*?)<\/p>/is', $guide_html, $pm)) { $stand = sentence_excerpt($pm[1], 220); }
+if (preg_match_all('/<p[^>]*>(.*?)<\/p>/is', $guide_html, $pms)) { foreach ($pms[1] as $pt) { if (mb_strlen(trim(strip_tags($pt))) >= 40) { $stand = sentence_excerpt($pt, 220); break; } } }
 
 $latest = !empty($posts) ? strtotime($posts[0]['post_updated'] ?: $posts[0]['posted_date']) : 0;
 $count = count($posts);
