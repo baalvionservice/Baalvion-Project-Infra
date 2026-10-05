@@ -197,7 +197,9 @@
          <div class="col-lg-3 col-md-6">
             <div class="mb-3">
                <a href="<?php echo base_url(); ?>" class="text-decoration-none" aria-label="Imperialpedia home">
-                  <img src="<?php echo base_url(); ?>assets/img/footer-logo.png" alt="Imperialpedia" width="363" height="189" loading="lazy" decoding="async" style="width:180px;height:auto;display:block;margin:-18px 0 -22px -10px">
+                  <h3 style="font-size:1.8rem; font-weight:800; color:#fff; letter-spacing:-0.5px; margin:0;">
+                     IMPERIAL<span style="color:#d00000;">PEDIA</span>
+                  </h3>
                </a>
             </div>
             <p style="font-size:0.85rem; line-height:1.6; color:#94a3b8;">

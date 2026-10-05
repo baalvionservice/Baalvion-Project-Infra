@@ -192,7 +192,7 @@
             text-transform: uppercase;
             line-height: 1;
          }
-         .p6-brand-logo img { display:block; height:44px; width:auto; max-width:100%; }
+         .p6-brand-logo img { display:block; height:34px; width:auto; max-width:100%; }
          .p6-brand-logo span {
             color: var(--p6-red);
          }
@@ -587,7 +587,7 @@
             <div class="row align-items-center">
                <div class="col-md-4 col-6">
                   <a href="<?php echo base_url(); ?>" class="p6-brand-logo" aria-label="Imperialpedia home">
-                     <img src="<?php echo base_url(); ?>assets/img/brand-logo.png" alt="Imperialpedia" width="250" height="44" decoding="async" fetchpriority="high">
+                     <img src="<?php echo base_url(); ?>assets/img/imperialpedia-logo.svg" alt="Imperialpedia" width="302" height="34" decoding="async" fetchpriority="high">
                   </a>
                </div>
                <div class="col-md-8 col-6 text-end">
