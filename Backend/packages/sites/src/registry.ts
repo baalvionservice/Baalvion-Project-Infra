@@ -25,7 +25,8 @@ export const SITES: readonly Site[] = Object.freeze([
     // copyrightvideo.controlthemarket.com sits in the old admin registry but a 2026-07-12
     // audit confirmed it exists nowhere in the codebase, so subdomains own nothing here.
     apexOwnsSubdomains: false,
-    status: 'live',
+    // Owner confirmed 2026-10-05: not launched yet. The domain does not answer HTTP.
+    status: 'not_live',
     rails: ['razorpay', 'payu', 'bank_transfer'],
     railsBasis: 'confirmed',
     services: ['ctm-service', 'market-service'],
