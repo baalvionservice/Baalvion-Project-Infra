@@ -464,7 +464,7 @@ body {
       </div>
 
       <div class="row g-4">
-         <?php foreach($post as $pst){ if(isset($row) && $pst['post_id'] == $row['post_id']){continue;} ?>
+         <?php $shown_related = isset($row) ? related_reading_uris($row['post_desc']) : array(); foreach($post as $pst){ if(isset($row) && $pst['post_id'] == $row['post_id']){continue;} if(in_array($pst['uri'], $shown_related, true)){continue;} ?>
             <div class="col-xl-3 col-lg-4 col-md-6">
                <a href="<?php echo base_url();foreach($get_subcat_info as $subcat_info){echo 'seo/'.str_replace(' ','-',$subcat_info['sub_cat_name']);}; echo '/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-img-wrapper">

@@ -98,3 +98,17 @@ if (!function_exists('render_related_reading')) {
         }, $html);
     }
 }
+
+if (!function_exists('related_reading_uris')) {
+    // Post slugs already linked from the article's "Related reading" block, so the bottom grid can skip them.
+    function related_reading_uris($html) {
+        $out = array();
+        if (preg_match('#<p class="imp-related-reading">(.*?)</p>#s', (string)$html, $m) && preg_match_all('#<a [^>]*href="([^"]+)"#i', $m[1], $l)) {
+            foreach ($l[1] as $href) {
+                $out[] = basename(rtrim(parse_url($href, PHP_URL_PATH) ?: '', '/'));
+            }
+        }
+        return $out;
+    }
+}
+
