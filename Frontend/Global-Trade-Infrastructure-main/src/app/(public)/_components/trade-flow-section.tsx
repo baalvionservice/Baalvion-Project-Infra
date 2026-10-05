@@ -45,7 +45,7 @@ export function TradeFlowSection() {
             Every Stage. One System.
           </h2>
           <p className="text-lg text-slate-400 leading-relaxed">
-            Each stage below is a real, live workspace — sign in to see it running.
+            Each stage below is a workspace in the Baalvion trading platform, which is in active development. The reference data behind it (countries, ports, tariffs, trade agreements) is live today.
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
