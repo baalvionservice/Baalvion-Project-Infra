@@ -20,6 +20,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
   }
   const [searchQuery, setSearchQuery] = useState("");
   const [suburbFilter, setSuburbFilter] = useState("All");
+  const [visibleCount, setVisibleCount] = useState(24);
 
   const MAHARASHTRA_SUBURBS = ["All", "Andheri", "Bandra", "Santacruz", "Lower Parel", "Worli", "Dadar", "Juhu"];
 
@@ -125,7 +126,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
                   <h3 className="text-xl font-bold text-gray-700">No clubs found</h3>
                 </div>
               ) : (
-                filteredClubs.map((club) => (
+                filteredClubs.slice(0, visibleCount).map((club) => (
                   <div key={club.id} className="flex flex-col">
                     <Link href={`/clubs/venue/${club.id}`} className="relative h-56 w-full mb-4 group cursor-pointer overflow-hidden block">
                       <ClubPhoto
@@ -166,10 +167,16 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
                 ))
               )}
             </div>
+            {filteredClubs.length > visibleCount && (
+              <div className="pt-8 text-center">
+                <p className="text-xs text-gray-500 mb-3">Showing {visibleCount} of {filteredClubs.length} clubs</p>
+                <button onClick={() => setVisibleCount((n) => n + 24)} className="px-8 py-3 border border-gray-300 text-sm font-bold uppercase tracking-widest hover:border-[#ed6c2a] hover:text-[#ed6c2a] transition-colors">Show more clubs</button>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
-          <aside className="w-full lg:w-[320px] space-y-8">
+          <aside className="w-full lg:w-[320px] space-y-8 order-first lg:order-last">
             <div className="bg-white p-6 shadow-sm border border-gray-200">
               <h4 className="text-sm font-bold uppercase tracking-widest text-center border-b border-gray-100 pb-4 mb-4">
                 Search Clubs
@@ -183,14 +190,6 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
               />
             </div>
 
-            <div className="bg-white p-6 shadow-sm border border-gray-200 text-center">
-              <h4 className="text-sm font-bold uppercase tracking-widest border-b border-gray-100 pb-4 mb-4">
-                Sponsors
-              </h4>
-              <div className="w-full h-[250px] bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">
-                Advertisement Space
-              </div>
-            </div>
           </aside>
 
         </div>

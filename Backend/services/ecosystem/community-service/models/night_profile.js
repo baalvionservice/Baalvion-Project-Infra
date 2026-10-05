@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 // released one profile at a time to verified employers (see gigsService.revealContact).
 module.exports = (sequelize) => sequelize.define('NightProfile', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    user_id: { type: DataTypes.UUID, allowNull: false, unique: true },
+    user_id: { type: DataTypes.STRING(64), allowNull: false, unique: true },
     full_name: { type: DataTypes.STRING(120), allowNull: false },
     gender: { type: DataTypes.ENUM('Female', 'Male', 'Non-binary'), allowNull: false },
     age: { type: DataTypes.INTEGER, allowNull: false },
@@ -20,7 +20,7 @@ module.exports = (sequelize) => sequelize.define('NightProfile', {
     whatsapp: { type: DataTypes.STRING(32), allowNull: false },
     status: { type: DataTypes.ENUM('pending', 'verified', 'rejected'), allowNull: false, defaultValue: 'pending' },
     review_note: { type: DataTypes.STRING(500), allowNull: true },
-    reviewed_by: { type: DataTypes.UUID, allowNull: true },
+    reviewed_by: { type: DataTypes.STRING(64), allowNull: true },
     reviewed_at: { type: DataTypes.DATE, allowNull: true },
 }, {
     tableName: 'night_profiles',

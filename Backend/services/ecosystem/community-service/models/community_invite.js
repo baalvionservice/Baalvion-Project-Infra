@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('CommunityInvite', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     community_id: { type: DataTypes.UUID, allowNull: false },
-    invited_by_user_id: { type: DataTypes.UUID, allowNull: false },
+    invited_by_user_id: { type: DataTypes.STRING(64), allowNull: false },
     invited_email: { type: DataTypes.STRING(320), allowNull: true },
     token: { type: DataTypes.STRING(64), allowNull: false, unique: true },
     status: {

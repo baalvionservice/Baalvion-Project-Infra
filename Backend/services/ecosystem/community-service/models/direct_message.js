@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('DirectMessage', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     conversation_id: { type: DataTypes.UUID, allowNull: false },
-    sender_id: { type: DataTypes.UUID, allowNull: false },
+    sender_id: { type: DataTypes.STRING(64), allowNull: false },
     content: { type: DataTypes.TEXT, allowNull: false },
     read_at: { type: DataTypes.DATE, allowNull: true },
 }, {
