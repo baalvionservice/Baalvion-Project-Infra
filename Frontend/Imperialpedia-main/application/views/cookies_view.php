@@ -680,7 +680,12 @@ body {
       </div>
 
       <div class="row g-4">
-         <?php foreach($get_subcat_list as $gsl){ ?>
+         <?php
+            $current_services = array();
+            if(!empty($get_subcat_info)){ foreach($get_subcat_info as $cur){ $current_services[] = $cur['sub_cat_name']; } }
+            foreach($get_subcat_list as $gsl){
+               if(in_array($gsl['sub_cat_name'], $current_services, true)){ continue; }
+         ?>
             <div class="col-xl-3 col-lg-4 col-md-6">
                <a href="<?php echo base_url().'cookies/'.str_replace(' ','-',$gsl['sub_cat_name']);?>" class="p6-cookie-card">
                   <?php $gsl_img = !empty($gsl['sub_cat_image']) ? upload_image_url('subcategory', $gsl['sub_cat_image']) : (!empty($gsl['cat_image']) ? upload_image_url('category', $gsl['cat_image']) : ''); if($gsl_img !== ''){ ?>
