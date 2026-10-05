@@ -32,7 +32,7 @@ bad=0; for u in '' about author sitemap.xml editor/adobe insurance/india; do c=\
 docker stop imp-php-smoketest >/dev/null; rm -f /tmp/imp-smoke.env; exit \$bad" || { echo "Smoke test failed. Live NOT changed."; exit 1; }
 
 read -r -p "5/5 swap the new image into LIVE now? [y/N] " ans
-[ "$ans" = "y" ] || { echo "Stopped. Live NOT changed (image :new is built and waiting)."; exit 0; }
+case "$ans" in y|Y|yes|YES|Yes) ;; *) echo "Stopped. Live NOT changed (image :new is built and waiting)."; exit 0;; esac
 ssh -o BatchMode=yes $HOST "docker tag $IMAGE:new $IMAGE:local && cd /opt/baalvion/stack && docker compose -f docker-compose.data.yml -f docker-compose.app.yml -f docker-compose.caddytest.yml up -d --no-build --no-deps app-imperialpedia-php-web 2>&1 | tail -1"
 sleep 12
 for u in '' editor/adobe/adobe-after-effects sitemap.xml; do echo "  live /$u $(curl -s -o /dev/null -m 25 -w '%{http_code}' https://imperialpedia.com/$u)"; done
