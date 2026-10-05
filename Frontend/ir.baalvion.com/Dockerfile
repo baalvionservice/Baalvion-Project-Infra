@@ -8,14 +8,14 @@
 # built with if they differ from the production defaults in src/config.ts. Server-side URLs
 # (IR_SERVICE_URL, MARKETPLACE_SERVICE_URL, CMS_PUBLIC_URL, IR_INVEST_INVITES, ...) are runtime
 # variables and come from docker-compose, not from this file.
-FROM node:24-alpine AS base
+FROM node:26.9-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo down to this app and the workspace packages it uses.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune ir.baalvion.com --docker
+RUN pnpm dlx turbo@2.10.4 prune ir.baalvion.com --docker
 
 # 2) Install the pruned dependency set.
 FROM base AS installer
@@ -41,7 +41,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 # --env-mode=loose: turbo 2.x filters the task environment to what turbo.json declares, and
 # BUILD_STANDALONE is not declared there. Filtered, `output: 'standalone'` silently does not
 # apply and the runner stage fails on a missing .next/standalone several minutes later.
-RUN pnpm dlx turbo@2.9.14 run build --filter=ir.baalvion.com --env-mode=loose
+RUN pnpm dlx turbo@2.10.4 run build --filter=ir.baalvion.com --env-mode=loose
 
 # 4) Minimal runner.
 FROM base AS runner
