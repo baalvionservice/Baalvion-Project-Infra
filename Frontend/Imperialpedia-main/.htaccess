@@ -5,8 +5,8 @@ RewriteBase /
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.php(?:/([^\s?]*))?(?:\?[^\s]*)?\sHTTP
 RewriteRule ^ /%1 [R=301,L,NE]
 
-# The web-story sub-app is not part of the live site (it has no database and only shows a PHP error): answer 410 Gone.
-RewriteRule ^web-story/?$ - [G,L]
+# The old web-story mini-app was removed from the site: answer 410 Gone for it and anything under it.
+RewriteRule ^web-story(/|$) - [G,L]
 
 # Route all other requests through CodeIgniter front controller
 RewriteCond %{REQUEST_FILENAME} !-f

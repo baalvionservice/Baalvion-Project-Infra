@@ -1,3 +1,0 @@
-# Retired sub-app (no database on the live server, only shows a PHP error): answer 410 Gone for everything.
-RewriteEngine On
-RewriteRule ^ - [G,L]

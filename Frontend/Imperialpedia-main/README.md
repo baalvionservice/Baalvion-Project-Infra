@@ -48,18 +48,17 @@ Rollback: on the server retag `baalvion-legacy-imperialpedia-web:previous` as `:
 Every saved article or sub-category description is cleaned: fixed pixel sizes on pasted pictures removed, own-site links made relative, `<h1>` → `<h2>`, empty paragraphs collapsed. Posts need a sub-category that belongs to the chosen category, a cover image before publishing, and get a hyphenated slug. Covers are resized to ≤1200 px / ≤300 KB.
 
 ## Database changes
-`sql/migrations/NNN_*.sql` are numbered, written to be safe to run twice, and applied to **live by hand** (phpMyAdmin or `mysql < file`) after a backup. Numbering has a gap at 008 (a draft that was replaced by 009–012). 001–004 are the original schema/content syncs; 005–012 are the October 2026 cleanup. Older one-off content scripts are in `sql/archive/` and are history only — do not run them.
+`sql/migrations/NNN_*.sql` are numbered, written to be safe to run twice, and applied to **live by hand** (phpMyAdmin or `mysql < file`) after a backup. Numbering has a gap at 008 (a draft that was replaced by 009–012). 001–004 are the original schema/content syncs; 005–012 are the October 2026 cleanup. Old one-off content scripts and database dumps were deleted; they remain in git history.
 
 ## Repository map
 ```
 application/    controllers, models, views, helpers, config (CodeIgniter)
 assets/         css, js, fonts, img (imperialpedia-logo.svg is the header logo), vendor (bootstrap, jquery, fa)
 scripts/        sync-from-live, deploy-to-live, check-site, build-icon-subset
-sql/migrations/ numbered database changes      sql/archive/  old one-off scripts (history)
-docker/         local database bootstrap       archive/      old dumps and scripts (history)
-web-story/      retired sub-app, answers 410 (kept only so old links resolve cleanly)
-system/         CodeIgniter core (do not edit)  uploads/  images (gitignored; synced from live)
-MOVE_TO_APEX.md notes from moving legacy.imperialpedia.com to imperialpedia.com
+sql/migrations/ numbered database changes
+docker/         local database bootstrap
+system/         CodeIgniter core (do not edit); license.txt is its licence
+uploads/        images (gitignored; synced from live)
 ```
 
 ## Do not
