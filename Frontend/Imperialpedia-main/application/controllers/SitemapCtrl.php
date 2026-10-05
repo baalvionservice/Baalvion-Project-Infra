@@ -17,6 +17,46 @@ class SitemapCtrl extends CI_Controller{
         header('Content-Type: text/plain; charset=utf-8');
         echo "User-agent: *\nAllow: /\nDisallow: /imp-admin/\nDisallow: /login\nDisallow: /register\nDisallow: /user/\nDisallow: /forgot-password\n\n";
         echo 'Sitemap: ' . rtrim(base_url(), '/') . "/sitemap.xml\n";
+        echo 'Sitemap: ' . rtrim(base_url(), '/') . "/news-sitemap.xml\n";
+    }
+
+
+    // Google News sitemap: articles from the news section published in the last 2 days (Google ignores older ones).
+    // A news section post is either a row in `post` or a sub-category that is itself the article (no posts of its own).
+    public function news(){
+        $base = rtrim(base_url(), '/');
+        $slug = function($v){ return strtolower(str_replace(' ', '-', trim($v))); };
+        $since = date('Y-m-d H:i:s', time() - 2 * 86400);
+        $items = array();
+
+        $this->db->select('p.post_title, p.uri, p.posted_date, c.cat_name, s.sub_cat_name');
+        $this->db->from('post p')->join('category c', 'c.cat_id = p.cat_id')->join('sub_category s', 's.sub_cat_id = p.sub_cat_id');
+        $this->db->where('p.status', 'published')->where('c.cat_name', 'news')->where('p.posted_date >=', $since);
+        foreach($this->db->get()->result_array() as $r){
+            $items[] = array('loc' => $base . '/' . $slug($r['cat_name']) . '/' . $slug($r['sub_cat_name']) . '/' . $slug($r['uri']),
+                             'date' => $r['posted_date'], 'title' => ucfirst($r['post_title']));
+        }
+        $rows = $this->db->query("SELECT s.sub_cat_name, s.added_date, c.cat_name, m.meta_title,
+                (SELECT COUNT(*) FROM post p WHERE p.sub_cat_id = s.sub_cat_id AND p.status = 'published') AS n
+            FROM sub_category s JOIN category c ON c.cat_id = s.cat_id
+            LEFT JOIN meta m ON m.page_url = CONCAT(REPLACE(c.cat_name, ' ', '-'), '/', REPLACE(s.sub_cat_name, ' ', '-'))
+            WHERE c.cat_name = 'news' AND s.added_date >= ? AND CHAR_LENGTH(s.sub_cat_desc) > 200", array($since))->result_array();
+        foreach($rows as $r){
+            if((int)$r['n'] > 0){ continue; }
+            $items[] = array('loc' => $base . '/' . $slug($r['cat_name']) . '/' . $slug($r['sub_cat_name']),
+                             'date' => $r['added_date'], 'title' => !empty($r['meta_title']) ? $r['meta_title'] : ucwords($r['sub_cat_name']));
+        }
+
+        header('Content-Type: application/xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
+        foreach($items as $i){
+            echo "  <url>\n    <loc>" . htmlspecialchars($i['loc'], ENT_XML1 | ENT_QUOTES) . "</loc>\n    <news:news>\n";
+            echo "      <news:publication><news:name>Imperialpedia</news:name><news:language>en</news:language></news:publication>\n";
+            echo "      <news:publication_date>" . date('c', strtotime($i['date'])) . "</news:publication_date>\n";
+            echo "      <news:title>" . htmlspecialchars($i['title'], ENT_XML1 | ENT_QUOTES) . "</news:title>\n    </news:news>\n  </url>\n";
+        }
+        echo '</urlset>';
     }
 
     public function index(){
@@ -44,7 +84,7 @@ class SitemapCtrl extends CI_Controller{
         // sub_cat_desc article or at least one published post. Skips pages
         // with nothing behind them (e.g. news/usa) and orphaned subcategories
         // whose cat_id doesn't match a real category (can't build a valid URL).
-        $this->db->select('c.cat_name, s.sub_cat_name, CHAR_LENGTH(s.sub_cat_desc) AS desc_len, COUNT(p.post_id) AS post_count, MAX(p.post_updated) AS latest_post');
+        $this->db->select('c.cat_name, s.sub_cat_name, CHAR_LENGTH(s.sub_cat_desc) AS desc_len, COUNT(p.post_id) AS post_count, MAX(p.post_updated) AS latest_post, s.added_date AS sub_added');
         $this->db->from('sub_category s');
         $this->db->join('category c', 'c.cat_id = s.cat_id');
         $this->db->join('post p', 'p.sub_cat_id = s.sub_cat_id AND p.status = "published"', 'left');
@@ -58,7 +98,7 @@ class SitemapCtrl extends CI_Controller{
                 continue;
             }
             $loc = $base . '/' . $slug($sc['cat_name']) . '/' . $slug($sc['sub_cat_name']);
-            $urls[] = array('loc' => $loc, 'lastmod' => $sc['latest_post'], 'priority' => '0.7');
+            $urls[] = array('loc' => $loc, 'lastmod' => !empty($sc['latest_post']) ? $sc['latest_post'] : $sc['sub_added'], 'priority' => '0.7');
         }
 
         // Individual published posts.

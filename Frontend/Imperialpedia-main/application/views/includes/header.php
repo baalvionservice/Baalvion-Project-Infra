@@ -39,6 +39,21 @@
             if(!empty($pd['posted_date'])){ $pub_date = date('c', strtotime($pd['posted_date'])); }
             if(!empty($pd['post_updated'])){ $mod_date = date('c', strtotime($pd['post_updated'])); }
          }
+
+         // A sub-category with no separate posts is itself an article (see hub_view.php). Treat it like one for search.
+         $ld_is_article = !empty($post_details) && is_array($post_details);
+         $ld_sc = null;
+         if(!$ld_is_article && empty($post) && !empty($get_subcat_info[0]) && trim(strip_tags($get_subcat_info[0]['sub_cat_desc'])) !== ''){
+            $ld_sc = $get_subcat_info[0];
+            $ld_is_article = true;
+            $ci_h =& get_instance();
+            $ld_dates = $ci_h->db->select('added_date, updated_date')->get_where('sub_category', array('sub_cat_id' => (int)$ld_sc['sub_cat_id']))->row_array();
+            if(!empty($ld_dates['added_date'])){ $pub_date = date('c', strtotime($ld_dates['added_date'])); $mod_date = date('c', strtotime(!empty($ld_dates['updated_date']) ? $ld_dates['updated_date'] : $ld_dates['added_date'])); }
+            if(empty($meta_res['meta_desc'])){ $meta_desc = seo_excerpt($ld_sc['sub_cat_desc'], 155); }
+            if(!empty($ld_sc['sub_cat_image'])){ $meta_image = upload_image_url('subcategory', $ld_sc['sub_cat_image']); }
+            $ld_author_row = !empty($ld_sc['author_name']) ? $ci_h->db->query('SELECT * FROM author WHERE LOWER(name) = ? LIMIT 1', array(strtolower(trim($ld_sc['author_name']))))->row_array() : null;
+            if($ld_author_row){ $ld_author_row['url'] = base_url('author/' . $ld_author_row['slug']); }
+         }
       ?>
       <title><?php echo htmlspecialchars($meta_title); ?></title>
       <meta name="description" content="<?php echo htmlspecialchars($meta_desc); ?>" />
@@ -54,44 +69,45 @@
       <meta name="twitter:title" content="<?php echo htmlspecialchars($meta_title); ?>"/>
       <meta name="twitter:description" content="<?php echo htmlspecialchars($meta_desc); ?>"/>
       <meta name="twitter:image" content="<?php echo $meta_image; ?>"/>
-      <meta property="og:type" content="article"/>
+      <meta property="og:type" content="<?php echo $ld_is_article ? 'article' : 'website'; ?>"/>
       <meta property="og:description" content="<?php echo htmlspecialchars($meta_desc); ?>"/>
+      <?php if($ld_is_article){ ?>
       <meta property="article:published_time" content="<?php echo $pub_date; ?>"/>
       <meta property="article:modified_time" content="<?php echo $mod_date; ?>"/>
+      <meta property="article:section" content="<?php echo htmlspecialchars(ucwords(str_replace('-', ' ', $this->uri->segment(1)))); ?>"/>
+      <?php } ?>
       <link rel="icon" type="image/x-icon" href="<?php echo base_url() . 'assets/img/favicon.png'; ?>">
 
-      <!-- Google News & Discover Schema.org JSON-LD Structured Data -->
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "NewsArticle",
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": "<?php echo base_url().uri_string(); ?>"
-        },
-        "headline": <?php echo json_encode($meta_title); ?>,
-        "image": [
-          <?php echo json_encode($meta_image); ?>
-        ],
-        "datePublished": "<?php echo $pub_date; ?>",
-        "dateModified": "<?php echo $mod_date; ?>",
-        "author": <?php
-          $ld_author = !empty($pd) ? post_author($pd) : null;
-          echo $ld_author
-            ? json_encode(array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => $ld_author['url'], 'jobTitle' => $ld_author['title']), JSON_UNESCAPED_SLASHES)
-            : json_encode(array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()), JSON_UNESCAPED_SLASHES);
-        ?>,
-        "publisher": {
-          "@type": "Organization",
-          "name": "Imperialpedia",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "<?php echo base_url() . 'assets/img/brand-logo.png'; ?>"
-          }
-        },
-        "description": <?php echo json_encode($meta_desc); ?>
-      }
-      </script>
+      <?php if($ld_is_article){
+         $ld_author = !empty($pd) ? post_author($pd) : (!empty($ld_author_row) ? $ld_author_row : null);
+         $ld_kw = '';
+         if(!empty($ld_sc['tags'])){ $ld_kw = implode(', ', array_slice(array_filter(array_map('trim', explode(',', $ld_sc['tags']))), 0, 12)); }
+         $ld = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'NewsArticle',
+            'mainEntityOfPage' => array('@type' => 'WebPage', '@id' => rtrim(base_url() . uri_string(), '/')),
+            'headline' => mb_substr(html_entity_decode($meta_title), 0, 110),
+            'description' => $meta_desc,
+            'image' => array($meta_image),
+            'datePublished' => $pub_date,
+            'dateModified' => $mod_date,
+            'author' => $ld_author
+               ? array('@type' => 'Person', 'name' => $ld_author['name'], 'url' => (isset($ld_author['url']) ? $ld_author['url'] : base_url('author/' . $ld_author['slug'])), 'jobTitle' => isset($ld_author['title']) ? $ld_author['title'] : '')
+               : array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url()),
+            'publisher' => array('@type' => 'Organization', 'name' => 'Imperialpedia', 'url' => base_url(),
+               'logo' => array('@type' => 'ImageObject', 'url' => base_url('assets/img/publisher-logo.png'), 'width' => 600, 'height' => 60)),
+            'articleSection' => ucwords(str_replace('-', ' ', $this->uri->segment(1))),
+            'inLanguage' => 'en',
+            'isAccessibleForFree' => true,
+         );
+         if($ld_kw !== ''){ $ld['keywords'] = $ld_kw; }
+         echo '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+         $segs = array_values(array_filter(explode('/', uri_string())));
+         $crumbs = array('Home' => base_url());
+         if(count($segs) >= 1){ $crumbs[ucwords(str_replace('-', ' ', $segs[0]))] = base_url($segs[0] . (count($segs) > 1 ? '/' . $segs[1] : '')); }
+         $crumbs[mb_substr(html_entity_decode($meta_title), 0, 80)] = rtrim(base_url() . uri_string(), '/');
+         echo render_breadcrumb_schema($crumbs);
+      } ?>
       <?php echo render_website_schema('Imperialpedia', base_url()); ?>
       <?php echo render_organization_schema('Imperialpedia', base_url()); ?>
       <!-- Resource Hints & Critical Performance Preloading -->

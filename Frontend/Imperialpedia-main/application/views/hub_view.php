@@ -116,6 +116,111 @@ $count = count($posts);
 }
 </style>
 
+<?php
+// A sub-category with no separate articles is itself the article (for example a single news story).
+// Show it as a proper article page: headline, byline, share row, readable body, contents list, more from the section.
+if ($count === 0 && trim(strip_tags($guide_html)) !== '' && $sc) {
+   $CI =& get_instance();
+   $au = null;
+   if (!empty($sc['author_name'])) {
+      $au = $CI->db->query('SELECT * FROM author WHERE LOWER(name) = ? LIMIT 1', array(strtolower(trim($sc['author_name']))))->row_array();
+      if ($au) { $au['url'] = base_url('author/' . $au['slug']); $au['avatar_url'] = author_avatar_url($au['avatar'] ?? '', $au['name']); }
+   }
+   // The page query joins the category table, whose dates overwrite the sub-category's; read the real dates directly.
+   $dates = $CI->db->select('added_date, updated_date')->get_where('sub_category', array('sub_cat_id' => (int)$sc['sub_cat_id']))->row_array();
+   $pub = strtotime($dates['added_date']); $upd = !empty($dates['updated_date']) ? strtotime($dates['updated_date']) : 0;
+   $mins = max(1, (int)ceil(str_word_count(strip_tags($guide_html)) / 200));
+   $page_url = base_url(uri_string());
+   $others = array();
+   foreach ((array)$get_subcat_list as $o) { if ($o['sub_cat_id'] != $sc['sub_cat_id']) { $others[] = $o; } }
+   $hero = !empty($sc['sub_cat_image']) ? upload_image_url('subcategory', $sc['sub_cat_image']) : '';
+?>
+<style>
+.na-wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.na-head{padding:30px 0 6px}
+.na-title{font-family:var(--p6-font-headline,'Plus Jakarta Sans',system-ui,sans-serif);font-weight:800;font-size:clamp(1.8rem,3.6vw,2.9rem);line-height:1.14;letter-spacing:-.03em;color:#0f172a;margin:6px 0 14px;max-width:900px}
+.na-stand{font-size:1.15rem;line-height:1.6;color:#475569;max-width:780px;margin:0 0 20px}
+.na-by{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;padding:14px 0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
+.na-by-who{display:flex;align-items:center;gap:12px}
+.na-by-who img{width:44px;height:44px;border-radius:50%;object-fit:cover;aspect-ratio:1/1;flex:none}
+.na-by-who strong{display:block;font-size:.95rem;color:#0f172a;line-height:1.25}
+.na-by-who span{display:block;font-size:.78rem;color:#64748b}
+.na-by-meta{font-size:.84rem;font-weight:600;color:#64748b}
+.na-share{margin-left:auto;display:flex;gap:8px;align-items:center}
+.na-share span{font-size:.76rem;font-weight:700;color:#64748b;margin-right:2px}
+.na-share a,.na-share button{width:38px;height:38px;border-radius:50%;border:1px solid #cbd5e1;background:#fff;color:#0f172a !important;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;text-decoration:none !important;font-size:.95rem}
+.na-share a:hover,.na-share button:hover{background:#0f172a;color:#fff !important;border-color:#0f172a}
+.na-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:44px;padding:30px 0 20px;align-items:start}
+.na-hero{border-radius:14px;overflow:hidden;margin:0 0 24px}.na-hero img{display:block;width:100%;height:auto}
+.na-body{font-size:1.1rem;line-height:1.85;color:#1e293b;max-width:760px}
+.na-body h2{font-size:1.55rem;font-weight:800;color:#0f172a;margin:2.2rem 0 .8rem;line-height:1.3;letter-spacing:-.01em;scroll-margin-top:20px}
+.na-body h2:first-child{margin-top:0}
+.na-body h3{font-size:1.2rem;font-weight:800;margin:1.6rem 0 .6rem;color:#0f172a}
+.na-body p{margin:0 0 1.15rem}
+.na-body ul,.na-body ol{margin:0 0 1.2rem;padding-left:1.4rem}.na-body li{margin-bottom:.45rem}
+.na-body img{max-width:100% !important;height:auto !important;border-radius:10px}
+.na-body a{color:#b45309;text-decoration:underline;text-underline-offset:3px}
+.na-side{position:sticky;top:18px;display:flex;flex-direction:column;gap:18px}
+.na-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px}
+.na-box h3{font-size:.76rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#475569;margin:0 0 10px}
+.na-box a{display:block;padding:8px 10px;border-radius:8px;color:#334155;font-size:.9rem;line-height:1.4;font-weight:600;text-decoration:none}
+.na-box a:hover{background:#fff;color:var(--hub-accent)}
+.na-tags{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0}
+.na-tags span{font-size:.78rem;font-weight:700;color:#475569;background:#f1f5f9;border-radius:999px;padding:6px 12px}
+.na-more{padding:10px 0 50px}
+.na-more h2{font-size:1.3rem;font-weight:800;margin:0 0 14px}
+.na-more-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.na-more-card{display:block;padding:16px 18px;border:1px solid #e2e8f0;border-radius:12px;text-decoration:none;color:#0f172a;background:#fff;transition:all .15s ease}
+.na-more-card:hover{border-color:var(--hub-accent);box-shadow:0 10px 24px rgba(15,23,42,.1);transform:translateY(-2px);color:#0f172a}
+.na-more-card strong{display:block;font-size:1rem;margin-bottom:4px}.na-more-card span{font-size:.85rem;color:#64748b;line-height:1.5}
+@media (max-width:991.98px){.na-grid{grid-template-columns:1fr;gap:20px}.na-side{position:static;order:-1}}
+@media (max-width:767.98px){.na-wrap{padding:0 16px}.na-head{padding-top:20px}.na-stand{font-size:1.02rem}.na-body{font-size:1.02rem;line-height:1.75}.na-share{margin-left:0;width:100%}.na-body h2{font-size:1.3rem}.na-toc a:nth-child(n+6){display:none}.na-toc.is-open a:nth-child(n+6){display:block}}
+</style>
+<main class="na-wrap">
+   <header class="na-head">
+      <div class="hub-crumb"><span class="hub-chip"><?php echo htmlspecialchars(strtoupper($cat_label)); ?></span><span>&rsaquo;</span><span><?php echo htmlspecialchars(strtoupper($sub_name)); ?></span></div>
+      <h1 class="na-title"><?php echo htmlspecialchars($sub_name); ?></h1>
+      <?php if ($stand !== '') { ?><p class="na-stand"><?php echo htmlspecialchars($stand); ?></p><?php } ?>
+      <div class="na-by">
+         <div class="na-by-who">
+            <?php if ($au) { ?><img src="<?php echo htmlspecialchars($au['avatar_url']); ?>" alt="<?php echo htmlspecialchars($au['name']); ?>" width="44" height="44">
+            <span style="display:block"><strong><a href="<?php echo $au['url']; ?>" rel="author" style="color:inherit;text-decoration:none"><?php echo htmlspecialchars($au['name']); ?></a></strong><span><?php echo htmlspecialchars($au['title']); ?></span></span>
+            <?php } else { ?><span style="display:block"><strong>Imperialpedia editorial team</strong></span><?php } ?>
+         </div>
+         <div class="na-by-meta">Published <?php echo date('M j, Y', $pub); ?><?php if ($upd && date('Y-m-d', $upd) !== date('Y-m-d', $pub)) { ?> &bull; Updated <?php echo date('M j, Y', $upd); ?><?php } ?> &bull; <?php echo $mins; ?> min read</div>
+         <div class="na-share"><span>Share</span>
+            <a href="https://api.whatsapp.com/send?text=<?php echo rawurlencode($sub_name . ' ' . $page_url); ?>" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://twitter.com/intent/tweet?text=<?php echo rawurlencode($sub_name); ?>&amp;url=<?php echo rawurlencode($page_url); ?>" target="_blank" rel="noopener" aria-label="Share on X"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo rawurlencode($page_url); ?>" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <button type="button" onclick="navigator.clipboard&amp;&amp;navigator.clipboard.writeText(location.href);this.innerHTML='&amp;#10003;'" aria-label="Copy link"><i class="fa-solid fa-link"></i></button>
+         </div>
+      </div>
+   </header>
+   <div class="na-grid">
+      <article>
+         <?php if ($hero !== '') { ?><div class="na-hero"><img src="<?php echo htmlspecialchars($hero); ?>" alt="<?php echo htmlspecialchars($sub_name); ?>" width="1100" height="620" fetchpriority="high"></div><?php } ?>
+         <div class="na-body"><?php echo embed_social($guide_html); ?></div>
+         <?php if (!empty($sc['tags'])) { $tg = array_slice(array_filter(array_map('trim', explode(',', $sc['tags']))), 0, 8); if ($tg) { ?>
+         <div class="na-tags"><?php foreach ($tg as $t) { ?><span><?php echo htmlspecialchars($t); ?></span><?php } ?></div>
+         <?php } } ?>
+      </article>
+      <aside class="na-side">
+         <?php if (count($toc) > 1) { ?>
+         <div class="na-box"><h3>In this article</h3><div class="na-toc" id="naToc"><?php foreach ($toc as $t) { ?><a href="#<?php echo $t[0]; ?>"><?php echo htmlspecialchars(ucfirst($t[1])); ?></a><?php } ?></div>
+         <?php if (count($toc) > 5) { ?><button type="button" class="p6-toc-toggle" id="naTocBtn" style="display:none" onclick="var t=document.getElementById('naToc');this.textContent=t.classList.toggle('is-open')?'Show fewer':'Show all sections'">Show all sections</button><?php } ?></div>
+         <?php } ?>
+      </aside>
+   </div>
+   <?php if ($others) { ?>
+   <section class="na-more"><h2>More in <?php echo htmlspecialchars($cat_label); ?></h2>
+      <div class="na-more-grid"><?php foreach ($others as $o) { ?>
+         <a class="na-more-card" href="<?php echo base_url($cat_slug . '/' . str_replace(' ', '-', $o['sub_cat_name'])); ?>"><strong><?php echo htmlspecialchars(brand_name($o['sub_cat_name'])); ?></strong><span><?php echo htmlspecialchars(seo_excerpt($o['sub_cat_desc'], 110)); ?></span></a>
+      <?php } ?></div>
+   </section>
+   <?php } ?>
+</main>
+<script>(function(){var b=document.getElementById('naTocBtn');if(b&&window.matchMedia('(max-width:767.98px)').matches){b.style.display='block';}})();</script>
+<?php return; } ?>
 <header class="hub-head">
    <div class="container-fluid px-lg-5">
       <div class="hub-crumb">
