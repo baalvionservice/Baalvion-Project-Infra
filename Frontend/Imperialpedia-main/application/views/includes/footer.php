@@ -196,10 +196,8 @@
          <!-- Column 1: Brand & E-E-A-T Info -->
          <div class="col-lg-3 col-md-6">
             <div class="mb-3">
-               <a href="<?php echo base_url(); ?>" class="text-decoration-none">
-                  <h3 style="font-family:'Oswald',sans-serif; font-size:1.8rem; font-weight:700; color:#fff; letter-spacing:-0.5px;">
-                     IMPERIAL<span style="color:#d00000;">PEDIA</span>
-                  </h3>
+               <a href="<?php echo base_url(); ?>" class="text-decoration-none" aria-label="Imperialpedia home">
+                  <img src="<?php echo base_url(); ?>assets/img/footer-logo.png" alt="Imperialpedia" width="363" height="189" loading="lazy" decoding="async" style="width:180px;height:auto;display:block;margin:-18px 0 -22px -10px">
                </a>
             </div>
             <p style="font-size:0.85rem; line-height:1.6; color:#94a3b8;">
