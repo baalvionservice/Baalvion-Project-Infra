@@ -682,7 +682,7 @@ body {
       <div class="row g-4">
          <?php foreach($get_subcat_list as $gsl){ ?>
             <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url().'cookies/'.$gsl['sub_cat_name'];?>" class="p6-cookie-card">
+               <a href="<?php echo base_url().'cookies/'.str_replace(' ','-',$gsl['sub_cat_name']);?>" class="p6-cookie-card">
                   <?php $gsl_img = !empty($gsl['sub_cat_image']) ? 'uploads/subcategory/'.$gsl['sub_cat_image'] : (!empty($gsl['cat_image']) ? 'uploads/category/'.$gsl['cat_image'] : ''); if($gsl_img !== ''){ ?>
                   <img src="<?php echo base_url().htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars($gsl['sub_cat_name']); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
                   <?php } ?>
