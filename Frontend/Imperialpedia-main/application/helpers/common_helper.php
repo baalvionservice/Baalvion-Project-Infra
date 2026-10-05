@@ -112,3 +112,13 @@ if (!function_exists('related_reading_uris')) {
     }
 }
 
+if (!function_exists('upload_image_url')) {
+    // Full URL for a stored image name. Older rows hold a complete URL (Cloudinary), newer ones a file in uploads/<dir>/.
+    function upload_image_url($dir, $file) {
+        $file = trim((string)$file);
+        if ($file === '') return '';
+        if (preg_match('#^https?://#i', $file)) return $file;
+        return base_url('uploads/' . $dir . '/' . $file);
+    }
+}
+
