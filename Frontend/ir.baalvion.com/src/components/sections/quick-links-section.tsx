@@ -20,7 +20,6 @@ export default function QuickLinksSection() {
   // Returns & Payouts" promised a track record and a distribution history that a company
   // incorporated in March 2025 does not have; /investment-thesis was never a payouts page either.
   const quickLinks = [
-    { name: "Company Filings", href: "/financials" },
     { name: "Investment Thesis", href: "/investment-thesis" },
     { name: "Governance & Strategic Updates", href: "/governance/overview" },
   ];

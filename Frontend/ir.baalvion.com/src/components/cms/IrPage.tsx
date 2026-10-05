@@ -7,6 +7,9 @@ import { IR_FAQ } from '@/lib/ir-faq';
 
 const ORIGIN = AppConfig.baseUrl.replace(/\/$/, '');
 
+/** Routes whose first section already renders the page's <h1>. */
+const HAS_OWN_H1 = new Set(['/why-invest']);
+
 interface IrPageProps {
   slug: string;
 }
@@ -47,6 +50,7 @@ export default function IrPage({ slug }: IrPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
         />
       )}
+      {!HAS_OWN_H1.has(slug) && <h1 className="sr-only">{pageDef.title.split('|')[0].trim()}</h1>}
       <div className="animate-in fade-in duration-700">
         <PageRenderer page={pageDef} />
       </div>

@@ -17,7 +17,6 @@ export const GATED_PREFIXES = [
   "/auth",
   "/dashboard",
   "/capital-ops",
-  "/strategic-operator",
   "/onboarding",
   "/phase2",
   "/phase3",
@@ -36,7 +35,7 @@ export const isGatedPath = (path: string): boolean =>
  * them. `isInviteGated` is the same predicate the middleware enforces, imported rather than
  * restated so a route cannot end up gated but still advertised in the sitemap.
  */
-export const INVITE_GATED_PREFIXES = ["/invest", "/onboarding"] as const;
+export const INVITE_GATED_PREFIXES = ["/invest", "/onboarding", "/news-and-events", "/governance/committee-composition", "/market-opportunity", "/use-of-proceeds", "/financials"] as const;
 export const INVITE_OPEN_PATHS = ["/invest/list-your-business", "/onboarding/business"] as const;
 
 /** Everything that must stay out of the sitemap and out of the index, for either reason. */

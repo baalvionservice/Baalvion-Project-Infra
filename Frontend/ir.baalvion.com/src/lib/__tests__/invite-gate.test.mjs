@@ -85,10 +85,10 @@ test('constantTimeEquals rejects length mismatches and near-misses', () => {
 });
 
 test('the founder side is never gated, and the landing page stays reachable', () => {
-  for (const p of ['/invest', '/invest/deals', '/onboarding', '/onboarding/step-2']) {
+  for (const p of ['/invest', '/invest/deals', '/onboarding', '/onboarding/step-2', '/financials', '/use-of-proceeds', '/market-opportunity']) {
     assert.ok(isInviteGated(p), `${p} must be gated`);
   }
-  for (const p of ['/invest/list-your-business', '/onboarding/business', REQUEST_ACCESS_PATH, '/financials', '/']) {
+  for (const p of ['/invest/list-your-business', '/onboarding/business', REQUEST_ACCESS_PATH, '/']) {
     assert.ok(!isInviteGated(p), `${p} must stay open`);
   }
 });

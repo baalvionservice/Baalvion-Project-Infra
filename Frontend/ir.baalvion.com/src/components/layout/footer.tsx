@@ -25,8 +25,6 @@ const CORPORATE_URL = process.env.NEXT_PUBLIC_CORPORATE_URL || "https://baalvion
 // inventing them.
 const INVESTOR_LINKS = [
   { label: "IR HOME", href: "/" },
-  { label: "FINANCIALS", href: "/financials" },
-  { label: "NEWS & EVENTS", href: "/news-and-events/news" },
   { label: "GOVERNANCE", href: "/governance/overview" },
   { label: "RESOURCES", href: "/resources" },
 ];

@@ -85,7 +85,7 @@ export const IR_FAQ: IrFaqCategory[] = [
     items: [
       {
         q: "How large is the market Baalvion is addressing?",
-        a: "Global B2B trade flows exceed 13 trillion US dollars annually, and a persistent trade-finance gap of roughly 2.5 trillion US dollars leaves significant demand unmet each year. Approximately 80 percent of world trade still depends on fragmented, paper-heavy processes. These are external market estimates that describe the addressable opportunity we are building toward, not company results.",
+        a: "Global trade in goods and services reached about 35 trillion US dollars in 2025 (UNCTAD), and the trade-finance gap is about 2.5 trillion US dollars (Asian Development Bank, 2025). These are external, published figures describing the size of the ecosystem we operate in, not company results and not the revenue we expect to capture.",
       },
       {
         q: "Why is now the right time to build this infrastructure?",
@@ -97,7 +97,7 @@ export const IR_FAQ: IrFaqCategory[] = [
       },
       {
         q: "How should investors interpret the market figures in Baalvion's materials?",
-        a: "The headline figures — 13 trillion dollars in trade flows, a 2.5 trillion dollar finance gap and 80 percent paper-heavy processes — are external estimates of the total opportunity, not penetration assumptions or revenue forecasts. They frame the scale of the problem we are addressing rather than a claim on near-term capture. Investors should treat any forward-looking illustration as directional and subject to execution and market risk.",
+        a: "The headline figures — about 35 trillion dollars in annual trade and a 2.5 trillion dollar finance gap — are published external statistics (UNCTAD and the Asian Development Bank) about the whole market, not penetration assumptions or revenue forecasts. They frame the scale of the problem we are addressing rather than a claim on near-term capture. Investors should treat any forward-looking illustration as directional and subject to execution and market risk.",
       },
     ],
   },

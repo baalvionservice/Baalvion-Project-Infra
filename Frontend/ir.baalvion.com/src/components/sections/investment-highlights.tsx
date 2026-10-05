@@ -30,7 +30,7 @@ const HIGHLIGHTS: Highlight[] = [
     num: "01",
     title: "Massive, durable market",
     icon: Globe,
-    body: "Global B2B trade moves more than $13 trillion in goods and capital every year. That scale is structural, not cyclical — it is the foundation of the world economy and it is not going away.",
+    body: "Global trade in goods and services reached about $35 trillion in 2025, according to UNCTAD. That scale is structural, not cyclical — it is the foundation of the world economy and it is not going away.",
   },
   {
     num: "02",

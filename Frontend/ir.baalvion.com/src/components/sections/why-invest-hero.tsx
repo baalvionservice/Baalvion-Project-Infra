@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 // scale of the market, the AI-native technology moat, and the integrated
 // platform. Market figures are external estimates, not company results.
 const STAT_CHIPS = [
-  { value: "$13T+", label: "Annual global B2B trade flows", icon: Globe },
-  { value: "$2.5T", label: "Persistent trade-finance gap", icon: TrendingDown },
+  { value: "$35T", label: "Global trade in 2025 (UNCTAD)", icon: Globe },
+  { value: "$2.5T", label: "Trade-finance gap (ADB, 2025)", icon: TrendingDown },
   { value: "1", label: "Unified AI-native platform", icon: Network },
-  { value: "~80%", label: "Of world trade still un-digitised", icon: Layers },
+  { value: "~10%", label: "Gap as a share of global trade (ADB)", icon: Layers },
 ];
 
 export default function WhyInvestHero({ id }: { id: string }) {
@@ -23,7 +23,7 @@ export default function WhyInvestHero({ id }: { id: string }) {
 
           <h1 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight leading-[1.08]">
             An AI-native category leader building the rails of a{" "}
-            <span className="text-primary">$13 trillion</span> market.
+            <span className="text-primary">$35 trillion</span> trade ecosystem.
           </h1>
 
           <p className="mt-6 max-w-3xl text-lg text-white/70">

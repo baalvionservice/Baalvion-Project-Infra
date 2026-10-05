@@ -41,13 +41,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/governance/overview`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${baseUrl}/governance/board-of-directors`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${baseUrl}/governance/committee-composition`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/governance/ownership`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/strategic-operator`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${baseUrl}/governance/leadership`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${baseUrl}/governance/framework`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
   ];
 
   // News and Events — every published surface, not just the four that were listed.
   const newsEventsRoutes = [
-    "/news", "/press-releases", "/events", "/investor-day", "/webcast",
+    "/news", "/press-releases", "/events", "/webcast",
     "/filings", "/financial-reports", "/documents",
   ].map((seg) => ({
     url: `${baseUrl}/news-and-events${seg}`,

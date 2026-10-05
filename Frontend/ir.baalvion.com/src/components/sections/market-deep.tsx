@@ -2,30 +2,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layers, Sparkles, LineChart } from "lucide-react";
 
 // Market Opportunity (deep) — sizes the addressable opportunity with a
-// TAM/SAM/SOM frame and an illustrative adoption trajectory. Every figure is a
-// market estimate and management assumption, not company results.
+// sourced frame (global trade, financing gap, trade-finance revenue pool) and an
+// illustrative adoption trajectory. Every figure is a published third-party
+// estimate, not company results.
 
-const TAM_SAM_SOM = [
+const MARKET_TIERS = [
   {
-    tier: "TAM",
-    figure: "$13T+",
+    tier: "Global trade",
+    figure: "$35T",
     width: 100,
     opacity: 1,
-    definition: "Total annual global B2B trade flows — the full universe of goods, capital and documentation moving across borders.",
+    definition: "Goods and services traded across borders in 2025 — about $35 trillion, the first year above that level. Source: UNCTAD Global Trade Update, December 2025.",
   },
   {
-    tier: "SAM",
-    figure: "~$1.8T",
-    width: 14,
+    tier: "Trade-finance gap",
+    figure: "$2.5T",
+    width: 7,
     opacity: 0.7,
-    definition: "Digitally-addressable spend across trade software, embedded trade finance and compliance & automation.",
+    definition: "Financing requests from importers and exporters that go unmet each year — roughly 10% of global trade by ADB's estimate. Source: ADB Global Trade Finance Gap Survey, 2025.",
   },
   {
-    tier: "SOM",
-    figure: "~$40B",
-    width: 2,
+    tier: "Trade-finance revenue pool",
+    figure: "~$51B",
+    width: 1,
     opacity: 0.45,
-    definition: "Near-term serviceable obtainable market across Baalvion's priority corridors and products over a 3–5 year horizon.",
+    definition: "Annual revenue earned by providers of trade finance, about $50.6 billion in 2024. Source: Straits Research (commercial market estimate; treat as indicative).",
   },
 ];
 
@@ -73,11 +74,11 @@ export default function MarketDeepSection({ id }: { id: string }) {
             <h3 className="text-xl md:text-2xl font-bold tracking-tight">Sizing the opportunity</h3>
           </div>
           <p className="mt-3 max-w-2xl text-sm text-white/60">
-            From the full scale of global trade flows down to the market Baalvion can realistically serve in the near term.
+            From the size of global trade down to the revenue pool in trade finance. Each figure is published by the source named beneath it.
           </p>
 
           <div className="mt-10 space-y-8">
-            {TAM_SAM_SOM.map((t) => (
+            {MARKET_TIERS.map((t) => (
               <div key={t.tier}>
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="text-sm font-bold uppercase tracking-[0.2em] text-primary">{t.tier}</span>
@@ -94,7 +95,7 @@ export default function MarketDeepSection({ id }: { id: string }) {
             ))}
           </div>
           <p className="mt-8 text-xs text-white/40">
-            Bars are scaled relative to TAM and shown for illustration; the SOM sliver is widened to a minimum width for legibility.
+            Bars are drawn on a compressed scale for legibility and are not proportional to the figures. Baalvion has not published a serviceable-market or revenue-capture estimate.
           </p>
         </div>
 
@@ -165,7 +166,7 @@ export default function MarketDeepSection({ id }: { id: string }) {
         </div>
 
         <p className="mt-10 text-xs text-white/40">
-          TAM, SAM and SOM figures reflect external market estimates and management assumptions about the addressable opportunity. They are illustrative, do not represent company financial results, projections or guarantees, and should not be relied upon as such.
+          The figures above are published third-party estimates of the market Baalvion operates in. They are not company financial results, projections or guarantees, and do not represent revenue Baalvion expects to capture.
         </p>
       </div>
     </section>
