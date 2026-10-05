@@ -345,7 +345,7 @@ body {
                      <h4 class="fw-bold mb-0" style="color:var(--p6-cyan)"><i class="fa-solid fa-laptop-code me-1"></i> Top Tech Guides</h4>
                   </div>
                   <?php $i = 1; foreach($post as $pst1){ ?>
-                     <a href="<?php echo base_url().'internet/'.str_replace(' ','-',$pst1['uri']); ?>" class="d-flex gap-2 text-decoration-none text-dark py-2 border-bottom">
+                     <a href="<?php echo base_url().str_replace(' ','-',$pst1['cat_name']).'/'.str_replace(' ','-',$pst1['sub_cat_name']).'/'.str_replace(' ','-',$pst1['uri']); ?>" class="d-flex gap-2 text-decoration-none text-dark py-2 border-bottom">
                         <span class="fw-bold fs-5" style="color:var(--p6-cyan)">0<?php echo $i++; ?></span>
                         <div class="fw-bold small"><?php echo ucfirst($pst1['post_title']);?></div>
                      </a>
@@ -365,7 +365,7 @@ body {
       <div class="row g-4">
          <?php foreach($post as $pst){?>
             <div class="col-xl-3 col-lg-4 col-md-6">
-               <a href="<?php echo base_url().'internet/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
+               <a href="<?php echo base_url().str_replace(' ','-',$pst['cat_name']).'/'.str_replace(' ','-',$pst['sub_cat_name']).'/'.str_replace(' ','-',$pst['uri']); ?>" class="p6-grid-card">
                   <div class="p6-grid-body">
                      <span class="badge text-white w-auto me-auto mb-2" style="background:var(--p6-cyan)">TECH DESK</span>
                      <h4 class="fw-bold font-serif fs-6"><?php echo ucfirst($pst['post_title']);?></h4>

@@ -211,12 +211,10 @@
             <h4 class="p6-foot-col-title">Channels</h4>
             <ul class="p6-foot-links">
                <li><a href="<?php echo base_url(); ?>seo/web-seo"><i class="fa-solid fa-angle-right text-danger"></i> SEO & Algorithms</a></li>
-               <li><a href="<?php echo base_url(); ?>news/tech-news"><i class="fa-solid fa-angle-right text-danger"></i> Tech News</a></li>
                <li><a href="<?php echo base_url(); ?>insurance/health-insurance"><i class="fa-solid fa-angle-right text-danger"></i> Health Insurance</a></li>
                <li><a href="<?php echo base_url(); ?>marketing/digital-marketing"><i class="fa-solid fa-angle-right text-danger"></i> Digital Marketing</a></li>
                <li><a href="<?php echo base_url(); ?>internet/web-hosting"><i class="fa-solid fa-angle-right text-danger"></i> Cloud & Hosting</a></li>
                <li><a href="<?php echo base_url(); ?>attorney/immigration"><i class="fa-solid fa-angle-right text-danger"></i> Legal & Visa</a></li>
-               <li><a href="<?php echo base_url(); ?>online-education/degrees"><i class="fa-solid fa-angle-right text-danger"></i> Degrees & ROI</a></li>
             </ul>
          </div>
 

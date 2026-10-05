@@ -32,6 +32,32 @@ class PostsCtrl extends CI_Controller{
 		$this->output->set_output('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page removed - Imperialpedia</title></head><body style="font-family:sans-serif;max-width:560px;margin:15vh auto;padding:0 20px"><h1>This page has been removed</h1><p>The page you are looking for no longer exists. <a href="' . htmlspecialchars(base_url()) . '">Go to the Imperialpedia homepage</a>.</p></body></html>');
 	}
 
+	private function slugify($v){
+		return strtolower(str_replace(' ', '-', trim($v)));
+	}
+
+	// The one real URL for a post is /category/sub-category/post, the same shape the sitemap lists.
+	private function canonical_post_path($post){
+		$row = $this->db->select('c.cat_name, s.sub_cat_name')
+			->from('post p')
+			->join('category c', 'c.cat_id = p.cat_id')
+			->join('sub_category s', 's.sub_cat_id = p.sub_cat_id')
+			->where('p.post_id', $post['post_id'])
+			->get()->row_array();
+		if(empty($row)){
+			return null;
+		}
+		return $this->slugify($row['cat_name']) . '/' . $this->slugify($row['sub_cat_name']) . '/' . $this->slugify($post['uri']);
+	}
+
+	private function redirect_to_canonical($path){
+		if(trim(uri_string(), '/') === $path){
+			return false;
+		}
+		redirect(base_url($path), 'location', 301);
+		return true;
+	}
+
 	public function index(){ 
 		$this->load->view('includes/header'); 
 		$this->load->view('seo_view'); 
@@ -103,12 +129,29 @@ class PostsCtrl extends CI_Controller{
 				return;
 			}
 
+			if(!empty($data['get_subcat_info'])){
+				$on_own_category = false;
+				foreach($data['get_subcat_info'] as $sc){
+					if($this->slugify($sc['cat_name']) === $seg1){
+						$on_own_category = true;
+					}
+				}
+				if(!$on_own_category){
+					$first = $data['get_subcat_info'][0];
+					$this->redirect_to_canonical($this->slugify($first['cat_name']) . '/' . $this->slugify($first['sub_cat_name']));
+				}
+			}
+
 			if(empty($data['get_subcat_info'])){
 				$post_by_url = $this->Post_model->get_post_by_url($seg2);
 				if(empty($post_by_url)){
 					$post_by_url = $this->Post_model->get_post_by_url(str_replace('-',' ',$seg2));
 				}
 				if(!empty($post_by_url)){
+					$canonical = $this->canonical_post_path($post_by_url[0]);
+					if($canonical !== null){
+						$this->redirect_to_canonical($canonical);
+					}
 					$data['post_details'] = $post_by_url;
 					$this->load->view('includes/header', $data); 
 					if(file_exists(APPPATH.'views/'.$seg1.'_details_view.php')){
@@ -119,6 +162,12 @@ class PostsCtrl extends CI_Controller{
 					$this->load->view('includes/footer');  
 					return;
 				}
+			}
+
+			// Neither a sub-category nor a post: nothing real lives at this URL.
+			if(empty($data['get_subcat_info']) && empty($data['post'])){
+				$this->gone();
+				return;
 			}
 
 			// Unknown top-level section (e.g. a URL from the retired Next.js site): 410, not a template-load 500.
@@ -150,6 +199,14 @@ class PostsCtrl extends CI_Controller{
         $data['post_details'] = $this->Post_model->get_post_by_url($url);
         $data['comments'] = $this->Post_model->comm_list(uri_string());  
 		if(!empty($this->uri->segment(1))){ 
+			if(empty($data['post_details'])){
+				$this->gone();
+				return;
+			}
+			$canonical = $this->canonical_post_path($data['post_details'][0]);
+			if($canonical !== null){
+				$this->redirect_to_canonical($canonical);
+			}
 			if(!file_exists(APPPATH.'views/'.$this->uri->segment(1).'_details_view.php')){
 				$this->gone();
 				return;

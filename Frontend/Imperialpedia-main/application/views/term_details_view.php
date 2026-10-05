@@ -299,7 +299,7 @@
            <!-- section 3  related term --> 
            <h3 class="related-terms mt-4 mb-0">Related Terms</h3> 
                 <?php foreach($related_term as $rel_term){?> 
-                <h4 class="rel-terms"><a href="<?php echo base_url().'term/'.str_replace(' ','-',$rel_term['term_name']); ?>"><?php echo ucfirst($rel_term['term_name']); ?></a></h4> 
+                <h4 class="rel-terms"><a href="<?php echo base_url().'term/'.strtolower(substr($rel_term['term_name'],0,1)).'/'.str_replace(' ','-',$rel_term['term_name']); ?>"><?php echo ucfirst($rel_term['term_name']); ?></a></h4> 
                 <p class="rel-desc mb-3"> 
                 <?php   
                 $str=$rel_term['term_desc'];
@@ -310,7 +310,7 @@
 
                 ?> 
 
-                <a href="<?php echo base_url().'term/'.str_replace(' ','-',$rel_term['term_name']); ?>" class="read-mre">more</a></p>
+                <a href="<?php echo base_url().'term/'.strtolower(substr($rel_term['term_name'],0,1)).'/'.str_replace(' ','-',$rel_term['term_name']); ?>" class="read-mre">more</a></p>
 
                 <?php } ?>
 
