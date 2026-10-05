@@ -511,9 +511,9 @@ body {
             <div class="p6-breadcrumb">
                <span class="p6-meta-tag"><?php echo strtoupper($sc_info['cat_name']); ?></span>
                <span>&rsaquo;</span>
-               <span><?php echo strtoupper(str_replace('-',' ',$sc_info['sub_cat_name'])); ?> COOKIES</span>
+               <span><?php echo strtoupper(brand_name(str_replace('-',' ',$sc_info['sub_cat_name']))); ?> COOKIES</span>
             </div>
-            <h1 class="p6-main-title"><?php echo ucfirst($sc_info['sub_cat_name']); ?> Premium Cookies (Hourly Updated)</h1>
+            <h1 class="p6-main-title"><?php echo htmlspecialchars(brand_name($sc_info['sub_cat_name'])); ?> Premium Cookies (Hourly Updated)</h1>
             <div class="p6-meta-bar">
                <div class="p6-author-chip">
                   <?php if(!empty($sc_info['author_img'])){ ?>
@@ -524,8 +524,14 @@ body {
                   <span>By <strong><?php echo ucfirst($sc_info['author_name']); ?></strong></span>
                </div>
                <span>&bull;</span>
-               <span><i class="fa-regular fa-calendar-days me-1"></i> <?php echo date('F d, Y', strtotime($sc_info['added_date'])); ?></span>
+               <?php
+                  // Show when this service was last written about, not the year the section was created.
+                  $svc_dates = array();
+                  if(!empty($post)){ foreach($post as $pp){ $svc_dates[] = strtotime(!empty($pp['post_updated']) ? $pp['post_updated'] : $pp['posted_date']); } }
+                  if(!empty($svc_dates)){ ?>
+               <span><i class="fa-regular fa-calendar-days me-1"></i> Updated <?php echo date('F j, Y', max($svc_dates)); ?></span>
                <span>&bull;</span>
+               <?php } ?>
                <span><i class="fa-solid fa-shield-halved me-1"></i> 100% Working List</span>
             </div>
          </div>
@@ -689,10 +695,10 @@ body {
             <div class="col-6 col-md-4 col-xl-3">
                <a href="<?php echo base_url().'cookies/'.str_replace(' ','-',$gsl['sub_cat_name']);?>" class="p6-cookie-card">
                   <?php $gsl_img = !empty($gsl['sub_cat_image']) ? upload_image_url('subcategory', $gsl['sub_cat_image']) : (!empty($gsl['cat_image']) ? upload_image_url('category', $gsl['cat_image']) : ''); if($gsl_img !== ''){ ?>
-                  <img src="<?php echo htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars($gsl['sub_cat_name']); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
+                  <img src="<?php echo htmlspecialchars($gsl_img); ?>" alt="<?php echo htmlspecialchars(brand_name($gsl['sub_cat_name'])); ?>" loading="lazy" width="400" height="200" style="width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;display:block;">
                   <?php } ?>
                   <div class="p6-cookie-card-header">
-                     <div class="p6-cookie-card-title"><?php echo $gsl['sub_cat_name'];?></div>
+                     <div class="p6-cookie-card-title"><?php echo htmlspecialchars(brand_name($gsl['sub_cat_name']));?></div>
                      <div class="p6-cookie-card-sub">Session Cookies</div>
                   </div>
                   <div class="p6-cookie-card-body">

@@ -20,7 +20,7 @@
 
          $page_uri = uri_string();
          if($meta_title === 'Imperialpedia Editorial & Tech Archive' && $page_uri !== ''){
-            $label = ucwords(str_replace(array('-', '_'), ' ', basename($page_uri)));
+            $label = brand_name(str_replace(array('-', '_'), ' ', basename($page_uri)));
             $meta_title = $label . ' - Imperialpedia';
             $meta_desc = $label . ' on Imperialpedia: independent guides and analysis on marketing, SEO, insurance and technology.';
          }
@@ -598,7 +598,7 @@
                                  <ul class="list-unstyled">
                                     <li>
                                        <a href="<?php echo base_url(); ?><?php echo str_replace(' ','-',$cat_res['cat_name']).'/'. str_replace(' ','-',$subcat_res['sub_cat_name'])?>">
-                                          <i class="fa-solid fa-angle-right me-1 text-danger"></i> <?php echo ucfirst($subcat_res['sub_cat_name']);?>
+                                          <i class="fa-solid fa-angle-right me-1 text-danger"></i> <?php echo htmlspecialchars(brand_name($subcat_res['sub_cat_name']));?>
                                        </a>
                                     </li>
                                  </ul>

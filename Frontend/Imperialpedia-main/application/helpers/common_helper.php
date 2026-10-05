@@ -122,3 +122,12 @@ if (!function_exists('upload_image_url')) {
     }
 }
 
+if (!function_exists('brand_name')) {
+    // Display name for a sub-category. A few keep an old spelling in their URL, so the real brand name is shown instead.
+    function brand_name($name) {
+        static $map = array('envanto' => 'Envato', 'grammerly' => 'Grammarly', 'quillbot' => 'QuillBot', 'amazon prime' => 'Amazon Prime Video', 'hotstar' => 'Disney+ Hotstar');
+        $key = strtolower(trim((string)$name));
+        return isset($map[$key]) ? $map[$key] : ucwords($name);
+    }
+}
+

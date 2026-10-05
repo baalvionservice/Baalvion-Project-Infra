@@ -29,9 +29,7 @@
     <?php foreach($services as $svc){
       $slug = str_replace(' ', '-', $svc['sub_cat_name']);
       $n = (int)$svc['article_count'];
-      // The sub-category names double as URLs, so a few keep their old spelling there; show the real brand names.
-      $brand = array('envanto' => 'Envato', 'grammerly' => 'Grammarly', 'quillbot' => 'QuillBot', 'amazon prime' => 'Amazon Prime Video');
-      $label = isset($brand[$svc['sub_cat_name']]) ? $brand[$svc['sub_cat_name']] : ucwords($svc['sub_cat_name']);
+      $label = brand_name($svc['sub_cat_name']);
     ?>
       <a class="ckl-card" href="<?php echo base_url('cookies/' . $slug); ?>">
         <h2 class="ckl-name"><?php echo htmlspecialchars($label); ?></h2>

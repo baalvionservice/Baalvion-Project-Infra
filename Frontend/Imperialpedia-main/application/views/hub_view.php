@@ -32,8 +32,7 @@ $accents = array(
 );
 $cat_label = isset($labels[$cat_slug]) ? $labels[$cat_slug] : ucwords(str_replace('-', ' ', $cat_slug));
 $accent = isset($accents[$cat_slug]) ? $accents[$cat_slug] : '#0f172a';
-$brands = array('envanto' => 'Envato', 'grammerly' => 'Grammarly', 'quillbot' => 'QuillBot', 'amazon prime' => 'Amazon Prime Video');
-$sub_name = $sc ? (isset($brands[$sc['sub_cat_name']]) ? $brands[$sc['sub_cat_name']] : ucwords($sc['sub_cat_name'])) : '';
+$sub_name = $sc ? brand_name($sc['sub_cat_name']) : '';
 $sub_slug = $sc ? str_replace(' ', '-', $sc['sub_cat_name']) : '';
 
 $guide_html = $sc ? preg_replace(array('/<h1\b/i', '/<\/h1>/i'), array('<h2', '</h2>'), $sc['sub_cat_desc']) : '';   // the page's own h1 is the title above
@@ -147,7 +146,7 @@ $count = count($posts);
          <?php foreach ($get_subcat_list as $s) {
             $slug = str_replace(' ', '-', $s['sub_cat_name']);
             $on = ($s['sub_cat_name'] === $sc['sub_cat_name']); ?>
-            <a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(isset($brands[$s['sub_cat_name']]) ? $brands[$s['sub_cat_name']] : ucwords($s['sub_cat_name'])); ?></a>
+            <a class="hub-pill<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo base_url($cat_slug . '/' . $slug); ?>"><?php echo htmlspecialchars(brand_name($s['sub_cat_name'])); ?></a>
          <?php } ?>
       </nav>
       <?php } ?>
