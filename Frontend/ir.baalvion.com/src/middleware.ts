@@ -129,5 +129,11 @@ export const config = {
     '/invest/:path*',
     '/onboarding',
     '/onboarding/:path*',
+    // Held pages (see GATED in lib/invite-gate.ts). The matcher must list them or the gate never runs.
+    '/financials',
+    '/use-of-proceeds',
+    '/market-opportunity',
+    '/news-and-events/:path*',
+    '/governance/committee-composition',
   ],
 };

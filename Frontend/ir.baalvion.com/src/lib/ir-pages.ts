@@ -46,11 +46,11 @@ export const IR_PAGES: PageDefinition[] = [
   page(
     '/why-invest',
     'Why Invest in Baalvion',
-    'Thirteen reasons to invest in Baalvion — an AI-native operating system for global B2B trade, addressing a $13 trillion market across logistics, trade finance and compliance.',
+    'Thirteen reasons to invest in Baalvion — an AI-native operating system for global B2B trade, operating within a $35 trillion global trade ecosystem across logistics, trade finance and compliance.',
     {
       title: 'Why Invest in Baalvion | AI-Native Global Trade Infrastructure',
       description:
-        'Discover why Baalvion is a category-defining investment: a $13T market, a proprietary AI technology moat, integrated platform economics, network effects and multiple revenue streams. Information for qualified and institutional investors.',
+        'Discover why Baalvion is a category-defining investment: a $35T global trade ecosystem, a technology-led platform, integrated platform economics, network effects and multiple revenue streams. Information for qualified and institutional investors.',
       keywords: [
         'why invest in Baalvion', 'AI startup investment', 'trade infrastructure investment',
         'B2B fintech investment', 'AI technology company', 'venture capital opportunity',
@@ -66,7 +66,7 @@ export const IR_PAGES: PageDefinition[] = [
     {
       title: 'Investment Thesis | Baalvion AI Trade Infrastructure',
       description:
-        'The complete investment thesis for Baalvion: the structural problem in global trade, our AI-native solution, the $13T market, why now is the inflection point, and the path to durable, compounding value.',
+        'The complete investment thesis for Baalvion: the structural problem in global trade, our AI-native solution, the $35T trade ecosystem, why now is the inflection point, and the path to durable, compounding value.',
       keywords: [
         'Baalvion investment thesis', 'AI investment thesis', 'trade finance startup', 'B2B platform thesis',
         'technology moat', 'network effects', 'scalable SaaS', 'venture thesis', 'fintech infrastructure',
@@ -77,11 +77,11 @@ export const IR_PAGES: PageDefinition[] = [
   page(
     '/market-opportunity',
     'Market Opportunity',
-    'Baalvion market opportunity — TAM, SAM and SOM across the $13 trillion global B2B trade market, with industry trends, the AI opportunity and technology-adoption forecasts.',
+    'Baalvion market opportunity — the $35 trillion global trade ecosystem and the $2.5 trillion trade-finance gap, with sources, industry trends and the AI opportunity.',
     {
-      title: 'Market Opportunity (TAM, SAM, SOM) | Baalvion',
+      title: 'Market Opportunity | Baalvion',
       description:
-        'A generational, AI-addressable market: $13T+ in annual B2B trade flows, a $2.5T trade-finance gap and ~80% still un-digitised. Explore Baalvion’s TAM, SAM, SOM, industry trends and AI market opportunity.',
+        'The market Baalvion operates in: about $35T of annual global trade (UNCTAD) and a $2.5T trade-finance gap (ADB). Sources, industry trends and the AI opportunity.',
       keywords: [
         'global trade market size', 'TAM SAM SOM', 'B2B trade market opportunity', 'AI market opportunity',
         'trade finance gap', 'digital trade adoption', 'fintech market size', 'logistics market', 'addressable market',
