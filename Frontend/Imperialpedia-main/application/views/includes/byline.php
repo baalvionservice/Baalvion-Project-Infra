@@ -5,7 +5,7 @@ $date = !empty($row['post_updated']) ? $row['post_updated'] : $row['posted_date'
 ?>
 <div class="d-flex align-items-center gap-3">
    <?php if($au){ ?>
-      <img src="<?php echo htmlspecialchars($au['avatar_url']); ?>" alt="<?php echo htmlspecialchars($au['name']); ?>" width="42" height="42" class="rounded-circle flex-shrink-0" style="object-fit:cover;">
+      <img src="<?php echo htmlspecialchars($au['avatar_url']); ?>" alt="<?php echo htmlspecialchars($au['name']); ?>" width="42" height="42" class="rounded-circle flex-shrink-0" style="width:42px;height:42px;min-width:42px;aspect-ratio:1/1;object-fit:cover;">
    <?php } ?>
    <div>
       <?php if($au){ ?>

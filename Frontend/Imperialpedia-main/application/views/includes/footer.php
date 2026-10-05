@@ -394,6 +394,10 @@ footer,.p6-grid-section,section.py-5.bg-white{content-visibility:auto;contain-in
 .p6-article-body > *:nth-child(n+9){content-visibility:auto;contain-intrinsic-size:auto 180px}
 /* Pictures pasted from the editor carry fixed pixel sizes (e.g. 1200x675); keep their proportions at any width */
 .p6-content-box img,.p6-article-body img,.hub-guide img{max-width:100% !important;height:auto !important}
+/* Round avatars stay perfect circles: fixed square box, picture cropped to fill it */
+img.rounded-circle,img.p6-author-avatar,img.p6-author-avatar-sm,img.author-avatar,img[class*="avatar"]{aspect-ratio:1/1;object-fit:cover;object-position:center top;flex-shrink:0}
+img.rounded-circle[width="42"]{width:42px !important;height:42px !important}
+img.rounded-circle[width="56"]{width:56px !important;height:56px !important}
 /* Phones: short table of contents and tighter reading text on every section page */
 .p6-toc-toggle{display:none}
 @media (max-width: 767.98px){
