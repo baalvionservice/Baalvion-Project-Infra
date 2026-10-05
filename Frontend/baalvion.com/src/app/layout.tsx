@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { SITE, EXTERNAL, NETWORK, CONTACT } from '@/lib/content';
 import { fraunces, interTight, plexMono } from './fonts';
 import { Substrate } from '@/components/structure/substrate';
+import { INCORPORATED_ON, LEGAL_ENTITY_NAME } from '@baalvion/company';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import './globals.css';
 
@@ -43,12 +44,17 @@ const organizationSchema = {
   description: SITE.description,
   logo: `${SITE.url}/icon.svg`,
   slogan: SITE.tagline,
-  foundingDate: '2026',
+  legalName: LEGAL_ENTITY_NAME,
+  foundingDate: INCORPORATED_ON,
+  founder: [
+    { '@type': 'Person', name: 'Deepak Kumar Kuldeep', alternateName: 'Allen Krewzz' },
+    { '@type': 'Person', name: 'Dilip Kumar Kuldeep' },
+  ],
   areaServed: CONTACT.regions,
   sameAs: [
     EXTERNAL.about,
     EXTERNAL.ir,
-    ...NETWORK.groups.flatMap((g) => g.entries.map((e) => e.href)),
+    ...NETWORK.groups.flatMap((g) => g.entries.filter((e) => e.live !== false).map((e) => e.href)),
   ],
 };
 

@@ -39,11 +39,8 @@ export const SEARCH_INDEX: SearchEntry[] = [
   { title: 'Acceptable Use Policy', description: 'What is and isn’t permitted on Baalvion platforms.', href: ROUTES.acceptableUse },
   { title: 'Data Protection', description: 'Data protection commitments and practices.', href: ROUTES.dataProtection },
   { title: 'Global Trade', description: 'Cross-border trade infrastructure and settlement.', href: 'https://trade.baalvion.com', external: true },
-  { title: 'Mining & Resources', description: 'Resource and commodity operations infrastructure.', href: 'https://mining.baalvion.com', external: true },
   { title: 'Markets', description: 'Financial and market systems at institutional tolerance.', href: 'https://market.baalvion.com', external: true },
   { title: 'Talent', description: 'The connective layer for institutional talent.', href: EXTERNAL.talent, external: true },
-  { title: 'Connect', description: 'Where institutions and counterparties transact.', href: 'https://connect.baalvion.com', external: true },
-  { title: 'Enterprise Access', description: 'The operator’s command surface across the stack.', href: 'https://dashboard.baalvion.com', external: true },
   { title: 'About Baalvion — institutional record', description: 'The full institutional record, at about.baalvion.com.', href: EXTERNAL.about, external: true },
   { title: 'Investor Relations — full thesis', description: 'The long-horizon investment thesis, at ir.baalvion.com.', href: EXTERNAL.ir, external: true },
 ];

@@ -463,7 +463,42 @@ export const INVESTORS_PAGE = {
     'Capital, ownership, and decisions held for continuity: the foundation is structured so that patience compounds rather than erodes.',
   ],
   cta: { label: 'Read the long-horizon thesis', href: 'https://ir.baalvion.com' },
-  ctaSecondary: { label: 'Investor enquiries', href: 'mailto:hello@baalvion.com' },
+  ctaSecondary: { label: 'Request investor access', href: 'https://ir.baalvion.com/invest/request-access' },
+} as const;
+
+/** Facts from the incorporation record (@baalvion/company) and the board; nothing here is projected. */
+export const COMPANY_FACTS = {
+  caption: 'The company',
+  title: 'Digital infrastructure for global trade.',
+  story: [
+    'Moving goods across borders takes verified businesses, logistics, documentation, compliance, and physical infrastructure, and today those pieces are fragmented across separate parties and paperwork.',
+    'Baalvion is building the trusted layer that connects them: a platform where verified businesses, logistics partners, and the documentation and compliance each shipment needs sit in one digital workflow.',
+    'Revenue comes from transactions and services on the platform. As the network grows, the same infrastructure is designed to extend into payments, financing, insurance, data, and compliance.',
+  ],
+  directors: ['Deepak Kumar Kuldeep (publicly known as Allen Krewzz)', 'Dilip Kumar Kuldeep'],
+} as const;
+
+/** Properties confirmed answering HTTP 200 on 2026-10-05. Keep in step with @baalvion/sites. */
+export const BUILT_PROPERTIES = {
+  caption: 'What is online',
+  title: 'Fourteen sites, online today.',
+  lede: 'Each of these is a deployed site on its own domain. Where a product is still being built behind its public pages, it says so.',
+  items: [
+    { name: 'Global Trade Infrastructure', host: 'trade.baalvion.com', note: 'Public site and trade reference data are live. The trading platform behind sign-in is in development.' },
+    { name: 'World Shipping Directory', host: 'ships.baalvion.com' },
+    { name: 'Baalvion Insiders', host: 'www.marketunderworld.com' },
+    { name: 'Baalvion Communities', host: 'community.marketunderworld.com' },
+    { name: 'Baalvion Intelligence', host: 'signal.baalvion.com' },
+    { name: 'Imperialpedia', host: 'imperialpedia.com' },
+    { name: 'Law Elite Network', host: 'lawelitenetwork.com' },
+    { name: 'TalentOS', host: 'jobs.baalvion.com' },
+    { name: 'CanWeMarry', host: 'canwemarry.baalvion.com' },
+    { name: 'Proxy BaalvionStack', host: 'proxy.baalvionstack.com' },
+    { name: 'Amarisé Maison Avenue', host: 'www.amarisemaisonavenue.com' },
+    { name: 'Investor Relations', host: 'ir.baalvion.com' },
+    { name: 'About Baalvion', host: 'about.baalvion.com' },
+    { name: 'Baalvion', host: 'baalvion.com' },
+  ],
 } as const;
 
 /* ─────────────────────────── Careers ─────────────────────────── */
