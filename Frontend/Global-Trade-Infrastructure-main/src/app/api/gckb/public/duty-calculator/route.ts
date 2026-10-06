@@ -8,6 +8,7 @@
 import { z } from 'zod';
 import { ok, toErrorResponse, rateLimit } from '@/server/http/api';
 import { estimateDuty } from '@/server/gckb/duty-calculator';
+import { hasPublishedTariffData } from '@/server/gckb/public-read';
 
 export const runtime = 'nodejs';
 
@@ -31,6 +32,14 @@ export async function POST(req: Request) {
   try {
     rateLimit(`duty-calc:${clientIp(req)}`, 60, 60_000);
     const body = bodySchema.parse(await req.json());
+    // With no tariff schedule published, an estimate would come back as "0 duty", which is
+    // wrong rather than empty. Refuse until real rates exist.
+    if (!(await hasPublishedTariffData())) {
+      return Response.json(
+        { success: false, data: null, error: 'Duty estimates are not available yet: tariff rates have not been published.' },
+        { status: 503 },
+      );
+    }
     const estimate = await estimateDuty(body);
     return ok(estimate);
   } catch (err) {

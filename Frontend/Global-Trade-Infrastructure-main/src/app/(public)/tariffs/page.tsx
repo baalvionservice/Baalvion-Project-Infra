@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calculator } from 'lucide-react';
 import { pageMetadata, breadcrumbJsonLd, jsonLdScriptProps } from '@/lib/seo';
-import { listCountries } from '@/server/gckb/public-read';
+import { hasPublishedTariffData, listCountries } from '@/server/gckb/public-read';
 import { DutyCalculatorForm } from './_components/duty-calculator-form';
 
 /**
@@ -28,7 +28,7 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = 'force-dynamic';
 
 export default async function TariffsPage() {
-  const countries = await listCountries();
+  const [countries, hasTariffs] = await Promise.all([listCountries(), hasPublishedTariffData()]);
 
   return (
     <>
@@ -48,7 +48,7 @@ export default async function TariffsPage() {
 
       <section className="bg-slate-950">
         <div className="mx-auto max-w-7xl px-6 py-14">
-          {countries.length === 0 ? (
+          {countries.length === 0 || !hasTariffs ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 py-24 text-center">
               <p className="text-sm font-bold text-slate-300">No tariff data is published yet.</p>
               <p className="mt-1 text-xs text-slate-500">Our institutional data team is expanding this directory. Check back soon or contact us for details on a specific tariff.</p>
@@ -59,7 +59,7 @@ export default async function TariffsPage() {
         </div>
       </section>
 
-      {countries.length > 0 ? (
+      {countries.length > 0 && hasTariffs ? (
         <section className="border-t border-white/5 bg-slate-950">
           <div className="mx-auto max-w-7xl px-6 py-14">
             <h2 className="text-lg font-black text-white">Browse tariff schedules by country</h2>

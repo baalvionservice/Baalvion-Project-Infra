@@ -20,6 +20,11 @@
  * NULL-org rows.
  *
  *   node scripts/seed-countries.cjs
+ *
+ * SEED_SKIP_POLICIES=1 loads the factual directories (countries, currencies, authorities,
+ * ports, trade agreements) and leaves out the country_policy rows (tax and tariff rates).
+ * The dataset describes those rates as indicative and unverified, so a public site should
+ * not show them until someone has checked them against the official schedules.
  */
 const { PrismaClient } = require('@prisma/client');
 const { createHash } = require('crypto');
@@ -161,6 +166,7 @@ async function upsertRecord(write, countryIdByCode) {
 
 async function main() {
   console.log('Seeding GCKB country baseline (organizationId NULL)…');
+  if (process.env.SEED_SKIP_POLICIES === '1') console.log('SEED_SKIP_POLICIES=1: tax and tariff policy rows are not loaded.');
 
   // 1) Countries first, so country-scoped records can resolve their FK.
   const countryIdByCode = new Map();
@@ -175,7 +181,7 @@ async function main() {
     ['authority', data.authorities],
     ['point_of_entry', data.ports],
     ['trade_agreement', data.agreements],
-    ['country_policy', data.policies],
+    ...(process.env.SEED_SKIP_POLICIES === '1' ? [] : [['country_policy', data.policies]]),
   ];
   for (const [entityType, items] of sections) {
     for (const item of items || []) {
