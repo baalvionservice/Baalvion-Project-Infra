@@ -91,7 +91,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install
-        run: pnpm install --frozen-lockfile --filter law-elite-network-web...
+        run: pnpm install --frozen-lockfile --filter lawelitenetwork.com...
 
       - name: Build workspace dependencies (@baalvion/illustrations)
         run: pnpm --filter @baalvion/illustrations build
