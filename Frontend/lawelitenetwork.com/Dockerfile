@@ -12,7 +12,7 @@
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://yourdomain.com \
 #     .
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 

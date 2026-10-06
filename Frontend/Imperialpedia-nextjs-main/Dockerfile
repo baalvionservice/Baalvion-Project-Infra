@@ -12,7 +12,7 @@
 #     --build-arg NEXT_PUBLIC_CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public \
 #     --build-arg NEXT_PUBLIC_SITE_URL=https://imperialpedia.com \
 #     .
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 

@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.m2,sharing=locked \
     mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:25-jre@sha256:bb036ed6cfdc57e3da7c22634d15f1b840d2caf76183861c80e81ca4b5104abb
+FROM eclipse-temurin:25-jre@sha256:fcd7fd7b387f94bb2ac461478a7436ad8e349924c374ea8313919624dceae636
 
 # Apply the Ubuntu security patch for OpenSSL in-place. The pinned base still ships
 # openssl/libssl3t64 3.5.5-1ubuntu3 (CVE-2026-45447 HIGH: heap use-after-free in PKCS7_verify);

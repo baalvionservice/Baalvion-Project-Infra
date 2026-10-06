@@ -13,7 +13,7 @@
 #     --build-arg NEXT_PUBLIC_BASE_URL=https://jobs.baalvion.com \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://jobs.baalvion.com \
 #     .
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 

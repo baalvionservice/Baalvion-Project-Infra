@@ -11,7 +11,7 @@
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.baalvion.com/api/v1/commerce/trade/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://trade.baalvion.com \
 #     .
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat openssl && npm install -g corepack && corepack enable
 WORKDIR /app
 
