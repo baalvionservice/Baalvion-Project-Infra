@@ -56,6 +56,12 @@ WORKDIR /app
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/.next/standalone ./
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/.next/static ./Frontend/Global-Trade-Infrastructure-main/.next/static
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/public ./Frontend/Global-Trade-Infrastructure-main/public
+# Reference-data loader and a read-only status check, run by hand with `docker exec`:
+#   node Frontend/Global-Trade-Infrastructure-main/scripts/gckb-status.cjs
+#   SEED_SKIP_POLICIES=1 node Frontend/Global-Trade-Infrastructure-main/scripts/seed-countries.cjs
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/scripts/seed-countries.cjs ./Frontend/Global-Trade-Infrastructure-main/scripts/seed-countries.cjs
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/scripts/gckb-status.cjs ./Frontend/Global-Trade-Infrastructure-main/scripts/gckb-status.cjs
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/src/server/gckb/seed-data.json ./Frontend/Global-Trade-Infrastructure-main/src/server/gckb/seed-data.json
 # Prisma schema + migrations for any runtime `prisma migrate deploy` sidecar.
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Global-Trade-Infrastructure-main/prisma ./Frontend/Global-Trade-Infrastructure-main/prisma
 USER nextjs

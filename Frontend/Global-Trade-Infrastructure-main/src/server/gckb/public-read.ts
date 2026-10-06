@@ -289,6 +289,21 @@ function toAgreementView(record: GckbRecord): AgreementView {
 
 // ── Public queries ───────────────────────────────────────────────────────────
 
+/**
+ * True once at least one published tariff schedule row exists.
+ *
+ * The duty calculator must not run without one: with no tariff line on file it reports a
+ * duty of 0 and a landed cost equal to the goods' value, which reads as "no import duty".
+ */
+export async function hasPublishedTariffData(): Promise<boolean> {
+  const result = await gckbRecordRepository.search(
+    null,
+    { entityType: 'country_policy', policyType: 'tariff', status: PUBLISHED },
+    { page: 1, pageSize: 1 },
+  );
+  return result.items.length > 0;
+}
+
 /** All published countries, sorted by name. */
 export async function listCountries(): Promise<CountrySummary[]> {
   const records = await fetchAllPublished({ entityType: 'country' });
