@@ -86,8 +86,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Technology & Data Protection Editor',
     credentials: 'Technology & Data Protection desk, Law Elite Network',
     bio:
-      'Marcus Hale writes Law Elite Network’s technology, intellectual-property, and data-protection coverage. His articles cover privacy regimes such as the GDPR and CCPA, trademark and copyright, and platform regulation. ' +
-      'Topics include the difference between a data “processor” and “controller”, how trademark and copyright differ, and how company-formation choices relate to data obligations. He edits the network’s IP and privacy guides. His Technology & Innovation articles cover the history of digital documents, document search and OCR.',
+      'Marcus Hale writes about technology and the law. He edits Law Elite Network’s technology, intellectual-property and data-protection coverage. His recent articles follow how legal documents went digital: document search, OCR, and the move from filing cabinets to the cloud.',
     expertise: ['Technology & IP', 'Business & Corporate'],
     avatarSeed: 'marcus-hale',
   },
@@ -145,8 +144,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Senior Legal Editor',
     credentials: 'Senior Editor, Law Elite Network',
     bio:
-      'Priya Nair is a senior editor at Law Elite Network whose byline spans commercial agreements, tax fundamentals, employment contracts, intellectual property, and property transactions.' +
-      'Her role is editorial consistency across the network’s desks, covering clarity, accuracy and worldwide framing. Her Technology & Innovation articles cover legal technology, from typewriters and PDFs to computerised records and AI.',
+      'Priya Nair is a senior editor at Law Elite Network. She keeps the site’s articles clear, accurate and consistent across every section. Her own articles look at legal technology, from typewriters and PDFs to digital records and AI in law.',
     expertise: ['Tax & Finance', 'Employment & Labor', 'Technology & IP', 'Property & Real Estate'],
     avatarSeed: 'priya-nair',
   },
@@ -180,8 +178,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Criminal Justice Contributor',
     credentials: 'Criminal Justice desk, Law Elite Network',
     bio:
-      'Aisha Rahman covers criminal justice for Law Elite Network, from how bail is set and challenged to how white-collar offences are investigated and charged. Her articles explain the stages of a case and the rights that apply at each one. ' +
-      'Aisha’s explainers are general education for a global readership and always point serious matters toward qualified local defence counsel. Her History & Heritage and Culture & Society articles look at the origins of jury trials and ancient courts, and at how real trials entered newspapers and literature.',
+      'Aisha Rahman writes about criminal justice and its history. Her articles cover where jury trials came from, how trials worked in ancient courts, and how real trials found their way into newspapers and novels. She writes general education, not legal advice.',
     expertise: ['Criminal Law'],
     avatarSeed: 'aisha-rahman',
   },
@@ -191,8 +188,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Dispute Resolution Editor',
     credentials: 'Dispute Resolution desk, Law Elite Network',
     bio:
-      'Marcus Whitfield covers how disputes are resolved outside — and inside — the courtroom: arbitration, mediation, negotiation, and litigation. His articles compare these routes and what each involves. ' +
-      'He edits the network’s dispute-resolution coverage. His Stories on Screen and Law School Life articles compare how courtroom scenes and lawyers are shown on screen with real practice, and how cold calling works.',
+      'Marcus Whitfield writes about how disputes are settled, in court and out of it: litigation, arbitration, mediation and negotiation. He edits the network’s dispute-resolution coverage. His articles here compare movie courtrooms with real practice and explain how cold calling works in law school.',
     expertise: ['Dispute Resolution'],
     avatarSeed: 'marcus-whitfield',
   },
@@ -202,8 +198,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Maritime & Personal Injury Law Contributor',
     credentials: 'BSc Nautical Science · Maritime law background, Law Elite Network',
     bio:
-      'Deepak Kumar Kuldeep covers Law Elite Network’s personal injury and maritime law desk, drawing on a background in maritime law and a BSc in Nautical Science. ' +
-      'He writes and reviews the network’s guides on personal injury claims, offshore and maritime injury law, cruise ship and passenger vessel accidents, and boating and car accident cases, along with its coverage of religious law and unusual state and local laws.',
+      'Deepak Kumar Kuldeep has a background in maritime law and holds a BSc in Nautical Science. He writes about the customs and symbols of the courtroom: why judges wear robes, how the gavel became a symbol of justice, what the scales and Lady Justice stand for, and why courtrooms are so popular in fiction. He has also written about maritime and personal injury law.',
     expertise: ['Personal Injury Law', 'Maritime & Offshore Injury Law', 'Cruise Ship & Passenger Vessel Accidents', 'Boating Accidents', 'Car Accidents', 'Religion, Law & Weird Laws'],
     avatarSeed: 'deepak-kumar-kuldeep',
     social: { linkedin: 'https://in.linkedin.com/in/allenkrewzz' },
@@ -214,8 +209,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Lawyer & Legal Contributor',
     credentials: 'Lawyer · Certification in Dispute Resolution through Mediation, National Law School of India University',
     bio:
-      'Waki Malik is a lawyer based in Kanpur, Uttar Pradesh, with experience across several areas of legal practice, including IT law, patent law, consumer law, property law, corporate law, immigration law, entertainment law, and labor and employment law. ' +
-      'He has also completed certification in Dispute Resolution through Mediation from the National Law School of India University, and contributes to Law Elite Network’s coverage of business, technology, employment, property, and dispute-resolution topics. His Language & Ideas and Law School Life articles cover the origins of everyday legal words and practical first-year study habits.',
+      'Waki Malik is a lawyer based in Kanpur, Uttar Pradesh. He has worked across IT, patent, consumer, property, corporate, immigration, entertainment and employment law, and holds a certification in Dispute Resolution through Mediation from the National Law School of India University. At Law Elite Network he writes about the everyday words that came from law, and about practical law-school habits: how long to study, planning the first year and building an exam outline.',
     expertise: ['Business & Corporate', 'Technology & IP', 'Employment & Labor', 'Property & Real Estate', 'Dispute Resolution'],
     avatarSeed: 'waki-malik',
     social: { linkedin: 'https://in.linkedin.com/in/wakimalik' },
@@ -265,8 +259,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     title: 'Legal Administrative Contributor',
     credentials: 'Legal Administrative Assistant',
     bio:
-      'Yessica Ruiz has a professional background in legal administration and legal support work. ' +
-      'She contributes general legal-process and legal-education content to Law Elite Network — explaining how the U.S. legal system and lawmaking process work, and the network’s legal-history guides — rather than articles requiring attorney-level legal opinions. Her articles for the History & Heritage and Language & Ideas sections trace the history of courts, trials and legal language.',
+      'Yessica Ruiz has a background in legal administration and legal support work. At Law Elite Network she writes about legal history and legal language: the first laws in history, how ancient courts worked, why legal English is full of Latin, and why lawyers write so formally. Her articles explain; they do not give legal advice.',
     expertise: ['Legal Education & History', 'U.S. Law & Constitution'],
     avatarSeed: 'yessica-ruiz',
     social: { linkedin: 'https://www.linkedin.com/in/yessica-ruiz-b277ba281' },
