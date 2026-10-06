@@ -9,7 +9,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
-import { cmsGetAdsenseClient } from '@/lib/cms';
+import { ADSENSE_CLIENT } from '@/lib/adsense';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
@@ -200,7 +200,6 @@ export default async function RootLayout({
 }) {
   // AdSense publisher ID is managed in the CMS admin panel (Website → SEO →
   // Monetization); resolved server-side, hourly-cached, env-fallback inside.
-  const ADSENSE_CLIENT = await cmsGetAdsenseClient();
   return (
     <html
       lang="en"
@@ -217,9 +216,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
-        {ADSENSE_CLIENT && (
-          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-        )}
+        <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
       </head>
       <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
         {/* Google Consent Mode v2 defaults + the AdSense loader, emitted as one raw HTML string.
@@ -237,9 +234,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html:
               `<script id="consent-default">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});</script>` +
-              (ADSENSE_CLIENT
-                ? `<script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(ADSENSE_CLIENT)}" crossorigin="anonymous"></script>`
-                : ''),
+              `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}" crossorigin="anonymous"></script>`,
           }}
         />
         {/* Structured data lives in the body, after the raw block above, so no React-owned <script>
