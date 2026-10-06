@@ -264,3 +264,48 @@ export async function ExploreBand() {
     </section>
   );
 }
+
+const publishedTime = (a: Article) => Date.parse(a?.updatedAt || a?.publishedAt || '') || 0;
+
+/** Newest articles across every category, as a compact two-column list. */
+export function LatestFeed({ articles, limit = 12 }: { articles: Article[]; limit?: number }) {
+  const latest = [...articles].filter((a) => a?.slug).sort((a, b) => publishedTime(b) - publishedTime(a)).slice(0, limit);
+  if (latest.length === 0) return null;
+  return (
+    <section className="py-8 md:py-10 border-t border-slate-200">
+      <SectionHeader id="latest-articles" title="Latest Articles" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
+        {latest.map((a) => (
+          <StoryCard key={a.slug} article={a} variant="horizontal" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** One row per live nav category: its three newest articles and a link to the full section. */
+export function CategoryRows({ articles }: { articles: Article[] }) {
+  const rows = PRIMARY_NAV.map((item) => {
+    const slug = item.href.replace(/^\//, '');
+    const items = articles
+      .filter((a) => String(a?.category?.slug ?? a?.categorySlug ?? '') === slug)
+      .sort((a, b) => publishedTime(b) - publishedTime(a))
+      .slice(0, 3);
+    return { label: item.label, href: item.href, items };
+  }).filter((r) => r.items.length > 0);
+  if (rows.length === 0) return null;
+  return (
+    <div className="border-t border-slate-200">
+      {rows.map((r) => (
+        <section key={r.href} className="py-8 md:py-10">
+          <SectionHeader title={r.label} href={r.href} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+            {r.items.map((a) => (
+              <StoryCard key={a.slug} article={a} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}

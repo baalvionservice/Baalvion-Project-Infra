@@ -16,6 +16,8 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
+  LatestFeed,
+  CategoryRows,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
 import type { Metadata } from 'next';
@@ -159,6 +161,10 @@ export default async function KnowledgeHomePage() {
         </div>
 
         <DocketRail items={widgets.docket} />
+
+        <LatestFeed articles={pool} />
+
+        <CategoryRows articles={pool} />
 
 
 
