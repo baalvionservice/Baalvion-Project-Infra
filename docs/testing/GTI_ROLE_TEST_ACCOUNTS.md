@@ -85,3 +85,19 @@ DELETE FROM auth.users WHERE email LIKE 'test.%@gti.local';
 For a live environment use the public sign-up (`/register` creates buyer and seller accounts) and the
 institutional onboarding flow, or grant roles through the admin console with a **unique password per account**.
 Never reuse this password or this script there.
+
+## 7. Testing a real login on a live site (read-only)
+
+`Frontend/Global-Trade-Infrastructure-main/scripts/live-smoke.mjs` signs in with an account **you** provide, then sends
+read-only requests to the trade and finance backends and tells you which ones answer. It never writes data and never
+prints your password, cookies or tokens. Run it on your own machine:
+
+```bash
+export GTI_EMAIL='you@example.com'
+read -s GTI_PASSWORD && export GTI_PASSWORD       # type the password; it is not echoed or saved in history
+node Frontend/Global-Trade-Infrastructure-main/scripts/live-smoke.mjs
+```
+
+Defaults to `https://trade.baalvion.com`; set `GTI_BASE` for another host. Use an account without MFA.
+Result codes: `200` backend answered; `403` your role may not use that area (normal); `404` the route or the service
+behind it is missing; `5xx`/`502` the service is down.
