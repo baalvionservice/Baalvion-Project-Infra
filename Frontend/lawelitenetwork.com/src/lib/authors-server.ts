@@ -85,3 +85,21 @@ export async function getPublishedArticleCountsByAuthorSlug(): Promise<Map<strin
     });
   return counts;
 }
+
+/** Category slugs each author has published in (live categories only), keyed by author slug. */
+export async function getPublishedSectionsByAuthorSlug(): Promise<Map<string, string[]>> {
+  const cmsArticles = await cmsGetArticles().catch(() => []);
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const sections = new Map<string, Set<string>>();
+  mergeArticles(cmsArticles).forEach((a) => {
+    const rawSlug = a.category?.slug;
+    if (!rawSlug) return;
+    const catSlug = toNewCategorySlug(rawSlug);
+    if (!currentSlugSet.has(catSlug)) return;
+    const authorSlug = authorNameToSlug(a.author);
+    if (!authorSlug) return;
+    if (!sections.has(authorSlug)) sections.set(authorSlug, new Set());
+    sections.get(authorSlug)!.add(catSlug);
+  });
+  return new Map(Array.from(sections, ([slug, set]) => [slug, Array.from(set)]));
+}

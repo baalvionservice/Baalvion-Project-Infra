@@ -1,68 +1,51 @@
 import React from 'react';
-import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AuthorsDirectory } from '@/components/knowledge/AuthorsDirectory';
-import { getMergedAuthors, getPublishedArticleCountsByAuthorSlug } from '@/lib/authors-server';
+import {
+  getMergedAuthors,
+  getPublishedArticleCountsByAuthorSlug,
+  getPublishedSectionsByAuthorSlug,
+} from '@/lib/authors-server';
+import { PRIMARY_NAV } from '@/lib/site-nav';
 
-// Serve a cached page and refresh it in the background every 5 minutes,
-// instead of re-rendering (and re-fetching from the CMS) on every single
-// visitor/Googlebot request.
-// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
-// this on publish, so the window is only the no-webhook safety net.
+// /api/revalidate refreshes this on publish; the window is only the no-webhook safety net.
 export const revalidate = 86400;
 
 export default async function AuthorsIndexPage() {
-  const [allAuthors, countsMap] = await Promise.all([
+  const [allAuthors, countsMap, sectionsMap] = await Promise.all([
     getMergedAuthors(),
     getPublishedArticleCountsByAuthorSlug(),
+    getPublishedSectionsByAuthorSlug(),
   ]);
 
-  // AdSense second-rejection finding: 23 of 24 profiles rendered "No
-  // published guides yet" -- noindexing the empty profile (author/[slug]/
-  // layout.tsx) stops it being indexed, but a human reviewer (or any visitor)
-  // clicking through from this directory still landed on one. Hiding them
-  // from the directory itself, not just their own page, is the actual fix.
-  const authors = allAuthors.filter((a) => (countsMap.get(a.slug) || 0) > 0);
+  // Only people with published work: the directory, the sitemap and each
+  // profile's own noindex logic have to agree on who counts.
+  const authors = allAuthors
+    .filter((a) => (countsMap.get(a.slug) || 0) > 0)
+    .sort((a, b) => (countsMap.get(b.slug) || 0) - (countsMap.get(a.slug) || 0) || a.name.localeCompare(b.name));
 
-  // A plain slug -> count map, not a closure -- functions can't cross the
-  // server/client component boundary as props.
   const counts: Record<string, number> = Object.fromEntries(countsMap);
+  const sectionsByAuthor: Record<string, string[]> = Object.fromEntries(sectionsMap);
+  const sections = PRIMARY_NAV.map((n) => ({ slug: n.href.replace(/^\//, ''), label: n.label }));
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#fbf9f4] text-slate-900">
       <Navbar />
 
-      <main className="pt-32 pb-24">
-        <div className="container mx-auto px-6 max-w-6xl">
-
-          <header className="mb-16 max-w-3xl">
-            <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight">Editorial Team</span>
-            <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-6 leading-tight mt-2">
-              Our Contributors
+      <main className="pt-14 pb-24">
+        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+          <header className="mt-10 border-t-[5px] border-[#0F2440] pt-5">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[#E13131]">The people behind the stories</p>
+            <h1 className="mt-4 font-serif text-[2.9rem] font-black leading-[0.95] tracking-tight text-[#0F2440] sm:text-7xl lg:text-[5.5rem]">
+              Our Authors
             </h1>
-            <p className="text-xl text-slate-500 font-medium leading-relaxed">
-              Every guide on Law Elite Network is written and edited by our editorial team, following the
-              research, sourcing, and fact-checking process set out in our{' '}
-              <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
-              Our coverage is general legal education for a worldwide audience — not jurisdiction-specific
-              legal advice.
-            </p>
-            <p className="text-[14px] text-slate-500 leading-relaxed mt-6 max-w-2xl">
-              <span className="font-bold text-slate-700">Editors</span> lead a practice-area desk and edit
-              guides in that subject; <span className="font-bold text-slate-700">contributors</span> write
-              guides. Neither role implies a specific guide was independently reviewed by a licensed
-              attorney — where that happened, it's credited by name directly on that article (see our{' '}
-              <Link href="/editorial-process" className="text-blue-600 hover:underline">Editorial Process</Link>).
+            <p className="mt-6 max-w-2xl border-t border-slate-300 pt-4 font-serif text-lg italic text-slate-600">
+              Every article carries a name. Pick a writer to read their work.
             </p>
           </header>
 
-          {/* `authors` above is already filtered to published-only (line 26) —
-              same zero-article filter sitemap.ts applies, so the directory,
-              the sitemap, and each profile's own noindex logic all agree
-              instead of this page advertising people the sitemap omits. */}
-          <AuthorsDirectory authors={authors} counts={counts} />
-
+          <AuthorsDirectory authors={authors} counts={counts} sectionsByAuthor={sectionsByAuthor} sections={sections} />
         </div>
       </main>
 
