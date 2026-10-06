@@ -42,7 +42,7 @@ export default function AccessRequestPage() {
       <div className="container py-20 md:py-28 max-w-2xl">
         <Card className="border-0 md:border shadow-none md:shadow-sm bg-card">
           <CardHeader className="text-center p-6 md:p-8">
-            <CardTitle className="text-2xl md:text-3xl">Request Platform Access</CardTitle>
+            <CardTitle className="text-2xl md:text-3xl"><h1 className="contents">Request Platform Access</h1></CardTitle>
             <CardDescription className="text-md text-muted-foreground max-w-2xl mx-auto pt-2">
               Baalvion is a regulated, institution-grade trade infrastructure. Access is strictly limited to verified organizations and is granted following a formal review process.
             </CardDescription>
