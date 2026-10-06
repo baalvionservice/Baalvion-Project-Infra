@@ -115,7 +115,7 @@ The wrapper:
 
 ### Publisher ID
 
-**Current:** `ca-pub-8968452296456450`
+**Current:** `ca-pub-7321711585180412`
 
 **To update:**
 1. Update in `src/lib/cms.ts` (CMS-managed)
@@ -135,7 +135,7 @@ All placements currently use slot ID `4123514154`. To create unique slots:
 ### Environment Variables
 
 ```bash
-# Optional - defaults to hardcoded ca-pub-8968452296456450
+# Optional - defaults to hardcoded ca-pub-7321711585180412
 NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-YOUR_ID
 
 # CMS integration

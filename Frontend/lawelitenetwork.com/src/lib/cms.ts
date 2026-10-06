@@ -38,52 +38,6 @@ const DEFAULT_REVALIDATE_SECONDS = 86400;
 // (every page on the site), so an unguarded fetch here blocks the whole site.
 const FETCH_TIMEOUT_MS = 4000;
 
-// Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
-// is treated as "no ad client" so we never emit a broken AdSense tag.
-const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
-
-// AdSense application in progress (Google Search Console verification) for this
-// property. Publisher IDs are not secrets — Google's own onboarding instructs
-// pasting this exact value directly into every page's HTML — so a code-level
-// default is safe. The CMS admin panel (Website → SEO → Monetization) or
-// NEXT_PUBLIC_ADSENSE_CLIENT still take priority and can replace it without a
-// redeploy once the site is managed there.
-const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
-
-/**
- * Per-site AdSense publisher ID, managed in the CMS admin panel
- * (Website → SEO → Monetization) and exposed on the public website-info endpoint
- * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
- *
- * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
- * the CMS is unreachable or unset. Cached rather than `no-store` so it doesn't
- * force dynamic rendering — and on the shared window/tag rather than its own
- * hour, because this runs in the root layout: its window was the ISR floor for
- * every prerendered route on the site.
- */
-export async function cmsGetAdsenseClient(): Promise<string | null> {
-  const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const r = await fetch(BASE, {
-      next: { revalidate: DEFAULT_REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
-      signal: controller.signal,
-    });
-    if (r.ok) {
-      const j = (await r.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
-      const fromCms = j?.data?.config?.ads?.adsensePublisherId?.trim();
-      if (fromCms && ADSENSE_RE.test(fromCms)) return fromCms;
-    }
-  } catch {
-    // CMS unreachable or timed out — fall through to env fallback.
-  } finally {
-    clearTimeout(timer);
-  }
-  if (envFallback && ADSENSE_RE.test(envFallback)) return envFallback;
-  return DEFAULT_ADSENSE_CLIENT;
-}
-
 interface Block { id: string; type: string; order: number; content: Record<string, any> }
 interface CmsContent {
   id: string;

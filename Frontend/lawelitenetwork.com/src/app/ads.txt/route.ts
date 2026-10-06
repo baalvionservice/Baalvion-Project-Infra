@@ -1,26 +1,12 @@
-// Serves /ads.txt for Google AdSense. The publisher ID is managed in the CMS admin
-// panel (Website → SEO → Monetization) and resolved via cmsGetAdsenseClient, which
-// falls back to NEXT_PUBLIC_ADSENSE_CLIENT. ads.txt needs the bare numeric publisher
-// ID, so we strip the "ca-pub-" prefix.
-//
-// When no valid ID is configured, we return an empty (but valid 200) ads.txt so
-// crawlers get a clean response instead of a 404. Set the ID in the admin panel once
-// AdSense is approved — no redeploy needed.
+// Serves /ads.txt for Google AdSense. ads.txt needs the bare numeric publisher ID,
+// so the "ca-pub-" prefix is stripped.
+import { ADSENSE_CLIENT } from '@/lib/adsense';
 
-import { cmsGetAdsenseClient } from '@/lib/cms';
-
-// Revalidate daily; cmsGetAdsenseClient itself caches the CMS read for an hour.
 export const revalidate = 86400;
 
 export async function GET(): Promise<Response> {
-  const client = await cmsGetAdsenseClient();
-  const pubId = client?.replace(/^ca-pub-/i, '');
-
-  const body = pubId
-    ? `google.com, pub-${pubId}, DIRECT, f08c47fec0942fa0\n`
-    : '# ads.txt — add your AdSense publisher line after approval.\n';
-
-  return new Response(body, {
+  const pubId = ADSENSE_CLIENT.replace(/^ca-pub-/, '');
+  return new Response(`google.com, pub-${pubId}, DIRECT, f08c47fec0942fa0\n`, {
     status: 200,
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });

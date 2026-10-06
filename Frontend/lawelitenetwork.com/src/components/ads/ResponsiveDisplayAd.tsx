@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, CSSProperties } from 'react';
+import { ADSENSE_CLIENT } from '@/lib/adsense';
 
 export interface ResponsiveDisplayAdProps {
   /**
@@ -209,7 +210,7 @@ export function ResponsiveDisplayAd({
         ref={insRef}
         className="adsbygoogle"
         style={getDisplayStyle()}
-        data-ad-client={`ca-pub-8968452296456450`}
+        data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={slotId}
         data-ad-format={format}
         data-full-width-responsive={fullWidthResponsive ? 'true' : 'false'}
