@@ -8,7 +8,7 @@
 # built with if they differ from the production defaults in src/config.ts. Server-side URLs
 # (IR_SERVICE_URL, MARKETPLACE_SERVICE_URL, CMS_PUBLIC_URL, IR_INVEST_INVITES, ...) are runtime
 # variables and come from docker-compose, not from this file.
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 

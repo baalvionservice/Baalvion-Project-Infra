@@ -12,7 +12,7 @@
 #     --build-arg VITE_API_AUTH_BASE_URL=https://api.baalvion.com/api/v1/identity/auth/v1/auth \
 #     --build-arg VITE_GATEWAY_URL=https://api.baalvion.com \
 #     .
-FROM node:26.9-alpine AS base
+FROM node:26.10-alpine AS base
 RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
