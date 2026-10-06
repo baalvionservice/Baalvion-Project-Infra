@@ -150,6 +150,9 @@ const PUBLIC_MARKETING_PREFIXES: readonly string[] = [
   '/payment-terms',
   // Public application forms: they submit to an anonymous intake and grant no access.
   '/onboard',
+  '/get-started',
+  '/register',
+  '/access',
 ];
 
 export function skipsSessionRehydration(pathname: string): boolean {
