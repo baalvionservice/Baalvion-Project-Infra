@@ -3,155 +3,121 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search } from 'lucide-react';
-import { classifyPracticeArea, isEditorRole, type LawAuthor } from '@/data/authors';
-import { resolvePersonImage } from '@/lib/article-art';
+import type { LawAuthor } from '@/data/authors';
+
+interface Section {
+  slug: string;
+  label: string;
+}
 
 interface AuthorsDirectoryProps {
   authors: LawAuthor[];
   counts: Record<string, number>;
+  sectionsByAuthor: Record<string, string[]>;
+  sections: Section[];
 }
 
-// Search + practice-area filter -- needed once the roster passed ~100
-// profiles; a flat grid at that size has no way to find one specialist.
-export function AuthorsDirectory({ authors, counts }: AuthorsDirectoryProps) {
+function initialsOf(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+export function AuthorsDirectory({ authors, counts, sectionsByAuthor, sections }: AuthorsDirectoryProps) {
   const [query, setQuery] = useState('');
-  const [area, setArea] = useState<string>('All');
+  const [section, setSection] = useState('all');
+  const labelOf = useMemo(() => new Map(sections.map((s) => [s.slug, s.label])), [sections]);
 
-  const withArea = useMemo(
-    () => authors.map((a) => ({ author: a, area: classifyPracticeArea(a) })),
-    [authors]
+  const perSection = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of authors) for (const s of sectionsByAuthor[a.slug] || []) m.set(s, (m.get(s) || 0) + 1);
+    return m;
+  }, [authors, sectionsByAuthor]);
+
+  // A section with nobody in it never shows up as a tab.
+  const tabs = [{ slug: 'all', label: 'All', n: authors.length }].concat(
+    sections.filter((s) => perSection.get(s.slug)).map((s) => ({ slug: s.slug, label: s.label, n: perSection.get(s.slug)! })),
   );
 
-  const areaCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const { area: a } of withArea) counts.set(a, (counts.get(a) || 0) + 1);
-    return counts;
-  }, [withArea]);
-
-  // Only real, populated buckets appear -- never a filter pill with 0 results.
-  const areaOptions = useMemo(
-    () => ['All', ...Array.from(areaCounts.keys()).sort((a, b) => (areaCounts.get(b)! - areaCounts.get(a)!))],
-    [areaCounts]
-  );
-
-  const filtered = useMemo(() => {
+  const shown = authors.filter((a) => {
+    if (section !== 'all' && !(sectionsByAuthor[a.slug] || []).includes(section)) return false;
     const q = query.trim().toLowerCase();
-    return withArea
-      .filter(({ area: a }) => area === 'All' || a === area)
-      .filter(({ author }) => {
-        if (!q) return true;
-        return (
-          author.name.toLowerCase().includes(q) ||
-          author.title.toLowerCase().includes(q) ||
-          author.credentials.toLowerCase().includes(q)
-        );
-      })
-      .map(({ author }) => author);
-  }, [withArea, area, query]);
-
-  const editors = filtered.filter((a) => isEditorRole(a.title));
-  const contributors = filtered.filter((a) => !isEditorRole(a.title));
+    return !q || a.name.toLowerCase().includes(q) || a.title.toLowerCase().includes(q);
+  });
 
   return (
-    <div>
-      <div className="mb-10 space-y-5">
-        <div className="relative max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search contributors by name or firm"
-            className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-colors"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {areaOptions.map((opt) => {
-            const count = opt === 'All' ? authors.length : areaCounts.get(opt) || 0;
-            const active = opt === area;
-            return (
+    <div className="mt-10">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 border-b border-slate-300 pb-3">
+        <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-medium">
+          {tabs.map((t) => (
+            <li key={t.slug}>
               <button
-                key={opt}
                 type="button"
-                onClick={() => setArea(opt)}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-colors ${
-                  active
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                onClick={() => setSection(t.slug)}
+                aria-pressed={section === t.slug}
+                className={`border-b-2 pb-1 transition-colors ${
+                  section === t.slug ? 'border-[#E13131] text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-900'
                 }`}
               >
-                {opt}
-                <span className={active ? 'text-blue-100' : 'text-slate-400'}>{count}</span>
+                {t.label} <span className="text-slate-400">{t.n}</span>
               </button>
-            );
-          })}
-        </div>
+            </li>
+          ))}
+        </ul>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name"
+          aria-label="Search authors by name"
+          className="w-48 border-b border-slate-400 bg-transparent py-1 text-sm placeholder:text-slate-400 focus:border-[#0F2440] focus:outline-none"
+        />
       </div>
 
-      {editors.length > 0 && (
-        <section className="mb-16">
-          <h2 className="text-sm font-extrabold uppercase tracking-[0.14em] text-slate-900 border-b-2 border-slate-900 pb-2 mb-8">
-            Editors
-          </h2>
-          <AuthorGrid authors={editors} counts={counts} />
-        </section>
+      {shown.length === 0 ? (
+        <p className="py-16 font-serif italic text-slate-500">No authors match.</p>
+      ) : (
+        <ul className="mt-10 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((a) => {
+            const n = counts[a.slug] || 0;
+            const labels = (sectionsByAuthor[a.slug] || []).map((s) => labelOf.get(s)).filter(Boolean);
+            return (
+              <li key={a.slug}>
+                <Link href={`/author/${a.slug}`} className="group block border-t-2 border-[#0F2440] pt-4">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-[#ece6d8]">
+                    {a.avatarUrl ? (
+                      <Image
+                        src={a.avatarUrl}
+                        alt={`Portrait of ${a.name}`}
+                        fill
+                        sizes="(min-width: 1024px) 380px, (min-width: 640px) 45vw, 100vw"
+                        className="object-cover object-top grayscale transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center font-serif text-6xl font-black tracking-tight text-[#0F2440]/25">
+                        {initialsOf(a.name)}
+                      </span>
+                    )}
+                  </div>
+                  {labels.length > 0 && (
+                    <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#E13131]">{labels.slice(0, 2).join(' · ')}{labels.length > 2 ? ` · +${labels.length - 2}` : ''}</p>
+                  )}
+                  <h2 className="mt-1 font-serif text-2xl font-black leading-tight text-[#0F2440] group-hover:underline decoration-[#E13131] decoration-2 underline-offset-4">
+                    {a.name}
+                  </h2>
+                  <p className="mt-1 font-serif text-[15px] italic text-slate-600">{a.title}</p>
+                  <p className="mt-2 text-[12px] font-medium uppercase tracking-wider text-slate-500">
+                    {n} {n === 1 ? 'piece' : 'pieces'}
+                  </p>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       )}
-
-      {contributors.length > 0 && (
-        <section>
-          <h2 className="text-sm font-extrabold uppercase tracking-[0.14em] text-slate-900 border-b-2 border-slate-900 pb-2 mb-8">
-            Contributors
-          </h2>
-          <AuthorGrid authors={contributors} counts={counts} />
-        </section>
-      )}
-
-      {editors.length === 0 && contributors.length === 0 && (
-        <div className="py-24 text-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/40">
-          <p className="text-sm text-slate-500">No contributors match "{query}" in {area === 'All' ? 'any practice area' : area}.</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AuthorGrid({ authors, counts }: { authors: LawAuthor[]; counts: Record<string, number> }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {authors.map((author) => {
-        const count = counts[author.slug] || 0;
-        return (
-          <Link key={author.slug} href={`/author/${author.slug}`} className="group block h-full">
-            <article className="p-7 border border-slate-100 rounded-[2rem] bg-slate-50/50 hover:shadow-xl transition-all h-full flex flex-col">
-              <div className="flex items-center gap-4 mb-5">
-                <div className="relative w-16 h-16 shrink-0 rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
-                  <Image
-                    src={resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed })}
-                    alt={author.name}
-                    fill
-                    className="object-cover"
-                    data-ai-hint="professional portrait"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-                    {author.name}
-                  </h3>
-                  <p className="text-[13px] font-semibold text-blue-600">{author.title}</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-500 leading-relaxed line-clamp-4 mb-5 flex-1">
-                {author.bio.split('\n')[0]}
-              </p>
-              <p className="text-[12px] font-medium text-slate-400 mt-auto">
-                {author.credentials} · {count} {count === 1 ? 'guide' : 'guides'}
-              </p>
-            </article>
-          </Link>
-        );
-      })}
     </div>
   );
 }
