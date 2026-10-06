@@ -87,10 +87,9 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Technology & Data Protection desk, Law Elite Network',
     bio:
       'Marcus Hale writes Law Elite Network’s technology, intellectual-property, and data-protection coverage. His articles cover privacy regimes such as the GDPR and CCPA, trademark and copyright, and platform regulation. ' +
-      'Topics include the difference between a data “processor” and “controller”, how trademark and copyright differ, and how company-formation choices relate to data obligations. He edits the network’s IP and privacy guides.',
+      'Topics include the difference between a data “processor” and “controller”, how trademark and copyright differ, and how company-formation choices relate to data obligations. He edits the network’s IP and privacy guides. His Technology & Innovation articles cover the history of digital documents, document search and OCR.',
     expertise: ['Technology & IP', 'Business & Corporate'],
     avatarSeed: 'marcus-hale',
-    archived: true,
   },
   {
     slug: 'priya-menon',
@@ -147,10 +146,9 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Senior Editor, Law Elite Network',
     bio:
       'Priya Nair is a senior editor at Law Elite Network whose byline spans commercial agreements, tax fundamentals, employment contracts, intellectual property, and property transactions.' +
-      'Her role is editorial consistency across the network’s desks, covering clarity, accuracy and worldwide framing.',
+      'Her role is editorial consistency across the network’s desks, covering clarity, accuracy and worldwide framing. Her Technology & Innovation articles cover legal technology, from typewriters and PDFs to computerised records and AI.',
     expertise: ['Tax & Finance', 'Employment & Labor', 'Technology & IP', 'Property & Real Estate'],
     avatarSeed: 'priya-nair',
-    archived: true,
   },
   {
     slug: 'daniel-okafor',
@@ -183,10 +181,9 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Criminal Justice desk, Law Elite Network',
     bio:
       'Aisha Rahman covers criminal justice for Law Elite Network, from how bail is set and challenged to how white-collar offences are investigated and charged. Her articles explain the stages of a case and the rights that apply at each one. ' +
-      'Aisha’s explainers are general education for a global readership and always point serious matters toward qualified local defence counsel.',
+      'Aisha’s explainers are general education for a global readership and always point serious matters toward qualified local defence counsel. Her History & Heritage and Culture & Society articles look at the origins of jury trials and ancient courts, and at how real trials entered newspapers and literature.',
     expertise: ['Criminal Law'],
     avatarSeed: 'aisha-rahman',
-    archived: true,
   },
   {
     slug: 'marcus-whitfield',
@@ -195,10 +192,9 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Dispute Resolution desk, Law Elite Network',
     bio:
       'Marcus Whitfield covers how disputes are resolved outside — and inside — the courtroom: arbitration, mediation, negotiation, and litigation. His articles compare these routes and what each involves. ' +
-      'He edits the network’s dispute-resolution coverage.',
+      'He edits the network’s dispute-resolution coverage. His Stories on Screen and Law School Life articles compare how courtroom scenes and lawyers are shown on screen with real practice, and how cold calling works.',
     expertise: ['Dispute Resolution'],
     avatarSeed: 'marcus-whitfield',
-    archived: true,
   },
   {
     slug: 'deepak-kumar-kuldeep',
@@ -219,11 +215,10 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Lawyer · Certification in Dispute Resolution through Mediation, National Law School of India University',
     bio:
       'Waki Malik is a lawyer based in Kanpur, Uttar Pradesh, with experience across several areas of legal practice, including IT law, patent law, consumer law, property law, corporate law, immigration law, entertainment law, and labor and employment law. ' +
-      'He has also completed certification in Dispute Resolution through Mediation from the National Law School of India University, and contributes to Law Elite Network’s coverage of business, technology, employment, property, and dispute-resolution topics.',
+      'He has also completed certification in Dispute Resolution through Mediation from the National Law School of India University, and contributes to Law Elite Network’s coverage of business, technology, employment, property, and dispute-resolution topics. His Language & Ideas and Law School Life articles cover the origins of everyday legal words and practical first-year study habits.',
     expertise: ['Business & Corporate', 'Technology & IP', 'Employment & Labor', 'Property & Real Estate', 'Dispute Resolution'],
     avatarSeed: 'waki-malik',
     social: { linkedin: 'https://in.linkedin.com/in/wakimalik' },
-    archived: true,
   },
   {
     slug: 'aman-thakur',
@@ -271,11 +266,10 @@ export const LAW_AUTHORS: LawAuthor[] = [
     credentials: 'Legal Administrative Assistant',
     bio:
       'Yessica Ruiz has a professional background in legal administration and legal support work. ' +
-      'She contributes general legal-process and legal-education content to Law Elite Network — explaining how the U.S. legal system and lawmaking process work, and the network’s legal-history guides — rather than articles requiring attorney-level legal opinions.',
+      'She contributes general legal-process and legal-education content to Law Elite Network — explaining how the U.S. legal system and lawmaking process work, and the network’s legal-history guides — rather than articles requiring attorney-level legal opinions. Her articles for the History & Heritage and Language & Ideas sections trace the history of courts, trials and legal language.',
     expertise: ['Legal Education & History', 'U.S. Law & Constitution'],
     avatarSeed: 'yessica-ruiz',
     social: { linkedin: 'https://www.linkedin.com/in/yessica-ruiz-b277ba281' },
-    archived: true,
   },
   {
     slug: 'abinesh-raj',
