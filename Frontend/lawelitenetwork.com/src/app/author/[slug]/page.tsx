@@ -10,9 +10,10 @@ import { credentialStatus, credentialNotice } from '@/lib/author-credentials';
 import { getMergedAuthorBySlug } from '@/lib/authors-server';
 import { mergeArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
-import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
-import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+import { resolveArticleImage } from '@/lib/article-art';
+import { articleUrl } from '@/lib/article-url';
+import { formatArticleDate } from '@/lib/format-date';
 import { AdSlot } from '@/components/ads/AdSlot';
 
 const AUTHOR_AD_SLOT_ID = '4123514154';
@@ -41,12 +42,6 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-/** Format a date string to "Month DD, YYYY" */
-function formatDate(d: string | undefined): string {
-  if (!d) return '';
-  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
 export default async function AuthorProfilePage(
   { params }: { params: Promise<{ slug: string }> },
 ) {
@@ -61,8 +56,14 @@ export default async function AuthorProfilePage(
     .filter((a) => authorNameToSlug(a.author) === author.slug && isKeptCategoryArticle(a))
     .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
+  const topics = Array.from(
+    new Map(
+      articles
+        .filter((a) => a.category?.slug && a.category?.name)
+        .map((a) => [toNewCategorySlug(a.category!.slug as string), a.category!.name as string]),
+    ).entries(),
+  );
   const initials = getInitials(author.name);
-  const firstName = author.name.split(' ')[0].toUpperCase();
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
 
   const credStatus = credentialStatus(author);
@@ -123,277 +124,193 @@ export default async function AuthorProfilePage(
     },
   ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin; title: string; external: boolean }[];
 
+  const roleLabel = isEditorRole(author.title) ? 'Editor' : 'Contributor';
+  const [latest, ...archive] = articles;
+  const desk = author.title;
+
   return (
-    <div className="min-h-screen bg-[#f9f9fb]">
+    <div className="min-h-screen bg-[#fbf9f4] text-slate-900">
       <Navbar />
 
-      <main className="pt-14 pb-20">
+      <main className="pt-14 pb-24">
+        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+          <nav aria-label="Breadcrumb" className="pt-6 text-[13px] text-slate-500">
+            <Link href="/" className="hover:text-slate-900">Home</Link>
+            <span className="mx-2 text-slate-300">/</span>
+            <Link href="/authors" className="hover:text-slate-900">Authors</Link>
+          </nav>
 
-        {/* ─── HERO HEADER (navy bg + red bottom border) ─── */}
-        <div className="w-full bg-[#0F2440] text-white border-b-[6px] border-[#E13131] shadow-xl">
-          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-
-            {/* Breadcrumb */}
-            <div className="pt-6">
-              <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm pb-2 text-slate-300">
-                <Link href="/" className="flex items-center gap-1.5 font-semibold hover:text-white transition-colors">
-                  <Home className="h-3.5 w-3.5" />
-                  Home
-                </Link>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-                <Link href="/authors" className="font-semibold hover:text-white transition-colors text-[#C8A24A]">
-                  Authors
-                </Link>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-                <span className="font-bold text-white truncate max-w-[200px] sm:max-w-sm" aria-current="page">
-                  {author.name}
-                </span>
-              </nav>
-            </div>
-
-            {/* Author hero row */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6 py-10 lg:py-12">
-
-              {/* Avatar — initials circle with gold bg */}
-              <span className="relative flex overflow-hidden h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-full border-4 border-white shadow-xl">
-                <span className="flex h-full w-full items-center justify-center rounded-full text-3xl font-black bg-[#C8A24A] text-[#0F2440]">
-                  {initials}
-                </span>
-              </span>
-
-              <div className="space-y-2">
-                {/* Site badge */}
-                <div className="flex items-center gap-2">
-                  <span className="bg-[#E13131] text-white text-xs font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 inline-block shadow-sm">
-                    LAW ELITE NETWORK AUTHOR
-                  </span>
-                </div>
-
-                {/* Name */}
-                <h1 className="text-4xl sm:text-5xl font-black text-white font-serif uppercase tracking-tighter leading-none">
+          {/* masthead */}
+          <header className="mt-8 border-t-[5px] border-[#0F2440] pt-5">
+            <div className={author.avatarUrl ? 'grid grid-cols-1 items-end gap-8 md:grid-cols-[1fr_15rem]' : ''}>
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[#E13131]">
+                  {roleLabel}
+                  {desk && <span className="text-slate-400"> &nbsp;·&nbsp; </span>}
+                  <span className="text-slate-500">{desk}</span>
+                </p>
+                <h1 className="mt-4 break-words font-serif text-[2.9rem] font-black leading-[0.95] tracking-tight text-[#0F2440] sm:text-7xl lg:text-[5.5rem]">
                   {author.name}
                 </h1>
-
-                {/* Title — gold mono */}
-                {author.title && (
-                  <p className="text-sm font-mono font-bold uppercase tracking-wider text-[#C8A24A]">
-                    {author.title}
-                  </p>
-                )}
-
-                {/* Social / action buttons */}
-                {socialButtons.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 pt-2">
-                    {socialButtons.map(({ href, label, Icon, title, external }) =>
-                      external ? (
-                        <a
-                          key={label}
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={title}
-                          aria-label={title}
-                          className="h-10 w-10 rounded-full bg-white text-[#0F2440] border-2 border-white hover:bg-[#E13131] hover:text-white hover:border-[#E13131] flex items-center justify-center transition-colors shadow-sm"
-                        >
-                          <Icon className="h-4 w-4" />
-                        </a>
-                      ) : (
-                        <Link
-                          key={label}
-                          href={href}
-                          title={title}
-                          aria-label={title}
-                          className="h-10 w-10 rounded-full bg-white text-[#0F2440] border-2 border-white hover:bg-[#E13131] hover:text-white hover:border-[#E13131] flex items-center justify-center transition-colors shadow-sm"
-                        >
-                          <Icon className="h-4 w-4" />
-                        </Link>
-                      )
-                    )}
-                  </div>
-                )}
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ─── DOSSIER CARD + ARTICLES ─── */}
-        <section className="py-14">
-          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-
-            {/* Dossier card */}
-            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-6 pb-10 mb-14 relative rounded-sm">
-              {/* Red top accent */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-[#E13131]" />
-
-              <div className="px-6 sm:px-10 pt-8">
-                {/* Dossier header */}
-                <div className="flex items-center gap-2 border-b-2 border-black pb-3 pt-1">
-                  <span className="bg-[#E13131] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
-                    LAW ELITE DOSSIER
-                  </span>
-                  <h2 className="text-sm font-black uppercase tracking-widest text-black font-mono">
-                    AUTHOR CREDENTIALS &amp; VERIFICATION
-                  </h2>
+              {author.avatarUrl && (
+                <div className="relative order-first aspect-[4/5] w-44 overflow-hidden bg-slate-200 md:order-none md:w-full">
+                  <Image
+                    src={author.avatarUrl}
+                    alt={`Portrait of ${author.name}`}
+                    fill
+                    priority
+                    sizes="(min-width: 768px) 240px, 176px"
+                    className="object-cover grayscale"
+                  />
                 </div>
-
-                {/* Meta rows */}
-                {metaRows.length > 0 && (
-                  <dl className="space-y-2 text-sm font-semibold mt-4">
-                    {metaRows.map(({ label, value }) => (
-                      <div key={label}>
-                        <dt className="inline font-mono uppercase text-[#E13131] font-black">{label}: </dt>
-                        <dd className="inline text-slate-900 font-bold">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                )}
-
-                {/* Verification status: only what the data supports */}
-                <div className="mt-5 border-2 border-black bg-slate-50 p-5 text-xs sm:text-sm font-bold text-slate-800 space-y-2">
-                  <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E13131]">
-                    VERIFICATION STATUS
-                  </p>
-                  <p>Confirmed: {author.name} is a Law Elite Network {isEditorRole(author.title) ? 'editor' : 'contributor'}.</p>
-                  <p>
-                    {credentialNotice(credStatus)}
-                  </p>
-                  <p>Articles are general legal education, not legal advice.</p>
-                </div>
-
-                {/* Editorial highlights */}
-                {articles.length > 0 && (
-                  <div className="mt-5 bg-slate-50 p-5 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                    <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E13131] mb-2">
-                      EDITORIAL HIGHLIGHTS
-                    </p>
-                    <ul className="space-y-2 text-xs sm:text-sm font-bold text-black">
-                      <li className="flex items-start gap-2">
-                        <span className="text-[#E13131] font-mono font-black">01.</span>
-                        <span>Has published {articles.length} article{articles.length !== 1 ? 's' : ''} on Law Elite Network.</span>
-                      </li>
-                      {author.expertise.length > 0 && (
-                        <li className="flex items-start gap-2">
-                          <span className="text-[#E13131] font-mono font-black">02.</span>
-                          <span>Covers: {author.expertise.slice(0, 3).join(', ')}{author.expertise.length > 3 ? ' and more.' : '.'}</span>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Bio */}
-                <div className="space-y-3 pt-6">
-                  <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
-                    BIOGRAPHY &amp; EXPERIENCE
-                  </h3>
-                  {bioParagraphs.map((p, i) => (
-                    <p key={i} className="text-sm sm:text-base font-medium text-slate-800 leading-relaxed">
-                      {p}
-                    </p>
-                  ))}
-                </div>
-
-                {/* Education */}
-                {author.education && author.education.length > 0 && (
-                  <div className="space-y-3 pt-6">
-                    <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
-                      EDUCATION
-                    </h3>
-                    <ul className="space-y-1.5">
-                      {author.education.map((e) => (
-                        <li key={e} className="flex items-start gap-2 text-sm font-bold text-slate-800">
-                          <span className="text-[#E13131] font-mono font-black mt-0.5">→</span>
-                          <span>{e}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Editorial integrity */}
-                <div className="space-y-3 pt-6">
-                  <h3 className="text-xl font-black uppercase font-serif text-black border-b border-slate-200 pb-2">
-                    EDITORIAL INTEGRITY
-                  </h3>
-                  <p className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">
-                    Law Elite Network publishes plain-language legal guides for a worldwide audience. Every article names its author.
-                    Learn more in our{' '}
-                    <Link href="/editorial-standards" className="text-[#E13131] hover:underline">
-                      editorial standards →
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <AdSlot slotId={AUTHOR_AD_SLOT_ID} format="horizontal" placement="author-mid-page" fullWidthResponsive minHeight="100px" />
-
-            {/* ─── ARTICLES LIST ─── */}
-            <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black pb-4">
-              <div className="flex items-center gap-3">
-                <span className="bg-[#E13131] text-white text-xs font-black uppercase tracking-widest px-3 py-1 -skew-x-12">
-                  LAW ELITE ARCHIVE
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-black uppercase font-serif">
-                  LATEST ARTICLES BY {firstName}
-                </h2>
-              </div>
-              {articles.length > 0 && (
-                <span className="bg-black text-white text-xs font-mono font-bold px-3 py-1 uppercase">
-                  {articles.length} ARTICLE{articles.length !== 1 ? 'S' : ''} PUBLISHED
-                </span>
               )}
-            </header>
+            </div>
+            <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-y border-slate-300 py-3 text-[13px] text-slate-600">
+              <p className="font-serif italic">
+                {articles.length === 0
+                  ? 'No pieces published yet'
+                  : `${articles.length} ${articles.length === 1 ? 'piece' : 'pieces'} on Law Elite Network` +
+                    (latest ? `, most recently ${formatArticleDate(latest.updatedAt)}` : '')}
+              </p>
+              <ul className="flex flex-wrap gap-x-5 gap-y-1 font-medium">
+                {socialButtons.map(({ href, label, title, external }) => (
+                  <li key={label}>
+                    {external ? (
+                      <a href={href} target="_blank" rel="noopener noreferrer" title={title} className="underline decoration-slate-300 underline-offset-4 hover:text-[#E13131] hover:decoration-[#E13131]">
+                        {label} ↗
+                      </a>
+                    ) : (
+                      <Link href={href} title={title} className="underline decoration-slate-300 underline-offset-4 hover:text-[#E13131] hover:decoration-[#E13131]">
+                        {label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </header>
 
-            {articles.length === 0 ? (
-              <p className="text-slate-500 italic font-medium py-8">No published guides yet.</p>
-            ) : (
-              <div className="divide-y-2 divide-slate-200">
-                {articles.map((art) => (
-                  <article key={art.id} className="py-6 first:pt-0 group">
-                    <Link
-                      href={articleUrl(art)}
-                      className="flex flex-row gap-4 sm:gap-6 items-start"
-                    >
-                      {/* Thumbnail */}
-                      <div className="relative w-24 h-24 sm:w-[220px] sm:h-[147px] shrink-0 overflow-hidden bg-slate-200 border-2 border-black">
-                        <Image
-                          src={resolveArticleImage(art)}
-                          alt={art.title}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          sizes="(min-width: 640px) 220px, 96px"
-                          data-ai-hint="legal article"
-                        />
-                      </div>
+          <div className="mt-12 grid grid-cols-1 gap-x-14 gap-y-12 lg:grid-cols-12">
+            {/* bio */}
+            <section aria-label={`About ${author.name}`} className="lg:col-span-7 lg:col-start-1">
+              <div className="space-y-5 font-serif text-[1.15rem] leading-[1.8] text-slate-800 first-letter:float-left first-letter:-mr-0.5 first-letter:mt-1 first-letter:text-[4.2rem] first-letter:font-black first-letter:leading-[0.8] first-letter:text-[#0F2440]">
+                {bioParagraphs.map((p, i) => (
+                  <p key={i} className={i === 0 ? '' : 'first-letter:float-none first-letter:text-[inherit] first-letter:font-normal first-letter:mr-0 first-letter:mt-0 first-letter:leading-[inherit]'}>
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </section>
 
-                      {/* Content */}
-                      <div className="min-w-0 flex-1">
+            {/* margin notes */}
+            <aside className="lg:col-span-4 lg:col-start-9">
+              <dl className="divide-y divide-slate-300 border-y border-slate-300 text-[14px]">
+                {metaRows.filter((r) => r.label !== 'TITLE').map(({ label, value }) => (
+                  <div key={label} className="grid grid-cols-[7.5rem_1fr] gap-4 py-3">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</dt>
+                    <dd className="font-medium leading-snug text-slate-900">{value}</dd>
+                  </div>
+                ))}
+                {author.education && author.education.length > 0 && (
+                  <div className="grid grid-cols-[7.5rem_1fr] gap-4 py-3">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Education</dt>
+                    <dd className="font-medium leading-snug text-slate-900">{author.education.join('; ')}</dd>
+                  </div>
+                )}
+                {topics.length > 0 && (
+                  <div className="grid grid-cols-[7.5rem_1fr] gap-4 py-3">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Writes in</dt>
+                    <dd className="font-medium leading-snug">
+                      {topics.map(([topicSlug, name], i) => (
+                        <React.Fragment key={topicSlug}>
+                          {i > 0 && <span className="text-slate-400">, </span>}
+                          <Link href={`/${topicSlug}`} className="underline decoration-slate-300 underline-offset-4 hover:text-[#E13131] hover:decoration-[#E13131]">
+                            {name}
+                          </Link>
+                        </React.Fragment>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              <p className="mt-4 font-serif text-[13px] italic leading-relaxed text-slate-500">
+                {credentialNotice(credStatus)} Articles are general education, not legal advice.{' '}
+                <Link href="/editorial-standards" className="not-italic underline decoration-slate-300 underline-offset-4 hover:text-[#E13131]">
+                  Editorial standards
+                </Link>
+              </p>
+            </aside>
+          </div>
+
+          {/* the work */}
+          <section aria-label={`Articles by ${author.name}`} className="mt-20">
+            <h2 className="flex items-baseline gap-4 border-b-2 border-[#0F2440] pb-2 font-serif text-2xl font-black text-[#0F2440]">
+              The work
+              {articles.length > 0 && <span className="text-sm font-normal italic text-slate-500">{articles.length} in all</span>}
+            </h2>
+
+            {articles.length === 0 && <p className="py-10 font-serif italic text-slate-500">No published guides yet.</p>}
+
+            {latest && (
+              <Link href={articleUrl(latest)} className="group mt-8 grid grid-cols-1 gap-6 border-b border-slate-300 pb-10 md:grid-cols-12 md:gap-10">
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-200 md:col-span-6">
+                  <Image
+                    src={resolveArticleImage(latest)}
+                    alt={latest.title}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="flex flex-col justify-center md:col-span-6">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E13131]">
+                    {latest.category?.name} <span className="text-slate-400">· {formatArticleDate(latest.updatedAt)}</span>
+                  </p>
+                  <h3 className="mt-3 font-serif text-3xl font-black leading-tight text-[#0F2440] group-hover:underline decoration-[#E13131] decoration-2 underline-offset-4 sm:text-4xl">
+                    {latest.title}
+                  </h3>
+                  {(latest.summary || (latest as any).excerpt) && (
+                    <p className="mt-4 font-serif text-[1.05rem] leading-relaxed text-slate-700 line-clamp-4">
+                      {latest.summary || (latest as any).excerpt}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            )}
+
+            {archive.length > 0 && (
+              <ol className="divide-y divide-slate-300">
+                {archive.map((art) => (
+                  <li key={art.id}>
+                    <Link href={articleUrl(art)} className="group grid grid-cols-1 gap-1 py-6 sm:grid-cols-[9rem_1fr] sm:gap-8">
+                      <time className="pt-1 text-[12px] font-medium uppercase tracking-wider text-slate-500">
+                        {formatArticleDate(art.updatedAt)}
+                      </time>
+                      <div>
                         {art.category?.name && (
-                          <span className="text-[10px] sm:text-[11px] font-mono font-black uppercase tracking-widest text-[#E13131]">
-                            {art.category.name}
-                          </span>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E13131]">{art.category.name}</p>
                         )}
-                        <h3 className="mt-1 text-base sm:text-xl font-black text-slate-950 leading-snug font-serif group-hover:text-[#E13131] transition-colors line-clamp-2 sm:line-clamp-none">
+                        <h3 className="mt-1 font-serif text-xl font-bold leading-snug text-slate-900 group-hover:underline decoration-[#E13131] decoration-2 underline-offset-4 sm:text-2xl">
                           {art.title}
                         </h3>
-                        <span className="block mt-1.5 text-[11px] font-mono font-bold uppercase tracking-wide text-slate-500">
-                          {formatDate(art.updatedAt)}
-                        </span>
                         {(art.summary || (art as any).excerpt) && (
-                          <p className="hidden sm:block mt-2 text-sm text-slate-700 leading-relaxed line-clamp-2">
+                          <p className="mt-2 max-w-2xl font-serif text-[1rem] leading-relaxed text-slate-600 line-clamp-2">
                             {art.summary || (art as any).excerpt}
                           </p>
                         )}
                       </div>
                     </Link>
-                  </article>
+                  </li>
                 ))}
-              </div>
+              </ol>
             )}
+          </section>
 
+          <div className="mt-12">
+            <AdSlot slotId={AUTHOR_AD_SLOT_ID} format="horizontal" placement="author-mid-page" fullWidthResponsive minHeight="100px" />
           </div>
-        </section>
+        </div>
       </main>
 
       <PublicFooter />
