@@ -1,6 +1,7 @@
 'use strict';
 const authorService = require('../service/authorService');
 const revalidateService = require('../service/revalidateService');
+const { CmsWebsite } = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 
 // Author edits never triggered a revalidation, so on an ISR frontend a corrected
@@ -11,10 +12,19 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 // every article, so the site-wide CMS cache tag (which /api/revalidate drops on
 // any call) is what actually matters here; the paths just make the intent legible
 // in logs. Fire-and-forget and fail-open, same as the content publish path.
-function revalidateAuthorPages(websiteId, author) {
-    const paths = ['/authors', '/'];
-    if (author && author.slug) paths.push(`/authors/${author.slug}`);
-    revalidateService.dispatch(websiteId, { paths });
+// `dispatch` looks the webhook up by site slug, but the route only has the
+// website id -- passing the id straight through meant it never matched a
+// configured webhook, so no author edit ever refreshed any site.
+// `/author/<slug>` is Law Elite's profile route; `/authors/<slug>` is
+// Imperialpedia's.
+async function revalidateAuthorPages(websiteId, author) {
+    try {
+        const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+        if (!website?.slug) return;
+        const paths = ['/authors', '/'];
+        if (author && author.slug) paths.push(`/authors/${author.slug}`, `/author/${author.slug}`);
+        revalidateService.dispatch(website.slug, { paths });
+    } catch { /* fail-open, same as the content publish path */ }
 }
 
 const listAuthors = async (req, res, next) => {
