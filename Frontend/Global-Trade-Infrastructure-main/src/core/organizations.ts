@@ -95,7 +95,10 @@ export const ORG_TYPE_CONFIG: Readonly<Record<OrgType, OrgTypeConfig>> = {
   bank:               { label: 'Bank',               home: '/governance/bank-admin',            personaId: 'bank-admin',          extraNav: [...ORG_SELF_ADMIN_NAV] },
   insurance_provider: { label: 'Insurance Provider', home: '/insurance',                        personaId: 'insurance-admin',     extraNav: [...ORG_SELF_ADMIN_NAV] },
   compliance_agency:  { label: 'Compliance Agency',  home: '/governance/compliance-admin',      personaId: 'compliance-admin',    extraNav: [...ORG_SELF_ADMIN_NAV] },
-  regulator:          { label: 'Regulator',          home: '/governance',                       personaId: 'national-regulator',  extraNav: ['/governance', ...ORG_SELF_ADMIN_NAV] },
+  // Not '/governance': allow-list matching is by prefix, so that would open every /governance/*
+  // screen (platform-admin, bank-admin, customs, ...) to a regulator. The regulator's own screens
+  // come from the national-regulator persona.
+  regulator:          { label: 'Regulator',          home: '/governance/regulatory',            personaId: 'national-regulator',  extraNav: [...ORG_SELF_ADMIN_NAV] },
   // platform_owner has platformLevel: true → getOrgTypeNav returns ['*'] (every route).
   // extraNav is included for completeness so /platform/organizations is explicitly enumerable
   // if callers inspect the config directly rather than going through getOrgTypeNav.
