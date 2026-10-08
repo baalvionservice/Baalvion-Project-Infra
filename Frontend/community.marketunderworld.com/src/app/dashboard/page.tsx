@@ -18,7 +18,10 @@ import {
 import { NexusCard, NexusBadge } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useAuth } from "@/context/auth-context"
-import { listMyOrders, getMyWishlist, type Order } from "@/lib/api/orders"
+import { listMyOrders, getMyWishlist, listMySales, type Order, type SellerSale } from "@/lib/api/orders"
+import { getMyMember, type MyMember } from "@/lib/api/members"
+import { MemberIdCard } from "@/components/dashboard/member-id-card"
+import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
 import { getMyOrders as getMyGiftCardOrders, type GiftCardOrder } from "@/lib/api/giftcards"
 import { getMyWallet, usdAvailable, type Wallet as WalletAccount } from "@/lib/api/wallet"
@@ -54,6 +57,9 @@ export default function DashboardPage() {
   const [wallet, setWallet] = useState<WalletAccount | null>(null)
   const [depositModalOpen, setDepositModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [member, setMember] = useState<MyMember | null>(null)
+  const [sales, setSales] = useState<SellerSale[]>([])
+  const [tab, setTab] = useState<"selling" | "buying">("buying")
 
   const refreshWallet = () => { getMyWallet().then(setWallet) }
 
@@ -68,11 +74,17 @@ export default function DashboardPage() {
       getMyWishlist(MARKET_UNDERWORLD_STORE_ID).catch(() => ({ items: [] as { id: string }[] })),
       getMyGiftCardOrders().catch(() => []),
       getMyWallet(),
-    ]).then(([o, w, g, wal]) => {
+      getMyMember().catch(() => null),
+    ]).then(async ([o, w, g, wal, m]) => {
       setOrders(o)
       setWishlistCount(w.items.length)
       setGiftCardOrders(g)
       setWallet(wal)
+      setMember(m)
+      if (m?.seller) {
+        setTab("selling")
+        if (m.isSeller) setSales(await listMySales(MARKET_UNDERWORLD_STORE_ID).catch(() => []))
+      }
       setLoading(false)
     })
   }, [authLoading, isAuthenticated, router])
@@ -94,6 +106,9 @@ export default function DashboardPage() {
     [orders]
   )
 
+  // Their chosen/derived name when they have one; otherwise their sign-in name (private page, so fine).
+  const greetingName = member && !member.displayName.startsWith("Member HR-") ? member.displayName : user?.email ? user.email.split("@")[0] : ""
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#050508] text-white pt-24 pb-32 flex items-center justify-center gap-3 text-gray-500">
@@ -107,10 +122,34 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-6 space-y-12">
         <header>
           <p className="text-cyan-400 font-bold text-[12px] uppercase tracking-[0.2em] mb-3">Dashboard</p>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
-          <p className="text-gray-500 font-medium text-lg">Your orders, wishlist, and gift cards in one place.</p>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Welcome back{greetingName ? `, ${greetingName}` : ""}</h1>
+          <p className="text-gray-500 font-medium text-lg">{member?.seller ? "Your store, your orders and your purchases in one place." : "Your orders, wishlist, and gift cards in one place."}</p>
         </header>
 
+        {member && <MemberIdCard member={member} onChange={setMember} />}
+
+        {member?.seller ? (
+          <div className="inline-flex p-1 rounded-xl bg-white/5 border border-white/5" role="tablist">
+            {(["selling", "buying"] as const).map((t) => (
+              <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+                className={`px-6 h-9 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${tab === t ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}>
+                {t === "selling" ? "Selling" : "Buying"}
+              </button>
+            ))}
+          </div>
+        ) : member ? (
+          <NexusCard className="p-6 bg-white/[0.02] border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-white mb-1">Want to sell on Hell Road?</h2>
+              <p className="text-sm text-gray-500 max-w-2xl">Apply as a seller, unlock a product category with a one-time $2,000 payment in USDT, Bitcoin or Binance Pay, list your physical products and get paid by buyers. You'll get a roadmap here that tracks each step.</p>
+            </div>
+            <Link href="/seller/onboarding" className="shrink-0"><NexusButton>Start selling <ArrowRight className="w-4 h-4 ml-2 inline" /></NexusButton></Link>
+          </NexusCard>
+        ) : null}
+
+        {member?.seller && tab === "selling" && <SellerOverviewPanel seller={member.seller} sales={sales} />}
+
+        {(!member?.seller || tab === "buying") && (<>
         <div className="max-w-sm">
           <WalletBalanceCard balance={usdAvailable(wallet)} onDeposit={() => setDepositModalOpen(true)} />
         </div>
@@ -231,6 +270,7 @@ export default function DashboardPage() {
             </div>
           </section>
         )}
+        </>)}
       </div>
 
       <DepositModal open={depositModalOpen} onOpenChange={setDepositModalOpen} onCredited={refreshWallet} />

@@ -1,6 +1,6 @@
 'use client';
 /**
- * Market Underworld → auth-gateway (BFF) session, via @baalvion/auth-sdk.
+ * Market Underworld → auth-gateway (BFF) session.
  * Cookie-only (no JWT in JS): login/register/session all flow through the
  * same-origin /auth-bff/* proxy (see next.config.ts rewrites), which forwards
  * to the shared Baalvion identity gateway. Real accounts are created in the

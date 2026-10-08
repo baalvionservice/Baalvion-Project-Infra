@@ -39,7 +39,7 @@ export default async function ForumHubPage() {
         <div className="baal-hero-content">
           <div className="baal-eyebrow">
             <span className="baal-eyebrow-icon">⚡</span>
-            MarketUnderworld Communities
+            Hell Road Communities
           </div>
           <h1 className="baal-title">
             <span className="baal-title-glow">BAAL</span>
@@ -184,7 +184,7 @@ export default async function ForumHubPage() {
       {/* ── CINEMATIC DIVIDER ── */}
       <div className="baal-cinematic-divider">
         <div className="baal-cinematic-line" />
-        <span className="baal-cinematic-glyph">⚡ BAALVION ⚡</span>
+        <span className="baal-cinematic-glyph">⚡ HELL ROAD ⚡</span>
         <div className="baal-cinematic-line" />
       </div>
 

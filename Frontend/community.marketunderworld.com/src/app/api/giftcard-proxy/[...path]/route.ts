@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Same-origin bridge to giftcard-service — mirrors api/community-proxy/route.ts exactly.
-const GIFTCARD_API_BASE = process.env.NEXT_PUBLIC_GIFTCARD_API_BASE ?? 'https://api.baalvion.com/api/v1/giftcards';
+const GIFTCARD_API_BASE = process.env.GIFTCARD_UPSTREAM_URL ?? '';
 
 async function proxy(request: NextRequest, path: string[]) {
   const target = new URL(`${GIFTCARD_API_BASE}/${path.join('/')}`);

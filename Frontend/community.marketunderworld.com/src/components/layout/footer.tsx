@@ -25,9 +25,9 @@ export const Footer = () => {
           <div className="md:col-span-2 space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex items-center justify-center bg-black">
-                <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+                <img src="/logo.jpg" alt="Hell Road" className="w-full h-full object-cover" />
               </div>
-              <span className="text-white font-bold tracking-widest uppercase font-display">BAALVION</span>
+              <span className="text-white font-bold tracking-widest uppercase font-display">HELL ROAD</span>
             </div>
             <p className="text-[#6B7280] max-w-sm text-sm leading-relaxed font-mono uppercase">
               The world's premier distributed intelligence and commodity exchange network.
@@ -70,7 +70,7 @@ export const Footer = () => {
             V2.4.0 OPERATIONAL • SECURE TUNNEL ACTIVE
           </div>
           <div className="flex gap-8">
-            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 UNDERWORLD PROTOCOL</span>
+            <span className="text-[10px] font-bold text-[#3D4450] uppercase tracking-widest">© 2026 HELL ROAD</span>
           </div>
         </div>
       </div>

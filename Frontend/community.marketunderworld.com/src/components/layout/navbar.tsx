@@ -61,12 +61,12 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
   return (
     <nav className="fixed top-8 left-0 right-0 h-14 z-[1000] bg-[#0B0C0F]/90 backdrop-blur-md border-b border-[#252A33]">
       <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 select-none" aria-label="Baalvion Home">
+        <Link href="/" className="flex items-center gap-2.5 select-none" aria-label="Home">
           <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex items-center justify-center bg-black flex-shrink-0">
-            <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+            <img src="/logo.jpg" alt="Hell Road" className="w-full h-full object-cover" />
           </div>
           <div className="hidden sm:flex items-center text-[15px] tracking-widest leading-none font-display uppercase font-bold text-white">
-            BAALVION
+            HELL ROAD
           </div>
         </Link>
 
@@ -216,9 +216,9 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded overflow-hidden border border-white/10 flex-shrink-0">
-                    <img src="/logo.jpg" alt="Baalvion Logo" className="w-full h-full object-cover" />
+                    <img src="/logo.jpg" alt="Hell Road" className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-sm font-black uppercase tracking-widest text-white">BAALVION</span>
+                  <span className="text-sm font-black uppercase tracking-widest text-white">HELL ROAD</span>
                 </div>
                 <button 
                   onClick={() => setIsMobileOpen(false)}

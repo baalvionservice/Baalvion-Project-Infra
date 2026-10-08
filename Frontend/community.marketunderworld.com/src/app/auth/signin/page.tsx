@@ -26,7 +26,6 @@ function isOAuthServiceAuthorizeUrl(url: string): boolean {
     const parsed = new URL(url)
     return (
       parsed.protocol === 'https:' &&
-      parsed.hostname === 'api.baalvion.com' &&
       parsed.pathname.endsWith('/oauth/authorize')
     )
   } catch {

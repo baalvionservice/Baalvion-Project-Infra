@@ -1,12 +1,12 @@
-// Real commerce-service integration. Public storefront reads (no auth) go straight
-// to api.baalvion.com — commerce-service mounts these routes without authMiddleware
-// and sets permissive CORS specifically for them (index.js), so this is safe to call
-// both server-side (Server Components) and client-side.
+// Real commerce-service integration. Public storefront reads (no auth). Server Components call
+// the upstream API directly (COMMERCE_UPSTREAM_URL, a server-only env var); the browser goes through
+// the same-origin /api/commerce-proxy bridge, so the upstream address never reaches client code.
 //
 // MARKET_UNDERWORLD_STORE_ID is the real store provisioned in commerce-service's
 // production database for this app (see docs/backend.json for provenance).
 
-const COMMERCE_API_BASE = process.env.NEXT_PUBLIC_COMMERCE_API_BASE ?? 'https://api.baalvion.com/api/v1/commerce';
+const COMMERCE_API_BASE = process.env.COMMERCE_UPSTREAM_URL ?? '';
+const PROXY_BASE = '/api/commerce-proxy';
 export const MARKET_UNDERWORLD_STORE_ID = process.env.NEXT_PUBLIC_MU_STORE_ID ?? '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c';
 
 export interface StorefrontProduct {
@@ -59,7 +59,8 @@ interface StorefrontListResponse {
 }
 
 async function commerceFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
-  const url = new URL(`${COMMERCE_API_BASE}${path}`);
+  const isServer = typeof window === 'undefined';
+  const url = isServer ? new URL(`${COMMERCE_API_BASE}${path}`) : new URL(`${PROXY_BASE}${path}`, window.location.origin);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   const res = await fetch(url.toString(), { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`commerce API ${path} failed: ${res.status}`);

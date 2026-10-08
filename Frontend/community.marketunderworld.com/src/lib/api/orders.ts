@@ -70,7 +70,7 @@ export interface CreateOrderInput {
   shippingAddress?: OrderAddressInput | null;
   idempotencyKey?: string;
   // returnUrl (this storefront's own checkout page origin) lets redirect-based gateways
-  // (Stripe/PayU) bounce the shopper back HERE instead of a different Baalvion site's checkout —
+  // (Stripe/PayU) bounce the shopper back HERE instead of a different site's checkout —
   // see order-service's paymentProvider.js/payuReturnRoutes.js for how it's consumed.
   metadata?: { returnUrl?: string };
 }
@@ -150,10 +150,9 @@ async function orderFetchPaginated<T>(path: string): Promise<PaginatedResult<T>>
 
 // Store-scoped order queue (requires store_viewer+ role on storeId — sellers get this via
 // ops_manager, granted on approval; see commerce-service's sellerApplicationService.js).
-// NOTE: this is store-wide, not per-seller — Market Underworld's shared-catalog model means an
-// order can contain another seller's products too. The seller order-fulfillment page filters/
-// highlights by product ownership client-side; true per-seller order isolation would require
-// splitting orders by seller at checkout, which order-service does not do today.
+// NOTE: this is store-wide, so it is for platform admins only — sellers no longer hold the role
+// that allows it. Sellers use listMySales / setSaleStatus / addSaleShipment below, which
+// order-service scopes to orders containing the caller's own products.
 export async function listStoreOrders(storeId: string, opts: { status?: string; page?: number; limit?: number; search?: string } = {}): Promise<PaginatedResult<Order>> {
   const params = new URLSearchParams();
   if (opts.status) params.set('status', opts.status);
@@ -290,4 +289,45 @@ export async function addToWishlist(storeId: string, productId: string, variantI
 export async function removeFromWishlist(storeId: string, productId: string, variantId?: string | null): Promise<Wishlist> {
   const qs = variantId ? `?variantId=${encodeURIComponent(variantId)}` : '';
   return wishlistFetch<Wishlist>(`/stores/${storeId}/mine/items/${productId}${qs}`, { method: 'DELETE' });
+}
+
+// ── Seller's own sales (buyer details + buyer ratings) ──────────────────────────────────────────
+// Unlike listStoreOrders above, this is scoped server-side to lines of the caller's own products.
+export interface SellerSale {
+  id: string;
+  orderNumber: string;
+  status: Order['status'];
+  paymentStatus: Order['paymentStatus'];
+  currencyCode: string;
+  createdAt: string;
+  shippingAddress: Partial<OrderAddressInput> | null;
+  items: { id: string; productId: string | null; name: string; sku: string; quantity: number; price: string }[];
+  buyer: {
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    memberNumber: string | null;
+    paidOrders: number;
+    ratingAverage: number | null;
+    ratingCount: number;
+  };
+  myRating: { rating: number; comment: string | null } | null;
+  soleSeller: boolean;
+  canRateBuyer: boolean;
+}
+
+export async function listMySales(storeId: string): Promise<SellerSale[]> {
+  return orderFetch<SellerSale[]>(`/stores/${storeId}/seller/orders?limit=100`);
+}
+
+export async function rateBuyer(storeId: string, orderId: string, rating: number, comment?: string): Promise<void> {
+  await orderFetch(`/stores/${storeId}/seller/orders/${orderId}/rate-buyer`, { method: 'POST', body: JSON.stringify({ rating, comment: comment || undefined }) });
+}
+
+export async function setSaleStatus(storeId: string, orderId: string, status: 'confirmed' | 'processing' | 'shipped' | 'delivered'): Promise<void> {
+  await orderFetch(`/stores/${storeId}/seller/orders/${orderId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+}
+
+export async function addSaleShipment(storeId: string, orderId: string, body: { carrier: string; trackingNumber: string }): Promise<void> {
+  await orderFetch(`/stores/${storeId}/seller/orders/${orderId}/shipments`, { method: 'POST', body: JSON.stringify(body) });
 }

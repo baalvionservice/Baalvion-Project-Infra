@@ -43,8 +43,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Baalvion | Elite Global Trade Network",
-    template: "%s | Baalvion"
+    default: "Hell Road",
+    template: "%s | Hell Road"
   },
   description: "The world's premier secure intelligence node for global knowledge exchange and commodity trade. Verified operators only.",
   // This app deploys to community.marketunderworld.com (wrangler worker
@@ -56,11 +56,11 @@ export const metadata: Metadata = {
   // canonical link and search engines were left to guess which URL is authoritative.
   alternates: { canonical: '/' },
   openGraph: {
-    title: "Baalvion",
-    description: "Secure Trade & Intelligence Node",
+    title: "Hell Road",
+    description: "Underground community",
     type: "website",
     url: "https://community.marketunderworld.com",
-    siteName: "Baalvion",
+    siteName: "Hell Road",
   },
 };
 

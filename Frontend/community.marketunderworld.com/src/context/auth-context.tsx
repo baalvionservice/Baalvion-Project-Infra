@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { gatewayAuth, GatewayIdentity } from '@/lib/auth/gateway-session';
+import { getMyMember } from '@/lib/api/members';
 
 interface AuthContextType {
   user: GatewayIdentity | null;
@@ -31,6 +32,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     })();
   }, [refresh]);
+
+  // Everyone who signs in gets their permanent member number the first time we see them. The call
+  // creates it on demand; once per browser session is enough.
+  useEffect(() => {
+    if (!user) return;
+    try {
+      if (sessionStorage.getItem('mu_member_ensured') === user.id) return;
+      sessionStorage.setItem('mu_member_ensured', user.id);
+    } catch { /* storage blocked: just call it */ }
+    getMyMember().catch(() => { /* not critical here; the dashboard retries */ });
+  }, [user]);
 
   const login = useCallback(async (email: string, password: string) => {
     const identity = await gatewayAuth.login(email, password);

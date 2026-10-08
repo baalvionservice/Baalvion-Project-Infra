@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // oauth-service's public authorize endpoint. Called server-to-server only, never rendered
 // as a browser link — the request carries this site's own Bearer access token.
-const OAUTH_AUTHORIZE_URL = 'https://api.baalvion.com/oidc-provider/oauth/authorize';
+const OAUTH_AUTHORIZE_URL = process.env.OAUTH_AUTHORIZE_URL ?? '';
 
 /**
  * Bridges NodeBB's (or any relying party's) OAuth authorization request to oauth-service.

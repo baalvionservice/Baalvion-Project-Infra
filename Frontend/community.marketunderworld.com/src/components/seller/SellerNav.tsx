@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Package, FolderTree, ClipboardList } from "lucide-react"
+import { Package, FolderTree, KeyRound, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV = [
   { name: "Listings", path: "/seller/listings", icon: Package },
-  { name: "Orders", path: "/seller/orders", icon: ClipboardList },
+  { name: "Orders & Buyers", path: "/seller/sales", icon: Users },
   { name: "Categories", path: "/seller/categories", icon: FolderTree },
+  { name: "Access & Tokens", path: "/seller/access", icon: KeyRound },
 ];
 
 // Lightweight top nav for the seller listing-management surfaces (/seller/listings,

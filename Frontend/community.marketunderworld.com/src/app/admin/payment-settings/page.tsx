@@ -54,7 +54,7 @@ export default function PaymentSettingsPage() {
     <div className="p-10 space-y-10 max-w-3xl">
       <header>
         <h1 className="text-4xl font-bold tracking-tight mb-2 text-white">Payment Settings</h1>
-        <p className="text-text-muted font-medium">Controls checkout for this storefront's own product listings only — no other Baalvion site is affected.</p>
+        <p className="text-text-muted font-medium">Controls checkout for this storefront's own product listings only.</p>
       </header>
 
       <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl text-xs text-text-secondary">

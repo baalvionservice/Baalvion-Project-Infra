@@ -9,7 +9,7 @@ export function BaalFooter() {
           <div className="relative w-64 h-32 overflow-hidden rounded-md border border-white/5 opacity-70 hover:opacity-100 transition-opacity">
             <Image 
               src="/logo.jpg" 
-              alt="Baalvion Logo" 
+              alt="Hell Road" 
               fill
               style={{ objectFit: 'contain' }}
             />
@@ -22,7 +22,7 @@ export function BaalFooter() {
           <Link href="/contact" className="hover:text-red-400 transition-colors">Contact</Link>
         </div>
         <p className="text-sm text-gray-600 font-sans tracking-wide">
-          © {new Date().getFullYear()} BAALVION NETWORK. ALL RIGHTS RESERVED.
+          © {new Date().getFullYear()} HELL ROAD.
         </p>
       </div>
     </footer>

@@ -9,7 +9,6 @@ import {
   Check,
   ArrowRight,
   ArrowLeft,
-  Camera,
   Plus,
   Sparkles,
   Info,
@@ -24,7 +23,7 @@ import { useRouter } from 'next/navigation'
 import { submitSellerApplication, listMySellerApplications, type SellerApplication } from '@/lib/api/commerce-admin'
 
 const STEPS = [
-  "Welcome", "Store", "Appearance", "Product", "Identity", "Crypto", "Policies", "Launch"
+  "Welcome", "Store", "Appearance", "Products", "Identity", "Crypto", "Policies", "Launch"
 ]
 
 // countryCode/currencyCode must be real ISO codes — commerce-service's createStoreSchema
@@ -71,9 +70,6 @@ export default function SellerOnboarding() {
     banner: null,
     color: '#00E676',
     description: '',
-    productName: '',
-    price: '',
-    stock: '',
     legalFullName: '',
     dateOfBirth: '',
     phoneNumber: '',
@@ -392,18 +388,6 @@ function StoreAppearance({ data, setAnswers, onNext, onPrev }: any) {
 
         <div className="space-y-8">
           <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Store Logo</label>
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-[2rem] bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center cursor-pointer hover:border-[#00E676]/50 transition-colors">
-                <Camera className="w-8 h-8 text-gray-600" />
-              </div>
-              <div className="text-xs text-gray-500 font-medium">
-                Upload a square logo. <br />PNG, JPG up to 2MB.
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Brand Color</label>
             <div className="flex gap-3">
               {['#00E676', '#6C63FF', '#00D4FF', '#FF9500', '#FF6584', '#FFD600'].map(c => (
@@ -467,68 +451,40 @@ function StoreAppearance({ data, setAnswers, onNext, onPrev }: any) {
   )
 }
 
-function FirstProduct({ data, setAnswers, onNext, onPrev }: any) {
+function FirstProduct({ onNext, onPrev }: any) {
+  // Nothing is collected here on purpose. Products need an approved seller account and an unlocked
+  // category, and photos are uploaded on the listing itself, so this step explains the path instead
+  // of asking for details that would be thrown away.
+  const steps = [
+    { n: 1, title: 'Your application is reviewed', body: 'An admin checks your details. You will be notified when it is approved.' },
+    { n: 2, title: 'Unlock a category', body: 'A one-time $2,000 payment in USDT, Bitcoin or Binance Pay unlocks one product category. It is not refundable.' },
+    { n: 3, title: 'Add your first listing', body: 'In Listings you enter the name, price, stock and upload product photos.' },
+    { n: 4, title: 'Listing review, then live', body: 'An admin approves the listing before buyers can see it.' },
+  ]
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="max-w-2xl mx-auto space-y-12"
     >
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-bold">📦 Add First Product</h2>
-          <p className="text-gray-500">Let's get your shop started with one item</p>
-        </div>
-        <button onClick={onNext} className="text-xs font-bold text-gray-500 hover:text-white mt-4">Skip for now →</button>
+      <div className="space-y-2">
+        <h2 className="text-4xl font-bold">📦 Adding products</h2>
+        <p className="text-gray-500">You will add products and photos after your application is approved. Here is how it works.</p>
       </div>
 
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Product Name</label>
-          <Input 
-            value={data.productName}
-            onChange={(e) => setAnswers({ ...data, productName: e.target.value })}
-            placeholder="e.g. iPhone 16 Pro 256GB"
-            className="h-14 bg-black/40 border-white/10" 
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Price (USDT)</label>
-            <Input 
-              value={data.price}
-              onChange={(e) => setAnswers({ ...data, price: e.target.value })}
-              placeholder="1200"
-              className="h-14 bg-black/40 border-white/10 font-bold" 
-            />
-            {data.price && <div className="text-[9px] text-gray-500 font-bold uppercase">≈ {(Number(data.price) / 2900).toFixed(4)} ETH</div>}
-          </div>
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock</label>
-            <Input 
-              value={data.stock}
-              onChange={(e) => setAnswers({ ...data, stock: e.target.value })}
-              placeholder="10"
-              className="h-14 bg-black/40 border-white/10 font-bold" 
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Product Images</label>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="aspect-square rounded-2xl bg-white/5 border-2 border-dashed border-[#00E676]/30 flex items-center justify-center cursor-pointer">
-              <Plus className="w-6 h-6 text-gray-600" />
+      <ol className="space-y-4">
+        {steps.map((st) => (
+          <li key={st.n} className="flex gap-4 p-5 rounded-2xl bg-white/5 border border-white/5">
+            <span className="w-8 h-8 rounded-full bg-[#00E676]/15 text-[#00E676] flex items-center justify-center font-bold text-sm shrink-0">{st.n}</span>
+            <div>
+              <div className="font-bold text-white">{st.title}</div>
+              <p className="text-sm text-gray-500">{st.body}</p>
             </div>
-            {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-square rounded-2xl bg-white/5 border border-white/5" />
-            ))}
-          </div>
-        </div>
-      </div>
+          </li>
+        ))}
+      </ol>
 
-      <div className="pt-8 flex gap-4">
+      <div className="pt-4 flex gap-4">
         <NexusButton variant="outline" className="flex-1 h-14 border-white/10" onClick={onPrev}>Back</NexusButton>
         <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext}>Continue</NexusButton>
       </div>
@@ -737,7 +693,6 @@ function LaunchReview({ data, onLaunch, launching, launchError, onPrev }: any) {
               { label: 'Marketplace Category', val: data.category[0], status: 'complete' },
               { label: 'Identity Verified', val: 'Basic Level', status: 'complete' },
               { label: 'Payout Method', val: `${data.payoutCoin} (${data.payoutSchedule})`, status: 'complete' },
-              { label: 'Initial Product', val: data.productName || 'None listed', status: data.productName ? 'complete' : 'optional' },
               { label: 'Logo & Branding', val: 'Default theme', status: 'optional' },
             ].map((item, i) => (
               <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">

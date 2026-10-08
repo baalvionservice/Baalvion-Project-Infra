@@ -36,7 +36,7 @@ export function BaalHeader() {
           <a href="/forum/category/gaming-zone" onClick={(e) => handleScaryClick(e, "/forum/category/gaming-zone")} className="cursor-pointer hover:text-red-400 transition-colors">Gaming</a>
           <span className="opacity-30">|</span>
           <span className="text-amber-400 font-semibold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> Baalvion Network
+            <Sparkles className="w-3 h-3" /> Hell Road
           </span>
         </div>
         <div className="flex items-center gap-4">
@@ -53,7 +53,7 @@ export function BaalHeader() {
             <div className="relative w-32 h-10 overflow-hidden rounded-md border border-white/10 shadow-sm">
               <Image 
                 src="/logo.jpg" 
-                alt="Baalvion Logo" 
+                alt="Hell Road" 
                 fill
                 style={{ objectFit: 'cover' }}
                 priority
