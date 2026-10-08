@@ -66,15 +66,29 @@ async function isStoreStaff(req) {
         const store = await resolveStoreScope(storeId, { token });
         if (!store) return false;
         const cap = await scope.resolveStoreCapability({ userId: req.auth.userId, token, store, jwtRoles: jwtRolesOf(req) });
-        return !!cap && cap.level > 0;
+        return !!cap && cap.level >= minStaffLevel(storeId);
     } catch {
         return false; // RBAC unreachable → not staff; ownership still governs access.
     }
 }
 
+const { minStaffLevel: minLevelFor, blocksSellerTier } = require('../service/marketplaceAccess');
+const minStaffLevel = (storeId) => minLevelFor(storeId, config.marketplace.storeId);
+
+function requireStoreRole(minRole) {
+    const inner = pep.requireStoreRole(minRole);
+    return (req, res, next) => inner(req, res, (err) => {
+        if (err) return next(err);
+        if (blocksSellerTier(req.params && req.params.storeId, req.storeLevel, config.marketplace.storeId)) {
+            return next(new AppError('FORBIDDEN', 'Marketplace sellers manage orders through the seller order endpoints', 403));
+        }
+        return next();
+    });
+}
+
 module.exports = {
     loadStoreRole: pep.loadStoreRole,
-    requireStoreRole: pep.requireStoreRole,
+    requireStoreRole,
     loadAccessScope: pep.loadAccessScope,
     requirePlatformAdmin,
     isStoreStaff,

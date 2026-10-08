@@ -1,6 +1,7 @@
 'use strict';
 const crypto = require('crypto');
 const { Op, QueryTypes } = require('sequelize');
+const { ensureBuyerCustomer } = require('./buyerCustomer');
 const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, OrdersShipment, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
@@ -414,7 +415,8 @@ async function reserveInventory(t, storeId, items) {
 }
 
 async function createOrder(storeId, body, actor) {
-    const { customerId, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+    let { customerId } = body;
+    const { discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
     // shippingAmount is NEVER taken from the client — same trust boundary as price/tax below
     // (a client could otherwise checkout with $0 shipping by simply omitting/zeroing the field).
 
@@ -453,6 +455,11 @@ async function createOrder(storeId, body, actor) {
         if (cust.userId == null && actor && actor.userId != null) {
             await OrdersCustomer.update({ userId: actor.userId }, { where: { id: customerId, storeId, userId: null } });
         }
+    } else if (actor && actor.userId != null) {
+        // The storefront checkout sends no customerId. Without a customer row the order has no
+        // buyer account: it never shows in "my orders", the buyer's reviews can't be marked
+        // verified, and sellers can't see or rate who bought. Give signed-in buyers one here.
+        customerId = await ensureBuyerCustomer(storeId, actor.userId, shippingAddress || billingAddress);
     }
 
     // ── Idempotency / replay safety (Phase 4) ───────────────────────────────────

@@ -3,6 +3,7 @@ const { Router } = require('express');
 const { authMiddleware, optionalAuth } = require('../middleware/authMiddleware');
 const orderRoutes = require('./orderRoutes');
 const customerRoutes = require('./customerRoutes');
+const sellerOrderRoutes = require('./sellerOrderRoutes');
 const cartRoutes = require('./cartRoutes');
 const returnRoutes = require('./returnRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
@@ -44,6 +45,7 @@ router.use('/orders/stores/:storeId/reconciliation', authMiddleware, reconciliat
 // Guest ownership is enforced in-service via the signed X-Cart-Session (same mechanism as carts).
 router.use('/orders/stores/:storeId/orders', optionalAuth, orderRoutes);
 router.use('/orders/stores/:storeId/customers', authMiddleware, customerRoutes);
+router.use('/orders/stores/:storeId/seller', authMiddleware, sellerOrderRoutes);
 // Carts support guest checkout: optionalAuth admits anonymous shoppers; ownership is enforced
 // in-service via a signed guest session (X-Cart-Session) or the authenticated userId.
 router.use('/orders/stores/:storeId/carts', optionalAuth, cartRoutes);

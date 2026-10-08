@@ -20,6 +20,11 @@ module.exports = {
         audience:  process.env.JWT_AUDIENCE || 'baalvion-platform',
         jwksUri:   process.env.JWKS_URI     || null,
     },
+    // The shared marketplace store. Sellers hold a store role there (needed to manage their own
+    // listings), so on this store the store-wide order routes need full store-admin capability.
+    marketplace: {
+        storeId: process.env.MARKETPLACE_STORE_ID || '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c',
+    },
     db: {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 5432),
