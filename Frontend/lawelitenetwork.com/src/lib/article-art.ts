@@ -1,7 +1,7 @@
 import { articleArtDataUri, personSilhouetteDataUri } from '@baalvion/illustrations';
 import bundledSlugs from '@/data/bundled-article-slugs.json';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 // `pnpm run generate:article-art` (wired into `build`) writes one PNG per bundled
 // article and the matching slug list below — see scripts/generate-article-art.ts.
 // A generated list, not a filesystem check (which would pull Node's `fs` into the

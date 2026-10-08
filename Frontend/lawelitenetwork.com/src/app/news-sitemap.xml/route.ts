@@ -12,7 +12,7 @@
 import { cmsGetNews } from '@/lib/cms';
 import { newsUrl } from '@/lib/news-url';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const PUBLICATION_NAME = 'Law Elite Network';
 const RECENCY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000; // Google News: only the last 2 days
 

@@ -3,7 +3,7 @@ import { brandTitle, clampDescription } from '@/lib/seo/brand-title';
 import { JsonLd, breadcrumbLd } from '@/lib/seo/json-ld';
 import { getMergedCourtBySlug } from '@/lib/legal-server';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 export async function generateMetadata(

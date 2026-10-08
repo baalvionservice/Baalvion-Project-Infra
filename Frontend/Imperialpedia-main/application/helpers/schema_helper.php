@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 if (!function_exists('render_website_schema')) {
-    function render_website_schema($site_name = 'Imperialpedia', $site_url = 'https://imperialpedia.com') {
+    function render_website_schema($site_name = 'Imperialpedia', $site_url = 'https://www.imperialpedia.com') {
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => 'WebSite',
@@ -23,7 +23,7 @@ if (!function_exists('render_website_schema')) {
 }
 
 if (!function_exists('render_organization_schema')) {
-    function render_organization_schema($org_name = 'Imperialpedia', $site_url = 'https://imperialpedia.com', $logo_url = '') {
+    function render_organization_schema($org_name = 'Imperialpedia', $site_url = 'https://www.imperialpedia.com', $logo_url = '') {
         $logo = !empty($logo_url) ? $logo_url : rtrim($site_url, '/') . '/assets/img/logo.png';
         $schema = [
             '@context' => 'https://schema.org',

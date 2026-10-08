@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Topics';
 const description = 'Cross-cutting subjects tagged automatically across every article on Law Elite Network.';
 

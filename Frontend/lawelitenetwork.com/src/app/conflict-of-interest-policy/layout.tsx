@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Conflict of Interest Policy';
 const description = "How Law Elite Network separates its commercial advertising and sponsorship relationships from independent editorial judgment, and how personal conflicts of interest are disclosed.";
 export const metadata: Metadata = {

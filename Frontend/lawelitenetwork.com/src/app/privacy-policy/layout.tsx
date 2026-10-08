@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Privacy Policy';
 const description = "Law Elite Network privacy policy — how we collect, use, and protect your data.";
 export const metadata: Metadata = {

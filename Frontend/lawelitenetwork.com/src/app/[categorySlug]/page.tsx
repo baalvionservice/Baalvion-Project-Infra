@@ -39,7 +39,7 @@ const ENTERTAINMENT_ENTITY_TYPE_MAP: Record<string, EntertainmentTypeSlug[]> = {
   music: ['music-release', 'album', 'song'],
 };
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
 // because that file is 'use client' and its export doesn't survive an import
 // into this server component (resolved to a client-ref stub with no keys).

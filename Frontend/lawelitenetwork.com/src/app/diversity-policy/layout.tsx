@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Diversity Policy';
 const description = "Law Elite Network's commitment to representing diverse subjects, traditions, and voices across our coverage and contributor roster.";
 export const metadata: Metadata = {

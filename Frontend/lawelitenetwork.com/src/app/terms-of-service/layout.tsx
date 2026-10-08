@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Terms of Service';
 const description = "Law Elite Network terms of service governing use of the platform.";
 export const metadata: Metadata = {

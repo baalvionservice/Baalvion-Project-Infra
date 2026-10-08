@@ -8,7 +8,7 @@ import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import seedData from '../../../docs/seed-data.json';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 // Hard cap so a slow/hung law-service response falls back to the slug-derived
 // title instead of blocking metadata generation and the page render.

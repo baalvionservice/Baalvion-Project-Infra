@@ -14,7 +14,7 @@ CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/public
 NEXT_PUBLIC_CMS_WEBSITE_SLUG=law-elite-network
 
 # Optional: For canonical URLs in metadata
-# NEXT_PUBLIC_APP_URL=https://lawelitenetwork.com
+# NEXT_PUBLIC_APP_URL=https://www.lawelitenetwork.com
 ```
 
 #### `.env.example` (Created)
@@ -244,7 +244,7 @@ gtag('consent', 'default', {
 
 - [ ] **Check robots.txt**
   ```bash
-  curl https://lawelitenetwork.com/robots.txt
+  curl https://www.lawelitenetwork.com/robots.txt
   # Verify:
   # - Allows Googlebot ✓
   # - Allows Google-AdBot ✓
@@ -253,7 +253,7 @@ gtag('consent', 'default', {
 
 - [ ] **Check ads.txt**
   ```bash
-  curl https://lawelitenetwork.com/ads.txt
+  curl https://www.lawelitenetwork.com/ads.txt
   # Should output:
   # google.com, pub-7321711585180412, DIRECT, f08c47fec0942fa0
   ```
@@ -280,7 +280,7 @@ gtag('consent', 'default', {
 - [ ] **CSP Headers**
   ```bash
   # Check headers:
-  curl -I https://lawelitenetwork.com
+  curl -I https://www.lawelitenetwork.com
   # Verify Content-Security-Policy header allows:
   # - googlesyndication.com ✓
   # - doubleclick.net ✓

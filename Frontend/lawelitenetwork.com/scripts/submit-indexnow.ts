@@ -10,12 +10,12 @@
  *
  * Usage:
  *   INDEXNOW_KEY=... pnpm run submit:indexnow
- *   INDEXNOW_KEY=... SITE_URL=https://lawelitenetwork.com pnpm run submit:indexnow
+ *   INDEXNOW_KEY=... SITE_URL=https://www.lawelitenetwork.com pnpm run submit:indexnow
  *
  * The key must match a public/{key}.txt file already deployed at
  * https://{host}/{key}.txt (IndexNow's ownership proof) -- see public/*.txt.
  */
-const SITE_URL = (process.env.SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com').replace(/\/$/, '');
 const KEY = process.env.INDEXNOW_KEY?.trim();
 const BATCH_SIZE = 10000; // IndexNow's documented max urlList length per request.
 

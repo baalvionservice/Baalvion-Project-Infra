@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 
 const FETCH_TIMEOUT_MS = 8000;
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 function siteHostname(): string {
   try {
     return new URL(SITE_URL).hostname;

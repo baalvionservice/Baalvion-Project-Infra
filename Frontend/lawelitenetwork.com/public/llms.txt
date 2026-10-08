@@ -9,18 +9,18 @@
 
 ## Key sections
 
-- Practice areas: https://lawelitenetwork.com/law
-- Legal glossary (A–Z): https://lawelitenetwork.com/legal
-- Lawyer directory: https://lawelitenetwork.com/lawyers
-- Legal news: https://lawelitenetwork.com/news
-- Editorial standards: https://lawelitenetwork.com/editorial-standards
-- Editorial process: https://lawelitenetwork.com/editorial-process
+- Practice areas: https://www.lawelitenetwork.com/law
+- Legal glossary (A–Z): https://www.lawelitenetwork.com/legal
+- Lawyer directory: https://www.lawelitenetwork.com/lawyers
+- Legal news: https://www.lawelitenetwork.com/news
+- Editorial standards: https://www.lawelitenetwork.com/editorial-standards
+- Editorial process: https://www.lawelitenetwork.com/editorial-process
 
 ## Sitemaps
 
-- https://lawelitenetwork.com/sitemap.xml
-- https://lawelitenetwork.com/news-sitemap.xml
-- https://lawelitenetwork.com/feed.xml
+- https://www.lawelitenetwork.com/sitemap.xml
+- https://www.lawelitenetwork.com/news-sitemap.xml
+- https://www.lawelitenetwork.com/feed.xml
 
 ## Usage
 

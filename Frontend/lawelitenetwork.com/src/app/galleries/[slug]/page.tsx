@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getAllGalleries, getGalleryBySlug } from '@/lib/media-server';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 export const revalidate = 3600;
 

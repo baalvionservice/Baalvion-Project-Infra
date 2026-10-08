@@ -4,7 +4,7 @@ import { VideoHubView } from '@/components/videos/VideoHubView';
 import { getArticlesForEntity } from '@/lib/entity-articles';
 import { getShowPeople, getVideoHub } from '@/lib/videos-hub';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 export const revalidate = 900;
 export const dynamicParams = true;

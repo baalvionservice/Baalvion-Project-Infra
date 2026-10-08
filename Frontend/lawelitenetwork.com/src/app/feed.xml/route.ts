@@ -5,7 +5,7 @@ import { articleUrl } from "@/lib/article-url";
 // this on publish, so the window is only the no-webhook safety net.
 export const revalidate = 86400;
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || "https://lawelitenetwork.com";
+const SITE = process.env.NEXT_PUBLIC_APP_URL || "https://www.lawelitenetwork.com";
 
 const esc = (s: string): string =>
   s

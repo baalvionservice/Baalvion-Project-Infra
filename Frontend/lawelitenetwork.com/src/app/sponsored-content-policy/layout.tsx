@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Sponsored Content Policy';
 const description = "How Law Elite Network labels sponsored posts and featured placements, holds them to the same editorial bar, and distinguishes Verified status from paid placement.";
 export const metadata: Metadata = {

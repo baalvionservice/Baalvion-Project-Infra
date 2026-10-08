@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Advertise With Us';
 const description = "Reach a global audience of legal professionals and clients on Law Elite Network. Advertising and partnership opportunities.";
 export const metadata: Metadata = {

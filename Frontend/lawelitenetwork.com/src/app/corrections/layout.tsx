@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Corrections Policy';
 const description = "How to report an error on Law Elite Network and how we review, correct, and transparently timestamp updates to our legal content.";
 export const metadata: Metadata = {

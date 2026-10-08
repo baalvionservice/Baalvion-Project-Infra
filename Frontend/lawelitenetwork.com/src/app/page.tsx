@@ -23,7 +23,7 @@ import { getHomeFeed } from '@/lib/home-feed';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const TITLE = 'Law Elite Network | History, Culture, Technology & Education';
 const DESCRIPTION =
   'Law Elite Network explores the history, culture, language, entertainment, education, and technology surrounding law through informative stories, research, and accessible analysis.';

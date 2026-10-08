@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 /** Escapes "<" so a name or description can never close the script tag early. */
 export function JsonLd({ data }: { data: Record<string, unknown> }) {

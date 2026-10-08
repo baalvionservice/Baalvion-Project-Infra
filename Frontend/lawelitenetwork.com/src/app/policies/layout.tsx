@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Policies & Guidelines';
 const description = 'Every editorial, privacy, and site policy governing Law Elite Network in one place — privacy, terms, editorial standards, corrections, and more.';
 
