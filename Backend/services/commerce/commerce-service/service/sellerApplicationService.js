@@ -60,8 +60,11 @@ async function getApplication(id) {
  * store would be invisible to every buyer, since nothing in the storefront queries across
  * multiple stores. Every approved seller instead becomes a team member of that one shared
  * catalog: `product_manager` (create/edit/publish/delete listings — capability 80, below
- * store_admin's 100, so they can never touch store settings or the team roster) plus
- * `ops_manager` (fulfil orders for what they sell). Cross-seller tampering on the shared
+ * store_admin's 100, so they can never touch store settings or the team roster). Sellers are
+ * deliberately NOT given `ops_manager`: that role is store-wide, so it would let one seller list
+ * and change every other seller's orders and see their buyers. Order-side work goes through
+ * order-service's seller-scoped routes (/seller/orders...), which only ever touch orders that
+ * contain the caller's own products. Cross-seller tampering on the shared
  * catalog is blocked separately by requireProductOwner (commerceAccess.js) on every
  * product-mutating route — a product_manager can only touch products where
  * createdBy === their own user id.
@@ -73,7 +76,6 @@ async function approveApplication(authCtx, applicationId) {
 
     const storeId = config.marketplace.defaultStoreId;
     await storeService.addMember(storeId, { userId: application.applicantUserId, role: 'product_manager' }, authCtx.token);
-    await storeService.addMember(storeId, { userId: application.applicantUserId, role: 'ops_manager' }, authCtx.token);
 
     await application.update({
         status: 'approved',

@@ -5,6 +5,7 @@ const { AppError } = require('../utils/errors');
 const { demoteFromMock } = require('../utils/mockFlag');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
+const sellerBondService = require('./sellerBondService');
 const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
@@ -71,6 +72,9 @@ async function updateProduct(storeId, productId, userId, body) {
         const existing = await CommerceProduct.findOne({ where: { storeId, slug: body.slug, id: { [Op.ne]: productId } } });
         if (existing) throw new AppError('CONFLICT', 'Product slug already exists', 409);
     }
+    if (body.categoryId && body.categoryId !== product.categoryId && product.status !== 'draft') {
+        await sellerBondService.assertCanSellInCategory(product.createdBy, body.categoryId);
+    }
     await product.update({ ...body, lastEditedBy: userId });
     // An operator editing real details curates a mock filler into a real listing — clear its mock
     // markers so the cleanup script never removes it.
@@ -96,6 +100,7 @@ async function publishProduct(storeId, productId, userId) {
     const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
     if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
     if (!['draft', 'rejected'].includes(product.status)) throw new AppError('CONFLICT', 'Product must be a draft (or rejected listing) to submit for review', 409);
+    await sellerBondService.assertCanSellInCategory(product.createdBy, product.categoryId);
     await product.update({ status: 'pending_review', lastEditedBy: userId });
     await cache.del(cache.keys.product(productId));
     return product.toJSON();
@@ -161,7 +166,9 @@ async function bulkUpdate(storeId, userId, { ids, action, categoryId }) {
     const products = await CommerceProduct.findAll({ where: { id: { [Op.in]: ids }, storeId } });
     if (!products.length) throw new AppError('NOT_FOUND', 'No products found', 404);
     switch (action) {
-        case 'publish': await CommerceProduct.update({ status: 'published', publishedAt: new Date(), lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, storeId } }); break;
+        case 'publish':
+            for (const p of products) await sellerBondService.assertCanSellInCategory(p.createdBy, p.categoryId);
+            await CommerceProduct.update({ status: 'published', publishedAt: new Date(), lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, storeId } }); break;
         case 'archive': await CommerceProduct.update({ status: 'archived', lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, storeId } }); break;
         case 'delete': {
             const pub = products.filter(p => p.status === 'published');
@@ -170,6 +177,7 @@ async function bulkUpdate(storeId, userId, { ids, action, categoryId }) {
         }
         case 'assign_category':
             if (!categoryId) throw new AppError('VALIDATION_ERROR', 'categoryId required', 400);
+            for (const owner of new Set(products.map((p) => p.createdBy))) await sellerBondService.assertCanSellInCategory(owner, categoryId);
             await CommerceProduct.update({ categoryId, lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, storeId } }); break;
         default: throw new AppError('VALIDATION_ERROR', `Unknown action: ${action}`, 400);
     }

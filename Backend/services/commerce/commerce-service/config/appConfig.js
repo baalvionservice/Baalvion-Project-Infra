@@ -61,6 +61,19 @@ module.exports = {
     marketplace: {
         defaultStoreId: process.env.MARKETPLACE_STORE_ID || '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c',
     },
+    // Per-category seller payment (non-refundable; credited as non-withdrawable tokens). Paid in BTC or USDT to the platform wallets below; the
+    // addresses are deployment config, never committed.
+    sellerBond: {
+        amountUsd: Number(process.env.SELLER_BOND_USD || 2000),
+        addresses: {
+            BTC: process.env.SELLER_BOND_BTC_ADDRESS || '',
+            USDT: process.env.SELLER_BOND_USDT_ADDRESS || '',
+        },
+        usdtNetwork: process.env.SELLER_BOND_USDT_NETWORK || 'TRC20',
+        tokensPerUsd: Number(process.env.SELLER_TOKENS_PER_USD || 1),
+        adminChatCostTokens: Number(process.env.ADMIN_CHAT_COST_TOKENS || 5),
+        adminChatMinutes: Number(process.env.ADMIN_CHAT_MINUTES || 5),
+    },
     // RBAC service is the SINGLE SOURCE OF TRUTH for admin hierarchy + store-team roles.
     // Commerce is a Policy Enforcement Point: it forwards the caller's bearer token to
     // resolve their effective grants, and owns the country→store scope-chain resolution
