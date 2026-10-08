@@ -33,7 +33,7 @@ interface BreadcrumbsProps {
  * Subcategory is optional and only renders when the article actually
  * carries real data for it -- never fabricated.
  */
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 export function Breadcrumbs({ category, subcategory, articleTitle, categoryIsCurrentPage, hideBackLink }: BreadcrumbsProps) {
   // A CMS article's category slug isn't guaranteed to be one of the site's 8

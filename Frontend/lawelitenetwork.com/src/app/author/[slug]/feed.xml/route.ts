@@ -7,7 +7,7 @@ import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs'
 
 export const revalidate = 86400;
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');

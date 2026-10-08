@@ -4,7 +4,7 @@ import LawyerProfileClient from './LawyerProfileClient';
 // Server component: emits unique, indexable metadata + Attorney structured data for
 // every practitioner (core to ranking each lawyer globally), then renders the client UI.
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 // Hard cap so a slow/hung law-service response degrades to a "not found"
 // fallback instead of blocking metadata generation and the page render.

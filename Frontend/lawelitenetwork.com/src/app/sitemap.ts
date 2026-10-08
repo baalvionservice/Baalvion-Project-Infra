@@ -28,7 +28,7 @@ export const dynamic = 'force-dynamic';
 // routes instead of hanging the request.
 const FETCH_TIMEOUT_MS = 4000;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 interface TaxonomyRef { slug?: string }
 interface ArticleEntry {

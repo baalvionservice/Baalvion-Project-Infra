@@ -11,7 +11,7 @@ import { notifyFollowersOfPublish } from "@/lib/follow-notify";
  *
  *   POST /api/revalidate
  *   x-revalidate-secret: <REVALIDATE_SECRET>
- *   { "paths": ["/articles/some-slug"], "urls": ["https://lawelitenetwork.com/..."] }
+ *   { "paths": ["/articles/some-slug"], "urls": ["https://www.lawelitenetwork.com/..."] }
  */
 const DEFAULT_PATHS = ["/", "/articles", "/sitemap.xml"];
 

@@ -46,7 +46,7 @@ const sourceSerif = localFont({
   display: 'swap',
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network';
 
 // Search-console ownership proofs. Both no-op (render nothing) until the

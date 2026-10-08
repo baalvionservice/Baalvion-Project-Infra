@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { buildArticleMetadata } from './article-seo';
 import { buildAuthorLd } from './author-ld';
 
-const SITE = 'https://lawelitenetwork.com';
+const SITE = 'https://www.lawelitenetwork.com';
 
 /**
  * The retirement shrank the sitemap but not the index: 75 retired-category

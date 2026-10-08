@@ -36,7 +36,7 @@ import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs'
 import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const AD_SLOT_ID = '4123514154';
 
 async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> {

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { buildCitationIndex } from '@/lib/citation-index';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 // Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
 // this on publish, so the window is only the no-webhook safety net.
 export const revalidate = 86400;

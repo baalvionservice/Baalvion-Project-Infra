@@ -2,7 +2,7 @@
 """Crawl the site (sitemap + every internal link) and report anything broken.
 
   python3 scripts/check-site.py                       # http://localhost:8000
-  python3 scripts/check-site.py https://imperialpedia.com
+  python3 scripts/check-site.py https://www.imperialpedia.com
 
 Checks every page for: HTTP status, a canonical URL equal to the page's own URL, exactly one <h1>.
 Exit code 1 when something fails. Needs only the Python standard library.

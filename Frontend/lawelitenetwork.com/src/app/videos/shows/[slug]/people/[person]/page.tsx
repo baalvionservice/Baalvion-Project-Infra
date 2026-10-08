@@ -6,7 +6,7 @@ import { getArticlesForEntity } from '@/lib/entity-articles';
 import { showPersonKey } from '@/lib/videos-tagging';
 import { getShowPeople, getShowPerson, getVideoHub, personUrl } from '@/lib/videos-hub';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 export const revalidate = 900;
 export const dynamicParams = true;

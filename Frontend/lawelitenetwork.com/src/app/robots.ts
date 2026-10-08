@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 // Crawling is allowed by default, so no per-page Allow list is needed. The old
 // file repeated ~60 Allow lines for every one of 14 crawler groups (950 lines),

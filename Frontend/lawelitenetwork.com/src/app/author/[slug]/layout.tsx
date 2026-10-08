@@ -5,7 +5,7 @@ import { mergeArticles } from '@/data/law-content';
 import { resolvePersonImage } from '@/lib/article-art';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
 // comment): mirrors page.tsx's isKeptCategoryArticle. `hasArticles` below

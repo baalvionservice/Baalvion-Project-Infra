@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 const title = 'Editorial Process';
 const description = "How Law Elite Network produces accurate, expert-reviewed legal content — our editorial standards and review process.";
 export const metadata: Metadata = {

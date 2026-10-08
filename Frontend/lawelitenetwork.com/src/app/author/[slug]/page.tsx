@@ -18,7 +18,7 @@ import { AdSlot } from '@/components/ads/AdSlot';
 
 const AUTHOR_AD_SLOT_ID = '4123514154';
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.lawelitenetwork.com';
 
 const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
 function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
