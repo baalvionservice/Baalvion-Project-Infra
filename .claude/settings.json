@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(ssh baalvion-prod:*)", "Bash(docker:*)", "Bash(rsync:*)",
+      "Bash(ssh baalvion-prod:*)",
+      "Bash(ssh -o BatchMode=yes baalvion-prod:*)",
+      "Bash(ssh -o BatchMode=yes baalvion-prod:*)",
+      "Bash(ssh baalvion-prod:*)",
       "Bash(*)",
       "PowerShell(*)",
       "Read(*)",

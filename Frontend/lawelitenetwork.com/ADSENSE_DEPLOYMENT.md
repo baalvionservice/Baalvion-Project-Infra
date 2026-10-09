@@ -16,7 +16,7 @@ This document covers the complete production deployment of Google AdSense on Law
 - [x] Performance dashboard built
 
 ### Phase 2: Pre-Launch Verification
-- [ ] Verify publisher ID: `ca-pub-8968452296456450`
+- [ ] Verify publisher ID: `ca-pub-7321711585180412`
 - [ ] Create unique ad slots for each placement
 - [ ] Test ads in preview mode
 - [ ] Verify robots.txt accessibility

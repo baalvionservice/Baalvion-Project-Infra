@@ -1,46 +1,28 @@
 "use client"
 
 import { useState } from "react";
+import { submitVipTable } from "@/lib/api/nightlife";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { ChevronRight, Check, Star, Phone } from "lucide-react";
+import { Check, Phone } from "lucide-react";
 import { Club } from "@/data/clubs-data";
 import { Breadcrumbs } from "@/components/ui/breadcrumb";
+import { ClubPhoto } from "@/components/clubs/club-photo";
 
-const TABLE_PACKAGES = [
-  {
-    name: "Standard Table",
-    minimumSpend: "₹30,000",
-    location: "Dance Floor Adjacent",
-    capacity: "Up to 6 Guests",
-    bottles: "2 Bottles Minimum",
-    perks: ["Priority Entry", "Dedicated Waitstaff", "Ice & Mixers"],
-    popular: false,
-  },
-  {
-    name: "VIP Booth",
-    minimumSpend: "₹60,000",
-    location: "Elevated VIP Section",
-    capacity: "Up to 10 Guests",
-    bottles: "3 Bottles Minimum",
-    perks: ["Skip-the-Line Entry", "Dedicated Waitstaff", "Ice & Mixers", "Champagne Toast on Arrival"],
-    popular: true,
-  },
-  {
-    name: "Ultra Cabana",
-    minimumSpend: "₹1,20,000",
-    location: "Premium Cabana / Stage View",
-    capacity: "Up to 20 Guests",
-    bottles: "6 Bottles Minimum",
-    perks: ["VIP Host", "Skip-the-Line Entry", "Dedicated Butler Service", "Champagne Toast", "Custom Signage", "Photo Package"],
-    popular: false,
-  },
-];
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+const getTomorrow = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split("T")[0];
+};
 
 export function VipTablesClient({ club, state }: { club: Club; state: string }) {
   const [submitted, setSubmitted] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(TABLE_PACKAGES[1].name);
+  const [bookingRef, setBookingRef] = useState("");
+  const packages = club.vipPackages ?? [];
+  const [selectedPackage, setSelectedPackage] = useState(packages.find((p) => p.popular)?.name ?? packages[0]?.name ?? "");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -51,9 +33,81 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
     specialRequests: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const tomorrow = getTomorrow();
+
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useState(() => {
+    if (user?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: user.email }));
+    }
+  });
+
+  const sendConfirmationEmail = async (ref: string) => {
+    try {
+      await fetch("/api/send-booking-confirmation", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          kind: "vip_table",
+          clubName: club.name,
+          clubCity: club.city,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          visitDate: formData.dateAttending,
+          groupSize: Number(formData.groupSize),
+          tablePackage: selectedPackage || undefined,
+          notes: formData.specialRequests || undefined,
+          bookingRef: ref,
+        }),
+      });
+    } catch { /* email is best-effort — never block the flow */ }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+
+    // ── Date validation: must be at least tomorrow ──────────────────────────
+    if (!formData.dateAttending) {
+      setError("Please select a visit date.");
+      return;
+    }
+    const chosen = new Date(formData.dateAttending);
+    const todayEnd = new Date();
+    todayEnd.setHours(0, 0, 0, 0);
+    if (chosen <= todayEnd) {
+      setError("Visit date must be tomorrow or later. Same-day VIP requests are not accepted.");
+      return;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
+    setSubmitting(true);
+    try {
+      // Try real API first; fall back to local store
+      const booking = await submitVipTable(club.id, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        visitDate: formData.dateAttending,
+        groupSize: Number(formData.groupSize),
+        tablePackage: selectedPackage || undefined,
+        notes: formData.specialRequests || undefined,
+      });
+      setBookingRef(booking.id);
+      await sendConfirmationEmail(booking.id);
+      setSubmitted(true);
+    } catch (error: any) {
+      setError(error?.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const breadcrumbItems = [
@@ -80,7 +134,7 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
 
             {/* Hero Banner */}
             <div className="relative h-72 overflow-hidden">
-              <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+              <ClubPhoto src={club.image} name={club.name} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent flex flex-col justify-end p-8">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#ed6c2a] mb-2">VIP Table Reservations</span>
                 <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
@@ -96,20 +150,21 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                 {club.name} Table Reservations & Bottle Service
               </h2>
               <p className="text-[#555] leading-relaxed mb-4">
-                Book a VIP table at {club.name} in {club.city} for the ultimate nightlife experience. Enjoy premium bottle service, dedicated waitstaff, and guaranteed entry — no waiting in line. Fill in the request form to lock in your spot.
+                Request a VIP table at {club.name} in {club.city}. Submitting the form sends your request to the venue; it does not reserve or guarantee a table.
               </p>
               <p className="text-[#555] leading-relaxed">
-                All packages include priority entry, dedicated table service, and a VIP host. Minimums vary by date and section. We'll confirm availability and pricing within 24 hours of your request.
+                Minimums and inclusions vary by date and section, and the venue confirms availability and pricing with you directly.
               </p>
             </div>
 
-            {/* Package Cards */}
+            {/* Package Cards: shown only when the venue has published packages */}
+            {packages.length > 0 && (
             <div className="bg-white p-8 shadow-sm border border-gray-200">
               <h2 className="text-xl font-bold mb-6 text-[#111] uppercase tracking-wider border-b border-gray-100 pb-4">
                 Choose Your Package
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {TABLE_PACKAGES.map((pkg) => (
+                {packages.map((pkg) => (
                   <button
                     key={pkg.name}
                     onClick={() => setSelectedPackage(pkg.name)}
@@ -126,9 +181,9 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                     )}
                     <div className="text-lg font-bold text-[#111] mb-1">{pkg.name}</div>
                     <div className="text-2xl font-black text-[#ed6c2a] mb-3">{pkg.minimumSpend}</div>
-                    <div className="text-xs text-gray-500 mb-1">{pkg.location}</div>
-                    <div className="text-xs text-gray-500 mb-1">{pkg.capacity}</div>
-                    <div className="text-xs font-semibold text-[#333] mb-3">{pkg.bottles}</div>
+                    {pkg.location && <div className="text-xs text-gray-500 mb-1">{pkg.location}</div>}
+                    {pkg.capacity && <div className="text-xs text-gray-500 mb-1">{pkg.capacity}</div>}
+                    {pkg.bottles && <div className="text-xs font-semibold text-[#333] mb-3">{pkg.bottles}</div>}
                     <ul className="space-y-1">
                       {pkg.perks.map((perk) => (
                         <li key={perk} className="flex items-center gap-2 text-xs text-gray-600">
@@ -141,6 +196,7 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                 ))}
               </div>
             </div>
+            )}
 
             {/* Reservation Form */}
             <div className="bg-[#1a1a1a] p-8 shadow-sm" id="table-form">
@@ -148,22 +204,47 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                 RESERVE YOUR TABLE
               </h2>
               <p className="text-gray-400 text-sm text-center mb-8">
-                Complete the form below and our VIP host will confirm within 24 hours.
+                Complete the form below and the venue will get back to you to confirm.
               </p>
 
               {submitted ? (
-                <div className="bg-green-900/30 border border-green-500/40 text-green-300 p-6 text-center">
+              <div className="bg-green-900/30 border border-green-500/40 text-green-300 p-6 text-center rounded-xl">
                   <Check className="w-10 h-10 mx-auto mb-3 text-green-400" />
-                  <h3 className="text-xl font-bold mb-2 text-white">Reservation Request Received!</h3>
-                  <p className="text-sm">Your VIP table request for {club.name} has been submitted. Our VIP host will contact you within 24 hours to confirm your booking.</p>
+                  <h3 className="text-xl font-bold mb-2 text-white">Reservation Request Received! 🎉</h3>
+                  <p className="text-sm mb-3">Your VIP table request for <strong className="text-white">{club.name}</strong> has been submitted. The venue will contact you to confirm availability and pricing; nothing is charged at this stage.</p>
+                  {bookingRef && (
+                    <p className="text-xs bg-green-900/40 border border-green-700/40 px-3 py-2 rounded-lg font-mono text-green-300 mb-4">
+                      Booking Ref: <strong>{bookingRef}</strong>
+                    </p>
+                  )}
+                  <Link
+                    href="/clubs/my-bookings"
+                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm mt-1"
+                  >
+                    📋 View My Bookings
+                  </Link>
+                </div>
+              ) : !isAuthenticated && !isLoading ? (
+                <div className="bg-[#2a2a2a] p-8 text-center rounded-xl space-y-6">
+                  <h3 className="text-2xl font-bold text-white">
+                    SIGN IN TO RESERVE
+                  </h3>
+                  <p className="text-gray-400">You must be logged into your account to request VIP table service for {club.name}.</p>
+                  <div className="pt-4">
+                    <Link href={`/auth/signin?redirect=${encodeURIComponent(`/clubs/${state}/${club.id}/vip-tables`)}`} className="inline-flex items-center gap-2 bg-[#ed6c2a] hover:bg-[#d55b1f] text-white font-bold px-8 py-3 rounded-xl transition-colors">
+                      Sign In
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Selected Package Display */}
-                  <div className="bg-[#2a2a2a] border border-[#ed6c2a]/30 p-4 mb-6">
-                    <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Selected Package</p>
-                    <p className="text-white font-bold">{selectedPackage} — {TABLE_PACKAGES.find(p => p.name === selectedPackage)?.minimumSpend} minimum</p>
-                  </div>
+                  {selectedPackage && (
+                    <div className="bg-[#2a2a2a] border border-[#ed6c2a]/30 p-4 mb-6">
+                      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Selected Package</p>
+                      <p className="text-white font-bold">{selectedPackage} — {packages.find(p => p.name === selectedPackage)?.minimumSpend} minimum</p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -216,10 +297,12 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                       <label className="text-xs text-gray-400 uppercase tracking-wide block mb-1">Event Date *</label>
                       <input
                         type="date" required
+                        min={tomorrow}
                         value={formData.dateAttending}
                         onChange={e => setFormData({ ...formData, dateAttending: e.target.value })}
                         className="w-full bg-[#303030] text-[#bfbfbf] border-0 p-3 text-sm outline-none focus:ring-1 focus:ring-[#ed6c2a]"
                       />
+                      <p className="text-xs text-gray-500 mt-1">Future dates only. Same-day VIP not accepted.</p>
                     </div>
                     <div>
                       <label className="text-xs text-gray-400 uppercase tracking-wide block mb-1">Group Size *</label>
@@ -229,8 +312,8 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                         onChange={e => setFormData({ ...formData, groupSize: e.target.value })}
                         className="w-full bg-[#303030] text-[#bfbfbf] border-0 p-3 text-sm outline-none focus:ring-1 focus:ring-[#ed6c2a] cursor-pointer"
                       >
-                        {[2,3,4,5,6,7,8,10,12,15,20,25,"20+"].map(n => (
-                          <option key={n} value={n}>{n} people</option>
+                        {[2,3,4,5,6,7,8,10,12,15,20,25,30].map(n => (
+                          <option key={n} value={n}>{n === 30 ? "25+" : n} people</option>
                         ))}
                       </select>
                     </div>
@@ -247,11 +330,14 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                     />
                   </div>
 
+                  {error && <p role="alert" className="text-sm text-red-400 font-medium">{error}</p>}
+
                   <button
                     type="submit"
-                    className="w-full bg-[#f96a30] hover:bg-[#e05520] text-black font-bold text-base py-4 transition-colors uppercase tracking-widest mt-2"
+                    disabled={submitting}
+                    className="w-full bg-[#f96a30] hover:bg-[#e05520] disabled:opacity-60 text-black font-bold text-base py-4 transition-colors uppercase tracking-widest mt-2"
                   >
-                    Request VIP Table
+                    {submitting ? "Submitting..." : "Request VIP Table"}
                   </button>
 
                   <p className="text-center text-xs text-gray-500 mt-2">
@@ -305,7 +391,7 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
               <h4 className="text-sm font-bold uppercase tracking-widest border-b border-gray-100 pb-4 mb-4">
                 Club Details
               </h4>
-              <img src={club.image} alt={club.name} className="w-full h-auto mb-4 object-cover aspect-video" />
+              <ClubPhoto src={club.image} name={club.name} className="w-full h-auto mb-4 object-cover aspect-video" />
               <div className="space-y-2 text-sm text-[#555]">
                 <p><strong className="text-[#111]">Venue:</strong> {club.name}</p>
                 <p><strong className="text-[#111]">City:</strong> {club.city}</p>

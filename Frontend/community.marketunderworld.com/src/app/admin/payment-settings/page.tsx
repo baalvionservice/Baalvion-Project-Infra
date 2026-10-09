@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getStoreAdmin, updateStore } from '@/lib/api/commerce-admin';
 import { MARKET_UNDERWORLD_STORE_ID } from '@/lib/api/commerce';
 
-type PaymentMode = 'standard' | 'crypto_only';
+type PaymentMode = 'standard' | 'crypto_only' | 'points';
 
 export default function PaymentSettingsPage() {
   const { toast } = useToast();
@@ -21,7 +21,7 @@ export default function PaymentSettingsPage() {
     getStoreAdmin(MARKET_UNDERWORLD_STORE_ID)
       .then((store) => {
         const meta = (store.meta || {}) as { paymentMode?: PaymentMode; cryptoWallets?: Record<string, string> };
-        setMode(meta.paymentMode === 'crypto_only' ? 'crypto_only' : 'standard');
+        setMode(meta.paymentMode === 'crypto_only' || meta.paymentMode === 'points' ? meta.paymentMode : 'standard');
         setWallets({ BTC: '', ETH: '', USDT: '', ...(meta.cryptoWallets || {}) });
       })
       .catch(() => toast({ variant: 'destructive', title: "Couldn't load payment settings" }))
@@ -34,7 +34,7 @@ export default function PaymentSettingsPage() {
       await updateStore(MARKET_UNDERWORLD_STORE_ID, {
         meta: { paymentMode: mode, cryptoWallets: wallets },
       });
-      toast({ title: 'Payment settings saved', description: mode === 'crypto_only' ? 'Checkout now shows crypto payment only.' : 'Checkout uses standard payment gateways.' });
+      toast({ title: 'Payment settings saved', description: mode === 'points' ? 'Checkout now takes wallet points.' : mode === 'crypto_only' ? 'Checkout now shows crypto payment only.' : 'Checkout uses standard payment gateways.' });
     } catch (err) {
       toast({ variant: 'destructive', title: "Couldn't save", description: err instanceof Error ? err.message : 'Please try again.' });
     } finally {
@@ -64,7 +64,14 @@ export default function PaymentSettingsPage() {
       <ListingCard className="p-8 space-y-8 border-brand-border bg-brand-surface">
         <div className="space-y-4">
           <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Checkout Mode</label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            <button
+              onClick={() => setMode('points')}
+              className={`p-6 rounded-xl border text-left transition-all ${mode === 'points' ? 'bg-brand-green/10 border-brand-green text-white' : 'bg-brand-void border-brand-border text-text-muted'}`}
+            >
+              <div className="font-bold mb-1">Wallet points</div>
+              <div className="text-xs opacity-70">Buyers load their wallet with crypto (you confirm it), then pay for orders with points</div>
+            </button>
             <button
               onClick={() => setMode('standard')}
               className={`p-6 rounded-xl border text-left transition-all ${mode === 'standard' ? 'bg-brand-green/10 border-brand-green text-white' : 'bg-brand-void border-brand-border text-text-muted'}`}

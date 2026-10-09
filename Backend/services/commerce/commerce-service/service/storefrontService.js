@@ -111,7 +111,7 @@ async function getPaymentSettings(storeId) {
     const store = await ensureStore(storeId);
     const meta = store.meta || {};
     return {
-        paymentMode: meta.paymentMode === 'crypto_only' ? 'crypto_only' : 'standard',
+        paymentMode: ['crypto_only', 'points'].includes(meta.paymentMode) ? meta.paymentMode : 'standard',
         cryptoWallets: (meta.cryptoWallets && typeof meta.cryptoWallets === 'object') ? meta.cryptoWallets : {},
     };
 }

@@ -1,6 +1,8 @@
 // Shared Locals Hub data — used by the listing page AND individual detail pages
 // so Google can index every listing at its own URL with unique SEO metadata.
 
+import type { RoleCategory, RoleRequirement } from "./locals-roles";
+
 export type Category = "All" | "Casting & Jobs" | "Events" | "Matchmaking" | "Travel";
 
 export interface LocalListing {
@@ -21,6 +23,9 @@ export interface LocalListing {
   minAge?: number;
   maxAge?: number;
   gender?: "Male" | "Female" | "Any";
+  // ── Many-to-many role requirements (new system) ──────────────────────────
+  primaryCategory?: RoleCategory;        // e.g. "Hospitality, Hosting & Front of House"
+  roleRequirements?: RoleRequirement[];  // e.g. [{roleId:"h-01", roleName:"Female Hostess", qty:5, gender:"Female"}]
   // SEO helpers
   seoKeywords?: string[];
 }

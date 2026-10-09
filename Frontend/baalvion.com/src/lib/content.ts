@@ -125,11 +125,8 @@ export const NAV: NavItem[] = [
     href: '/#network',
     children: [
       { label: 'Global Trade', href: 'https://trade.baalvion.com', description: 'Cross-border trade infrastructure and settlement.' },
-      { label: 'Mining & Resources', href: 'https://mining.baalvion.com', description: 'Resource and commodity operations infrastructure.' },
       { label: 'Markets', href: 'https://market.baalvion.com', description: 'Financial and market systems at institutional tolerance.' },
       { label: 'Talent', href: EXTERNAL.talent, description: 'The connective layer for institutional talent.' },
-      { label: 'Connect', href: 'https://connect.baalvion.com', description: 'Where institutions and counterparties transact.' },
-      { label: 'Enterprise Access', href: 'https://dashboard.baalvion.com', description: 'The operator’s command surface.' },
     ],
     more: { label: 'View the full network + independent brands', href: '/#network' },
   },
@@ -312,6 +309,8 @@ export interface NetworkEntry {
   href: string;
   domain: string;
   description: string;
+  /** False while the domain does not answer; the entry renders as a plain card, not a link. */
+  live?: boolean;
 }
 
 export interface NetworkGroup {
@@ -374,6 +373,7 @@ export const NETWORK: {
           name: 'Mining & Resources',
           href: 'https://mining.baalvion.com',
           domain: 'mining.baalvion.com',
+          live: false,
           description: 'Resource and commodity operations infrastructure, from licensing to logistics.',
         },
         {
@@ -395,6 +395,7 @@ export const NETWORK: {
           name: 'Connect',
           href: 'https://connect.baalvion.com',
           domain: 'connect.baalvion.com',
+          live: false,
           description: 'Infrastructure for institutions and counterparties to find and transact with one another.',
         },
         {
@@ -402,6 +403,7 @@ export const NETWORK: {
           name: 'Enterprise Access',
           href: 'https://dashboard.baalvion.com',
           domain: 'dashboard.baalvion.com',
+          live: false,
           description: 'The operator’s command surface: oversight, governance, and control across the stack.',
         },
       ],
@@ -416,6 +418,7 @@ export const NETWORK: {
           name: 'ControlTheMarket',
           href: 'https://controlthemarket.com',
           domain: 'controlthemarket.com',
+          live: false,
           description: 'Market intelligence and evaluation tooling, operated as an independent venture.',
         },
         {

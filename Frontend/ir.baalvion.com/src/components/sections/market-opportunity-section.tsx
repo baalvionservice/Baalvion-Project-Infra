@@ -5,9 +5,9 @@ import { Globe, TrendingUp, Layers, Network } from "lucide-react";
 // not company results, and are labelled as such.
 export default function MarketOpportunitySection({ id }: { id: string }) {
   const stats = [
-    { value: "$13T+", label: "Annual global B2B trade flows we are building to digitise and serve", icon: Globe },
-    { value: "$2.5T", label: "Persistent global trade-finance gap leaving demand unmet every year", icon: TrendingUp },
-    { value: "~80%", label: "Of world trade still depends on fragmented, paper-heavy processes", icon: Layers },
+    { value: "$35T", label: "Global trade in goods and services in 2025 (UNCTAD)", icon: Globe },
+    { value: "$2.5T", label: "Global trade-finance gap: financing requests that go unmet (ADB, 2025)", icon: TrendingUp },
+    { value: "~10%", label: "Share of global trade that the financing gap represents (ADB, 2025)", icon: Layers },
     { value: "1", label: "Unified platform connecting logistics, finance and compliance", icon: Network },
   ];
 
@@ -20,7 +20,7 @@ export default function MarketOpportunitySection({ id }: { id: string }) {
             The infrastructure of global trade is being rebuilt — once in a generation.
           </h2>
           <p className="mt-6 text-lg text-white/70">
-            Global commerce moves trillions of dollars in goods, capital and documentation every year, yet it still runs on a patchwork of disconnected systems, manual paperwork and siloed intermediaries. Baalvion is building the unified operating system beneath it — capturing a <span className="text-white font-semibold">$13 trillion-plus</span> opportunity across logistics, trade finance and compliance.
+            Global commerce moves trillions of dollars in goods, capital and documentation every year, yet it still runs on a patchwork of disconnected systems, manual paperwork and siloed intermediaries. Baalvion is building the unified operating system beneath it — serving an ecosystem of about <span className="text-white font-semibold">$35 trillion</span> in annual trade, across logistics, trade finance and compliance.
           </p>
         </div>
 

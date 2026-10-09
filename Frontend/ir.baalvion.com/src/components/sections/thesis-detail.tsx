@@ -28,7 +28,7 @@ const PILLARS: Pillar[] = [
     no: "01",
     icon: AlertTriangle,
     heading: "Problem",
-    body: "Global trade still runs on disconnected systems, manual paperwork and siloed intermediaries that were never designed to talk to one another. Every shipment carries hidden cost, avoidable delay and real compliance exposure as documents are rekeyed across banks, customs authorities, carriers and counterparties. These are not edge-case inefficiencies — they are structural, and they compound at the scale of a $13 trillion-plus market. The friction is so embedded that most participants treat it as the unchangeable price of doing business across borders.",
+    body: "Global trade still runs on disconnected systems, manual paperwork and siloed intermediaries that were never designed to talk to one another. Every shipment carries hidden cost, avoidable delay and real compliance exposure as documents are rekeyed across banks, customs authorities, carriers and counterparties. These are not edge-case inefficiencies — they are structural, and they compound at the scale of a $35 trillion global trade ecosystem. The friction is so embedded that most participants treat it as the unchangeable price of doing business across borders.",
   },
   {
     no: "02",
@@ -40,7 +40,7 @@ const PILLARS: Pillar[] = [
     no: "03",
     icon: Globe2,
     heading: "Market",
-    body: "The opportunity is generational in scale: more than $13 trillion in annual B2B trade flows, alongside a persistent $2.5 trillion trade-finance gap that leaves real demand unmet every year. Roughly 80% of this activity still depends on fragmented, paper-heavy processes that have barely been touched by modern software. That combination — enormous volume, structural under-financing and minimal digitisation — is precisely where durable infrastructure businesses are built. We are not competing for a slice of a mature market; we are helping digitise one that is still overwhelmingly analog.",
+    body: "The opportunity is generational in scale: about $35 trillion of global trade in goods and services in 2025 (UNCTAD), alongside a $2.5 trillion trade-finance gap (ADB, 2025) — financing that exporters and importers ask for and do not receive. Trade documentation is still largely paper-based and fragmented across parties. Enormous volume, structural under-financing and uneven digitisation are the conditions in which durable infrastructure businesses are built. These are market-wide figures, not Baalvion revenue or a forecast of what Baalvion will capture.",
   },
   {
     no: "04",
@@ -52,7 +52,7 @@ const PILLARS: Pillar[] = [
     no: "05",
     icon: Users,
     heading: "Team",
-    body: "Baalvion is built by operators and engineers who ship — not by a team selling a roadmap. The AI agents at the core of the platform are real and deployed: compliance and sanctions screening, logistics route optimisation and HS-code classification are live, not theoretical. That bias toward execution over slideware is the company's operating culture, and it is the single best predictor of which infrastructure platforms endure. We believe credibility in this category is earned in production, and we intend to keep earning it shipment by shipment.",
+    body: "Baalvion is built by operators and engineers who ship — not by a team selling a roadmap. The AI agents at the core of the platform are built and ready for deployment: compliance and sanctions screening, logistics route optimisation and HS-code classification. That bias toward execution over slideware is the company's operating culture. We believe credibility in this category is earned in production, and we intend to earn it shipment by shipment once the agents go live.",
   },
   {
     no: "06",

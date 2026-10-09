@@ -7,7 +7,7 @@
 #### `.env.local` (Added)
 ```bash
 # Google AdSense Publisher ID
-NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-8968452296456450
+NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-7321711585180412
 
 # CMS Configuration
 CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/public
@@ -83,7 +83,7 @@ Generates JSON-LD schemas:
 
 **Google AdSense Meta Tag:**
 ```html
-<meta name="google-adsense-account" content="ca-pub-8968452296456450" />
+<meta name="google-adsense-account" content="ca-pub-7321711585180412" />
 ```
 Location: `src/app/layout.tsx` (line ~225)
 
@@ -192,7 +192,7 @@ gtag('consent', 'default', {
 
 - [ ] **Verify Publisher ID**
   ```bash
-  # Your current ID: ca-pub-8968452296456450
+  # Your current ID: ca-pub-7321711585180412
   # Action: Login to AdSense and confirm:
   # 1. Account is VERIFIED ✓
   # 2. Site is APPROVED ✓
@@ -214,7 +214,7 @@ gtag('consent', 'default', {
 - [ ] **Environment Variables**
   ```bash
   # Local Development (.env.local)
-  NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-8968452296456450 ✓
+  NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-7321711585180412 ✓
   
   # Production (Vercel)
   # Set in Vercel Dashboard → Settings → Environment Variables
@@ -255,7 +255,7 @@ gtag('consent', 'default', {
   ```bash
   curl https://lawelitenetwork.com/ads.txt
   # Should output:
-  # google.com, pub-8968452296456450, DIRECT, f08c47fec0942fa0
+  # google.com, pub-7321711585180412, DIRECT, f08c47fec0942fa0
   ```
 
 - [ ] **Consent Banner Test**

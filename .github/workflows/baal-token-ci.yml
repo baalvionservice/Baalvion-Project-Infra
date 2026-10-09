@@ -1,0 +1,114 @@
+name: baal-token CI
+
+# Verification only. This workflow has no secrets, no environments and no
+# manual trigger, and it must stay that way: baal-token/ci/workflow-policy.ts
+# fails the build if any deploy/signing path appears (ADR-005).
+
+on:
+  pull_request:
+    paths:
+      - "baal-token/**"
+      - ".github/workflows/baal-token-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "baal-token/**"
+      - ".github/workflows/baal-token-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baal-token-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: baal-token
+
+jobs:
+  verify:
+    name: Format, lint, types, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baal-token/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: baal-token/.nvmrc
+          cache: pnpm
+          cache-dependency-path: baal-token/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Formatting
+        run: pnpm run format
+      - name: Lint
+        run: pnpm run lint
+      - name: Type check
+        run: pnpm run typecheck
+      - name: Unit and integration tests
+        run: pnpm run test
+      - name: Workflow policy
+        run: pnpm run check:workflows
+      - name: Build verification
+        run: pnpm run build
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baal-token/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: baal-token/.nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit
+
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: baal-token/.nvmrc
+      - name: Built-in Solana-aware scanner
+        run: node scripts/scan-secrets.ts
+      - name: gitleaks
+        working-directory: .
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.18.4 \
+            detect --source /repo/baal-token --no-git --config /repo/baal-token/security/gitleaks.toml --redact --verbose
+
+  static-analysis:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          source-root: baal-token
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: baal-token

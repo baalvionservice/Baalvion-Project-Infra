@@ -24,7 +24,9 @@
  */
 
 /** Investor-side prefixes. Anything matching needs an invitation. */
-const GATED = ['/invest', '/onboarding'] as const;
+// /market-opportunity, /use-of-proceeds and /financials carry modelled numbers that are not yet real.
+// They are held behind the invitation until they are sourced.
+const GATED = ['/invest', '/onboarding', '/news-and-events', '/governance/committee-composition', '/market-opportunity', '/use-of-proceeds', '/financials'] as const;
 
 /** Founder-side routes that sit under a gated prefix but must stay open. */
 const OPEN_EXCEPTIONS = ['/invest/list-your-business', '/onboarding/business'] as const;

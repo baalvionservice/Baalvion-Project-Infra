@@ -93,16 +93,6 @@ export const MARKETPLACE_MODULES: MarketplaceModule[] = [
   { id: 'mod_freelance', name: 'Freelance', slug: 'freelance', icon: '⚡', description: 'Professional services and intel.', status: 'installed', categories: ['cat_freelance'], color: 'from-indigo-500 to-purple-600' },
 ];
 
-export const ALL_CATEGORIES: MarketplaceCategory[] = [
-  { id: 'cat_creator', name: 'Creator Equity', slug: 'creators', description: 'Invest in creators and share their revenue yield.', icon: '💎', status: 'active', countryId: 'india', itemCount: 412, path: 'creators', color: 'from-blue-400 to-indigo-600', moduleId: 'mod_creator' },
-  { id: 'cat_electronics', name: 'Electronics', slug: 'electronics', description: 'Advanced hardware and localized gadget nodes.', icon: '💻', status: 'active', countryId: 'india', itemCount: 1240, path: 'electronics', color: 'from-purple-500 to-violet-600', moduleId: 'mod_electronics' },
-  { id: 'cat_commodities', name: 'Commodities', slug: 'commodities', description: 'Raw materials and bulk agriculture settlement.', icon: '🏗️', status: 'active', countryId: 'india', itemCount: 320, path: 'commodities', color: 'from-orange-500 to-amber-600', moduleId: 'mod_commodities' },
-  { id: 'cat_hotels', name: 'Luxury Hotels', slug: 'hotels', description: 'Verified 5-star node bookings.', icon: '🏨', status: 'active', countryId: 'india', itemCount: 560, path: 'hotels', color: 'from-pink-500 to-rose-600', moduleId: 'mod_travel' },
-  { id: 'cat_flights', name: 'Aviation Node', slug: 'flights', description: 'Global flight protocols and class upgrades.', icon: '✈️', status: 'active', countryId: 'india', itemCount: 842, path: 'flights', color: 'from-blue-500 to-cyan-600', moduleId: 'mod_travel' },
-  { id: 'cat_digital', name: 'Digital Assets', slug: 'digital-assets', description: 'Trading YouTube channels and domains.', icon: '🎬', status: 'active', countryId: 'india', itemCount: 210, path: 'digital-assets', color: 'from-cyan-500 to-blue-600', moduleId: 'mod_creator' },
-  { id: 'cat_realestate', name: 'Real Estate', slug: 'realestate', description: 'Commercial property nodes.', icon: '🏢', status: 'active', countryId: 'india', itemCount: 120, path: 'realestate', color: 'from-emerald-500 to-teal-600', moduleId: 'mod_realestate' },
-];
-
 export const COUNTRY_MARKETPLACE_CONFIGS: Record<string, CountryMarketplace> = {
   'india': {
     country: 'India',
@@ -127,89 +117,31 @@ export const COUNTRY_MARKETPLACE_CONFIGS: Record<string, CountryMarketplace> = {
   }
 };
 
-export const CREATORS: CreatorProfile[] = [
-  {
-    id: 'c1',
-    name: 'Gaming Master Alpha',
-    platforms: ['YouTube', 'LiveStreaming'],
-    followers: 1200000,
-    bio: 'Leading gaming creator specializing in high-stakes esports.',
-    avatar: 'https://picsum.photos/seed/creator1/200/200',
-    rating: 4.9,
-    verified: true,
-    totalEarningsGenerated: 450000,
-    regionId: 'sas',
-    country: 'India'
-  }
-];
+export interface LiveSession {
+  id: string;
+  teacherName: string;
+  region: string;
+  regionId: string;
+  country: string;
+  title: string;
+  viewers: number;
+  duration: string;
+  product: string;
+  isLive: boolean;
+  startTime: string;
+}
 
-export const CREATOR_INVESTMENTS: InvestmentListing[] = [
-  {
-    id: 'inv_1',
-    creatorId: 'c1',
-    creatorName: 'Gaming Master Alpha',
-    title: 'Q2 Live Stream Super Chat Yield',
-    platform: 'YouTube',
-    category: 'RevenueShare',
-    investmentRequired: 50000,
-    expectedRevenue: 120000,
-    investorShare: 70,
-    platformFee: 30,
-    description: 'Share in revenue generated from Super Chats.',
-    isLive: true,
-    streamSchedule: 'Mon, Wed, Fri 18:00 UTC',
-    creatorPlatformLink: 'https://youtube.com/alpha_gaming',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    images: ['https://picsum.photos/seed/inv1/800/400']
-  }
-];
+export interface LiveEvent {
+  id: string;
+  type: string;
+  text: string;
+  time: string;
+}
 
-export const MARKETPLACE_PRODUCTS: Product[] = [
-  {
-    id: 'p1',
-    title: 'iPhone 16 Pro Max — Node UAE',
-    description: 'Unlocked global version. Sealed.',
-    price: 1200,
-    crypto_price: '0.42',
-    category: 'Electronics',
-    module: 'Electronics',
-    region: 'Middle East',
-    regionId: 'mena',
-    country: 'UAE',
-    rating: 5.0,
-    purchases: 42,
-    seller: 'GadgetHub_Dubai',
-    sellerVerified: true,
-    status: 'approved'
-  }
-];
-
-export const MARKET_TICKER = [
-  { pair: 'BTC', price: '94,231', change: '1.8%', pos: true },
-  { pair: 'ETH', price: '3,124', change: '4.2%', pos: true },
-  { pair: 'SOL', price: '198', change: '2.1%', pos: false },
-  { pair: 'USDT', price: '1.00', change: '0.0%', pos: true },
-];
-
-export const LIVE_ACTIVITY_MOCK = {
-  events: [
-    { id: 'ev1', type: 'purchase', text: 'New YouTube node order from Mumbai', time: '2m ago' },
-    { id: 'ev2', type: 'category', text: 'Admin installed module: Real Estate', time: '5m ago' },
-  ],
-  activeSessions: [
-    { id: 's1', teacherName: 'Priya Sharma', region: 'South Asia', regionId: 'sas', country: 'India', title: 'Advanced Organic Synthesis', viewers: 124, duration: '42:10', product: 'Lab Protocol v4', isLive: true, startTime: new Date().toISOString() },
-  ]
+// No live-session or activity backend exists yet, so these are intentionally empty rather
+// than carrying invented teachers and viewer counts.
+export const LIVE_ACTIVITY_MOCK: { events: LiveEvent[]; activeSessions: LiveSession[] } = {
+  events: [],
+  activeSessions: [],
 };
 
-export const STATS = {
-  revenueData: [
-    { name: 'Mon', value: 4200 },
-    { name: 'Tue', value: 3800 },
-    { name: 'Wed', value: 6500 },
-    { name: 'Thu', value: 7800 },
-    { name: 'Fri', value: 5800 },
-    { name: 'Sat', value: 8400 },
-    { name: 'Sun', value: 7200 },
-  ]
-};

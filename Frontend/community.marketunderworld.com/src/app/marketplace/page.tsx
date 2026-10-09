@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ShieldCheck, Zap, Globe2, Tag, BookOpen, Key, Terminal, UserSquare, RefreshCw, ShoppingCart, CheckCircle2 } from "lucide-react";
@@ -153,6 +154,42 @@ export default function MarketplacePage() {
           >
             Gift Cards (KFC, Pizza Hut, etc.)
           </button>
+          <Link
+            href="/marketplace/clothing"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            Clothing
+          </Link>
+          <Link
+            href="/shop/food"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            Food
+          </Link>
+          <Link
+            href="/shop/events"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            Events
+          </Link>
+          <Link
+            href="/shop/travel"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            Travel
+          </Link>
+          <Link
+            href="/access"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            VIP
+          </Link>
+          <Link
+            href="/marketplace/commodities"
+            className="px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap text-gray-400 hover:text-white"
+          >
+            Commodities
+          </Link>
         </div>
 
         {/* Content */}

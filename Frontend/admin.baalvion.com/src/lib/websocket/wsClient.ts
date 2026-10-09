@@ -1,5 +1,6 @@
 import { useRealtimeStore } from '@/lib/store/realtimeStore';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useNotificationStore } from '@/lib/store/notificationStore';
 import type { LiveEvent } from '@/lib/types/realtime.types';
 
 const WS_URL          = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.baalvion.com/api/v1/infrastructure/realtime';
@@ -94,6 +95,26 @@ function handleMessage(msg: { type: string; data: unknown; ts?: number }) {
       if (!ev.id) ev.id = crypto.randomUUID();
       if (!ev.timestamp) ev.timestamp = now;
       store.pushEvent(ev);
+      // Mirror into the app notification bell for all warning/error/critical events,
+      // and for high-value info events (orders, support tickets, new users).
+      const notifStore = useNotificationStore.getState();
+      const shouldNotify =
+        ev.severity !== 'info' ||
+        ['order', 'support', 'payment', 'user', 'marketplace', 'community'].includes(ev.type);
+      if (shouldNotify) {
+        const typeToNotifType: Record<string, 'info' | 'success' | 'warning' | 'error'> = {
+          info: 'info',
+          warning: 'warning',
+          error: 'error',
+          critical: 'error',
+        };
+        notifStore.addNotification({
+          type: typeToNotifType[ev.severity] ?? 'info',
+          title: ev.summary ?? ev.action.replace(/\./g, ' › '),
+          body: ev.userEmail ?? ev.userName ?? ev.userId,
+          href: ev.href,
+        });
+      }
       break;
     }
     case 'queue_stats':

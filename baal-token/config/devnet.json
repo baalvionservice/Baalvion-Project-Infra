@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "network": "devnet",
+  "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "rpc": {
+    "publicUrl": "https://api.devnet.solana.com",
+    "urlEnvVar": "DEVNET_RPC_URL"
+  },
+  "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "mintAddress": null,
+  "freezeAuthority": null,
+  "safety": {
+    "deploymentEnabled": false,
+    "requiresExplicitSelection": false,
+    "requiresGenesisVerification": true,
+    "requiresTypedConfirmation": false,
+    "ciExecutionAllowed": false,
+    "signing": "hardware-wallet-offline"
+  }
+}

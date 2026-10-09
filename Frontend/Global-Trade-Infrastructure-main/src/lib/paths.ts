@@ -34,6 +34,7 @@ export const PATHS = {
   GOVERNANCE_ONBOARDING: '/governance/onboarding',
   GOVERNANCE_PLATFORM_STATUS: '/governance/platform-status',
   LOGIN: '/login',
+  GET_STARTED: '/get-started',
   PRIVACY_POLICY: '/privacy',
   TERMS_OF_USE: '/terms',
 

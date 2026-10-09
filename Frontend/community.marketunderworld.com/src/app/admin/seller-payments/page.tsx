@@ -25,6 +25,7 @@ export default function SellerPaymentsPage() {
   const [error, setError] = useState<string | null>(null)
   const [action, setAction] = useState<Action | null>(null)
   const [field, setField] = useState('')
+  const [credit, setCredit] = useState('')
   const [busy, setBusy] = useState(false)
 
   const load = useCallback((s: CategoryPayment['status']) => {
@@ -37,11 +38,11 @@ export default function SellerPaymentsPage() {
     if (!action || !field.trim()) return
     setBusy(true)
     try {
-      if (action.kind === 'confirm') await confirmPayment(action.id, field.trim())
+      if (action.kind === 'confirm') await confirmPayment(action.id, field.trim(), undefined, credit ? Number(credit) : undefined)
       else if (action.kind === 'reject') await rejectPayment(action.id, field.trim())
       else await revokePayment(action.id, field.trim())
-      toast({ title: action.kind === 'confirm' ? 'Payment confirmed — tokens credited' : action.kind === 'reject' ? 'Payment rejected' : 'Access revoked' })
-      setAction(null); setField(''); load(status)
+      toast({ title: action.kind === 'confirm' ? (items.find((i) => i.id === action.id)?.kind === 'wallet_topup' ? 'Payment confirmed — points credited' : 'Payment confirmed') : action.kind === 'reject' ? 'Payment rejected' : 'Access revoked' })
+      setAction(null); setField(''); setCredit(''); load(status)
     } catch (e) {
       toast({ variant: 'destructive', title: 'Action failed', description: e instanceof Error ? e.message : 'Please try again.' })
     } finally { setBusy(false) }
@@ -77,10 +78,10 @@ export default function SellerPaymentsPage() {
           {items.map((p) => (
             <ListingCard key={p.id} className="p-6 border-brand-border bg-brand-surface space-y-4">
               <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-white font-bold">{p.sellerName || `Seller #${p.sellerUserId}`}{p.storeName ? <span className="text-text-muted font-normal"> · {p.storeName}</span> : null}</h3>
+                <h3 className="text-white font-bold">{p.sellerName || `${p.kind === 'category' ? 'Seller' : 'Buyer'} #${p.sellerUserId}`}{p.storeName ? <span className="text-text-muted font-normal"> · {p.storeName}</span> : null}</h3>
                 {p.memberNumber && <span className="font-mono text-[10px] text-text-ghost">{p.memberNumber}</span>}
                 <Badge variant="default" className="text-[8px]">${p.amountUsd} · {p.currency}</Badge>
-                <span className="text-[10px] text-text-ghost font-mono">{p.categoryName || `Category ${p.categoryId.slice(0, 8)}`} · {new Date(p.createdAt).toLocaleString()}</span>
+                <span className="text-[10px] text-text-ghost font-mono">{p.kind === 'buyer_access' ? 'Buyer access pass' : p.kind === 'wallet_topup' ? `Wallet load → ${Math.round(Number(p.amountUsd) * 100).toLocaleString()} points` : (p.categoryName || `Category ${(p.categoryId ?? '').slice(0, 8)}`)} · {new Date(p.createdAt).toLocaleString()}</span>
               </div>
               {p.txHash && <p className="text-xs text-text-muted break-all">Hash: <code className="text-white">{p.txHash}</code></p>}
               {p.amountReceived && <p className="text-xs text-text-muted">Received: {p.amountReceived}</p>}
@@ -91,6 +92,10 @@ export default function SellerPaymentsPage() {
                   <input autoFocus value={field} onChange={(e) => setField(e.target.value)}
                     placeholder={action.kind === 'confirm' ? 'Amount received (e.g. 2000 USDT)' : 'Reason'}
                     className="flex-1 min-w-[240px] h-10 px-3 rounded-lg bg-black border border-brand-border text-sm text-white" />
+                  {action.kind === 'confirm' && p.kind === 'wallet_topup' && (
+                    <input value={credit} onChange={(e) => setCredit(e.target.value)} type="number" min={0} step="0.01" placeholder={`Credit in USD (blank = $${Number(p.amountUsd).toFixed(2)})`}
+                      aria-label="Credit in USD" className="w-64 h-10 px-3 rounded-lg bg-black border border-brand-border text-sm text-white" />
+                  )}
                   <AppButton onClick={run} disabled={busy || !field.trim()}>{busy ? 'Saving…' : 'Confirm'}</AppButton>
                   <AppButton variant="secondary" onClick={() => { setAction(null); setField('') }}>Cancel</AppButton>
                 </div>

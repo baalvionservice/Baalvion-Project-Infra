@@ -1,0 +1,2227 @@
+[
+ {
+  "id": "c-1",
+  "name": "Toy Room",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "image": "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Hip Hop",
+   "Commercial"
+  ],
+  "daysOpen": "Wed, Fri, Sat",
+  "description": "An exclusive, high-energy nightclub famous for its iconic teddy bear mascot 'Frank' and elite crowd.",
+  "coverCharge": "Couples only / VIP Table Minimums",
+  "rating": 4.8
+ },
+ {
+  "id": "c-2",
+  "name": "Kitty Su",
+  "state": "Delhi (NCT)",
+  "city": "Delhi",
+  "image": "https://images.unsplash.com/photo-1545128485-c400e7702796?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "EDM",
+   "Techno",
+   "House"
+  ],
+  "daysOpen": "Wed - Sun",
+  "description": "One of Delhi's most legendary nightlife destinations known for international DJ acts and an inclusive vibe.",
+  "coverCharge": "₹3,000 - ₹5,000",
+  "rating": 4.9
+ },
+ {
+  "id": "c-3",
+  "name": "Sutra Gastropub",
+  "state": "Delhi NCR",
+  "city": "Gurgaon",
+  "image": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Bollywood",
+   "Commercial",
+   "Live Sufi"
+  ],
+  "daysOpen": "All Days",
+  "description": "Located in Cyber Hub, offering incredible open-air vibes, live music, and the best crowd in Gurugram.",
+  "coverCharge": "Free Entry (Stag restrictions apply)",
+  "rating": 4.5
+ },
+ {
+  "id": "c-4",
+  "name": "Dragonfly Experience",
+  "state": "Delhi (NCT)",
+  "city": "Delhi",
+  "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Techno",
+   "Hip Hop"
+  ],
+  "daysOpen": "Wed - Sun",
+  "description": "A high-end club in Aerocity by Badshah, featuring stunning insect-themed decor and premium bottle service.",
+  "coverCharge": "Table reservations required",
+  "rating": 4.7
+ },
+ {
+  "id": "c-5",
+  "name": "Bastian - At The Top",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "image": "https://images.unsplash.com/photo-1572116469696-ed70ca8dbbc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Lounge",
+   "Deep House",
+   "Commercial"
+  ],
+  "daysOpen": "Tue - Sun",
+  "description": "A massive, ultra-luxurious dining and party space on the 48th floor with a spectacular view of the Mumbai skyline.",
+  "coverCharge": "Table Minimums (Very High)",
+  "rating": 4.9
+ },
+ {
+  "id": "c-6",
+  "name": "Diablo",
+  "state": "Delhi (NCT)",
+  "city": "Delhi",
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial",
+   "Hip Hop"
+  ],
+  "daysOpen": "All Days",
+  "description": "Gothic and Mediterranean-themed hotspot with fiery cocktails and a massive courtyard for epic night outs.",
+  "coverCharge": "₹4,000",
+  "rating": 4.6
+ },
+ {
+  "id": "c-7",
+  "name": "Prism Club & Kitchen",
+  "state": "Delhi NCR",
+  "city": "Gurgaon",
+  "image": "https://images.unsplash.com/photo-1470229722913-7c090be5c520?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Bollywood",
+   "Techno"
+  ],
+  "daysOpen": "Thu - Sun",
+  "description": "Massive club space with insane laser lighting, crazy weekend events, and premium VIP cabanas.",
+  "coverCharge": "₹2,500+",
+  "rating": 4.4
+ },
+ {
+  "id": "c-8",
+  "name": "Matahaari",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "image": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Bollywood",
+   "Commercial"
+  ],
+  "daysOpen": "Wed, Fri, Sat",
+  "description": "Located in Worli, this high-energy club is famous for its opulent decor and celebrity sightings.",
+  "coverCharge": "Couples only / VIP Table",
+  "rating": 4.7
+ },
+ {
+  "id": "mumbai-c1",
+  "name": "Bastian - At The Top",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "48th Floor, Kohinoor Square, N.C. Kelkar Marg, Dadar West",
+  "vibe": "Upscale, Premium Elite",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Celebrity-favorite luxury rooftop lounge offering 360-degree skyline views.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c2",
+  "name": "Dada Saheb Gastropub",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Dr. Babasaheb Ambedkar Road, Dadar East",
+  "vibe": "Retro Commercial, Relaxed",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Vibrant high-ceiling community pub with extensive craft cocktails and lively background sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c3",
+  "name": "The Gateway Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Kohinoor Square Commercial Complex, Dadar West",
+  "vibe": "EDM, Corporate Elite",
+  "requiredRoles": [
+   "Paid Party Host",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Modern, tech-lit lounge catering to premium corporate profiles and weekend high-energy crowds.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c4",
+  "name": "Dadar Social",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Ranade Road, Near Shivaji Park, Dadar West",
+  "vibe": "Alternative, Hip-Hop, High-Volume",
+  "requiredRoles": [
+   "Social Media Hype Agent",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-volume industrial-chic casual workspace by day that transforms into a heavily packed party spot by night.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c5",
+  "name": "Toit Dadar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Mills Area, Dadar West",
+  "vibe": "Lively, Commercial Remixes",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Large brewery footprint offering bustling weekend dance vibes and live local indie-fusion sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c6",
+  "name": "The Rooftop Horizon",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "N.C. Kelkar Road, Dadar West",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Panoramic sky lounge featuring intimate open-air tables and private celebrity bookings.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c7",
+  "name": "Pritam Da Dhaba Bar & Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Dadar East Metro Corridor, Dadar",
+  "vibe": "Hardcore Bollywood, High Energy",
+  "requiredRoles": [
+   "Male/Female Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Vintage property featuring high-energy heritage Bollywood nights and premium table hospitality.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c8",
+  "name": "The Urban Connect",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Gokhale Road, Dadar West",
+  "vibe": "Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Club Promoter",
+   "Brand Promotion / Shot Distribution"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Compact commercial pub focusing heavily on live weekend DJs and promotional drink distributions.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c9",
+  "name": "Gold Room Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Kohinoor Square Complex, Floor 3, Dadar West",
+  "vibe": "Glamorous, House Music",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Exclusive cocktail room designed with gold LED accents, targeting high-spending table clientele.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c10",
+  "name": " Shivaji Park Gymkhana Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Dadar",
+  "address": "Keluskar Road, Shivaji Park, Dadar",
+  "vibe": "Elite Retro, Exclusive",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-end member club lounge opening premium event slots for guestlist promoters and hosts.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c11",
+  "name": "Matahaari Nightclub",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Atria-The Millennium Mall, Dr Annie Besant Rd, Worli",
+  "vibe": "Bollywood Night, High Energy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Club Promoter",
+   "Male/Female Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Opulent South Mumbai disco club featuring high-energy music and luxurious interiors.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c12",
+  "name": "AER",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "34th Floor, Four Seasons Hotel, Dr Elijah Moses Rd, Worli",
+  "vibe": "Luxury, International Vibe",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Paid Party Host"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Luxe open-air rooftop bar offering panoramic vistas of the Arabian Sea.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c13",
+  "name": "Slink & Bardot",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "329, Thadani House, Moulsari Avenue, Worli Village",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Chic, intimate lounge set-up known for high-end mixology and ambient music curated for premium profiles.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c14",
+  "name": "Lord of the Drinks Worli",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Pandurang Budhkar Marg, Worli",
+  "vibe": "Massive, Lively, Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Club Promoter",
+   "Shisha / Hookah Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sprawling commercial gastropub designed with extensive bars, perfect for large group bookings.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c15",
+  "name": "HYPE Atria",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Top Floor, Atria Mall, Dr. Annie Besant Road, Worli",
+  "vibe": "Futuristic, Electronic/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Legendary high-volume nightclub featuring neon-streaked VIP lounges and large dance configurations.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c16",
+  "name": "The Ghetto",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Bhulabhai Desai Marg, Near Worli Border",
+  "vibe": "Underground, Retro Alternative",
+  "requiredRoles": [
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Iconic neon-graffiti pub operating late nights with standard alternative rock and casual indie loops.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c17",
+  "name": "WINK South",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Premium Waterfront Hotel Enclave, Worli",
+  "vibe": "Luxury Clubbing, Deep House",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Paid Party Host"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-concept luxury lounge famous for deep house mixes and high-spending profile table structures.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c18",
+  "name": "Tote On The Turf",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Mahalaxmi Race Course, Near Worli",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Stunning colonial-style architecture hosting open-air electronic festivals and elite high-society mixers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c19",
+  "name": "The Coast Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Sea Face Promenade, Worli",
+  "vibe": "Techno, Underground, Exclusive",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Waterfront glass panel lounge catering to premium profiles looking for deep house sundowners.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c20",
+  "name": "Shiro Worli",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Bombay Dyeing Compound, Pandurang Budhkar Marg, Worli",
+  "vibe": "Glamorous, Elite Nightlife",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive Asian-themed luxury nightclub famous for its towering statues and commercial house sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c21",
+  "name": "Baroke Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Atria Mall Enclave, Worli",
+  "vibe": "Commercial, High Energy",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Plush, velvet-lined classic night club catering to South Mumbai corporate elites and weekend ragers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c22",
+  "name": "Velvet Room",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Dr. Annie Besant Road, Worli",
+  "vibe": "Luxury Clubbing, High-End Hip-Hop/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Ultra-exclusive private table lounge featuring international guest DJs and elite bottle service.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c23",
+  "name": "The Blue Terrace",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Khan Abdul Gaffar Khan Road, Worli Sea Face",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "Male/Female Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Rooftop lounge overlooking the sea link, optimized for high-end fashion promotional mixers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c24",
+  "name": "Casa Vito Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "Lotus Colony, Worli",
+  "vibe": "High Energy, Lively",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Cozy European-style cocktail bar that amps up the volume to top-tier commercial EDM post midnight.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c25",
+  "name": "Exo Penthouse",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Worli",
+  "address": "High-Rise Tower Complex, Worli",
+  "vibe": "Upscale, Premium Elite",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Multi-level penthouse club venue offering expansive dance floors and strict look-based profile entries.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c26",
+  "name": "Tryst Nightclub",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Phoenix Mills Compound, 462, Senapati Bapat Marg, Lower Parel",
+  "vibe": "Futuristic, Commercial/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Club Promoter",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "One of Mumbai’s most iconic high-tech clubs with futuristic LED lighting layouts.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c27",
+  "name": "antiSOCIAL Lower Parel",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Plot 242, Mathuradas Mill Compound, Sitaram Jadhav Marg, Lower Parel West",
+  "vibe": "Underground, Techno, Live Electronic",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Famous underground basement venue dedicated to live music tours, raw techno, and indie gigs.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c28",
+  "name": "EPITOME - Global Dining & Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mill Compound, Plot 242, NM Joshi Marg, Lower Parel West",
+  "vibe": "High Energy, Dramatic Visuals",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive, highly dramatic lounge space hosting live fusion percussion acts and commercial mixers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c29",
+  "name": "Asilo",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "40th Floor, Phoenix Mills, 462, Senapati Bapat Marg, Lower Parel",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Ultra-premium open-air rooftop social venue famous for sunset views and upscale late-night mixology.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c30",
+  "name": "XXO",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Level 37 & 38, The St. Regis Mumbai, Senapati Bapat Marg, Lower Parel",
+  "vibe": "Luxury Clubbing, High-End Hip-Hop/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Paid Party Host",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Floor-to-ceiling glass panel super-club nestled inside St. Regis catering strictly to elite profiles.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c31",
+  "name": "The Game Palacio Lower Parel",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mill Compound, Lower Parel",
+  "vibe": "Commercial, Energetic Crowd",
+  "requiredRoles": [
+   "Club Promoter",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Boutique bowling lounge transitioning into a neon-drenched luxury party rager on weekend nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c32",
+  "name": "Toit Lower Parel",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mills Compound, Senapati Bapat Marg, Lower Parel",
+  "vibe": "Vibrant Gastropub, Commercial Hits",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Bustling microbrewery transforming into a packed house-music haven with extensive standing dance zones.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c33",
+  "name": "PCO Cocktail Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "NRK House, Kamala Mills Compound, Lower Parel",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Speakeasy lounge requiring a secret phone-booth passcode to enter, playing deep lounge and alternative tech.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c34",
+  "name": "Kamala Mills Social",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Trade View Building, Kamala Mills, Lower Parel",
+  "vibe": "High-Volume, Hardcore Bollywood",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive multi-room layout driving high-volume student and young corporate crowds for heavy commercial dance nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c35",
+  "name": "Farzi Cafe Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Kamala Mills Compound, Lower Parel",
+  "vibe": "High Energy, Lively",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Avant-garde dynamic space featuring fusion live percussionists and upbeat Bollywood club music.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c36",
+  "name": "The London Taxi",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Kamala Mills Compound, A-Wing, Lower Parel",
+  "vibe": "Commercial, High Energy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Multi-level cocktail lounge mimicking London nightlife, pulling high-end suburban and town crowds.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c37",
+  "name": "Tamasha Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Victoria House, E.B Marg, Lower Parel",
+  "vibe": "High Energy, Dramatic Visuals",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Club Promoter"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive 9,000 sq ft lounge with dramatic overhead Edison bulb installations hosting upscale commercial ragers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c38",
+  "name": "Diablo Mumbai",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mill Compound, Lower Parel",
+  "vibe": "Avant-Garde, Heavy EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Gothic-themed high-end nightclub serving luxury food alongside explosive techno and commercial dance tracks.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c39",
+  "name": "Lord of the Drinks Kamala Mills",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Trade View Building, Kamala Mills, Lower Parel",
+  "vibe": "Massive, Lively, Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Club Promoter",
+   "Shisha / Hookah Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Features an exceptionally long island bar setup designed for rapid club promoter group entries.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c40",
+  "name": "Fly High Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Senapati Bapat Marg, Lower Parel West",
+  "vibe": "Commercial, High Energy",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Paid Party Host"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-rise venue tracking commercial electronic circuits and deep house late nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c41",
+  "name": "The Wine Rack Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "High Street Phoenix, Lower Parel",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Elegant, premium wine and cocktail club setup curated for sophisticated media and elite profiles.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c42",
+  "name": "Plum by Bent Chair",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Trade View Building, Kamala Mills, Lower Parel",
+  "vibe": "Glamorous, High Energy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Extremely colorful, highly Instagrammable lounge hosting weekly premium all-girls theme nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c43",
+  "name": "The Junkyard Cafe",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mill Compound, Lower Parel West",
+  "vibe": "Buzzing Suburb Crowd, Hardcore Bollywood",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Quirky industrial-recycle themed super bar running intensive commercial Bollywood playlists.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c44",
+  "name": "British Brewing Company",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "High Street Phoenix Mall, Lower Parel",
+  "vibe": "Vibrant Gastropub, Commercial Hits",
+  "requiredRoles": [
+   "Club Promoter"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Classic retro pub converting into an intense weekend retro commercial dance hall.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c45",
+  "name": "Koi Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Lower Parel",
+  "address": "Mathuradas Mills Compound, Lower Parel",
+  "vibe": "Luxury Clubbing, High-End Hip-Hop/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-end lounge operating late nights with distinct look-based entries and heavy EDM loops.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c46",
+  "name": "Bombay Cocktail Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Ground Floor, Sharyans Audeu, Off Veera Desai Road, Andheri West",
+  "vibe": "Bollywood, Commercial, Packed Dance Floor",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC",
+   "Paid Party Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive high-energy commercial nightclub famous for its weekly Chitrahaar Bollywood nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c47",
+  "name": "Glocal Junction Andheri",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Ground Floor, B-57, New Link Road, Veera Desai Industrial Estate, Andheri West",
+  "vibe": "Vibrant Gastropub, Commercial Hits",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Dynamic gastropub layout transforming seamlessly into a packed high-energy dance venue on weekends.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c48",
+  "name": "Kitty Su Mumbai",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Ground Floor, The LaLit, Airport Road, Marol, Andheri East",
+  "vibe": "Avant-Garde, Heavy EDM/Psytrance, Inclusive",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Legendary multi-room indoor electronic super-club known for hosting major international music producers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c49",
+  "name": "Dragonfly Experience",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "The Orb, Next to JW Marriott Sahar, Vile Parle East / Andheri East",
+  "vibe": "Celebrity Heavy, Electronic / Commercial",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "VIP Guest Handler",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "8,000 sq ft luxury lounge co-owned by Badshah, featuring insect-themed digital walls.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c50",
+  "name": "Sin City Rooftop Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "5th Floor, Crystal Point Mall, New Link Rd, Andheri West",
+  "vibe": "Energetic, Loud, Late Night Lounge",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "A prominent industrial-themed nightclub and open terrace lounge hosting deep commercial club nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c51",
+  "name": "Opa! Bar & Cafe",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Rooftop, Hotel Peninsula Grand, Sakinaka Junction, Andheri East",
+  "vibe": "Intense Energy, Late Night Suburb Rager",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Shisha / Hookah Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Famous Middle-Eastern themed open-air super club running till 3 AM with dense commercial and house loops.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c52",
+  "name": "The Little Door",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Plot B-18, New Link Road, Opp. Citi Mall, Andheri West",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Intimate, high-vibe Mediterranean pub hosting themed karaoke ragers and electronic house sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c53",
+  "name": "Versova Social",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Plot 1311/2, Juhu Versova Link Road, Andheri West",
+  "vibe": "Alternative, Hip-Hop, High-Volume",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Three-level structure built like a Victorian greenhouse, packed deeply with alternative music lovers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c54",
+  "name": "Hard Rock Cafe Andheri",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Shaman Apartments, Link Road, Andheri West",
+  "vibe": "Vibrant Gastropub, Commercial Hits",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive commercial pub layout driving high-volume rock and retro commercial EDM circuits.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c55",
+  "name": "The Stables",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Peninsula Redpine, Near Airport Road Metro Station, Andheri East",
+  "vibe": "Commercial, Energetic Crowd",
+  "requiredRoles": [
+   "Club Promoter"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "British-style wooden pub amping up deep commercial hits for corporate groups post 10 PM.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c56",
+  "name": "Rodeo Drive Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Peninsula Grand Hotel, Sakinaka, Andheri East",
+  "vibe": "High Energy, Lively",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "American cowboy-themed wild bar featuring a mechanical bull setup and loud commercial hip-hop.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c57",
+  "name": "The Little Easy",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Link Corner, Link Road, Andheri West",
+  "vibe": "Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Prohibition-era speakeasy lounge shifting dynamically to commercial electronic sets on Friday nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c58",
+  "name": "Luft - The Air",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Veera Desai Industrial Estate, Andheri West",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Expansive rooftop lounge running commercial deep house and EDM tracks for local media professionals.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c59",
+  "name": "1522 - Bar and Kitchen",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Mahakali Caves Road, Near Paper Box, Andheri East",
+  "vibe": "High Energy, Energetic Crowd",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Rooftop rock and pop lounge hosting high-volume corporate mixers and weekend promoter events.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c60",
+  "name": "Tap Resto-Bar Andheri",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Global Galleries, Juhu Versova Link Road, Andheri West",
+  "vibe": "Lively, Commercial Remixes",
+  "requiredRoles": [
+   "Club Promoter",
+   "Shisha / Hookah Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-volume budget-friendly pub featuring continuous dance floors and loud commercial remix sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c61",
+  "name": "Shiloh Bar & Experience",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Veera Desai Road, Andheri West",
+  "vibe": "Luxury Clubbing, Deep House",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sleek, multi-sensory premium club operating with strict profile filter doors and deep house lineups.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c62",
+  "name": "Club Escape",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Link Road, Near Infinity Mall, Andheri West",
+  "vibe": "Commercial, High Energy",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-energy commercial electronic disco catering to young party-goers and suburban dance crews.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c63",
+  "name": "Whats Your Plan Sakinaka",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Andheri-Kurla Road, Sakinaka, Andheri East",
+  "vibe": "High-Volume, Hardcore Bollywood",
+  "requiredRoles": [
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Industrial party party hub processing high-volume corporate crowds with heavy commercial remixes.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c64",
+  "name": "Rock Bottom",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "Hotel Ramee Guestline, AB Nair Road, Andheri Enclave",
+  "vibe": "Underground, Techno, Live Electronic",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Legendary basement club circuit running dense commercial techno and late-night promoter sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c65",
+  "name": "Fever Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Andheri",
+  "address": "New Link Road, Andheri West",
+  "vibe": "High Energy, Dramatic Visuals",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Brand Promotion / Shot Distribution"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Neon lounge configuration pushing fast commercial dance tracks and brand launch parties.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c66",
+  "name": "Raasta Bombay",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "4th & 5th Floor, Rohan Plaza, 5th Road, Khar West (Bandra Area)",
+  "vibe": "Reggae, Techno, Free-Spirited",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Famous multi-level Jamaican-themed lounge with a vibrant rooftop dance floor.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c67",
+  "name": "Drop Nightclub",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Krystal Building, Waterfield Road, Bandra West",
+  "vibe": "Techno, Underground, Exclusive",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sleek, high-profile basement nightclub hosting premium electronic music tours.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c68",
+  "name": "Escobar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "4th Floor, VN Sphere Mall, Linking Road, Bandra West",
+  "vibe": "Sleek Lounge, House Music, Elite Suburb Vibe",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Features one of Mumbai’s longest continuous indoor bar counters paired with open terrace dance decks.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c69",
+  "name": "Bonobo",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "2nd Floor, Kenilworth Mall, Phase 2, Off Linking Road, Bandra West",
+  "vibe": "Indie-Alternative, Rooftop Casual, Music First",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Legendary rooftop music venue serving suburban crowds with excellent alternative/indie electronic gigs.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c70",
+  "name": "Mitron Bar & Cafe Bandra",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Crystal Shoppers Paradise, Junction of 24th & 33rd Road, Bandra West",
+  "vibe": "Buzzing Suburb Crowd, Hardcore Bollywood",
+  "requiredRoles": [
+   "Club Promoter",
+   "Paid Party Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-volume suburban weekend favorite pulling massive crowds for loud commercial Bollywood remixes.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c71",
+  "name": "The Daily All Day",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Ground Floor, Behind Shoppers Stop, SV Road, Bandra West",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sophisticated black-and-white print lounge transitioning to high-energy commercial house past midnight.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c72",
+  "name": "Olive Bar & Kitchen",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "14, Nargis Dutt Road, Union Park, Khar/Bandra West",
+  "vibe": "Upscale, Premium Elite",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Iconic Mediterranean villa club pulling Bollywood A-listers and premium elite fashion profiles.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c73",
+  "name": "Radio Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Ground Floor, Hotel New Bengal, SV Road, Bandra West",
+  "vibe": "High Energy, Dramatic Visuals",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Music-centric underground lounge using vintage radio elements, driving intensive commercial EDM playlists.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c74",
+  "name": "3 Wise Monkeys",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "The Hub, Near Khar Station, Bandra Enclave",
+  "vibe": "Lively, Commercial Remixes",
+  "requiredRoles": [
+   "Club Promoter",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-energy rock and commercial pub packed heavily with local college crowds and promoters.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c75",
+  "name": "Hawaiian Shack",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "16th Road, Pali Hill, Bandra West",
+  "vibe": "Retro Commercial, Relaxed",
+  "requiredRoles": [
+   "Club Promoter"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Classic retro multi-tier shack layout running standard retro commercial pop loops for old-school clubbers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c76",
+  "name": "Level 5 Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Linking Road Center, Bandra West",
+  "vibe": "Luxury Clubbing, Deep House",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-altitude boutique night club featuring plush seating and intensive private table bookings.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c77",
+  "name": "Monkey Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Summerville, Junction of 14th & 33rd Road, Bandra West",
+  "vibe": "Vibrant Gastropub, Commercial Hits",
+  "requiredRoles": [
+   "Club Promoter",
+   "Brand Promotion / Shot Distribution"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Gastro-cluster pub amping up high-volume alternative dance sets and promotional brand activations.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c78",
+  "name": "Hoppipola Bandra",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Waterfield Road, Bandra West",
+  "vibe": "Commercial, Energetic Crowd",
+  "requiredRoles": [
+   "Guestlist Manager",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Playful pub space hosting lively weekend crowd balances and commercial dance events.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c79",
+  "name": "The Game Palacio Bandra",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Linking Road, Bandra West",
+  "vibe": "Glamorous, High Energy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Ultra-luxury entertainment club merging bowling avenues with a high-energy midnight techno console.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c80",
+  "name": "Club Pandora",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Bandra",
+  "address": "Station Road, Khar/Bandra Outskirts",
+  "vibe": "Underground, Techno, Live Electronic",
+  "requiredRoles": [
+   "Club Promoter",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Intimate neon basement floor tracking electronic circuits and late-night local promoter sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c81",
+  "name": "Toy Room Mumbai",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Grand Hyatt Hotel, Off Western Express Highway, Santacruz East",
+  "vibe": "Glamorous, Elite Nightlife, House/Commercial",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model",
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "International luxury club brand known for its playful aesthetic, plush crowds, and late-night sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c82",
+  "name": "China House Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Grand Hyatt, Off Western Express Highway, Santacruz East",
+  "vibe": "Luxury Clubbing, High-End Hip-Hop/EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Paid Party Host",
+   "VIP Guest Handler"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Multi-room luxury lounge with an island bar design, pulling corporate icons and high-profile expats.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c83",
+  "name": "Willingdon Catholic Gym Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Church Avenue, Santacruz West",
+  "vibe": "Elite Retro, Exclusive",
+  "requiredRoles": [
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Heritage wooden enclave hosting upscale retro-pop dance nights for local community networks.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c84",
+  "name": "The Velvet Horizon",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "CST Road, Near BKC Border, Santacruz East",
+  "vibe": "EDM, Corporate Elite",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sleek commercial lounge managing high-volume tech-firm mixers and late-night VIP tables.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c85",
+  "name": "Sky High Lounge Santacruz",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Rooftop, Hotel Ritz, Santacruz West",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sprawling terrace setting running commercial Bollywood beats for sub-lineage clubbers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c86",
+  "name": "The Club Room",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Western Express Highway Enclave, Santacruz East",
+  "vibe": "Avant-Garde, Heavy EDM",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Sound-insulated electronic room catering to deep psytrance and underground progressive circuits.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c87",
+  "name": "Neon Disco Santacruz",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Link Road Cross, Santacruz West",
+  "vibe": "High Energy, Dramatic Visuals",
+  "requiredRoles": [
+   "Club Promoter",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Vibrant laser-lit dance club targeting energetic student crowds and promoter activations.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c88",
+  "name": "The Lounge Hyatt",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Grand Hyatt Arcade, Santacruz East",
+  "vibe": "Sophisticated, Intimate",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Opulent ambient bar space shifting smoothly to upbeat commercial house on weekend nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c89",
+  "name": "Transit Bar & Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Domestic Airport Terminal Zone, Santacruz",
+  "vibe": "Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Brand Promotion / Shot Distribution"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-transit cocktail bar keeping late nights buzzing with commercial hit loops and brand events.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c90",
+  "name": "Acoustic Club",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Santacruz",
+  "address": "Juhu Road Promenade, Santacruz West",
+  "vibe": "High Energy, Energetic Crowd",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Paid Party Host"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-spec sound system lounge focusing heavily on live remix percussion and upscale hosting profiles.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c91",
+  "name": "Trilogy Super Club",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Sea Princess Hotel, 969, Juhu Tara Road, Juhu",
+  "vibe": "Commercial, High Energy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Male Security Bouncer"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Iconic beachside multi-level super club popular for massive weekend party vibes.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c92",
+  "name": "Yeda Republic",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Ramee Guestline Hotel, Juhu Tara Road, Juhu",
+  "vibe": "Commercial, Energetic Crowd",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Quirky, ultra-premium commercial club known for throwing high-energy weekend ragers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c93",
+  "name": "R' Adda",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Ramee Guestline Hotel, 462, Juhu Tara Road, Juhu",
+  "vibe": "Intense Energy, Late Night Suburb Rager",
+  "requiredRoles": [
+   "Club Promoter",
+   "Paid Party Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-spirited rust-themed pub keeping Juhu locals dancing late into the night with live commercial remix sets.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c94",
+  "name": "Bar Bank Juhu",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Plot 148, Juhu Tara Road, Juhu",
+  "vibe": "Outdoor Sky-Lounge, Glamorous",
+  "requiredRoles": [
+   "Club Promoter",
+   "Social Media Hype Agent"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Massive outdoor food-truck park lounge configuration running commercial deep house loops.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c95",
+  "name": "Leviitate Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Juhu Scheme Road 10, Juhu",
+  "vibe": "Luxury Clubbing, Deep House",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-altitude neon lounge overlooking premium residential layouts, running deep commercial house tracks.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c96",
+  "name": "The Nines Juhu",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Plot 70, Juhu Tara Road, Juhu",
+  "vibe": "Upscale, Premium Elite",
+  "requiredRoles": [
+   "VIP Guest Handler",
+   "Nightlife Model"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Grand Art-Deco themed luxury lounge space hosting upscale media promotional mixers.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c97",
+  "name": "Stomach House Juhu",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Beach View Promenade, Juhu",
+  "vibe": "Lively, Commercial Remixes",
+  "requiredRoles": [
+   "Club Promoter",
+   "Party Anchor / Hype MC"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Lively coastal rooftop layout driving heavy tourist and elite local student weekend crowds.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c98",
+  "name": "Juhu Vile Parle Gymkhana Club Bar",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "N S Road No 13, Juhu",
+  "vibe": "Elite Retro, Exclusive",
+  "requiredRoles": [
+   "Guestlist Manager"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Exclusive club lounge space unlocking specialized high-end corporate promoter event nights.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c99",
+  "name": "The Beachside Room",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "Juhu Tara Road, Near Beach Entry, Juhu",
+  "vibe": "Commercial Hit-Heavy",
+  "requiredRoles": [
+   "Paid Party Hostess",
+   "Table Booker"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "Glass facade venue playing raw commercial electronic and intensive late-night house arrays.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ },
+ {
+  "id": "mumbai-c100",
+  "name": "Raging Bull Lounge",
+  "state": "Maharashtra",
+  "city": "Mumbai",
+  "suburb": "Juhu",
+  "address": "AB Nair Road, Juhu Enclave",
+  "vibe": "High-Volume, Hardcore Bollywood",
+  "requiredRoles": [
+   "Club Promoter",
+   "Shisha / Hookah Hostess"
+  ],
+  "image": "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+  "musicType": [
+   "Commercial"
+  ],
+  "daysOpen": "All Days",
+  "description": "High-volume commercial night club setup throwing massive weekend Bollywood remix parties.",
+  "coverCharge": "Check Guestlist",
+  "rating": 4.5
+ }
+]

@@ -78,9 +78,6 @@ export const SEED_NAVIGATION: NavigationItem[] = [
     children: [
       nav('nav-invest-why', 'Why Invest in Baalvion', 0, { href: '/why-invest' }),
       nav('nav-invest-thesis', 'Investment Thesis', 1, { href: '/investment-thesis' }),
-      nav('nav-invest-market', 'Market Opportunity', 2, { href: '/market-opportunity' }),
-      nav('nav-invest-proceeds', 'Use of Proceeds', 3, { href: '/use-of-proceeds' }),
-      nav('nav-invest-financials', 'Financial Framework', 4, { href: '/financials' }),
     ],
   }),
   nav('nav-company', 'Company', 1, {
@@ -98,23 +95,11 @@ export const SEED_NAVIGATION: NavigationItem[] = [
         href: '/governance/board-of-directors',
       }),
       nav('nav-gov-leadership', 'Leadership', 3, { href: '/governance/leadership' }),
-      nav('nav-gov-committee', 'Committee Composition', 4, {
-        href: '/governance/committee-composition',
-      }),
       nav('nav-gov-voting', 'My Voting', 5, { href: '/governance/my-voting' }),
     ],
   }),
   nav('nav-news', 'News & Events', 3, {
     children: [
-      nav('nav-news-news', 'News', 0, { href: '/news-and-events/news' }),
-      nav('nav-news-press', 'Press Releases', 1, {
-        href: '/news-and-events/press-releases',
-      }),
-      nav('nav-news-events', 'Events', 2, { href: '/news-and-events/events' }),
-      nav('nav-news-webcast', 'Webcast', 3, { href: '/news-and-events/webcast' }),
-      nav('nav-news-investor-day', 'Investor Day', 4, {
-        href: '/news-and-events/investor-day',
-      }),
     ],
   }),
   nav('nav-portal', 'Investor Portal', 4, {

@@ -1,5 +1,6 @@
 "use client"
 
+import { useAdminAccess, requirementFor } from "@/components/admin/admin-access"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -35,7 +36,10 @@ import {
   GraduationCap,
   Fingerprint,
   Radio,
-  ScrollText
+  ScrollText,
+  Ticket,
+  Star,
+  Crown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -55,6 +59,7 @@ const ADMIN_NAV = [
       { name: "Seller Applications", path: "/admin/seller-applications", icon: ClipboardCheck },
       { name: "Seller Payments", path: "/admin/seller-payments", icon: Wallet },
       { name: "Payment Addresses", path: "/admin/payment-addresses", icon: Bitcoin },
+      { name: "Wallet Receipts", path: "/admin/points", icon: Wallet },
       { name: "Seller Chat", path: "/admin/seller-chat", icon: MessageSquare },
       { name: "Listing Moderation", path: "/admin/moderation", icon: FileCheck },
       { name: "Listing Oversight", path: "/admin/marketplace", icon: ShoppingBag },
@@ -92,8 +97,33 @@ const ADMIN_NAV = [
   {
     group: "EDUCATION HUB",
     items: [
-      { name: "Course Approvals", path: "/admin/education/approvals", icon: GraduationCap },
-      { name: "Live Session Monitor", path: "/admin/education/live", icon: Video },
+      { name: "Teacher Approvals", path: "/admin/education/approvals", icon: GraduationCap },
+      { name: "Sessions", path: "/admin/education/live", icon: Video },
+    ]
+  },
+  {
+    group: "VERIFICATION",
+    items: [
+      { name: "Identity KYC", path: "/admin/kyc", icon: Fingerprint },
+      { name: "Investment Listings", path: "/admin/investments", icon: Tag },
+    ]
+  },
+  {
+    group: "BUG BOUNTY",
+    items: [
+      { name: "Tasks, Reports & Inbox", path: "/admin/bounty", icon: ShieldCheck },
+    ]
+  },
+  {
+    group: "NIGHTLIFE",
+    items: [
+      { name: "Clubs Directory", path: "/admin/clubs", icon: MapPin },
+      { name: "Events Calendar", path: "/admin/clubs/events", icon: MapPin },
+      { name: "Celebrity & DJ Events", path: "/admin/clubs/celebrity-events", icon: Star },
+      { name: "DJ Demand Requests", path: "/admin/clubs/dj-demands", icon: Radio },
+      { name: "Guest List & VIP Requests", path: "/admin/clubs/bookings", icon: MessageSquare },
+      { name: "Ticket Lottery", path: "/admin/clubs/lottery", icon: Ticket },
+      { name: "Elite Hosted Parties", path: "/admin/clubs/elite-host", icon: Crown },
     ]
   },
   {
@@ -101,13 +131,13 @@ const ADMIN_NAV = [
     items: [
       { name: "Manage Listings", path: "/admin/locals", icon: MapPin },
       { name: "Applications Inbox", path: "/admin/locals/applications", icon: MessageSquare },
-      { name: "Identity KYC Check", path: "/admin/locals/kyc", icon: Fingerprint },
       { name: "Post Casting Call", path: "/admin/locals/new", icon: Megaphone },
     ]
   },
   {
     group: "SYSTEM CORE",
     items: [
+      { name: "Staff & Access", path: "/admin/staff", icon: ShieldCheck },
       { name: "Global Announcements", path: "/admin/system/announcements", icon: Radio },
       { name: "Staff Audit Logs", path: "/admin/system/audit", icon: ScrollText },
       { name: "Security Node", path: "/admin/security", icon: Lock },
@@ -118,6 +148,10 @@ const ADMIN_NAV = [
 
 export const AdminSidebar = () => {
   const pathname = usePathname();
+  const { tier, can } = useAdminAccess();
+  const visible = ADMIN_NAV
+    .map((group) => ({ ...group, items: group.items.filter((item) => can(requirementFor(item.path))) }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="flex flex-col h-full bg-[#050508] border-r border-white/5 w-72 fixed left-0 top-0 z-50">
@@ -128,13 +162,13 @@ export const AdminSidebar = () => {
           </div>
           <div>
             <span className="font-bold text-xl tracking-tight text-white block leading-none">NEXUS</span>
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Super Admin</span>
+            <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{tier === "super" ? "Super Admin" : tier === "admin" ? "Admin" : "Moderator"}</span>
           </div>
         </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-6 space-y-10 no-scrollbar">
-        {ADMIN_NAV.map((group) => (
+        {visible.map((group) => (
           <div key={group.group}>
             <h4 className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4 px-4">{group.group}</h4>
             <div className="space-y-1">

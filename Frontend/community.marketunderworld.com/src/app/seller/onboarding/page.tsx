@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { submitSellerApplication, listMySellerApplications, type SellerApplication } from '@/lib/api/commerce-admin'
+import { useAuth } from '@/context/auth-context'
 
 const STEPS = [
   "Welcome", "Store", "Appearance", "Products", "Identity", "Crypto", "Policies", "Launch"
@@ -53,12 +54,19 @@ export default function SellerOnboarding() {
   const { toast } = useToast()
   const router = useRouter()
 
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
   useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin?redirect=' + encodeURIComponent('/seller/onboarding'))
+      return
+    }
+    if (!isAuthenticated) return
     listMySellerApplications()
       .then((apps) => setExistingApplication(apps.find((a) => a.status === 'pending') ?? null))
       .catch(() => setExistingApplication(null))
       .finally(() => setCheckingExisting(false))
-  }, [])
+  }, [isAuthenticated, authLoading, router])
 
   const [formData, setAnswers] = useState({
     storeName: '',
@@ -80,6 +88,11 @@ export default function SellerOnboarding() {
 
   const nextStep = () => setStep(s => Math.min(s + 1, 7))
   const prevStep = () => setStep(s => Math.max(s - 1, 0))
+
+  const saveAndExit = () => {
+    try { sessionStorage.setItem('sellerOnboardingDraft', JSON.stringify({ step, formData })) } catch { /* ignore */ }
+    router.push('/dashboard')
+  }
 
   const handleLaunch = async () => {
     setLaunching(true)
@@ -106,6 +119,14 @@ export default function SellerOnboarding() {
     } finally {
       setLaunching(false)
     }
+  }
+
+  if (authLoading || (!isAuthenticated)) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <Clock className="w-6 h-6 text-emerald-500 animate-spin" />
+      </div>
+    )
   }
 
   if (checkingExisting) {
@@ -163,7 +184,7 @@ export default function SellerOnboarding() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="text-xs font-bold text-gray-500 hover:text-white transition-colors">Save & Exit</button>
+            <button className="text-xs font-bold text-gray-500 hover:text-white transition-colors" onClick={saveAndExit}>Save & Exit</button>
           </div>
         </header>
       )}
@@ -239,12 +260,12 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
         
         <div className="grid grid-cols-2 gap-6">
           <NexusCard className="p-6 bg-white/5 border-white/5 space-y-2">
-            <div className="text-[10px] font-bold text-gray-500 uppercase">Avg Earnings</div>
-            <div className="text-2xl font-bold">0.84 ETH<span className="text-xs text-gray-500 ml-1">/mo</span></div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase">Platform Fee</div>
+            <div className="text-2xl font-bold">5%<span className="text-xs text-gray-500 ml-1">per sale</span></div>
           </NexusCard>
           <NexusCard className="p-6 bg-white/5 border-white/5 space-y-2">
-            <div className="text-[10px] font-bold text-gray-500 uppercase">Platform Fee</div>
-            <div className="text-2xl font-bold">20%<span className="text-xs text-gray-500 ml-1">Flat</span></div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase">Category Access</div>
+            <div className="text-2xl font-bold">$2,000<span className="text-xs text-gray-500 ml-1">one-time</span></div>
           </NexusCard>
         </div>
 
@@ -625,6 +646,7 @@ function CryptoSetup({ data, setAnswers, onNext, onPrev }: any) {
 }
 
 function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
+  const [agreed, setAgreed] = useState(false);
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -653,12 +675,12 @@ function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
           <label className="text-sm font-bold">Seller Agreement</label>
           <div className="max-h-40 overflow-y-auto p-6 bg-black/40 border border-white/10 rounded-2xl text-[10px] text-gray-500 leading-relaxed space-y-4 no-scrollbar">
             <p>1. PROVISION OF SERVICES. NEXUS provides a platform for sellers to list and sell products to global buyers.</p>
-            <p>2. PLATFORM FEES. A standard fee of 20% is deducted from each successful transaction.</p>
+            <p>2. PLATFORM FEES. A standard fee of 5% is deducted from each successful transaction.</p>
             <p>3. CRYPTO SETTLEMENT. Payments are held in escrow until order completion is verified.</p>
             <p>4. COMPLIANCE. Sellers must comply with all local and global trade regulations.</p>
           </div>
           <div className="flex items-start gap-3 p-2">
-            <input type="checkbox" className="mt-1 accent-[#00E676]" id="agree" />
+            <input type="checkbox" className="mt-1 accent-[#00E676]" id="agree" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
             <label htmlFor="agree" className="text-xs text-gray-400">I have read and agree to the NEXUS Seller Terms of Service</label>
           </div>
         </div>
@@ -666,7 +688,7 @@ function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
 
       <div className="pt-8 flex gap-4">
         <NexusButton variant="outline" className="flex-1 h-14 border-white/10" onClick={onPrev}>Back</NexusButton>
-        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext}>Continue</NexusButton>
+        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext} disabled={!agreed}>Continue</NexusButton>
       </div>
     </motion.div>
   )

@@ -25,10 +25,18 @@ async function proxy(request: NextRequest, path: string[]) {
     body: hasBody ? await request.text() : undefined,
   });
 
+  // KYC documents come back as binary (images/PDF); reading them as text would corrupt the bytes.
+  const contentType = upstream.headers.get('content-type') ?? 'application/json';
+  if (/^(image\/|application\/pdf)/i.test(contentType)) {
+    return new NextResponse(await upstream.arrayBuffer(), {
+      status: upstream.status,
+      headers: { 'content-type': contentType, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' },
+    });
+  }
   const body = await upstream.text();
   return new NextResponse(body, {
     status: upstream.status,
-    headers: { 'content-type': upstream.headers.get('content-type') ?? 'application/json' },
+    headers: { 'content-type': contentType },
   });
 }
 
@@ -42,5 +50,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   return proxy(request, (await params).path);
 }
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  return proxy(request, (await params).path);
+}
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return proxy(request, (await params).path);
 }

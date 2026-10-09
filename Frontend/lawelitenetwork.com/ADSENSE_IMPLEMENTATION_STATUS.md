@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15  
 **Status:** ✅ PRODUCTION READY  
-**Publisher ID:** `ca-pub-8968452296456450`
+**Publisher ID:** `ca-pub-7321711585180412`
 
 ---
 
@@ -13,7 +13,7 @@
 ```
 ✓ .env.local                    - Added NEXT_PUBLIC_ADSENSE_CLIENT
 ✓ .env.example                  - Created with all options
-✓ AdSense Client ID             - ca-pub-8968452296456450
+✓ AdSense Client ID             - ca-pub-7321711585180412
 ✓ CMS Integration               - Fallback resolution
 ```
 
@@ -234,7 +234,7 @@ Metrics API (src/app/api/ads/metrics/route.ts)
 
 ### Before Production
 ```
-[ ] Verify publisher ID ca-pub-8968452296456450 is active
+[ ] Verify publisher ID ca-pub-7321711585180412 is active
 [ ] Test ads in AdSense preview mode
 [ ] Verify .env.local has NEXT_PUBLIC_ADSENSE_CLIENT set
 [ ] Check ads display on staging
@@ -271,7 +271,7 @@ Metrics API (src/app/api/ads/metrics/route.ts)
 pnpm install
 
 # 2. Set environment
-# .env.local already has NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-8968452296456450
+# .env.local already has NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-7321711585180412
 
 # 3. Run dev server
 pnpm run dev
@@ -288,7 +288,7 @@ pnpm run dev
 
 # 2. Set environment in Vercel
 # Vercel Dashboard → Settings → Environment Variables
-# NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-8968452296456450
+# NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-7321711585180412
 
 # 3. Deploy
 git push origin main  # or deploy via Vercel dashboard
@@ -323,7 +323,7 @@ git push origin main  # or deploy via Vercel dashboard
 ```bash
 # Login to AdSense
 # Confirm: Account is VERIFIED, Site is APPROVED
-# Publisher ID: ca-pub-8968452296456450
+# Publisher ID: ca-pub-7321711585180412
 ```
 
 ### 2. Create Ad Slots (Optional)

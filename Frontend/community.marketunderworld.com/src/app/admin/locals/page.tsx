@@ -1,64 +1,13 @@
 "use client"
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { 
-  MapPin, CheckCircle2, Trash2, Eye, EyeOff, Plus,
+  MapPin, CheckCircle2, Archive, Eye, EyeOff, Plus,
   Briefcase, Music, HeartHandshake, Plane, Users, Calendar, Search
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-// Simulated listing store (in production this would come from a DB/API)
-const MOCK_LISTINGS = [
-  {
-    id: "cast-1",
-    title: "CASTING CALL - UGC Video Shoot (Cosmetic Brand)",
-    type: "Casting & Jobs",
-    location: "Mumbai",
-    postedBy: "Casting47",
-    verified: true,
-    active: true,
-    applicants: 12,
-    postedAt: "Today 12:36 PM",
-    minAge: 18, maxAge: 24, gender: "Any",
-  },
-  {
-    id: "cast-2",
-    title: "Dermacy Films - Lead Female Artist (Urgent)",
-    type: "Casting & Jobs",
-    location: "Delhi NCR",
-    postedBy: "Right Way Films",
-    verified: true,
-    active: true,
-    applicants: 7,
-    postedAt: "Yesterday",
-    minAge: 25, maxAge: 32, gender: "Female",
-  },
-  {
-    id: "dance-1",
-    title: "DANCER BOYS & GIRLS Needed - Goa Shows",
-    type: "Casting & Jobs",
-    location: "Mumbai → Goa",
-    postedBy: "DANCER BOYS (मुंबई)",
-    verified: true,
-    active: true,
-    applicants: 34,
-    postedAt: "Today 12:02 PM",
-    minAge: 18, maxAge: 35, gender: "Any",
-  },
-  {
-    id: "dance-2",
-    title: "Jodhpur Wedding Shows - Girls Needed",
-    type: "Events",
-    location: "Jodhpur",
-    postedBy: "Ankit",
-    verified: false,
-    active: false,
-    applicants: 3,
-    postedAt: "Today",
-    minAge: 20, maxAge: 35, gender: "Female",
-  },
-];
+import { admin, type ApiListing } from "@/lib/api/nightlife";
 
 const TYPE_ICONS: Record<string, any> = {
   "Casting & Jobs": Briefcase,
@@ -68,26 +17,53 @@ const TYPE_ICONS: Record<string, any> = {
 };
 
 export default function AdminLocalsPage() {
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState<ApiListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
+
+  const load = useCallback(async () => {
+    try {
+      setError("");
+      setListings((await admin.listings()).items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load listings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const isActive = (l: ApiListing) => l.status === "active";
 
   const filtered = listings.filter((l) => {
     const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) ||
                         l.location.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "all" || (filter === "active" ? l.active : !l.active);
+    const matchFilter = filter === "all" || (filter === "active" ? isActive(l) : !isActive(l));
     return matchSearch && matchFilter;
   });
 
-  const toggleActive = (id: string) => {
-    setListings(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l));
+  const setStatus = async (l: ApiListing, status: ApiListing["status"]) => {
+    try {
+      setError("");
+      await admin.updateListing(l.id, { status });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update listing");
+    }
   };
 
-  const deleteListing = (id: string) => {
-    setListings(prev => prev.filter(l => l.id !== id));
+  // Hidden = closed to new applications but kept; archived = off the hub entirely. Neither deletes rows.
+  const toggleActive = (l: ApiListing) => setStatus(l, isActive(l) ? "closed" : "active");
+  const archiveListing = (l: ApiListing) => {
+    if (confirm(`Archive "${l.title}"? It will be removed from the public hub.`)) setStatus(l, "archived");
   };
 
-  const totalApplicants = listings.reduce((sum, l) => sum + l.applicants, 0);
+  const totalApplicants = listings.reduce((sum, l) => sum + (l.applicationCount ?? 0), 0);
 
   return (
     <div className="space-y-10">
@@ -107,12 +83,14 @@ export default function AdminLocalsPage() {
         </Link>
       </div>
 
+      {error && <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Listings", value: listings.length, color: "text-white" },
-          { label: "Active", value: listings.filter(l => l.active).length, color: "text-green-400" },
-          { label: "Inactive / Hidden", value: listings.filter(l => !l.active).length, color: "text-red-400" },
+          { label: "Active", value: listings.filter(l => isActive(l)).length, color: "text-green-400" },
+          { label: "Inactive / Hidden", value: listings.filter(l => !isActive(l)).length, color: "text-red-400" },
           { label: "Total Applicants", value: totalApplicants, color: "text-fuchsia-400" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-2xl bg-white/[0.03] border border-white/10 p-6">
@@ -160,7 +138,8 @@ export default function AdminLocalsPage() {
           <div className="col-span-2 text-right">Actions</div>
         </div>
 
-        {filtered.length === 0 && (
+        {loading && <div className="py-16 text-center text-gray-500 text-sm">Loading…</div>}
+        {!loading && filtered.length === 0 && (
           <div className="py-16 text-center text-gray-500 text-sm">No listings found.</div>
         )}
 
@@ -169,22 +148,22 @@ export default function AdminLocalsPage() {
           return (
             <div key={listing.id} className={cn(
               "grid grid-cols-12 items-center px-6 py-5 border-b border-white/5 hover:bg-white/[0.02] transition-colors",
-              !listing.active && "opacity-50"
+              !isActive(listing) && "opacity-50"
             )}>
               {/* Title col */}
               <div className="col-span-5 flex items-center gap-4">
                 <div className={cn(
                   "w-10 h-10 shrink-0 rounded-xl flex items-center justify-center",
-                  listing.active ? "bg-fuchsia-500/10" : "bg-white/5"
+                  isActive(listing) ? "bg-fuchsia-500/10" : "bg-white/5"
                 )}>
-                  <Icon className={cn("w-5 h-5", listing.active ? "text-fuchsia-400" : "text-gray-500")} />
+                  <Icon className={cn("w-5 h-5", isActive(listing) ? "text-fuchsia-400" : "text-gray-500")} />
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-sm text-white line-clamp-1">{listing.title}</div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-[10px] font-bold text-gray-500 uppercase">{listing.type}</span>
                     {listing.verified && <CheckCircle2 className="w-3 h-3 text-green-400" />}
-                    {listing.gender !== "Any" && (
+                    {listing.gender && listing.gender !== "Any" && (
                       <span className="text-[10px] font-bold text-blue-400">{listing.gender}</span>
                     )}
                     {listing.minAge && (
@@ -208,26 +187,26 @@ export default function AdminLocalsPage() {
               <div className="col-span-1 text-center">
                 <span className={cn(
                   "inline-flex items-center justify-center gap-1 text-xs font-bold rounded-lg px-2 py-1",
-                  listing.applicants > 10 ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/5 text-gray-400"
+                  (listing.applicationCount ?? 0) > 10 ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/5 text-gray-400"
                 )}>
-                  <Users className="w-3 h-3" /> {listing.applicants}
+                  <Users className="w-3 h-3" /> {listing.applicationCount ?? 0}
                 </span>
               </div>
 
               <div className="col-span-2 flex items-center justify-end gap-2">
                 <button
-                  onClick={() => toggleActive(listing.id)}
-                  title={listing.active ? "Hide listing" : "Show listing"}
+                  onClick={() => toggleActive(listing)}
+                  title={isActive(listing) ? "Hide listing" : "Show listing"}
                   className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                 >
-                  {listing.active ? <Eye className="w-4 h-4 text-green-400" /> : <EyeOff className="w-4 h-4 text-gray-500" />}
+                  {isActive(listing) ? <Eye className="w-4 h-4 text-green-400" /> : <EyeOff className="w-4 h-4 text-gray-500" />}
                 </button>
                 <button
-                  onClick={() => deleteListing(listing.id)}
-                  title="Delete listing"
+                  onClick={() => archiveListing(listing)}
+                  title="Archive listing"
                   className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-red-500/20 hover:border-red-500/30 border border-transparent transition-colors"
                 >
-                  <Trash2 className="w-4 h-4 text-red-400" />
+                  <Archive className="w-4 h-4 text-red-400" />
                 </button>
               </div>
             </div>

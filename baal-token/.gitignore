@@ -1,0 +1,47 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Environment files (only the example is tracked)
+.env
+.env.*
+!.env.example
+
+# Secrets, wallets, keypairs, seed material
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mnemonic
+*.seed
+id.json
+*keypair*.json
+*-keypair.json
+wallet*.json
+*wallet*.key
+phantom-export*
+ledger-export*
+secrets/
+.secrets/
+.wallets/
+.solana/
+.config/solana/
+.anchor/
+test-ledger/
+
+# Local credentials and dumps
+.npmrc.local
+credentials*.json
+service-account*.json
+*.sql
+*.dump
+*.bak
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

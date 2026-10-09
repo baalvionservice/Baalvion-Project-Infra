@@ -9,6 +9,8 @@ const { createProductSchema, updateProductSchema, bulkUpdateSchema, importProduc
 const { createVariantSchema, updateVariantSchema, pricingSchema } = require('../validators/variantSchemas');
 const { updateMediaSchema, reorderMediaSchema } = require('../validators/mediaSchemas');
 
+const { ownProductOnMarketplace } = require('../middleware/marketplaceGuard');
+
 const router = Router({ mergeParams: true });
 
 router.get('/', loadStoreRole, productCtrl.listProducts);
@@ -16,13 +18,13 @@ router.post('/', loadStoreRole, requireStoreRole('content_editor'), validate(cre
 router.post('/bulk', loadStoreRole, requireStoreRole('content_editor'), validate(bulkUpdateSchema), productCtrl.bulkUpdate);
 router.post('/import', loadStoreRole, requireStoreRole('content_editor'), validate(importProductsSchema), productCtrl.importProducts);
 
-router.get('/:productId', loadStoreRole, productCtrl.getProduct);
+router.get('/:productId', loadStoreRole, ownProductOnMarketplace, productCtrl.getProduct);
 router.patch('/:productId', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(updateProductSchema), productCtrl.updateProduct);
 router.delete('/:productId', loadStoreRole, requireStoreRole('commerce_manager'), requireProductOwner(), productCtrl.deleteProduct);
 router.post('/:productId/publish', loadStoreRole, requireStoreRole('commerce_manager'), requireProductOwner(), productCtrl.publishProduct);
 router.post('/:productId/duplicate', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), productCtrl.duplicateProduct);
 
-router.get('/:productId/variants', loadStoreRole, variantCtrl.listVariants);
+router.get('/:productId/variants', loadStoreRole, ownProductOnMarketplace, variantCtrl.listVariants);
 router.post('/:productId/variants', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(createVariantSchema), variantCtrl.createVariant);
 router.patch('/:productId/variants/:variantId', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(updateVariantSchema), variantCtrl.updateVariant);
 router.delete('/:productId/variants/:variantId', loadStoreRole, requireStoreRole('commerce_manager'), requireProductOwner(), variantCtrl.deleteVariant);
@@ -31,7 +33,7 @@ router.put('/:productId/pricing', loadStoreRole, requireStoreRole('content_edito
 
 // Product media library — same authorization as product editing (content_editor to mutate).
 // Upload/replace bodies are multipart/form-data (parsed in the controller), so no validate().
-router.get('/:productId/media', loadStoreRole, mediaCtrl.listMedia);
+router.get('/:productId/media', loadStoreRole, ownProductOnMarketplace, mediaCtrl.listMedia);
 router.post('/:productId/media', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), mediaCtrl.uploadMedia);
 router.post('/:productId/media/reorder', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(reorderMediaSchema), mediaCtrl.reorderMedia);
 router.patch('/:productId/media/:mediaId', loadStoreRole, requireStoreRole('content_editor'), requireProductOwner(), validate(updateMediaSchema), mediaCtrl.updateMedia);

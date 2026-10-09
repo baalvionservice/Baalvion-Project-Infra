@@ -1,5 +1,6 @@
 "use client"
 
+import { notifyListing } from '@/lib/api/seller-notify';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { AppButton } from '@/components/ui/AppButton';
@@ -31,6 +32,7 @@ export default function ModerationQueuePage() {
     setActingOn(item.id);
     try {
       await moderateProduct(item.storeId, item.id, 'approve');
+      void notifyListing(item, 'approved');
       toast({ title: 'Listing approved', description: `${item.name} is now live on the storefront.` });
       load();
     } catch (err) {
@@ -45,6 +47,7 @@ export default function ModerationQueuePage() {
     setActingOn(item.id);
     try {
       await moderateProduct(item.storeId, item.id, 'reject', rejectReason.trim());
+      void notifyListing(item, 'rejected', rejectReason.trim());
       toast({ title: 'Listing rejected', description: 'Sent back to the seller with your reason.' });
       setRejectingId(null);
       setRejectReason('');

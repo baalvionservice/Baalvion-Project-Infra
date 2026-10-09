@@ -9,7 +9,7 @@ import {
   Server, Code2, Headphones, Bot, KeyRound, ShieldAlert, Globe,
   Activity, Database, Zap, Search, ArrowRight, Hash, Package,
   MessageSquare, Webhook, LifeBuoy, TrendingUp, Lock, UserCheck,
-  Cpu, HardDrive, Network, GitBranch, BookOpen, Layers,
+  Cpu, HardDrive, Network, GitBranch, BookOpen, Layers, Eye,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +59,7 @@ const NAV_COMMANDS: Cmd[] = [
 
   // Operations
   { id: 'notifs',      label: 'Notifications',            desc: 'Email, SMS, push, webhooks',             href: '/notifications',     icon: Bell,            group: 'Operations' },
+  { id: 'visitors',    label: 'Site Visitors',            desc: 'Real-time visitor tracking & intelligence', href: '/visitors',         icon: Eye,             group: 'Operations' },
   { id: 'support',     label: 'Support Center',           desc: 'Tickets, live chat, customer timeline',  href: '/support',           icon: Headphones,      group: 'Operations' },
 
   // AI

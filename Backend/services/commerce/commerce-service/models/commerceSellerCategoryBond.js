@@ -7,7 +7,9 @@ module.exports = function (sequelize, DataTypes) {
     return sequelize.define('commerce_seller_category_bonds', {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
         sellerUserId: { type: DataTypes.BIGINT, allowNull: false },
-        categoryId: { type: DataTypes.UUID, allowNull: false },
+        // 'category' = a seller's $2,000 category payment; 'buyer_access' = a buyer's entry pass (no category).
+        kind: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'category' },
+        categoryId: { type: DataTypes.UUID, allowNull: true },
         amountUsd: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
         currency: { type: DataTypes.STRING(10), allowNull: false },
         status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'awaiting_payment' },

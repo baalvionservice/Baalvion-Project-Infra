@@ -16,6 +16,7 @@ async function listProducts(storeId, query = {}) {
     if (query.productType) where.productType = query.productType;
     if (query.categoryId) where.categoryId = query.categoryId;
     if (query.isFeatured !== undefined) where.isFeatured = query.isFeatured === 'true';
+    if (query.ownerUserId) where.createdBy = query.ownerUserId;
     if (query.search) where[Op.or] = [{ name: { [Op.iLike]: `%${query.search}%` } }, { sku: { [Op.iLike]: `%${query.search}%` } }];
     const { rows, count } = await CommerceProduct.findAndCountAll({
         where, limit, offset, order: [['updatedAt', 'DESC']],
@@ -43,10 +44,34 @@ async function getProduct(storeId, productId) {
     return data;
 }
 
+// Web addresses are unique across the whole store, but sellers share one store: two sellers who both
+// name a listing "iPhone 15" (or both start an "Untitled listing") must not collide, and one seller
+// must not be able to tell that another already has a listing with that name. So a taken address
+// simply gets a short random suffix.
+async function uniqueSlug(storeId, base, excludeId) {
+    const root = (base || 'listing').slice(0, 480);
+    for (let i = 0; i < 20; i += 1) {
+        const candidate = i === 0 ? root : `${root}-${Math.random().toString(36).slice(2, 6 + (i > 5 ? 1 : 0))}`;
+        const where = { storeId, slug: candidate };
+        if (excludeId) where.id = { [Op.ne]: excludeId };
+        if (!(await CommerceProduct.findOne({ where, attributes: ['id'] }))) return candidate;
+    }
+    throw new AppError('CONFLICT', 'Could not find a free web address for this listing — try a different name', 409);
+}
+
+// Variant SKUs are unique across the whole database, not per store or per seller, so the automatic
+// one (and a seller's own, which may clash with another seller's) gets a short suffix when taken.
+async function uniqueVariantSku(base) {
+    const root = String(base || 'ITEM').toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 150) || 'ITEM';
+    for (let i = 0; i < 20; i += 1) {
+        const candidate = i === 0 ? root : `${root}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+        if (!(await CommerceProductVariant.findOne({ where: { sku: candidate }, attributes: ['id'] }))) return candidate;
+    }
+    throw new AppError('CONFLICT', 'Could not generate a free SKU — please set one yourself', 409);
+}
+
 async function createProduct(storeId, userId, body) {
-    const slug = body.slug || slugify(body.name);
-    const existing = await CommerceProduct.findOne({ where: { storeId, slug } });
-    if (existing) throw new AppError('CONFLICT', 'Product slug already exists in this store', 409);
+    const slug = await uniqueSlug(storeId, body.slug || slugify(body.name));
 
     const product = await sequelize.transaction(async (t) => {
         const p = await CommerceProduct.create({
@@ -54,7 +79,7 @@ async function createProduct(storeId, userId, body) {
         }, { transaction: t });
 
         if (p.productType === 'simple') {
-            const variantSku = body.sku || `${slug.toUpperCase().slice(0, 10)}-DEFAULT`;
+            const variantSku = await uniqueVariantSku(body.sku || `${slug}-DEFAULT`);
             await CommerceProductVariant.create({
                 productId: p.id, sku: variantSku, isDefault: true, isActive: true,
                 price: body.price || 0, currencyCode: body.currencyCode || 'USD', sortOrder: 0,
@@ -69,8 +94,7 @@ async function updateProduct(storeId, productId, userId, body) {
     const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
     if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
     if (body.slug && body.slug !== product.slug) {
-        const existing = await CommerceProduct.findOne({ where: { storeId, slug: body.slug, id: { [Op.ne]: productId } } });
-        if (existing) throw new AppError('CONFLICT', 'Product slug already exists', 409);
+        body = { ...body, slug: await uniqueSlug(storeId, body.slug, productId) };
     }
     if (body.categoryId && body.categoryId !== product.categoryId && product.status !== 'draft') {
         await sellerBondService.assertCanSellInCategory(product.createdBy, body.categoryId);
@@ -162,9 +186,13 @@ async function duplicateProduct(storeId, productId, userId) {
     return newProduct.toJSON();
 }
 
-async function bulkUpdate(storeId, userId, { ids, action, categoryId }) {
+async function bulkUpdate(storeId, userId, { ids, action, categoryId }, { ownerUserId } = {}) {
     const products = await CommerceProduct.findAll({ where: { id: { [Op.in]: ids }, storeId } });
     if (!products.length) throw new AppError('NOT_FOUND', 'No products found', 404);
+    // Marketplace sellers may only bulk-change listings they created: one foreign id refuses the whole batch.
+    if (ownerUserId && (products.length !== ids.length || products.some((p) => String(p.createdBy) !== String(ownerUserId)))) {
+        throw new AppError('FORBIDDEN', 'You can only change your own listings', 403);
+    }
     switch (action) {
         case 'publish':
             for (const p of products) await sellerBondService.assertCanSellInCategory(p.createdBy, p.categoryId);

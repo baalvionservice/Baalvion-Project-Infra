@@ -240,7 +240,7 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
                   Verify, Don&apos;t Take Our Word For It.
                 </h2>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  Real, live figures on platform integrity, audit accountability, and security architecture.
+                  How the platform approaches integrity, audit accountability, and security architecture, stated plainly.
                 </p>
               </div>
               <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary">

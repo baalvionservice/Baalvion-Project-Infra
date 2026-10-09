@@ -1,0 +1,8 @@
+{
+  "name": "@baalvion/notification-publisher",
+  "version": "1.0.0",
+  "description": "Shared utility to publish admin live-event notifications to Redis pub/sub",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "private": true
+}

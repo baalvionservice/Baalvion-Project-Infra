@@ -1,14 +1,34 @@
 "use client"
 
-import React from 'react';
-import { MARKET_TICKER } from '@/data/mockData';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
+interface TickerItem {
+  pair: string;
+  price: string;
+  change: string;
+  pos: boolean;
+}
+
 export const CryptoTicker = () => {
+  const [items, setItems] = useState<TickerItem[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      fetch('/api/ticker')
+        .then((r) => (r.ok ? r.json() : { items: [] }))
+        .then((body) => { if (alive) setItems(body.items ?? []); })
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 60_000);
+    return () => { alive = false; clearInterval(timer); };
+  }, []);
+
   return (
     <div className="fixed top-0 left-0 right-0 h-8 bg-black border-b border-[#1F232B] z-[1100] overflow-hidden whitespace-nowrap hidden md:block">
       <div className="flex h-full items-center animate-ticker">
-        {[...MARKET_TICKER, ...MARKET_TICKER, ...MARKET_TICKER].map((item, idx) => (
+        {[...items, ...items, ...items].map((item, idx) => (
           <div key={idx} className="inline-flex items-center mx-12 gap-3 group cursor-default">
             <span className="text-[#6B7280] text-[10px] font-bold uppercase tracking-widest">{item.pair}</span>
             <span className="text-white text-[11px] font-mono font-bold tracking-tight">${item.price}</span>

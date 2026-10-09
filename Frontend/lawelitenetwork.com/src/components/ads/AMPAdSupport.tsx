@@ -3,7 +3,9 @@
  * Provides utilities for serving AMP-compliant ad units on mobile
  */
 
-const ADSENSE_CLIENT_ID = 'ca-pub-8968452296456450';
+import { ADSENSE_CLIENT } from '@/lib/adsense';
+
+const ADSENSE_CLIENT_ID = ADSENSE_CLIENT;
 const DEFAULT_SLOT_ID = '4123514154';
 
 export interface AMPAdConfig {

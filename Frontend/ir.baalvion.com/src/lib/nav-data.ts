@@ -17,7 +17,6 @@ export const publicNav: NavItem[] = [
       { label: "Investment Thesis", href: "/investment-thesis" },
       { label: "Governance Framework", href: "/governance/framework" },
       { label: "Governance Overview", href: "/governance/overview" },
-      { label: "News & Events", href: "/news-and-events/news" },
     ],
   },
   {
@@ -26,8 +25,8 @@ export const publicNav: NavItem[] = [
       { label: "Our Story", href: "/company/story" },
       { label: "Leadership Team", href: "/governance/leadership" },
       { label: "Board of Directors", href: "/governance/board-of-directors" },
-      { label: "Committee Composition", href: "/governance/committee-composition" },
-      { label: "Market Opportunity", href: "/market-opportunity" },
+      { label: "Ownership & Control", href: "/governance/ownership" },
+      { label: "Strategic Operator Program", href: "/strategic-operator" },
     ],
   },
   {
@@ -36,25 +35,12 @@ export const publicNav: NavItem[] = [
     children: [
       { label: "For Investors", isHeader: true },
       { label: "Browse Opportunities", href: "/invest" },
-      { label: "Strategic Operator", href: "/strategic-operator" },
       { label: "---" as any },
       { label: "For Founders", isHeader: true },
       { label: "List Your Business", href: "/invest/list-your-business" },
       { label: "My Business", href: "/invest/my-business" },
       { label: "---" as any },
       { label: "Investment Thesis", href: "/investment-thesis" },
-      { label: "Use of Proceeds", href: "/use-of-proceeds" },
-    ],
-  },
-  {
-    label: "News & Events",
-    href: "/news-and-events/news",
-    children: [
-      { label: "News", href: "/news-and-events/news" },
-      { label: "Press Releases", href: "/news-and-events/press-releases" },
-      { label: "Events & Presentations", href: "/news-and-events/events" },
-      { label: "Investor Day", href: "/news-and-events/investor-day" },
-      { label: "Webcast", href: "/news-and-events/webcast" },
     ],
   },
   {
@@ -63,14 +49,8 @@ export const publicNav: NavItem[] = [
       { label: "Governance Overview", href: "/governance/overview" },
       { label: "Leadership", href: "/governance/leadership" },
       { label: "Board of Directors", href: "/governance/board-of-directors" },
-      {
-        label: "Committee Composition",
-        href: "/governance/committee-composition",
-      },
       { label: "---" as any },
       { label: "Governance Framework", href: "/governance/framework" },
-      { label: "Regulatory Filings", href: "/news-and-events/filings" },
-      { label: "Financial Reports", href: "/news-and-events/financial-reports" },
     ],
   },
   {
@@ -109,7 +89,6 @@ export const loggedInNav: NavItem[] = [
     label: "Data Rooms",
     children: [
       { label: "SPV Data Room", href: "/phase2/data-room" },
-      { label: "Documents", href: "/news-and-events/documents" },
     ],
   },
   {
@@ -118,24 +97,9 @@ export const loggedInNav: NavItem[] = [
       { label: "Governance Overview", href: "/governance/overview" },
       { label: "Leadership", href: "/governance/leadership" },
       { label: "Board of Directors", href: "/governance/board-of-directors" },
-      {
-        label: "Committee Composition",
-        href: "/governance/committee-composition",
-      },
       { label: "---" as any },
       { label: "My Voting", href: "/governance/my-voting" },
       { label: "Governance Framework", href: "/governance/framework" },
-      { label: "Regulatory Filings", href: "/news-and-events/filings" },
-    ],
-  },
-  {
-    label: "Company",
-    children: [
-      { label: "News", href: "/news-and-events/news" },
-      { label: "Press Releases", href: "/news-and-events/press-releases" },
-      { label: "Events & Presentations", href: "/news-and-events/events" },
-      { label: "Investor Day", href: "/news-and-events/investor-day" },
-      { label: "Webcast", href: "/news-and-events/webcast" },
     ],
   },
   {

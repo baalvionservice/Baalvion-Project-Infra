@@ -14,6 +14,7 @@ function actorOf(req) {
     const token = req.get && req.get('X-Cart-Session');
     return {
         userId: req.auth ? req.auth.userId : null,
+        roles: req.auth ? [req.auth.role, ...(Array.isArray(req.auth.roles) ? req.auth.roles : [])].filter(Boolean) : [],
         sessionId: token ? verify(token) : null,
         requestId: req.requestId,
         isStaff: () => (staffPromise = staffPromise || isStoreStaff(req)),

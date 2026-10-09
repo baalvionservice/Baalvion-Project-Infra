@@ -325,6 +325,10 @@ export interface CommerceProduct {
   stockQuantity: number;
   isFeatured: boolean;
   customFields?: Record<string, unknown>;
+  viewCount?: number;
+  updatedAt?: string;
+  // The default variant carries the price (decimal string from the API).
+  variants?: { price: string | number; currencyCode: string; isDefault?: boolean }[];
 }
 
 export interface ProductInput {
@@ -337,6 +341,7 @@ export interface ProductInput {
   tags?: string[];
   seoMetadata?: Record<string, unknown>;
   stockQuantity?: number;
+  customFields?: Record<string, unknown>;
 }
 
 export interface ProductPricingInput {

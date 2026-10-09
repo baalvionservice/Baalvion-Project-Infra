@@ -1,5 +1,5 @@
 'use strict';
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const { CommerceSellerCategoryBond, CommerceSellerApplication, CommerceCategory, CommerceProduct, CommerceMemberProfile, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
@@ -25,27 +25,45 @@ async function isApprovedSeller(userId) {
     return !!(await CommerceSellerApplication.findOne({ where: { applicantUserId: userId, status: 'approved' }, attributes: ['id'] }));
 }
 
-async function createBond(authCtx, { categoryId, currency, network }) {
+async function issuePayment(authCtx, { kind, categoryId, currency, network, amountUsd }) {
     if (!authCtx.userId) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
     if (!CURRENCIES.includes(currency)) throw new AppError('VALIDATION_ERROR', `currency must be one of ${CURRENCIES.join(', ')}`, 400);
-    if (!(await isApprovedSeller(authCtx.userId))) throw new AppError('FORBIDDEN', 'Your seller application must be approved first', 403);
+    const isPass = kind === 'buyer_access';
+    const isTopup = kind === 'wallet_topup';
+    if (isTopup) {
+        const { minTopupUsd, maxTopupUsd } = config.points;
+        if (!Number.isFinite(amountUsd) || amountUsd < minTopupUsd || amountUsd > maxTopupUsd) {
+            throw new AppError('VALIDATION_ERROR', `Load between $${minTopupUsd} and $${maxTopupUsd}`, 400);
+        }
+    }
 
-    const rootId = await rootCategoryId(categoryId);
+    let rootId = null;
+    if (!isPass && !isTopup) {
+        if (!(await isApprovedSeller(authCtx.userId))) throw new AppError('FORBIDDEN', 'Your seller application must be approved first', 403);
+        rootId = await rootCategoryId(categoryId);
+    }
     const dest = await paymentDestinations.resolve(currency, network);
     if (!dest) throw new AppError('UNAVAILABLE', `${paymentDestinations.METHODS[currency].label}${network ? ` on ${network}` : ''} is not available right now`, 503);
 
     const existing = await CommerceSellerCategoryBond.findOne({
-        where: { sellerUserId: authCtx.userId, categoryId: rootId, status: LIVE },
+        where: isTopup ? { sellerUserId: authCtx.userId, kind: 'wallet_topup', status: ['awaiting_payment', 'payment_submitted'] }
+            : isPass ? { sellerUserId: authCtx.userId, kind: 'buyer_access', status: LIVE }
+            : { sellerUserId: authCtx.userId, kind: 'category', categoryId: rootId, status: LIVE },
     });
-    if (existing) throw new AppError('CONFLICT', 'You already have access to this category', 409);
+    if (existing) throw new AppError('CONFLICT', isTopup ? 'You already have a wallet load in progress' : isPass ? 'You already have an access pass' : 'You already have access to this category', 409);
 
     const bond = await CommerceSellerCategoryBond.create({
-        sellerUserId: authCtx.userId, categoryId: rootId, amountUsd: config.sellerBond.amountUsd, currency,
-        // Frozen on the payment: what the seller was told is what the admin checks against, even if the address is changed later.
+        sellerUserId: authCtx.userId, kind: isTopup ? 'wallet_topup' : isPass ? 'buyer_access' : 'category', categoryId: rootId,
+        amountUsd: isTopup ? amountUsd : isPass ? config.buyerAccess.amountUsd : config.sellerBond.amountUsd, currency,
+        // Frozen on the payment: what the payer was told is what the admin checks against, even if the address is changed later.
         payToAddress: dest.address, payToNetwork: dest.network, payToLabel: dest.label,
     });
     return present(bond);
 }
+
+const createBond = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'category' });
+const createAccessPass = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'buyer_access' });
+const createWalletTopup = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'wallet_topup' });
 
 async function present(bond) {
     const json = bond.toJSON();
@@ -110,16 +128,28 @@ async function transition(bondId, from, patch) {
 }
 
 // Confirming a payment activates the category AND credits the seller's tokens, atomically.
-async function confirmPayment(authCtx, bondId, { amountReceived, note }) {
+async function confirmPayment(authCtx, bondId, { amountReceived, note, creditUsd }) {
     return sequelize.transaction(async (t) => {
         const bond = await CommerceSellerCategoryBond.findByPk(bondId, { transaction: t, lock: t.LOCK.UPDATE });
         if (!bond) throw new AppError('NOT_FOUND', 'Payment not found', 404);
         if (bond.status !== 'payment_submitted') throw new AppError('CONFLICT', `Payment is ${bond.status}`, 409);
         await bond.update({ status: 'active', confirmedBy: authCtx.userId, confirmedAt: new Date(), amountReceived, note }, { transaction: t });
-        await sequelize.query(
-            `INSERT INTO commerce.commerce_seller_token_ledger (seller_user_id, delta, reason, ref_id) VALUES (:seller, :delta, 'category_payment', :ref)`,
-            { replacements: { seller: bond.sellerUserId, delta: Math.round(Number(bond.amountUsd) * config.sellerBond.tokensPerUsd), ref: bond.id }, transaction: t },
-        );
+        if (bond.kind === 'wallet_topup') {
+            // Credit what actually arrived (the admin can enter a different amount than was requested).
+            const usd = creditUsd !== undefined ? Number(creditUsd) : Number(bond.amountUsd);
+            if (!Number.isFinite(usd) || usd <= 0) throw new AppError('VALIDATION_ERROR', 'Credit amount must be more than zero', 400);
+            const [profile] = await sequelize.query('SELECT member_number FROM commerce.commerce_member_profiles WHERE user_id = :u', { replacements: { u: bond.sellerUserId }, type: QueryTypes.SELECT, transaction: t });
+            await sequelize.query(
+                `INSERT INTO commerce.commerce_points_ledger (user_id, delta, reason, ref_id, member_number, note) VALUES (:u, :points, 'topup', :ref, :member, :note)`,
+                { replacements: { u: bond.sellerUserId, points: Math.round(usd * config.points.perUsd), ref: bond.id, member: profile ? profile.member_number : null, note: `Wallet load: $${usd.toFixed(2)} received` }, transaction: t },
+            );
+        } else if (bond.kind !== 'buyer_access') {
+            // Tokens come with a seller's category payment only; a buyer's access pass credits nothing.
+            await sequelize.query(
+                `INSERT INTO commerce.commerce_seller_token_ledger (seller_user_id, delta, reason, ref_id) VALUES (:seller, :delta, 'category_payment', :ref)`,
+                { replacements: { seller: bond.sellerUserId, delta: Math.round(Number(bond.amountUsd) * config.sellerBond.tokensPerUsd), ref: bond.id }, transaction: t },
+            );
+        }
         return bond.toJSON();
     });
 }
@@ -141,8 +171,10 @@ async function archiveListings(bond) {
 }
 
 async function closeBond(authCtx, bondId, from, status, note) {
+    const existing = await CommerceSellerCategoryBond.findByPk(bondId, { attributes: ['kind'] });
+    if (existing && existing.kind === 'wallet_topup') throw new AppError('CONFLICT', 'A wallet load cannot be revoked here — its points are already in the buyer\'s wallet', 409);
     const bond = await transition(bondId, from, { status, confirmedBy: authCtx.userId, closedAt: new Date(), note });
-    await archiveListings(bond);
+    if (bond.kind !== 'buyer_access') await archiveListings(bond);
     return bond;
 }
 
@@ -165,4 +197,4 @@ async function assertCanSellInCategory(userId, categoryId) {
     }
 }
 
-module.exports = { createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };
+module.exports = { createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };

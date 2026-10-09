@@ -75,7 +75,7 @@ if (isAdConsentGiven) {
 
 ## Configuration
 
-**Publisher ID:** `ca-pub-8968452296456450`  
+**Publisher ID:** `ca-pub-7321711585180412`  
 **Default Slot:** `4123514154`
 
 Update via:

@@ -10,7 +10,8 @@ export type PaymentStatus = 'awaiting_payment' | 'payment_submitted' | 'active' 
 export interface CategoryPayment {
   id: string;
   sellerUserId: string;
-  categoryId: string;
+  kind?: 'category' | 'buyer_access' | 'wallet_topup';
+  categoryId: string | null;
   amountUsd: string;
   currency: PaymentMethod;
   status: PaymentStatus;
@@ -90,8 +91,8 @@ export const sendMyChatMessage = (body: string) => post<ChatMessage>('/seller-to
 export async function listAllPayments(status?: string): Promise<CategoryPayment[]> {
   return call<CategoryPayment[]>(`/seller-bonds?limit=100${status ? `&status=${status}` : ''}`);
 }
-export const confirmPayment = (id: string, amountReceived: string, note?: string) =>
-  post<CategoryPayment>(`/seller-bonds/${id}/confirm`, { amountReceived, note });
+export const confirmPayment = (id: string, amountReceived: string, note?: string, creditUsd?: number) =>
+  post<CategoryPayment>(`/seller-bonds/${id}/confirm`, { amountReceived, note, creditUsd });
 export const rejectPayment = (id: string, note: string) => post<CategoryPayment>(`/seller-bonds/${id}/reject`, { note });
 export const revokePayment = (id: string, note: string) => post<CategoryPayment>(`/seller-bonds/${id}/forfeit`, { note });
 export const listChatSessions = () => call<AdminChatSession[]>('/seller-tokens/admin-chat/sessions');

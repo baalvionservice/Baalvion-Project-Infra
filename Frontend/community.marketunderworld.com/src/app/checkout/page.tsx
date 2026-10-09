@@ -10,6 +10,8 @@ import { Lock, Loader2, Wallet, Copy, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/context/cart-context';
 import { MARKET_UNDERWORLD_STORE_ID, getStorePaymentSettings, previewDiscount, type DiscountPreview } from '@/lib/api/commerce';
+import { getPointsWallet, payOrderWithPoints, usdToPoints, type PointsWallet } from '@/lib/api/points';
+import Link from 'next/link';
 import { createOrder, createPaymentIntent, confirmPayment, type OrderAddressInput, type Order, type PaymentIntent } from '@/lib/api/orders';
 
 declare global {
@@ -20,7 +22,10 @@ declare global {
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (window.Razorpay) return resolve(true);
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.onload = () => resolve(true);
@@ -40,6 +45,8 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState<OrderAddressInput>(emptyAddress);
   const [isProcessing, setIsProcessing] = useState(false);
   const [cryptoOnly, setCryptoOnly] = useState(false);
+  const [pointsMode, setPointsMode] = useState(false);
+  const [wallet, setWallet] = useState<PointsWallet | null>(null);
   const [cryptoStep, setCryptoStep] = useState<{ order: Order; intent: PaymentIntent } | null>(null);
   const [gateway, setGateway] = useState<'razorpay' | 'payu'>('razorpay');
   const [discountCode, setDiscountCode] = useState('');
@@ -47,8 +54,15 @@ export default function CheckoutPage() {
   const [checkingDiscount, setCheckingDiscount] = useState(false);
 
   useEffect(() => {
-    getStorePaymentSettings().then((s) => setCryptoOnly(s.paymentMode === 'crypto_only'));
+    getStorePaymentSettings().then((s) => {
+      setCryptoOnly(s.paymentMode === 'crypto_only');
+      setPointsMode(s.paymentMode === 'points');
+    });
   }, []);
+
+  useEffect(() => {
+    if (pointsMode) getPointsWallet().then(setWallet).catch(() => setWallet(null));
+  }, [pointsMode]);
 
   // PayU bounces the browser back here (303 redirect from order-service's webhook) after the
   // shopper pays on PayU's hosted page — pick up the outcome from the query string it appended.
@@ -111,6 +125,8 @@ export default function CheckoutPage() {
   };
 
   const discountedTotal = appliedDiscount ? Math.max(0, total - appliedDiscount.amount) : total;
+  const pointsNeeded = wallet && currencyCode === 'USD' ? usdToPoints(discountedTotal, wallet.pointsPerUsd) : null;
+  const pointsShort = wallet && pointsNeeded != null ? Math.max(0, pointsNeeded - wallet.points) : 0;
 
   const handlePayment = async () => {
     if (!validateAddress()) return;
@@ -131,6 +147,24 @@ export default function CheckoutPage() {
         // see order-service's paymentProvider.js/payuReturnRoutes.js.
         metadata: { returnUrl: `${window.location.origin}/checkout` },
       });
+
+      if (pointsMode) {
+        // Pay from the wallet: the points are debited and the order marked paid in one step on the server.
+        try {
+          await payOrderWithPoints(MARKET_UNDERWORLD_STORE_ID, order.id);
+        } catch (err) {
+          const e = err as Error & { code?: string; details?: { short?: number } };
+          if (e.code === 'INSUFFICIENT_POINTS') {
+            toast({ variant: 'destructive', title: 'Not enough points', description: `${e.message}. Load your wallet, then pay this order from your dashboard.` });
+            getPointsWallet().then(setWallet).catch(() => {});
+            return;
+          }
+          throw err;
+        }
+        await clear();
+        router.push(`/checkout/confirmation/${order.id}`);
+        return;
+      }
 
       if (cryptoOnly) {
         // Crypto never auto-captures — stop here and show wallet instructions. The order is real
@@ -201,6 +235,12 @@ export default function CheckoutPage() {
       await clear();
       router.push(`/checkout/confirmation/${order.id}`);
     } catch (err) {
+      // Investment listings need a one-time identity check; send the buyer to complete it.
+      if ((err as { code?: string }).code === 'KYC_REQUIRED') {
+        toast({ title: 'Identity verification needed', description: 'This item can only be bought by verified people. Taking you to verification.' });
+        router.push('/kyc?next=/checkout');
+        return;
+      }
       toast({ variant: 'destructive', title: 'Payment failed', description: err instanceof Error ? err.message : 'Please try again.' });
     } finally {
       setIsProcessing(false);
@@ -324,7 +364,22 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {!cryptoOnly && (
+                {pointsMode && (
+                  <div className="space-y-3 p-4 rounded-lg bg-brand-void border border-brand-border">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Pay with wallet points</label>
+                    {wallet ? (
+                      <>
+                        <div className="flex justify-between text-sm"><span className="text-text-muted">Your wallet</span><span className="text-white font-mono">{wallet.points.toLocaleString()} pts</span></div>
+                        {pointsNeeded != null && <div className="flex justify-between text-sm"><span className="text-text-muted">This order</span><span className="text-white font-mono">{pointsNeeded.toLocaleString()} pts</span></div>}
+                        {pointsNeeded != null && (pointsShort > 0
+                          ? <p className="text-sm text-amber-300">You need {pointsShort.toLocaleString()} more points. <Link href="/wallet" className="underline text-white">Load your wallet</Link>, then come back.</p>
+                          : <div className="flex justify-between text-sm"><span className="text-text-muted">Left after paying</span><span className="text-emerald-400 font-mono">{(wallet.points - pointsNeeded).toLocaleString()} pts</span></div>)}
+                      </>
+                    ) : <p className="text-sm text-text-muted">Loading your wallet…</p>}
+                  </div>
+                )}
+
+                {!cryptoOnly && !pointsMode && (
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Payment Method</label>
                     <div className="grid grid-cols-2 gap-4">
@@ -345,9 +400,10 @@ export default function CheckoutPage() {
                 <AppButton
                   onClick={handlePayment}
                   isLoading={isProcessing}
+                  disabled={pointsMode && (!wallet || pointsShort > 0)}
                   className="w-full h-16 font-mono text-sm uppercase tracking-[0.2em]"
                 >
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : cryptoOnly ? 'Continue to Crypto Payment' : `Pay ${discountedTotal.toLocaleString()} ${currencyCode}`}
+                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : pointsMode ? (pointsNeeded != null ? `Pay ${pointsNeeded.toLocaleString()} points` : 'Pay with points') : cryptoOnly ? 'Continue to Crypto Payment' : `Pay ${discountedTotal.toLocaleString()} ${currencyCode}`}
                 </AppButton>
               </ListingCard>
             </div>

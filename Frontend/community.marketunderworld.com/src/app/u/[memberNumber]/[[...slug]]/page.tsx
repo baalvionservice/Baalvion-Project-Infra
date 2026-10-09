@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { BadgeCheck, CalendarDays, PackageCheck, Star, Store, Boxes } from "lucide-react"
 import { NexusCard, NexusBadge } from "@/components/ui/nexus-card"
-import { getPublicMember } from "@/lib/api/members"
+import { cookies } from "next/headers"
+import { getMemberListings, getPublicMember } from "@/lib/api/members"
 
 type Props = { params: Promise<{ memberNumber: string; slug?: string[] }> }
 
@@ -27,6 +28,7 @@ export default async function MemberProfilePage({ params }: Props) {
   }
 
   const s = member.seller
+  const listings = s ? await getMemberListings(memberNumber, (await cookies()).get("access_token")?.value) : null
   const since = new Date(member.memberSince).toLocaleDateString(undefined, { month: "long", year: "numeric" })
 
   return (
@@ -68,7 +70,36 @@ export default async function MemberProfilePage({ params }: Props) {
               ) : <p className="text-sm text-gray-500">No categories unlocked yet.</p>}
             </NexusCard>
 
-            <Link href="/shop" className="inline-block text-[11px] font-bold text-cyan-400 uppercase tracking-widest hover:text-cyan-300">Browse the shop</Link>
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold">Listings</h2>
+              {listings?.status === "ok" ? (
+                listings.items.length === 0 ? (
+                  <NexusCard className="p-8 bg-white/[0.02] border-white/5 text-sm text-gray-500">No live listings right now.</NexusCard>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {listings.items.map((l) => (
+                      <Link key={l.id} href={l.categorySlug ? `/shop/${l.categorySlug}/${l.slug}` : "/shop"} className="group block">
+                        <NexusCard className="p-0 overflow-hidden bg-white/[0.02] border-white/5 group-hover:border-cyan-400/30 transition-colors">
+                          <div className="aspect-square bg-white/5 flex items-center justify-center overflow-hidden">
+                            {l.imageUrl ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={l.imageUrl} alt="" className="w-full h-full object-cover" /> : null}
+                          </div>
+                          <div className="p-3 space-y-1">
+                            <p className="text-sm font-bold truncate">{l.name}</p>
+                            <p className="text-xs text-gray-400">{l.price != null ? `${l.price.toLocaleString(undefined, { minimumFractionDigits: 2 })} ${l.currency ?? ""}` : ""}</p>
+                          </div>
+                        </NexusCard>
+                      </Link>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <NexusCard className="p-8 bg-white/[0.02] border-white/5 text-sm text-gray-400 space-y-3">
+                  <p>{listings?.status === "pass" ? "Listings are visible to marketplace members. Get your one-time access pass to browse." : listings?.status === "signin" ? "Sign in to see this seller's listings." : "Listings can't be shown right now."}</p>
+                  {listings?.status === "pass" && <Link href="/buyer-pass" className="inline-block text-[11px] font-bold text-cyan-400 uppercase tracking-widest">Get access</Link>}
+                  {listings?.status === "signin" && <Link href={`/auth/signin?redirect=${encodeURIComponent(member.profilePath)}`} className="inline-block text-[11px] font-bold text-cyan-400 uppercase tracking-widest">Sign in</Link>}
+                </NexusCard>
+              )}
+            </section>
           </>
         ) : (
           <NexusCard className="p-8 bg-white/[0.02] border-white/5 text-sm text-gray-500">This member is a buyer. Buyers' ratings are only visible to sellers they have ordered from.</NexusCard>

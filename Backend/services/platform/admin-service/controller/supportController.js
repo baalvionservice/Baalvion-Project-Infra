@@ -1,12 +1,18 @@
 'use strict';
 // admin-service :: support (ticketing) module — controller layer.
-//
-// Mirrors controller/adminController.js: { success, data, requestId } envelope via
-// sendSuccess, AppError for typed failures, req.auth.userId as the acting admin, and
-// req.ip threaded into the service for audit rows. Errors are forwarded to the shared
-// error handler via next(err).
 const supportService = require('../service/supportService');
 const { sendSuccess } = require('../utils/response');
+let _publisher;
+function getPublisher() {
+    if (!_publisher) {
+        try {
+            const { createPublisher } = require('@baalvion/notification-publisher');
+            const redis = require('../config/redis');
+            _publisher = createPublisher(redis.getClient?.(), 'support');
+        } catch { _publisher = () => {}; }
+    }
+    return _publisher;
+}
 
 // Resolve a human-readable agent name for message authorship. The canonical token
 // carries no display name, so fall back to email/userId. (Never load-bearing for auth.)
@@ -96,6 +102,14 @@ exports.escalateTicket = async (req, res, next) => {
         const ticket = await supportService.escalateTicket(
             req.params.id, reason, req.auth.userId, adminName(req), req.ip,
         );
+        getPublisher()({
+            action: 'support.ticket.escalated',
+            severity: 'error',
+            summary: `Ticket escalated: "${ticket.subject ?? ticket.id}"`,
+            userId: req.auth.userId,
+            href: `/support/${ticket.id}`,
+            meta: { ticketId: ticket.id, reason },
+        });
         sendSuccess(req, res, ticket);
     } catch (err) { next(err); }
 };
@@ -106,6 +120,14 @@ exports.closeTicket = async (req, res, next) => {
         const ticket = await supportService.closeTicket(
             req.params.id, resolution, req.auth.userId, adminName(req), req.ip,
         );
+        getPublisher()({
+            action: 'support.ticket.closed',
+            severity: 'info',
+            summary: `Ticket closed: "${ticket.subject ?? ticket.id}"`,
+            userId: req.auth.userId,
+            href: `/support/${ticket.id}`,
+            meta: { ticketId: ticket.id },
+        });
         sendSuccess(req, res, ticket);
     } catch (err) { next(err); }
 };

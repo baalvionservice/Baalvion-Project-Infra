@@ -3,6 +3,17 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+let _publisher;
+function getPublisher() {
+    if (!_publisher) {
+        try {
+            const { createPublisher } = require('@baalvion/notification-publisher');
+            const redisClient = require('../config/redis')?.getClient?.();
+            _publisher = createPublisher(redisClient, 'support');
+        } catch { _publisher = () => {}; }
+    }
+    return _publisher;
+}
 
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
@@ -80,6 +91,15 @@ const createTicket = async (req, res, next) => {
             created_by_user_id: callerUserId(req),
             created_by_org_id: tenantId,
         });
+        // Notify admin dashboard in real time
+        getPublisher()({
+            action: 'support.ticket.created',
+            severity: 'warning',
+            summary: `New support ticket: "${ticket.subject ?? 'No subject'}"`,
+            userId: callerUserId(req),
+            href: `/crm/support-tickets/${ticket.id}`,
+            meta: { ticketId: ticket.id, priority: ticket.priority, category: ticket.category },
+        });
         return sendSuccess(req, res, ticket, 201);
     } catch (err) {
         return next(err);
@@ -110,6 +130,15 @@ const addMessage = async (req, res, next) => {
                 entity_id: ticket.id,
             });
         }
+        // Notify admin dashboard in real time
+        getPublisher()({
+            action: 'support.ticket.reply',
+            severity: 'info',
+            summary: `Reply on ticket: "${ticket.subject ?? ticket.id}"`,
+            userId: callerUserId(req),
+            href: `/crm/support-tickets/${ticket.id}`,
+            meta: { ticketId: ticket.id, messageId: message.id },
+        });
         return sendSuccess(req, res, message, 201);
     } catch (err) {
         return next(err);

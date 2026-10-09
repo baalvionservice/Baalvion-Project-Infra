@@ -1,0 +1,4 @@
+# Makes baal-token its own workspace root so pnpm does not attach it to the
+# Baalvion monorepo one directory up. It has its own lockfile.
+packages:
+  - '.'

@@ -1,20 +1,53 @@
+export interface VipPackage {
+  name: string;
+  minimumSpend: string;
+  location?: string;
+  capacity?: string;
+  bottles?: string;
+  perks: string[];
+  popular: boolean;
+}
+
 export interface Club {
   id: string;
   name: string;
-  city: "Mumbai" | "Delhi" | "Gurgaon";
+  state: string;
+  city: string;
   image: string;
   musicType: string[];
   daysOpen: string;
   description: string;
   coverCharge: string;
   rating: number;
+  suburb?: string;
+  address?: string;
+  vibe?: string;
+  requiredRoles?: string[];
+  vipPackages?: VipPackage[];
 }
+
+import { MUMBAI_CLUBS } from "./mumbai-clubs";
+
+export const INDIAN_NIGHTLIFE_STATES = [
+  "Goa",
+  "Delhi (NCT)",
+  "Maharashtra",
+  "Karnataka",
+  "Delhi NCR",
+  "Telangana",
+  "Punjab",
+  "West Bengal",
+  "Tamil Nadu",
+  "Rajasthan"
+];
 
 export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-1",
     name: "Toy Room",
+    state: "Maharashtra",
     city: "Mumbai",
+    suburb: "Santacruz",
     image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Hip Hop", "Commercial"],
     daysOpen: "Wed, Fri, Sat",
@@ -25,6 +58,7 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-2",
     name: "Kitty Su",
+    state: "Delhi (NCT)",
     city: "Delhi",
     image: "https://images.unsplash.com/photo-1545128485-c400e7702796?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["EDM", "Techno", "House"],
@@ -36,6 +70,7 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-3",
     name: "Sutra Gastropub",
+    state: "Delhi NCR",
     city: "Gurgaon",
     image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Bollywood", "Commercial", "Live Sufi"],
@@ -47,6 +82,7 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-4",
     name: "Dragonfly Experience",
+    state: "Delhi (NCT)",
     city: "Delhi",
     image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Techno", "Hip Hop"],
@@ -58,7 +94,9 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-5",
     name: "Bastian - At The Top",
+    state: "Maharashtra",
     city: "Mumbai",
+    suburb: "Dadar",
     image: "https://images.unsplash.com/photo-1572116469696-ed70ca8dbbc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Lounge", "Deep House", "Commercial"],
     daysOpen: "Tue - Sun",
@@ -69,6 +107,7 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-6",
     name: "Diablo",
+    state: "Delhi (NCT)",
     city: "Delhi",
     image: "https://images.unsplash.com/photo-1574365561657-3f820253f545?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Commercial", "Hip Hop"],
@@ -80,6 +119,7 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-7",
     name: "Prism Club & Kitchen",
+    state: "Delhi NCR",
     city: "Gurgaon",
     image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Bollywood", "Techno"],
@@ -91,12 +131,15 @@ export const INDIAN_CLUBS: Club[] = [
   {
     id: "c-8",
     name: "Matahaari",
+    state: "Maharashtra",
     city: "Mumbai",
+    suburb: "Worli",
     image: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     musicType: ["Bollywood", "Commercial"],
     daysOpen: "Wed, Fri, Sat",
     description: "Located in Worli, this high-energy club is famous for its opulent decor and celebrity sightings.",
     coverCharge: "Couples only / VIP Table",
     rating: 4.7
-  }
+  },
+  ...MUMBAI_CLUBS
 ];

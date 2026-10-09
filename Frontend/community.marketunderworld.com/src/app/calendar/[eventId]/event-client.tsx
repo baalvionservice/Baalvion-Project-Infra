@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ChevronLeft, Check } from "lucide-react";
-import { ClubEvent } from "@/data/events-data";
+import { submitVipTable, type ClubEvent } from "@/lib/api/nightlife";
 
 export function EventClient({ event }: { event: ClubEvent }) {
   const [guestListOpen, setGuestListOpen] = useState(true);
@@ -21,10 +21,32 @@ export function EventClient({ event }: { event: ClubEvent }) {
     females: "0",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    const guests = Number(formData.males) + Number(formData.females);
+    if (guests < 1) return setError("Add at least one guest.");
+    const [firstName, ...rest] = formData.name.trim().split(/\s+/);
+    setSubmitting(true);
+    try {
+      await submitVipTable(event.clubId, {
+        firstName,
+        lastName: rest.join(" ") || "-",
+        email: formData.email,
+        phone: formData.phone,
+        visitDate: event.date,
+        groupSize: guests,
+        notes: `Enquiry from event page: ${event.eventName}`,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send your request. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -64,10 +86,13 @@ export function EventClient({ event }: { event: ClubEvent }) {
                       <span className="mr-1">🔥</span> FREE ON GUEST LIST
                     </li>
                   )}
+                  {event.tag === "SOLD OUT" && <li className="font-bold text-red-600 pb-2">SOLD OUT</li>}
+                  {event.ticketUrl && event.tag !== "SOLD OUT" && (
+                    <li className="pb-2"><a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#f96a30] hover:bg-[#e05520] text-black font-bold text-xs px-4 py-2 uppercase">Buy tickets</a></li>
+                  )}
                   <li><b className="text-[#111]">Date:</b> {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</li>
                   <li><b className="text-[#111]">Location:</b> {event.venue}, {event.city}</li>
-                  <li><b className="text-[#111]">Start time:</b> 10:00 pm</li>
-                  <li><b className="text-[#111]">Age:</b> 21+</li>
+                  {event.djName && <li><b className="text-[#111]">DJ:</b> {event.djName}</li>}
                 </ul>
               </div>
             </div>
@@ -124,14 +149,14 @@ export function EventClient({ event }: { event: ClubEvent }) {
                 {vipTablesOpen && (
                   <div className="p-6 border-t border-gray-200 bg-white">
                     <p className="text-[#555] mb-6 text-center text-sm">
-                      Get official pricing, availability & exclusive offers directly from an official VIP Host at {event.venue}.
+                      Send a table enquiry to {event.venue}. The venue confirms availability and pricing with you directly.
                     </p>
                     
                     {submitted ? (
                       <div className="bg-green-50 border border-green-200 text-green-800 p-4 text-center">
                         <Check className="w-8 h-8 mx-auto mb-2 text-green-500" />
                         <h4 className="font-bold">Request Sent</h4>
-                        <p className="text-sm mt-1">A VIP host will contact you shortly.</p>
+                        <p className="text-sm mt-1">The venue will contact you to confirm. Nothing is reserved or charged yet.</p>
                       </div>
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-3">
@@ -175,11 +200,13 @@ export function EventClient({ event }: { event: ClubEvent }) {
                           </div>
                         </div>
 
+                        {error && <p role="alert" className="text-sm text-red-600 font-medium">{error}</p>}
                         <button 
                           type="submit"
-                          className="w-full bg-[#f96a30] hover:bg-[#e05520] text-black font-bold text-[15px] py-3 transition-colors mt-2"
+                          disabled={submitting}
+                          className="w-full bg-[#f96a30] hover:bg-[#e05520] disabled:opacity-60 text-black font-bold text-[15px] py-3 transition-colors mt-2"
                         >
-                          Send Message
+                          {submitting ? "Sending..." : "Send Enquiry"}
                         </button>
                         <p className="text-[11px] text-gray-500 text-center mt-2">
                           Your information is secure and will never be shared.

@@ -21,6 +21,7 @@ export interface StorefrontProduct {
   imageUrl: string[];
   media: unknown[];
   isVip: boolean;
+  kycRequired?: boolean;
   ratingAverage: number;
   ratingCount: number;
   stock: number;
@@ -45,6 +46,17 @@ export interface StorefrontProductDetail extends StorefrontProduct {
   seoTitle?: string;
   seoDescription?: string;
   pricing: unknown[];
+  investment?: {
+    creatorName?: string;
+    platform?: string;
+    channelUrl?: string;
+    investmentAmount?: number;
+    expectedRevenue?: number;
+    investorSharePct?: number;
+    platformFeePct?: number;
+    riskNote?: string;
+    verification?: { channelOwnershipChecked: boolean; revenueEvidenceSeen: boolean; checkedAt?: string };
+  };
 }
 
 interface StorefrontListResponse {
@@ -87,7 +99,7 @@ export async function getStorefrontProducts(
 }
 
 export interface StorePaymentSettings {
-  paymentMode: 'standard' | 'crypto_only';
+  paymentMode: 'standard' | 'crypto_only' | 'points';
   cryptoWallets: Record<string, string>;
 }
 

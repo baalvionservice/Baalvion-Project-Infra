@@ -11,6 +11,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node scripts/seed.js",
+    "seed:nightlife": "node scripts/seed-nightlife.js",
+    "seed:bounty": "node scripts/seed-bounty.js",
+    "purge:kyc": "node scripts/purge-kyc-documents.js",
     "test": "jest --testEnvironment node --forceExit",
     "test:watch": "jest --watch",
     "migrate": "node ../../../packages/payment-consistency/scripts/migrate.mjs"

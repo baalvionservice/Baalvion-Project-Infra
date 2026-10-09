@@ -63,6 +63,16 @@ module.exports = {
     },
     // Per-category seller payment (non-refundable; credited as non-withdrawable tokens). Paid in BTC or USDT to the platform wallets below; the
     // addresses are deployment config, never committed.
+    // Buyers load a wallet with crypto; it becomes points they spend at checkout.
+    points: {
+        perUsd: Number(process.env.POINTS_PER_USD || 100),
+        minTopupUsd: Number(process.env.WALLET_TOPUP_MIN_USD || 10),
+        maxTopupUsd: Number(process.env.WALLET_TOPUP_MAX_USD || 5000),
+    },
+    // One-time fee a buyer pays to enter the marketplace and buy.
+    buyerAccess: {
+        amountUsd: Number(process.env.BUYER_ACCESS_USD || 50),
+    },
     sellerBond: {
         amountUsd: Number(process.env.SELLER_BOND_USD || 2000),
         addresses: {

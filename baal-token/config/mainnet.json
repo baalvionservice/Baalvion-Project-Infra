@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "network": "mainnet-beta",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "rpc": {
+    "publicUrl": null,
+    "urlEnvVar": "MAINNET_RPC_URL"
+  },
+  "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "mintAddress": null,
+  "freezeAuthority": null,
+  "safety": {
+    "deploymentEnabled": false,
+    "requiresExplicitSelection": true,
+    "requiresGenesisVerification": true,
+    "requiresTypedConfirmation": true,
+    "ciExecutionAllowed": false,
+    "signing": "hardware-wallet-offline"
+  }
+}

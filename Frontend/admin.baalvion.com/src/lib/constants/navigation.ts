@@ -355,6 +355,12 @@ export const NAVIGATION: NavGroup[] = [
         ],
       },
       {
+        title: 'Site Visitors',
+        href: '/visitors',
+        iconName: 'Eye',
+        roles: ['super_admin', 'admin'],
+      },
+      {
         title: 'Support',
         href: '/support',
         iconName: 'Headphones',

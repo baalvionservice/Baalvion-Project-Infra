@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { BaalvionLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { sharedSignInUrl } from '@/lib/shared-auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ChevronDown, Menu, Globe, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,13 +87,13 @@ export function InstitutionalHeader() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <button type="button" onClick={() => window.location.assign(sharedSignInUrl())} className="text-xs font-black uppercase tracking-[0.1em] text-slate-400 hover:text-primary transition-colors hidden lg:flex items-center gap-2">
-            <Globe className="h-3.5 w-3.5" aria-hidden="true" /> Institutional Login
-          </button>
-          <Button size="lg" className="font-black h-12 px-8 bg-white text-slate-950 rounded-none shadow-2xl hidden sm:flex hover:bg-slate-200" asChild>
-            <Link href={PATHS.ACCESS_REQUEST || '#'}>Access Portal</Link>
+          <Link href={PATHS.LOGIN} className="hidden min-[420px]:inline text-xs font-black uppercase tracking-[0.1em] text-slate-300 hover:text-primary transition-colors">
+            Sign in
+          </Link>
+          <Button size="lg" className="font-black h-11 px-6 md:h-12 md:px-8 bg-white text-slate-950 rounded-none shadow-2xl hover:bg-slate-200" asChild>
+            <Link href={PATHS.GET_STARTED}>Get started</Link>
           </Button>
-          
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden rounded-none border border-white/10 h-11 w-11" aria-label="Open navigation menu">
@@ -133,10 +132,10 @@ export function InstitutionalHeader() {
                 )}
                 <div className="flex flex-col gap-4 mt-12 border-t border-white/5 pt-12 px-6">
                    <Button size="lg" className="h-16 font-black uppercase tracking-widest text-xs rounded-none bg-white text-slate-950" asChild>
-                     <Link href={PATHS.ACCESS_REQUEST || '#'}>Onboard Institution</Link>
+                     <Link href={PATHS.GET_STARTED}>Get started</Link>
                    </Button>
-                   <Button size="lg" variant="outline" onClick={() => window.location.assign(sharedSignInUrl())} className="h-16 border-white/10 font-black uppercase tracking-widest text-xs rounded-none text-white">
-                    Institutional Login
+                   <Button size="lg" variant="outline" className="h-16 border-white/10 font-black uppercase tracking-widest text-xs rounded-none text-white" asChild>
+                     <Link href={PATHS.LOGIN}>Sign in</Link>
                    </Button>
                 </div>
               </div>

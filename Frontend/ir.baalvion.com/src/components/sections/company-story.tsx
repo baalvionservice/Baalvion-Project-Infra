@@ -30,17 +30,17 @@ const MILESTONES: Milestone[] = [
   },
   {
     year: "AI agents",
-    title: "AI agents deployed",
-    body: "Compliance and sanctions screening, logistics route optimisation and HS-code classification go live in production.",
+    title: "AI agents built",
+    body: "Compliance and sanctions screening, logistics route optimisation and HS-code classification are developed and ready for deployment.",
     icon: Bot,
     status: "active",
   },
   {
     year: "Corridors",
     title: "First corridors",
-    body: "Early trade flows are onboarded, proving the platform against the real friction of cross-border commerce.",
+    body: "The first trade flows are onboarded to prove the platform against the real friction of cross-border commerce.",
     icon: Route,
-    status: "active",
+    status: "ahead",
   },
   {
     year: "Scaling",
@@ -97,7 +97,7 @@ export default function CompanyStorySection({ id }: { id: string }) {
               Our conviction is simple: in trade, infrastructure wins, not
               features. Features get copied; connective rails that everyone comes
               to depend on do not. That belief shapes every decision — we would
-              rather earn trust in production with deployed AI agents than win a
+              rather earn trust in production than win a
               demo, because credibility in this category is built shipment by
               shipment.
             </p>

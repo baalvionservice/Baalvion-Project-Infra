@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ALL_LISTINGS, getListingBySlug } from "@/data/locals-listings";
+import { getListing, getListings } from "@/lib/api/nightlife";
 import { ListingDetailClient } from "./listing-detail-client";
 
 interface Props {
@@ -9,14 +9,15 @@ interface Props {
 
 // Generate static paths for all listings at build time (SSG)
 export async function generateStaticParams() {
-  return ALL_LISTINGS.map((listing) => ({ slug: listing.slug }));
+  return (await getListings()).map((listing) => ({ slug: listing.slug }));
 }
 
 // Generate unique SEO metadata per listing
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const listing = getListingBySlug(slug);
-  if (!listing) return { title: "Listing Not Found" };
+  const listing = await getListing(slug);
+  // Throwing here (not just in the page) makes crawlers get a real 404: Next blocks the shell on metadata for bots.
+  if (!listing) notFound();
 
   const ageRange = listing.minAge
     ? ` · Age ${listing.minAge}${listing.maxAge ? `–${listing.maxAge}` : "+"}`
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ListingDetailPage({ params }: Props) {
   const { slug } = await params;
-  const listing = getListingBySlug(slug);
+  const listing = await getListing(slug);
   if (!listing) notFound();
 
   // JSON-LD structured data for Google Jobs / Events

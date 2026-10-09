@@ -1,0 +1,32 @@
+{
+  "name": "baal-token",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BAAL token: single-source tokenomics, vesting specification, network safety guards and informational website. Phase 1: no deployment capability.",
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "validate": "node scripts/validate.ts",
+    "scan:secrets": "node scripts/scan-secrets.ts",
+    "check:workflows": "node scripts/check-workflows.ts",
+    "build": "node scripts/validate.ts && node scripts/build-website.ts",
+    "audit": "pnpm audit --audit-level=high",
+    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run scan:secrets && pnpm run check:workflows && pnpm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

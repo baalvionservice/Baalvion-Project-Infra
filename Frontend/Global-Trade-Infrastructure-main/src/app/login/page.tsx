@@ -22,6 +22,7 @@ import { safeInternalPath } from '@/lib/safe-redirect';
 import { isMfaRequiredError, type MfaKind } from './_components/mfa-login';
 import { MfaPanel } from './_components/mfa-panel';
 import { EmailOtpLogin } from './_components/email-otp-login';
+import { RoleGuide, RoleHint } from './_components/role-guide';
 import { motion } from 'framer-motion';
 
 interface MfaFlow {
@@ -33,6 +34,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [mfaFlow, setMfaFlow] = useState<MfaFlow | null>(null);
+  const [audience, setAudience] = useState<string | null>(null);
   const router = useRouter();
   const { login } = useAppState();
 
@@ -112,22 +114,10 @@ export default function LoginPage() {
         </motion.div>
 
         <div className="relative z-10 space-y-8 max-w-xl">
-          <motion.h1 
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-6xl font-black leading-[0.9] tracking-tighter uppercase"
-          >
-            The Operating <br />System for <br />Global Trade.
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl font-medium leading-relaxed italic"
-          >
-            Connect trade execution, finance, compliance, and logistics within a single governed infrastructure.
-          </motion.p>
+          <h1 className="text-5xl font-black leading-[0.95] tracking-tighter uppercase">
+            Sign in to your <br />trade console.
+          </h1>
+          <RoleGuide selected={audience} onSelect={setAudience} variant="panel" />
         </div>
 
         <div className="relative z-10 flex items-center gap-6 text-[10px] font-black opacity-40 uppercase tracking-[0.3em]">
@@ -146,8 +136,9 @@ export default function LoginPage() {
           initial={{ opacity: 0, scale: 0.98, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-[460px] relative z-10"
+          className="w-full max-w-[460px] relative z-10 space-y-6"
         >
+          <RoleGuide selected={audience} onSelect={setAudience} variant="chips" />
           <Card className="shadow-2xl border-2 ring-1 ring-black/5 overflow-hidden">
             <CardHeader className="space-y-4 pb-10 pt-10 text-center border-b bg-muted/10">
               <div className="space-y-1">
@@ -158,6 +149,7 @@ export default function LoginPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-8 pt-10">
+              {!mfaFlow && <RoleHint id={audience} />}
               {mfaFlow ? (
                 <MfaPanel
                   kind={mfaFlow.kind}

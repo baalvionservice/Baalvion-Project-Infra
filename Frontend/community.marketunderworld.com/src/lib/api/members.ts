@@ -61,3 +61,21 @@ export async function getPublicMember(memberNumber: string): Promise<PublicMembe
     return null;
   }
 }
+
+export interface MemberListing { id: string; name: string; slug: string; categorySlug: string | null; price: number | null; currency: string | null; imageUrl: string | null }
+
+// Server-side only (the public profile page). Members with marketplace access see a seller's live
+// listings; everyone else gets a reason so the page can show the right prompt.
+export async function getMemberListings(memberNumber: string, accessToken: string | undefined): Promise<{ status: 'ok'; items: MemberListing[] } | { status: 'signin' | 'pass' | 'error' }> {
+  if (!accessToken) return { status: 'signin' };
+  const base = process.env.COMMERCE_UPSTREAM_URL ?? '';
+  try {
+    const res = await fetch(`${base}/members/${encodeURIComponent(memberNumber)}/listings`, { headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
+    if (res.status === 401) return { status: 'signin' };
+    if (res.status === 402) return { status: 'pass' };
+    if (!res.ok) return { status: 'error' };
+    return { status: 'ok', items: (await res.json()).data as MemberListing[] };
+  } catch {
+    return { status: 'error' };
+  }
+}

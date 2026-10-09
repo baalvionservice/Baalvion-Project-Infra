@@ -5,22 +5,28 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin } from "lucide-react";
-import { CLUB_EVENTS, ClubEvent } from "@/data/events-data";
-import { INDIAN_CLUBS } from "@/data/clubs-data";
+import type { ClubEvent } from "@/lib/api/nightlife";
 import { Breadcrumbs } from "@/components/ui/breadcrumb";
 
-export function CalendarClient() {
-  const [selectedDate, setSelectedDate] = useState<string>("2026-10-02");
+const today = () => new Date().toISOString().slice(0, 10);
+
+const shiftMonth = (iso: string, delta: number) => {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setMonth(d.getMonth() + delta);
+  return d.toISOString().slice(0, 10);
+};
+
+export function CalendarClient({ events }: { events: ClubEvent[] }) {
+  const [selectedDate, setSelectedDate] = useState<string>(today());
   const [selectedVenue, setSelectedVenue] = useState<string>("ALL");
 
   // Get unique venues for the dropdown
-  const venues = ["ALL", ...Array.from(new Set(INDIAN_CLUBS.map(club => club.name)))];
+  const venues = ["ALL", ...Array.from(new Set(events.map((e) => e.venue)))];
 
-  // Filter events
-  const filteredEvents = CLUB_EVENTS.filter((event) => {
-    // In a real app, you'd filter by exact date or month. For this demo, we'll just show all or filter by venue.
+  // Events on or after the chosen date, optionally for one venue.
+  const filteredEvents = events.filter((event) => {
     const venueMatch = selectedVenue === "ALL" || event.venue === selectedVenue;
-    return venueMatch;
+    return venueMatch && event.date >= selectedDate;
   });
 
   return (
@@ -73,12 +79,6 @@ export function CalendarClient() {
                 </div>
               </div>
 
-              <div className="w-full md:w-1/3">
-                <button className="w-full bg-[#eee] text-[#555] font-bold h-[38px] border border-gray-300 hover:bg-gray-200 transition-colors text-sm uppercase">
-                  Search
-                </button>
-              </div>
-
             </div>
           </div>
         </div>
@@ -88,13 +88,13 @@ export function CalendarClient() {
           
           {/* Month Navigation */}
           <div className="flex justify-center items-center gap-4 mb-10">
-            <button className="text-[#555] hover:text-[#ed6c2a] transition-colors">
+            <button onClick={() => setSelectedDate(shiftMonth(selectedDate, -1))} aria-label="Previous month" className="text-[#555] hover:text-[#ed6c2a] transition-colors">
               <ChevronLeft className="w-8 h-8" />
             </button>
             <h2 className="text-xl font-bold text-[#111]">
               {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}
             </h2>
-            <button className="text-[#555] hover:text-[#ed6c2a] transition-colors">
+            <button onClick={() => setSelectedDate(shiftMonth(selectedDate, 1))} aria-label="Next month" className="text-[#555] hover:text-[#ed6c2a] transition-colors">
               <ChevronRight className="w-8 h-8" />
             </button>
           </div>
@@ -152,7 +152,7 @@ export function CalendarClient() {
 
           {filteredEvents.length === 0 && (
             <div className="text-center py-20">
-              <h3 className="text-xl font-bold text-gray-400">No events found for this venue.</h3>
+              <h3 className="text-xl font-bold text-gray-400">No upcoming events{selectedVenue === "ALL" ? "" : " for this venue"}.</h3>
             </div>
           )}
 

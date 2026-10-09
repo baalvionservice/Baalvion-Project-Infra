@@ -34,7 +34,7 @@ export function InstitutionalFooter() {
                         <ul className="space-y-2 text-sm">
                             <li><Link href={PATHS.PLATFORM} className="hover:text-foreground">Platform Overview</Link></li>
                             <li><Link href={PATHS.PRICING} className="hover:text-foreground">Pricing</Link></li>
-                            <li><Link href={PATHS.ONBOARD} className="hover:text-foreground">Onboard Your Institution</Link></li>
+                            <li><Link href={PATHS.GET_STARTED} className="hover:text-foreground">Get started</Link></li>
                             <li><Link href={PATHS.ABOUT} className="hover:text-foreground">How It Works</Link></li>
                         </ul>
                     </div>
@@ -61,10 +61,8 @@ export function InstitutionalFooter() {
                      <div>
                         <h4 className="font-semibold text-foreground mb-4">Governance & Trust</h4>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href={PATHS.ABOUT} className="hover:text-foreground">Compliance Framework</Link></li>
-                            <li><Link href={PATHS.PLATFORM} className="hover:text-foreground">Data & Security Principles</Link></li>
-                            <li><Link href={PATHS.ABOUT} className="hover:text-foreground">Regulatory Alignment</Link></li>
-                            <li><Link href={PATHS.ACCESS_REQUEST} className="hover:text-foreground">Institutional Access Policy</Link></li>
+                            <li><Link href={PATHS.TRUST_CENTER} className="hover:text-foreground">Trust Center</Link></li>
+                            <li><Link href={PATHS.ACCESS_REQUEST} className="hover:text-foreground">Request institutional access</Link></li>
                         </ul>
                     </div>
                 </div>

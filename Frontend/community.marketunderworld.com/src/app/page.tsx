@@ -22,35 +22,26 @@ import {
   BookOpen,
   Radio,
   TrendingUp,
+  AlertTriangle,
+  Wifi,
+  Camera,
+  Cpu,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { AppButton } from '@/components/ui/AppButton';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
-import { REGIONS, LIVE_ACTIVITY_MOCK } from '@/data/mockData';
+import { REGIONS } from '@/data/mockData';
 import { useIdentity } from '@/context/identity-context';
 import { cn } from '@/lib/utils';
 
-const COUNTRIES = [
-  { flag: '🇺🇸', name: 'United States', traders: '18.4K', status: 'ACTIVE' },
-  { flag: '🇮🇳', name: 'India', traders: '14.2K', status: 'ACTIVE' },
-  { flag: '🇬🇧', name: 'United Kingdom', traders: '9.1K', status: 'ACTIVE' },
-  { flag: '🇳🇬', name: 'Nigeria', traders: '7.8K', status: 'ACTIVE' },
-  { flag: '🇧🇷', name: 'Brazil', traders: '6.3K', status: 'ACTIVE' },
-  { flag: '🇩🇪', name: 'Germany', traders: '5.9K', status: 'ACTIVE' },
-  { flag: '🇵🇭', name: 'Philippines', traders: '5.4K', status: 'ACTIVE' },
-  { flag: '🇷🇺', name: 'Russia', traders: '4.8K', status: 'RESTRICTED' },
-  { flag: '🇿🇦', name: 'South Africa', traders: '4.2K', status: 'ACTIVE' },
-  { flag: '🇵🇰', name: 'Pakistan', traders: '3.9K', status: 'ACTIVE' },
-  { flag: '🇧🇩', name: 'Bangladesh', traders: '3.1K', status: 'ACTIVE' },
-  { flag: '🇨🇳', name: 'China', traders: '2.9K', status: 'RESTRICTED' },
-];
+const CYCLER_COUNTRIES = ['United States', 'India', 'United Kingdom', 'Nigeria', 'Brazil', 'Germany', 'Philippines', 'South Africa', 'Pakistan', 'Bangladesh'];
 
 const FEATURES = [
   {
     icon: ShoppingBag,
     title: 'Underground Marketplace',
-    desc: 'Buy & sell across 150+ countries. Verified sellers. Encrypted deals. No questions asked on legit trades.',
+    desc: 'Buy and sell on the marketplace. Seller listings, orders and wallet in one account.',
     color: '#cc0000',
     tag: 'CORE',
   },
@@ -91,12 +82,26 @@ const FEATURES = [
   },
 ];
 
-const HELL_STATS = [
-  { label: 'Countries Active', value: '150+', icon: Globe },
-  { label: 'Operators Online', value: '12,400+', icon: Eye },
-  { label: 'Deals Closed', value: '$4.2M+', icon: TrendingUp },
-  { label: 'Forum Posts', value: '890K+', icon: MessageSquare },
-];
+interface PublicStats {
+  clubs: number;
+  cities: number;
+  openListings: number;
+  upcomingEvents: number;
+}
+
+// Real counts from the community API; shown only once loaded, never as placeholders.
+function usePublicStats(): PublicStats | null {
+  const [stats, setStats] = useState<PublicStats | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/community-proxy/nightlife/stats')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body) => { if (alive && body?.success) setStats(body.data); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  return stats;
+}
 
 const SCARY_GLOBAL_CSS = `
   @keyframes scanlineMove {
@@ -172,13 +177,238 @@ const EMBER_PARTICLES = [
   { bottom: 18, size: 7, delay: 1.98, duration: 2.20 },
 ];
 
+// ─── Full-screen Site Entry Warning Overlay ───────────────────────────────────
+function SiteEntryWarning({ onEnter }: { onEnter: () => void }) {
+  const [phase, setPhase] = useState(0); // 0=scanning, 1=warning shown, 2=fading
+  const [scanLines, setScanLines] = useState<string[]>([]);
+  const [accepted, setAccepted] = useState(false);
+
+  const SCAN_MESSAGES = [
+    '> INITIALISING SURVEILLANCE PROTOCOL...',
+    '> CAPTURING DEVICE FINGERPRINT...',
+    '> READING BROWSER METADATA...',
+    '> GEOLOCATION: RESOLVED',
+    '> COOKIES: INTERCEPTED',
+    '> ACTIVE SESSIONS: LOGGED',
+    '> NETWORK INTERFACE: MONITORED',
+    '> SCREEN RESOLUTION: CAPTURED',
+    '> OPERATING SYSTEM: IDENTIFIED',
+    '> ALL DATA RECORDED. ENTRY PERMITTED.',
+  ];
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < SCAN_MESSAGES.length) {
+        setScanLines(prev => [...prev, SCAN_MESSAGES[i]]);
+        i++;
+      } else {
+        clearInterval(interval);
+        setPhase(1);
+      }
+    }, 280);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEnter = () => {
+    setAccepted(true);
+    setPhase(2);
+
+    // ── Collect REAL visitor fingerprint ──────────────────────────────────
+    const sessionId = (() => {
+      try {
+        const existing = sessionStorage.getItem('_v_sid');
+        if (existing) return existing;
+        const id = crypto.randomUUID();
+        sessionStorage.setItem('_v_sid', id);
+        return id;
+      } catch { return crypto.randomUUID(); }
+    })();
+
+    const payload = {
+      sessionId,
+      userAgent:    navigator.userAgent,
+      screenWidth:  screen.width,
+      screenHeight: screen.height,
+      language:     navigator.language,
+      referrer:     document.referrer || '',
+      landingPath:  window.location.pathname,
+      pageTitle:    document.title,
+      enteredSite:  true,
+    };
+
+    // Fire-and-forget — never blocks UX
+    fetch('/api/track', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    }).catch(() => {/* non-fatal */});
+
+    setTimeout(onEnter, 700);
+  };
+
+  return (
+    <AnimatePresence>
+      {!accepted && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: '#000', fontFamily: 'monospace' }}
+        >
+          {/* Red scanline overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(200,0,0,0.04) 2px, rgba(200,0,0,0.04) 4px)',
+          }} />
+
+          {/* Red corner brackets */}
+          <div className="absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 border-red-600" />
+          <div className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-red-600" />
+          <div className="absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 border-red-600" />
+          <div className="absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 border-red-600" />
+
+          {/* Pulsing red dot — recording indicator */}
+          <div className="absolute top-5 right-16 flex items-center gap-2">
+            <motion.div
+              animate={{ opacity: [1, 0.1, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+              className="w-2.5 h-2.5 rounded-full bg-red-600"
+            />
+            <span className="text-red-600 text-[10px] tracking-widest uppercase">REC</span>
+          </div>
+
+          <div className="w-full max-w-2xl px-6">
+
+            {/* Warning symbol */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex justify-center mb-6"
+            >
+              <div className="relative">
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="absolute inset-0 rounded-full blur-2xl"
+                  style={{ background: 'rgba(200,0,0,0.4)' }}
+                />
+                <AlertTriangle className="relative z-10 w-20 h-20" style={{ color: '#ff2200' }} strokeWidth={1.5} />
+              </div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-center mb-8"
+            >
+              <div className="text-[11px] tracking-[0.4em] text-red-600 uppercase mb-2">⚠ SECURITY ALERT ⚠</div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-widest">YOU ARE BEING MONITORED</h1>
+              <div className="mt-2 text-[11px] tracking-[0.3em] text-gray-500 uppercase">This site actively scans every visitor</div>
+            </motion.div>
+
+            {/* Live scan terminal */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="rounded border border-red-900/40 p-4 mb-6"
+              style={{ background: 'rgba(20,0,0,0.7)' }}
+            >
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-red-900/30">
+                <Cpu className="w-3 h-3 text-red-600" />
+                <span className="text-[10px] text-red-600 uppercase tracking-widest">SURVEILLANCE ACTIVE</span>
+                <motion.div
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.8 }}
+                  className="ml-auto text-[10px] text-green-500"
+                >
+                  ● LIVE
+                </motion.div>
+              </div>
+              <div className="space-y-1 min-h-[180px]">
+                {scanLines.map((line, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="text-[11px] font-mono"
+                    style={{ color: line.includes('RESOLVED') || line.includes('PERMITTED') ? '#00cc66' : line.includes('INTERCEPTED') || line.includes('LOGGED') || line.includes('MONITORED') ? '#ff8800' : '#555' }}
+                  >
+                    {line}
+                  </motion.div>
+                ))}
+                {phase === 0 && (
+                  <motion.span
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
+                    className="text-[11px] font-mono text-green-600"
+                  >█</motion.span>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Scanning icons row */}
+            <div className="flex justify-center gap-6 mb-6">
+              {[
+                { icon: Wifi,   label: 'NETWORK',  color: '#ff4400' },
+                { icon: Camera, label: 'BROWSER',  color: '#ff8800' },
+                { icon: Eye,    label: 'TRACKING', color: '#cc0000' },
+                { icon: Cpu,    label: 'DEVICE',   color: '#ff4400' },
+                { icon: Lock,   label: 'LOGGING',  color: '#ff8800' },
+              ].map(({ icon: Icon, label, color }) => (
+                <div key={label} className="flex flex-col items-center gap-1">
+                  <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: Math.random() * 1 }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color }} />
+                  </motion.div>
+                  <span className="text-[8px] tracking-widest uppercase" style={{ color: '#333' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Enter button — only shows after scan completes */}
+            <AnimatePresence>
+              {phase >= 1 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center"
+                >
+                  <p className="text-[11px] text-gray-600 uppercase tracking-widest mb-4">
+                    By entering you acknowledge you are being tracked.
+                  </p>
+                  <button
+                    onClick={handleEnter}
+                    className="px-10 py-3 font-black uppercase tracking-widest text-sm text-white border border-red-800/60 hover:border-red-500 hover:bg-red-950/40 transition-all"
+                    style={{ background: 'rgba(120,0,0,0.2)' }}
+                  >
+                    ☠ &nbsp; I UNDERSTAND. ENTER THE SITE &nbsp; ☠
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function CountryCycler({ initialCountry }: { initialCountry: string }) {
   const [country, setCountry] = useState(initialCountry);
   
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
-      setCountry(COUNTRIES[i % COUNTRIES.length].name);
+      setCountry(CYCLER_COUNTRIES[i % CYCLER_COUNTRIES.length]);
       i++;
     }, 1000);
     return () => clearInterval(interval);
@@ -189,6 +419,15 @@ function CountryCycler({ initialCountry }: { initialCountry: string }) {
 
 export default function HomePage() {
   const { identity, isGlobalView, setGlobalView, isLoading } = useIdentity();
+  const publicStats = usePublicStats();
+  const [warningDismissed, setWarningDismissed] = useState(false);
+
+  const heroStats = publicStats ? [
+    { label: 'Clubs Listed', value: publicStats.clubs.toLocaleString('en-IN') },
+    { label: 'Cities', value: publicStats.cities.toLocaleString('en-IN') },
+    { label: 'Open Listings', value: publicStats.openListings.toLocaleString('en-IN') },
+    { label: 'Upcoming Events', value: publicStats.upcomingEvents.toLocaleString('en-IN') },
+  ] : [];
 
   const displayRegions = useMemo(() => {
     if (!identity || isGlobalView) return REGIONS;
@@ -199,19 +438,13 @@ export default function HomePage() {
     });
   }, [identity, isGlobalView]);
 
-  const activeSessions = useMemo(() => {
-    const sessions = LIVE_ACTIVITY_MOCK.activeSessions;
-    if (!identity || isGlobalView) return sessions;
-    return [...sessions].sort((a, b) => {
-      if (a.regionId === identity.regionId) return -1;
-      if (b.regionId === identity.regionId) return 1;
-      return 0;
-    });
-  }, [identity, isGlobalView]);
-
   return (
     <div className="min-h-screen bg-[#0B0C0F]">
       <style dangerouslySetInnerHTML={{ __html: SCARY_GLOBAL_CSS }} />
+
+      {/* Full-screen warning overlay — shown to every fresh visitor */}
+      <SiteEntryWarning onEnter={() => setWarningDismissed(true)} />
+
       <Navbar />
 
       {/* ══════════════════════════════════════════════════════
@@ -305,9 +538,9 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Live stats bar */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2">
-              {HELL_STATS.map((stat) => (
+            {/* Live counts from the community API */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2 min-h-[3rem]">
+              {heroStats.map((stat) => (
                 <div key={stat.label} className="text-center lg:text-left">
                   <div className="text-xl sm:text-2xl font-black text-white">{stat.value}</div>
                   <div className="text-[10px] text-gray-500 uppercase tracking-widest">{stat.label}</div>
@@ -379,7 +612,7 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          COUNTRIES — Global Coverage Grid
+          REGIONS
       ══════════════════════════════════════════════════════ */}
       <section className="py-20 lg:py-32 px-4 sm:px-6" style={{ background: '#0B0C0F' }}>
         <div className="max-w-[1440px] mx-auto">
@@ -389,7 +622,7 @@ export default function HomePage() {
                 ☠ GLOBAL REACH
               </span>
               <h2 className="text-3xl sm:text-4xl font-black text-white mt-3">
-                {identity && !isGlobalView ? 'Your Region Node.' : '150+ Countries. One Network.'}
+                {identity && !isGlobalView ? 'Your Region Node.' : 'Regions.'}
               </h2>
               <p className="text-gray-500 mt-2 text-sm">
                 The platform auto-detects your location and surfaces local deals, events, and operators.
@@ -404,48 +637,6 @@ export default function HomePage() {
                 Connected: {identity.regionId.toUpperCase()}
               </div>
             )}
-          </div>
-
-          {/* Countries table */}
-          <div className="overflow-hidden rounded-lg" style={{ border: '1px solid rgba(180,0,0,0.2)' }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ background: 'rgba(140,0,0,0.15)', borderBottom: '1px solid rgba(180,0,0,0.2)' }}>
-                  <th className="text-left py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Country</th>
-                  <th className="text-right py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Operators</th>
-                  <th className="text-right py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COUNTRIES.map((c, i) => (
-                  <tr
-                    key={c.name}
-                    style={{
-                      borderBottom: i < COUNTRIES.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                      background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
-                    }}
-                  >
-                    <td className="py-3.5 px-4">
-                      <span className="text-lg mr-3">{c.flag}</span>
-                      <span className="text-white font-semibold">{c.name}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-mono text-gray-400">{c.traders}</td>
-                    <td className="py-3.5 px-4 text-right">
-                      <span
-                        className="text-[9px] font-bold px-2 py-1 rounded uppercase tracking-widest"
-                        style={{
-                          background: c.status === 'ACTIVE' ? 'rgba(0,180,0,0.1)' : 'rgba(180,100,0,0.1)',
-                          color: c.status === 'ACTIVE' ? '#00cc66' : '#ff8800',
-                          border: `1px solid ${c.status === 'ACTIVE' ? 'rgba(0,180,0,0.2)' : 'rgba(180,100,0,0.2)'}`,
-                        }}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
 
           {/* Existing regions grid */}
@@ -471,73 +662,10 @@ export default function HomePage() {
                     )}
                     <div className="text-3xl sm:text-4xl mb-4 sm:mb-6">{reg.icon}</div>
                     <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{reg.name}</h3>
-                    <div className="flex justify-between items-center pt-4 border-t border-[#252A33] mt-4">
-                      <div className="text-[9px] sm:text-[10px] font-bold text-[#6B7280] uppercase">{reg.teachers} Teachers</div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-[9px] sm:text-[10px] font-bold text-red-400 uppercase">{reg.sessions} Live</span>
-                      </div>
-                    </div>
                   </ListingCard>
                 </Link>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════
-          LIVE SESSIONS
-      ══════════════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-32" style={{ background: 'rgba(10,0,0,0.8)' }}>
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="mb-12 lg:mb-16 text-center md:text-left">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em]" style={{ color: '#ff3300' }}>
-              ⚡ OPERATIONAL STREAMS
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mt-4">Live Session Intelligence.</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {activeSessions.map((session, idx) => (
-              <ListingCard key={session.id} index={idx} className="p-0 overflow-hidden group border-[#252A33] hover:border-red-900/60">
-                <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 z-10" />
-                  <div className="text-red-900/20 group-hover:scale-110 transition-transform duration-1000">
-                    <TerminalIcon size={120} />
-                  </div>
-                  <div className="absolute top-4 left-4 z-20 flex gap-2">
-                    <Badge variant="live">LIVE</Badge>
-                    {identity?.regionId === session.regionId && (
-                      <Badge variant="success" className="bg-green-800 text-green-200">LOCAL NODE</Badge>
-                    )}
-                  </div>
-                  <div className="absolute bottom-4 left-4 z-20">
-                    <div className="text-[11px] sm:text-xs font-bold text-white mb-1">{session.viewers} watching</div>
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#cc2200' }}>
-                      {session.region} • {session.country}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 sm:p-8 space-y-4">
-                  <h4 className="text-lg sm:text-xl font-bold text-white line-clamp-1 group-hover:text-red-400 transition-colors">
-                    {session.title}
-                  </h4>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-red-950 border border-red-900/50 flex items-center justify-center font-bold text-[10px] sm:text-xs text-red-400">
-                      {session.teacherName.charAt(0)}
-                    </div>
-                    <span className="text-[13px] sm:text-sm font-medium text-gray-400">{session.teacherName}</span>
-                  </div>
-                  <button
-                    className="w-full h-10 text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-white rounded border border-red-900/50 hover:bg-red-950/50 transition-all"
-                    style={{ background: 'rgba(140,0,0,0.15)' }}
-                  >
-                    Connect Stream
-                  </button>
-                </div>
-              </ListingCard>
-            ))}
           </div>
         </div>
       </section>
@@ -561,7 +689,7 @@ export default function HomePage() {
             <span style={{ color: '#cc2200' }}>Underground?</span>
           </h2>
           <p className="text-gray-400 text-lg mb-8">
-            150+ countries. 12,000+ active operators. The market doesn't sleep.
+            Clubs, locals, events and a forum, all in one place. Free to join.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/registration">
@@ -599,12 +727,16 @@ function TerminalPanel({ identity }: { identity: any }) {
   const [shake, setShake] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  // Prevent React Strict Mode from running the boot sequence twice
+  const hasRun = React.useRef(false);
 
   const addLine = (text: string, color?: string, delay = 0) =>
-    new Promise<void>((res) => setTimeout(() => {
-      setLines(prev => [...prev, { text, color }]);
-      res();
-    }, delay));
+    new Promise<void>((res) => {
+      setTimeout(() => {
+        setLines(prev => [...prev, { text, color }]);
+        res();
+      }, delay);
+    });
 
   const addLines = async (pairs: Array<[string, string?, number?]>) => {
     for (const [text, color, delay = 0] of pairs) {
@@ -617,8 +749,10 @@ function TerminalPanel({ identity }: { identity: any }) {
     scrollRef.current?.scrollTo({ top: 99999, behavior: 'smooth' });
   }, [lines]);
 
-  // Boot sequence → scan → scary warning → prompt
+  // Boot sequence → scan → prompt
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
     let cancelled = false;
 
     const run = async () => {
@@ -630,10 +764,7 @@ function TerminalPanel({ identity }: { identity: any }) {
         [identity ? `✓ Country: ${identity.country}` : '  Tracing IP headers...', '#00cc66', 480],
         [identity ? `✓ IP: ${identity.ip}` : '  Verifying anonymity...', '#00cc66', 580],
         ['> market.status()', '#444', 700],
-        ['  Operators online:  12,447', '#888', 820],
-        ['  Active deals:      8,923', '#888', 940],
-        ['  ETH volume:    $4.2M', '#888', 1060],
-        ['  Countries:         150+', '#888', 1180],
+        ['  Status:            online', '#888', 820],
       ]);
 
       if (cancelled) return;
@@ -700,6 +831,9 @@ function TerminalPanel({ identity }: { identity: any }) {
     await addLine('  Verifying against encrypted vault...', '#888', 600);
 
     if (code === SECRET_CODE) {
+      // Set access cookie to allow navigating to /auth pages
+      document.cookie = 'underground_unlocked=1; path=/; max-age=86400';
+      
       await addLines([
         ['', undefined, 400],
         ['  ✓ HASH MATCH CONFIRMED', '#00cc66', 200],

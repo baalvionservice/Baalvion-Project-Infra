@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const { Op, QueryTypes } = require('sequelize');
 const { ensureBuyerCustomer } = require('./buyerCustomer');
+const buyerAccess = require('./buyerAccess');
 const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, OrdersShipment, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
@@ -20,6 +21,7 @@ const { sendOrderEmail } = require('./orderNotifications');
 const inventoryClient = require('./inventoryClient');
 const alerts = require('./alerts');
 const shippingService = require('./shippingService');
+const kycGate = require('./kycGate');
 // Exact money. Replaces float comparisons whose epsilons (`> 0.01`, `+ 1e-9`) were tolerating
 // a real short-payment of up to one minor unit on every single capture.
 const { Money, checkCapturedAmount } = require('@baalvion/money');
@@ -325,7 +327,7 @@ async function resolveAuthoritativeItems(storeId, items, marketCode = null) {
         }
 
         const [product] = await sequelize.query(
-            `SELECT id, name, status, store_id FROM commerce.commerce_products WHERE id = :productId AND store_id = :storeId LIMIT 1`,
+            `SELECT id, name, status, store_id, custom_fields FROM commerce.commerce_products WHERE id = :productId AND store_id = :storeId LIMIT 1`,
             { replacements: { productId, storeId }, type: QueryTypes.SELECT },
         );
         if (!product) throw new AppError('VALIDATION_ERROR', `Product ${productId} not found in this store`, 400);
@@ -363,6 +365,7 @@ async function resolveAuthoritativeItems(storeId, items, marketCode = null) {
         resolved.push({
             productId, variantId: variant.id, sku: variant.sku,
             name: product.name, variantName: variant.name || null,
+            requiresKyc: !!(product.custom_fields && product.custom_fields.requiresKyc === true),
             quantity: i.quantity,
             basePriceUsd: pricing.round2(baseUsd),
             price: unit.unitPrice,            // per-unit price in the order (market) currency
@@ -415,6 +418,7 @@ async function reserveInventory(t, storeId, items) {
 }
 
 async function createOrder(storeId, body, actor) {
+    await buyerAccess.assertCanBuy(storeId, actor);
     let { customerId } = body;
     const { discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
     // shippingAmount is NEVER taken from the client — same trust boundary as price/tax below
@@ -489,6 +493,9 @@ async function createOrder(storeId, body, actor) {
     // the order is priced at the SAME rate the storefront displayed.
     await fxRateProvider.primeFromCache().catch(() => {});
     const items = await resolveAuthoritativeItems(storeId, body.items, market);
+
+    // Opt-in: only items flagged customFields.requiresKyc trigger a lookup; other carts are untouched.
+    await kycGate.assertKycForItems(items, actor);
 
     // Server-computed, not client-supplied — see shippingService.js header.
     const shipping = shippingService.computeShipping(items);
@@ -658,6 +665,22 @@ async function cancelOrder(storeId, orderId, reason) {
 }
 
 // Manual/admin payment recording (e.g. bank transfer). Hardened with a duplicate-capture guard.
+// Everything that follows a real capture (mirror to the ledger via the durable outbox, commit the
+// inventory holds, send the payment email). Shared by admin-recorded payments and points payments.
+async function postCaptureEffects(storeId, order, payment, body) {
+    await ledgerOutbox.enqueuePaymentCapture({
+        storeId, paymentId: payment.id, orderId: order.id, orderNumber: order.orderNumber,
+        amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
+        provider: body.provider, transactionId: body.transactionId,
+    });
+    // Commit the cross-service inventory holds (reserved → deducted). Idempotent + fail-open.
+    await confirmLocks(storeId, locksFromOrder(order), order.id);
+    // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+    OrdersOrderItem.findAll({ where: { orderId: order.id } })
+        .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
+        .catch(() => {});
+}
+
 async function recordPayment(storeId, orderId, body) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
@@ -690,20 +713,7 @@ async function recordPayment(storeId, orderId, body) {
     // dead-lettered) instead of a swallowed best-effort call. This admin/finance path is not wrapped
     // in a DB transaction, so the enqueue is its own write; the reconciliation sweep is the backstop
     // for the small window between the order update and the enqueue.
-    if (body.status === 'captured') {
-        await ledgerOutbox.enqueuePaymentCapture({
-            storeId, paymentId: payment.id, orderId, orderNumber: order.orderNumber,
-            amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
-            provider: body.provider, transactionId: body.transactionId,
-        });
-        // Commit the cross-service inventory holds (reserved → deducted) on this manual capture.
-        // Idempotent + fail-open (an inventory hiccup never re-fails an already-recorded payment).
-        await confirmLocks(storeId, locksFromOrder(order), orderId);
-        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
-        OrdersOrderItem.findAll({ where: { orderId } })
-            .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
-            .catch(() => {});
-    }
+    if (body.status === 'captured') await postCaptureEffects(storeId, order, payment, body);
     return payment.toJSON();
 }
 
@@ -722,6 +732,8 @@ async function refundPayment(storeId, orderId, body = {}) {
 
     // The captured payment we are refunding against (most recent capture).
     const captured = await OrdersOrderPayment.findOne({ where: { orderId, status: 'captured' }, order: [['createdAt', 'DESC']] });
+    // Points payments are refunded back into the buyer's wallet, not through a payment gateway.
+    if (captured && captured.provider === 'points') return require('./pointsPayment').refundPointsPayment(order, captured, body);
     const captureMoney = Money.fromDatabaseValue(captured ? captured.amount : order.totalAmount, order.currencyCode);
     let refundMoney;
     try {
@@ -1114,3 +1126,4 @@ module.exports = { listOrders, listMyOrders, getOrder, lookupGuestOrder, createO
 // Appended export (separate statement to avoid colliding with concurrent edits to the line above).
 module.exports.capturePaymentFromWebhook = capturePaymentFromWebhook;
 module.exports.settlePayuReturn = settlePayuReturn;
+module.exports.postCaptureEffects = postCaptureEffects;

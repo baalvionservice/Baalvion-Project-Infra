@@ -20,7 +20,7 @@ export default function Onboarding() {
   [selectedRegionId]);
 
   const handleComplete = () => {
-    const path = role === 'TEACHER' ? '/admin/teacher' : role === 'SELLER' ? '/admin/seller' : '/student/dashboard';
+    const path = role === 'TEACHER' ? '/teacher-dashboard' : role === 'SELLER' ? '/seller/onboarding' : '/education';
     router.push(path);
   };
 

@@ -4,6 +4,8 @@ const { CommerceMemberProfile, CommerceSellerApplication, sequelize } = require(
 const { AppError } = require('../utils/errors');
 const { randomMemberNumber, formatMemberNumber, parseMemberNumber, profilePath, profileSlug } = require('../utils/memberId');
 const sellerTokenService = require('./sellerTokenService');
+const buyerAccessService = require('./buyerAccessService');
+const config = require('../config/appConfig');
 
 const q = (sql, replacements) => sequelize.query(sql, { type: QueryTypes.SELECT, replacements });
 
@@ -50,7 +52,7 @@ async function sellerStats(userId) {
     const categories = await q(
         `SELECT b.id, b.category_id AS "categoryId", c.name, b.status FROM commerce.commerce_seller_category_bonds b
            LEFT JOIN commerce.commerce_categories c ON c.id = b.category_id
-          WHERE b.seller_user_id::text = :u AND b.status IN ('awaiting_payment','payment_submitted','active') ORDER BY b.created_at`, { u });
+          WHERE b.seller_user_id::text = :u AND b.kind = 'category' AND b.status IN ('awaiting_payment','payment_submitted','active') ORDER BY b.created_at`, { u });
     const orders = await q(
         `SELECT o.id, o.status, o.payment_status AS "paymentStatus", o.currency_code AS "currency", SUM(i.total)::float AS mine,
                 (rt.id IS NOT NULL) AS rated
@@ -165,4 +167,25 @@ async function getPublic(memberNumberInput) {
     };
 }
 
-module.exports = { ensureProfile, getMine, updateMine, getPublic, summariseSales, buildRoadmap, profileSlug };
+// A seller's live listings, for their public shop page. Members only: the products are the thing the
+// buyer access pass protects, so this needs the same access as /shop.
+async function getListings(memberNumberInput, viewer) {
+    const access = await buyerAccessService.accessFor(viewer.userId, viewer.roles);
+    if (!access.hasAccess) throw new AppError('ACCESS_PASS_REQUIRED', `Browsing the marketplace needs the one-time $${config.buyerAccess.amountUsd} access pass`, 402, { priceUsd: config.buyerAccess.amountUsd });
+    const n = parseMemberNumber(memberNumberInput);
+    const profile = n ? await CommerceMemberProfile.findOne({ where: { memberNumber: n } }) : null;
+    if (!profile) throw new AppError('NOT_FOUND', 'Member not found', 404);
+    return q(
+        `SELECT p.id, p.name, p.slug, c.slug AS "categorySlug",
+                (SELECT v.price::float FROM commerce.commerce_product_variants v WHERE v.product_id = p.id ORDER BY v.is_default DESC, v.sort_order ASC LIMIT 1) AS price,
+                (SELECT v.currency_code FROM commerce.commerce_product_variants v WHERE v.product_id = p.id ORDER BY v.is_default DESC, v.sort_order ASC LIMIT 1) AS currency,
+                (SELECT m.url FROM commerce.commerce_product_media m WHERE m.product_id = p.id AND m.media_type = 'image' ORDER BY m.is_featured DESC, m.sort_order ASC LIMIT 1) AS "imageUrl"
+           FROM commerce.commerce_products p
+           LEFT JOIN commerce.commerce_categories c ON c.id = p.category_id
+          WHERE p.created_by::text = :u AND p.store_id = :store AND p.status = 'published' AND p.visibility = 'public'
+          ORDER BY p.published_at DESC NULLS LAST LIMIT 60`,
+        { u: String(profile.userId), store: config.marketplace.defaultStoreId },
+    );
+}
+
+module.exports = { getListings, ensureProfile, getMine, updateMine, getPublic, summariseSales, buildRoadmap, profileSlug };

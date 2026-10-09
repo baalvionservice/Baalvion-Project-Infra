@@ -1,10 +1,15 @@
 'use strict';
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const productService = require('../service/productService');
+const { isMarketplaceSeller } = require('../middleware/marketplaceGuard');
 
 const listProducts = async (req, res, next) => {
     try {
-        const result = await productService.listProducts(req.params.storeId, req.query);
+        // Never trust a client-supplied owner filter; on the marketplace a seller's list is always their own.
+        const query = { ...req.query };
+        delete query.ownerUserId;
+        if (isMarketplaceSeller(req)) query.ownerUserId = String(req.auth.userId);
+        const result = await productService.listProducts(req.params.storeId, query);
         return sendPaginated(req, res, result);
     } catch (err) { return next(err); }
 };
@@ -53,7 +58,7 @@ const duplicateProduct = async (req, res, next) => {
 
 const bulkUpdate = async (req, res, next) => {
     try {
-        const result = await productService.bulkUpdate(req.params.storeId, req.auth.userId, req.validated);
+        const result = await productService.bulkUpdate(req.params.storeId, req.auth.userId, req.validated, isMarketplaceSeller(req) ? { ownerUserId: req.auth.userId } : {});
         return sendSuccess(req, res, result);
     } catch (err) { return next(err); }
 };

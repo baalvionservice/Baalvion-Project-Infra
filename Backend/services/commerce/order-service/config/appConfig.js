@@ -24,7 +24,11 @@ module.exports = {
     // listings), so on this store the store-wide order routes need full store-admin capability.
     marketplace: {
         storeId: process.env.MARKETPLACE_STORE_ID || '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c',
+        // Buyers pay this once (USD) to enter the marketplace and buy. Mirrors commerce-service BUYER_ACCESS_USD.
+        buyerAccessUsd: Number(process.env.BUYER_ACCESS_USD || 50),
     },
+    // Buyers pay with wallet points (default 100 points = $1). Mirrors commerce-service POINTS_PER_USD.
+    points: { perUsd: Number(process.env.POINTS_PER_USD || 100) },
     db: {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 5432),

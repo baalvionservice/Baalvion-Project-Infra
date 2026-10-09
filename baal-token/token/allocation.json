@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "token": {
+    "symbol": "BAAL",
+    "name": "BAAL",
+    "standard": "spl-token-classic",
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "decimals": 9,
+    "totalSupplyTokens": "1000000000",
+    "totalSupplyBaseUnits": "1000000000000000000",
+    "supplyPolicy": {
+      "fixedSupply": true,
+      "mintAuthority": "revoke-permanently",
+      "freezeAuthority": "none"
+    }
+  },
+  "allocations": [
+    {
+      "id": "founder-team",
+      "label": "Founder / team",
+      "percent": "15",
+      "tokens": "150000000",
+      "baseUnits": "150000000000000000",
+      "walletRole": {
+        "role": "founder-team-vesting",
+        "address": null
+      },
+      "vesting": {
+        "type": "cliff-linear",
+        "status": "approved",
+        "releaseShape": "zero-before-cliff-then-continuous-linear",
+        "monthCounting": "calendar-months-utc-from-tge",
+        "cliffMonths": 12,
+        "linearMonths": 36,
+        "tgeUnlockPercent": "0"
+      }
+    },
+    {
+      "id": "treasury",
+      "label": "Treasury",
+      "percent": "20",
+      "tokens": "200000000",
+      "baseUnits": "200000000000000000",
+      "walletRole": {
+        "role": "treasury",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    },
+    {
+      "id": "community-ecosystem",
+      "label": "Community / ecosystem",
+      "percent": "30",
+      "tokens": "300000000",
+      "baseUnits": "300000000000000000",
+      "walletRole": {
+        "role": "community-ecosystem",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    },
+    {
+      "id": "future-development",
+      "label": "Future development / contributors",
+      "percent": "12",
+      "tokens": "120000000",
+      "baseUnits": "120000000000000000",
+      "walletRole": {
+        "role": "contributors",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    },
+    {
+      "id": "liquidity",
+      "label": "Liquidity",
+      "percent": "10",
+      "tokens": "100000000",
+      "baseUnits": "100000000000000000",
+      "walletRole": {
+        "role": "liquidity",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    },
+    {
+      "id": "marketing-partnerships",
+      "label": "Marketing / partnerships",
+      "percent": "8",
+      "tokens": "80000000",
+      "baseUnits": "80000000000000000",
+      "walletRole": {
+        "role": "marketing",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    },
+    {
+      "id": "operations-reserve",
+      "label": "Operations / security / legal reserve",
+      "percent": "5",
+      "tokens": "50000000",
+      "baseUnits": "50000000000000000",
+      "walletRole": {
+        "role": "operations-reserve",
+        "address": null
+      },
+      "vesting": {
+        "type": "unspecified",
+        "status": "tbd",
+        "tgeUnlockPercent": null
+      }
+    }
+  ],
+  "circulation": {
+    "status": "tbd",
+    "note": "Allocated, vested and circulating are different quantities (docs/03-tokenomics/supply-model.md). Only the founder/team schedule is approved; the other six are TBD, so no circulating-supply figure or schedule exists or may be published."
+  },
+  "enforcement": {
+    "status": "open",
+    "note": "No audited on-chain vesting provider has been verified. Multisig custody is not on-chain vesting and is not recorded as equivalent (ADR-008)."
+  },
+  "operationalRoles": [
+    {
+      "role": "mint-authority-temporary",
+      "address": null
+    },
+    {
+      "role": "deployer",
+      "address": null
+    }
+  ]
+}

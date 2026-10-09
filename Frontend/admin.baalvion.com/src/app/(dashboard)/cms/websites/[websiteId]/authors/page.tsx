@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useMemo } from 'react';
 import { Plus, ArrowLeft, Search, Pencil, Trash2, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
@@ -124,6 +124,15 @@ export default function WebsiteAuthorsPage({
 
   const [dialog, setDialog] = useState<{ open: boolean; editing?: WebsiteAuthor }>({ open: false });
   const [form, setForm] = useState<AuthorForm>(DEFAULT_FORM);
+  const [query, setQuery] = useState('');
+
+  const visibleAuthors = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return authors ?? [];
+    return (authors ?? []).filter((a) =>
+      [a.name, a.title, a.slug].some((v) => v?.toLowerCase().includes(q))
+    );
+  }, [authors, query]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -259,6 +268,16 @@ export default function WebsiteAuthorsPage({
         />
       </div>
 
+      <div className="relative max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={`Search ${authors?.length ?? ''} authors by name or title`}
+          className="pl-9"
+        />
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -267,7 +286,7 @@ export default function WebsiteAuthorsPage({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {(authors ?? []).map((a) => (
+          {visibleAuthors.map((a) => (
             <Card key={a.id} className="group">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2">
@@ -309,9 +328,9 @@ export default function WebsiteAuthorsPage({
               </CardContent>
             </Card>
           ))}
-          {!authors?.length && (
+          {!visibleAuthors.length && (
             <p className="col-span-3 py-8 text-center text-sm text-muted-foreground">
-              No authors yet. Create one to power bylines on this site.
+              {authors?.length ? 'No authors match your search.' : 'No authors yet. Create one to power bylines on this site.'}
             </p>
           )}
         </div>

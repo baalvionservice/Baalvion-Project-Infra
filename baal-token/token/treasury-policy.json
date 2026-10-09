@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "status": "design",
+  "treasuryMultisig": {
+    "threshold": 3,
+    "signerCount": 5,
+    "minIndependentSigners": 1,
+    "signerSlots": [
+      {
+        "slot": 1,
+        "role": "independent-signer",
+        "affiliation": "independent",
+        "identity": null,
+        "address": null
+      },
+      {
+        "slot": 2,
+        "role": "signer",
+        "affiliation": "unassigned",
+        "identity": null,
+        "address": null
+      },
+      {
+        "slot": 3,
+        "role": "signer",
+        "affiliation": "unassigned",
+        "identity": null,
+        "address": null
+      },
+      {
+        "slot": 4,
+        "role": "signer",
+        "affiliation": "unassigned",
+        "identity": null,
+        "address": null
+      },
+      {
+        "slot": 5,
+        "role": "signer",
+        "affiliation": "unassigned",
+        "identity": null,
+        "address": null
+      }
+    ],
+    "recovery": [
+      {
+        "id": "signer-key-loss",
+        "requirement": "Loss of any one signer's device or backup must be recoverable without the treasury being at risk or blocked."
+      },
+      {
+        "id": "signer-compromise",
+        "requirement": "A documented procedure exists to remove a compromised signer and rotate to a new one before the attacker can reach the threshold."
+      },
+      {
+        "id": "signer-unavailability",
+        "requirement": "The treasury must remain operable if up to two signers are unavailable at once."
+      },
+      {
+        "id": "signer-rotation",
+        "requirement": "Signer replacement is possible, recorded publicly, and itself requires the threshold."
+      },
+      {
+        "id": "quorum-loss",
+        "requirement": "A documented, tested plan covers loss of more than two signers, including how funds could be recovered or why they could not."
+      }
+    ]
+  },
+  "implementation": {
+    "status": "not-yet-implemented",
+    "note": "Design only. No wallets, keys or multisig accounts exist, signers are not named, and the multisig mechanism is not chosen."
+  }
+}

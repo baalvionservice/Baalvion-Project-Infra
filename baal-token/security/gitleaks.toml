@@ -1,0 +1,20 @@
+title = "baal-token gitleaks config"
+
+[extend]
+useDefault = true
+
+# Solana secret keys are 64 bytes: serialised either as a JSON array of 64
+# integers (solana-keygen output) or as an 86-88 character base58 string.
+[[rules]]
+id = "solana-keypair-json-array"
+description = "Solana keypair file contents (JSON array of 64 bytes)"
+regex = '''\[\s*(?:\d{1,3}\s*,\s*){63}\d{1,3}\s*\]'''
+
+[[rules]]
+id = "solana-base58-secret-key"
+description = "Base58 string the length of a 64-byte Solana secret key"
+regex = '''\b[1-9A-HJ-NP-Za-km-z]{86,88}\b'''
+
+[allowlist]
+description = "Placeholders only"
+paths = ['''\.env\.example$''', '''pnpm-lock\.yaml$''']

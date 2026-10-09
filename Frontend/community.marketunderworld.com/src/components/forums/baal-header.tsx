@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- these anchors run handleScaryClick (the forum's custom page transition), which performs the navigation itself, so next/link would double-handle it */
 "use client";
 
 import Link from "next/link";

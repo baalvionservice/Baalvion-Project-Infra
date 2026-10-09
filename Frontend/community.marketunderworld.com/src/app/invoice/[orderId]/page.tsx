@@ -34,7 +34,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
         </Link>
         <div className="flex gap-2">
           <NexusButton variant="outline" size="sm" className="border-white/10" onClick={handlePrint}><Printer className="w-4 h-4" /></NexusButton>
-          <NexusButton variant="outline" size="sm" className="border-white/10" onClick={() => alert('PDF generation mock')}><Download className="w-4 h-4" /></NexusButton>
+          <NexusButton variant="outline" size="sm" className="border-white/10" onClick={handlePrint}><Download className="w-4 h-4" /></NexusButton>
           <NexusButton variant="outline" size="sm" className="border-white/10"><Mail className="w-4 h-4" /></NexusButton>
           <NexusButton variant="outline" size="sm" className="border-white/10"><Share2 className="w-4 h-4" /></NexusButton>
         </div>

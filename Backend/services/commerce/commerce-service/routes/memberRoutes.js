@@ -3,6 +3,7 @@ const { Router } = require('express');
 const svc = require('../service/memberService');
 const { sendSuccess } = require('../utils/response');
 
+const rolesOf = (req) => [req.auth.role, ...(Array.isArray(req.auth.roles) ? req.auth.roles : [])].filter(Boolean);
 const wrap = (fn, status) => async (req, res, next) => {
     try { return sendSuccess(req, res, await fn(req), status); } catch (err) { return next(err); }
 };
@@ -16,4 +17,8 @@ me.put('/', wrap((req) => svc.updateMine(req.auth.userId, req.body && req.body.d
 const pub = Router();
 pub.get('/:memberNumber', wrap((req) => svc.getPublic(req.params.memberNumber)));
 
-module.exports = { me, pub };
+// Signed-in members with marketplace access: a seller's live listings.
+const listings = Router();
+listings.get('/:memberNumber/listings', wrap((req) => svc.getListings(req.params.memberNumber, { userId: req.auth.userId, roles: rolesOf(req) })));
+
+module.exports = { me, pub, listings };

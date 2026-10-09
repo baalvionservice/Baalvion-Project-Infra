@@ -101,7 +101,7 @@ async function orderFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${PROXY_BASE}${path}`, { ...init, headers, credentials: 'include', cache: 'no-store' });
   const body = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
   if (!res.ok || body.success === false) {
-    throw new Error(body.error?.message || `order API ${path} failed: ${res.status}`);
+    throw Object.assign(new Error(body.error?.message || `order API ${path} failed: ${res.status}`), { code: body.error?.code });
   }
   return body.data;
 }

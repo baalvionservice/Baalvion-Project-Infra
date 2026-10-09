@@ -1,0 +1,156 @@
+:root {
+  --bg: #fafaf8;
+  --fg: #1b1b1f;
+  --muted: #5b5b66;
+  --line: #d9d9e0;
+  --accent: #3a2bb0;
+  --ph-bg: #fff4d6;
+  --ph-fg: #6b4a00;
+  --status-bg: #1b1b1f;
+  --status-fg: #fafaf8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121216;
+    --fg: #ececf1;
+    --muted: #a0a0ad;
+    --line: #2e2e38;
+    --accent: #a99cff;
+    --ph-bg: #3a2f10;
+    --ph-fg: #ffd37a;
+    --status-bg: #ececf1;
+    --status-fg: #121216;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    16px/1.6 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+a {
+  color: var(--accent);
+}
+.skip {
+  position: absolute;
+  left: -999px;
+}
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  background: var(--bg);
+  padding: 8px;
+}
+.status {
+  background: var(--status-bg);
+  color: var(--status-fg);
+  padding: 8px 16px;
+  font-size: 14px;
+  text-align: center;
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: var(--fg);
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 14px;
+}
+nav a[aria-current='page'] {
+  font-weight: 700;
+}
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+h1 {
+  font-size: 36px;
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+h2 {
+  font-size: 22px;
+  margin: 32px 0 8px;
+}
+.lead {
+  font-size: 20px;
+  color: var(--muted);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-variant-numeric: tabular-nums;
+}
+caption {
+  text-align: left;
+  color: var(--muted);
+  padding-bottom: 8px;
+}
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+}
+.facts dt {
+  color: var(--muted);
+}
+.facts dd {
+  margin: 0;
+}
+.ph {
+  background: var(--ph-bg);
+  color: var(--ph-fg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+code {
+  overflow-wrap: anywhere;
+}
+footer {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  color: var(--muted);
+  font-size: 14px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 520px) {
+  .facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .facts dd {
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+}

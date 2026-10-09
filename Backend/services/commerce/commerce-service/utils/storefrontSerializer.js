@@ -103,6 +103,8 @@ function serializeProductListItem(p, opts = {}) {
         imageUrl: mediaUrls(p),
         media: mediaObjects(p),
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
+        // Buying this needs a one-time approved KYC (enforced by order-service; this is display only).
+        kycRequired: cf.requiresKyc === true,
         // Server-computed rating aggregate over ALL approved reviews (C4). Canonical fields +
         // legacy aliases so the PDP header reads a global average, not a page-scoped client mean.
         ratingAverage: ratingAverage(cf),
@@ -133,6 +135,33 @@ function serializeProductListItem(p, opts = {}) {
     };
 }
 
+// Whitelisted public view of customFields.investment (creator revenue-share listings). Only
+// these keys leave the service; anything else an author typed into customFields stays private.
+function serializeInvestment(raw) {
+    const inv = asObject(raw);
+    if (!Object.keys(inv).length) return undefined;
+    const num = (v) => (v != null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined);
+    const str = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined);
+    const url = (v) => (typeof v === 'string' && /^https:\/\//i.test(v) ? v.slice(0, 500) : undefined);
+    return {
+        creatorName: str(inv.creatorName, 160),
+        platform: str(inv.platform, 40),
+        channelUrl: url(inv.channelUrl),
+        investmentAmount: num(inv.investmentAmount),
+        expectedRevenue: num(inv.expectedRevenue),
+        investorSharePct: num(inv.investorSharePct),
+        platformFeePct: num(inv.platformFeePct),
+        riskNote: str(inv.riskNote, 1000),
+        // What the admin actually checked, as plain flags + a date. The admin's private notes and
+        // identity never leave the service. Absent flags mean "not checked", never "checked".
+        verification: {
+            channelOwnershipChecked: asObject(inv.verification).channelOwnershipChecked === true,
+            revenueEvidenceSeen: asObject(inv.verification).revenueEvidenceSeen === true,
+            checkedAt: typeof asObject(inv.verification).checkedAt === 'string' ? asObject(inv.verification).checkedAt.slice(0, 10) : undefined,
+        },
+    };
+}
+
 function serializeProductDetail(p, opts = {}) {
     const cf = asObject(p.customFields);
     const seo = asObject(p.seoMetadata);
@@ -140,6 +169,7 @@ function serializeProductDetail(p, opts = {}) {
         ...serializeProductListItem(p, opts),
         description: p.description || '',
         specialNotes: cf.specialNotes,
+        investment: serializeInvestment(cf.investment),
         // Luxury-resale provenance. Prefer the first-class columns; fall back to the legacy
         // custom_fields keys for rows authored before the condition/authenticity migration.
         condition: p.condition ?? cf.condition,

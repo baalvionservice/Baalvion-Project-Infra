@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES, SCALE } from '@/lib/content';
-import { INVESTORS_PAGE } from '@/lib/site-pages';
+import { BUILT_PROPERTIES, COMPANY_FACTS, INVESTORS_PAGE } from '@/lib/site-pages';
 import { pageMetadata } from '@/lib/seo';
+import { CIN, INCORPORATED_ON, LEGAL_ENTITY_NAME } from '@baalvion/company';
+
+const incorporated = new Date(INCORPORATED_ON).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 
 export const metadata: Metadata = pageMetadata({
   title: 'Investors',
@@ -34,6 +42,52 @@ export default function InvestorsPage() {
       </section>
 
       <section className="border-b hairline bg-ink-deep">
+        <div className="site-container grid gap-12 py-16 md:grid-cols-2 md:py-20">
+          <div>
+            <p className="mono-caption mb-6">{COMPANY_FACTS.caption}</p>
+            <h2 className="running-head mb-8">{COMPANY_FACTS.title}</h2>
+            {COMPANY_FACTS.story.map((para) => (
+              <p key={para.slice(0, 24)} className="body mb-4 max-w-xl">
+                {para}
+              </p>
+            ))}
+          </div>
+          <dl className="grid content-start gap-px border hairline bg-line">
+            {[
+              ['Legal entity', LEGAL_ENTITY_NAME],
+              ['Incorporated', incorporated],
+              ['CIN', CIN],
+              ['Directors', COMPANY_FACTS.directors.join(' · ')],
+            ].map(([k, v]) => (
+              <div key={k} className="bg-surface p-5">
+                <dt className="mono-caption">{k}</dt>
+                <dd className="body mt-1 text-foreground">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="border-b hairline bg-ink">
+        <div className="site-container py-16 md:py-20">
+          <p className="mono-caption mb-6">{BUILT_PROPERTIES.caption}</p>
+          <h2 className="running-head mb-4 max-w-2xl">{BUILT_PROPERTIES.title}</h2>
+          <p className="lead mb-10 max-w-2xl">{BUILT_PROPERTIES.lede}</p>
+          <ul className="grid gap-px border hairline bg-line sm:grid-cols-2 lg:grid-cols-3">
+            {BUILT_PROPERTIES.items.map((item) => (
+              <li key={item.host} className="bg-surface p-6">
+                <a href={`https://${item.host}`} className="font-display text-lg text-foreground">
+                  {item.name}
+                </a>
+                <p className="body mt-1 text-sm">{item.host}</p>
+                {'note' in item && <p className="body mt-3 text-sm">{item.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-b hairline bg-ink-deep">
         <div className="site-container py-16 md:py-20">
           <p className="mono-caption mb-6">{SCALE.caption}</p>
           <div className="grid grid-cols-2 gap-px border hairline bg-line sm:grid-cols-3">
@@ -54,7 +108,7 @@ export default function InvestorsPage() {
         <div className="site-container flex flex-col items-start gap-6 py-16 md:flex-row md:items-center md:justify-between md:py-20">
           <p className="lead max-w-xl">
             This page states the posture; the full long-horizon thesis, governance detail, and
-            capitalisation history are maintained at ir.baalvion.com.
+            capitalisation history are maintained at ir.baalvion.com. Investment is by invitation to identified persons only; request access and we will respond individually.
           </p>
           <div className="flex flex-wrap gap-4">
             <a href={INVESTORS_PAGE.cta.href} className="btn-primary">

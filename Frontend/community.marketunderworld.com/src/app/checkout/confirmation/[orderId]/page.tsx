@@ -15,6 +15,7 @@ import { NexusButton } from '@/components/ui/nexus-button'
 import { useRouter } from 'next/navigation'
 import { getOrder, type Order } from '@/lib/api/orders'
 import { MARKET_UNDERWORLD_STORE_ID } from '@/lib/api/commerce'
+import posthog from 'posthog-js'
 
 export default function OrderConfirmationPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params)
@@ -25,7 +26,21 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ or
 
   useEffect(() => {
     getOrder(MARKET_UNDERWORLD_STORE_ID, orderId)
-      .then(setOrder)
+      .then((o) => {
+        setOrder(o);
+        
+        // Prevent double tracking if the user refreshes the page
+        const trackedKey = `tracked_order_${o.id}`;
+        if (!sessionStorage.getItem(trackedKey)) {
+          sessionStorage.setItem(trackedKey, 'true');
+          try {
+            posthog.capture("purchase_completed", { 
+              order_id: o.id, 
+              value: o.totalPrice 
+            });
+          } catch (e) {}
+        }
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Order not found'))
       .finally(() => setLoading(false))
   }, [orderId])

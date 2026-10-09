@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AnnouncementBanner } from "@/components/announcements/announcement-banner";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { CryptoTicker } from "@/components/layout/ticker";
@@ -12,6 +13,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { GoogleAnalytics } from "@/components/layout/google-analytics";
 import { ScaryTransitionProvider } from "@/components/layout/scary-transition-provider";
+import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
+import { CSPostHogProvider } from "@/components/providers/posthog-provider";
+import { CookieBanner } from "@/components/layout/cookie-banner";
+import { AiAssistantWidget } from "@/components/chat/ai-assistant-widget";
+import { CustomerSupportWidget } from "@/components/chat/customer-support-widget";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -83,25 +89,32 @@ export default function RootLayout({
         style={isDev ? { fontFamily: 'system-ui, -apple-system, sans-serif' } : {}}
       >
         <LanguageProvider>
-          <AuthProvider>
-            <CartProvider>
-              <NotificationProvider>
-                <IdentityProvider>
-                  <ScaryTransitionProvider>
-                    <header>
-                      <CryptoTicker />
-                    </header>
-                    <main className="flex-1 flex flex-col">
-                      {children}
-                    </main>
-                    <ToastContainer />
-                    <Toaster />
-                    <GlobalSearch />
-                  </ScaryTransitionProvider>
-                </IdentityProvider>
-              </NotificationProvider>
-            </CartProvider>
-          </AuthProvider>
+          <CSPostHogProvider>
+            <AuthProvider>
+              <CartProvider>
+                <NotificationProvider>
+                  <IdentityProvider>
+                    <ScaryTransitionProvider>
+                      <header>
+                        <CryptoTicker />
+                      </header>
+                      <main className="flex-1 flex flex-col">
+                        {children}
+                      </main>
+                      <ToastContainer />
+                      <Toaster />
+                      <GlobalSearch />
+                      <BountyChatWidget />
+                      <AiAssistantWidget />
+                      <CustomerSupportWidget />
+                      <CookieBanner />
+                      <AnnouncementBanner />
+                    </ScaryTransitionProvider>
+                  </IdentityProvider>
+                </NotificationProvider>
+              </CartProvider>
+            </AuthProvider>
+          </CSPostHogProvider>
         </LanguageProvider>
       </body>
     </html>

@@ -24,13 +24,24 @@ export function IdentityProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       
       // Artificial delay for "Scanning Node" effect
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await new Promise<void>(resolve => {
+        setTimeout(resolve, 1200);
+      });
 
       const randomRegion = REGIONS[Math.floor(Math.random() * REGIONS.length)];
       const randomCountry = (randomRegion.countries ?? [])[Math.floor(Math.random() * (randomRegion.countries?.length ?? 0))];
 
+      let realIp = `103.24.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        if (data.ip) realIp = data.ip;
+      } catch (e) {
+        // Fallback to random if block
+      }
+
       const mockIdentity: UserIdentity = {
-        ip: `103.24.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        ip: realIp,
         country: randomCountry,
         countryCode: randomCountry.substring(0, 2).toUpperCase(),
         region: randomRegion.name,
@@ -43,6 +54,24 @@ export function IdentityProvider({ children }: { children: React.ReactNode }) {
 
       setIdentity(mockIdentity);
       setIsLoading(false);
+
+      // Track the visitor in the background
+      try {
+        await fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ip: realIp,
+            country: mockIdentity.country,
+            region: mockIdentity.region,
+            userAgent: navigator.userAgent,
+            device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+            path: window.location.pathname
+          })
+        });
+      } catch (e) {
+        console.warn('Failed to track visitor', e);
+      }
     };
 
     detectIdentity();

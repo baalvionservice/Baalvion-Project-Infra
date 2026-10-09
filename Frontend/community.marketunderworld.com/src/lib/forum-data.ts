@@ -861,7 +861,7 @@ export const INITIAL_THREADS: ForumThreadItem[] = [
           author: "PacketSniffer",
           text: "Did you enable MTU clamp MSS on the WireGuard interface?",
         },
-        content: "Yes, exactly! \`iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu\` ensures packets never fragment on mobile connections.",
+        content: "Yes, exactly! `iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu` ensures packets never fragment on mobile connections.",
         likes: 14,
       },
     ],

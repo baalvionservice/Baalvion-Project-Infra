@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { LocalsClient } from "./locals-client";
+import { getListings } from "@/lib/api/nightlife";
 
 export const metadata: Metadata = {
   title: "Mumbai Locals Hub - Casting Calls, Events & Jobs | Market Underworld",
@@ -12,6 +13,6 @@ export const metadata: Metadata = {
   }
 };
 
-export default function LocalsHubPage() {
-  return <LocalsClient />;
+export default async function LocalsHubPage() {
+  return <LocalsClient initialListings={await getListings()} />;
 }
