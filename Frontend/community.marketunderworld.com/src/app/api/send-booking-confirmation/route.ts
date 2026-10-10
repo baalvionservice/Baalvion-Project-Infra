@@ -39,7 +39,7 @@ function getSigningKey(secretKey: string, date: string, region: string, service:
 async function sendViaSES(to: string, subject: string, html: string): Promise<boolean> {
   // Dev mode — no credentials set
   if (!ACCESS_KEY || !SECRET_KEY) {
-    console.log(`[SES DEV] To: ${to} | Subject: ${subject}`);
+    console.log(`[SES DEV] To: ${to.replace(/[\r\n]/g, " ")} | Subject: ${subject.replace(/[\r\n]/g, " ")}`);
     return true;
   }
 

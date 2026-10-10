@@ -24,6 +24,11 @@ const STATUS_BADGE: Record<CommerceProduct["status"], "default" | "success" | "w
   rejected: "warning",
 };
 
+function safeImageUrl(url?: string | null): string | null {
+  if (!url) return null;
+  return /^(https?:\/\/|\/(?!\/))/i.test(url) ? url : null;
+}
+
 export default function SellerListingsPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -167,7 +172,7 @@ export default function SellerListingsPage() {
           {products.map((p) => {
             const price = defaultVariantPrice(p);
             const copy = STATUS_COPY[p.status];
-            const thumb = thumbs[p.id];
+            const thumb = safeImageUrl(thumbs[p.id]);
             const slug = categorySlug(p.categoryId);
             return (
               <NexusCard key={p.id} className="p-4 border-white/5 bg-white/[0.01]">
