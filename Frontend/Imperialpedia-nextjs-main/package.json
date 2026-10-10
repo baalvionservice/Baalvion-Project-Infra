@@ -48,7 +48,7 @@
     "framer-motion": "^11.0.8",
     "genkit": "^1.28.0",
     "lucide-react": "^0.475.0",
-    "next": "15.5.24",
+    "next": "15.5.27",
     "postcss-load-config": "^6.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
