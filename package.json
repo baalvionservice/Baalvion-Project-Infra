@@ -83,6 +83,7 @@
       "@types/node": "24.13.4",
       "typescript": "5.9.3",
       "proxy-addr": "2.0.8",
+      "handlebars": "4.7.10",
       "jest": "30.5.1",
       "@tiptap/core": "3.31.3",
       "@xmldom/xmldom": "0.8.15",
