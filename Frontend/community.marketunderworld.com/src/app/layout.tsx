@@ -16,6 +16,7 @@ import { ScaryTransitionProvider } from "@/components/layout/scary-transition-pr
 import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
 import { CSPostHogProvider } from "@/components/providers/posthog-provider";
 import { CookieBanner } from "@/components/layout/cookie-banner";
+import { AiAssistantWidget } from "@/components/chat/ai-assistant-widget";
 import { CustomerSupportWidget } from "@/components/chat/customer-support-widget";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +105,7 @@ export default function RootLayout({
                       <Toaster />
                       <GlobalSearch />
                       <BountyChatWidget />
+                      <AiAssistantWidget />
                       <CustomerSupportWidget />
                       <CookieBanner />
                       <AnnouncementBanner />
