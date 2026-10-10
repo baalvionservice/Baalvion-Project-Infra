@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Crown, CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
+import { Crown, CheckCircle, XCircle, Clock, RefreshCw, Search, Filter, Upload, Image as ImageIcon } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 const ELITE_HOST_KEY = "baalvion_elite_host_applications";

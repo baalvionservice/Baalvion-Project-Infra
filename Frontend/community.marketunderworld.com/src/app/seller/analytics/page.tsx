@@ -176,7 +176,7 @@ export default function SellerAnalyticsPage() {
     const prevCount = sales.filter((s) => s.createdAt.startsWith(prevM) && s.paymentStatus === "paid").length;
     if (!prevCount) return null;
     const pct = Math.round(((thisCount - prevCount) / prevCount) * 100);
-    return { direction: pct >= 0 ? "up" : "down" as const, text: `${Math.abs(pct)}% vs last month` };
+    return { direction: (pct >= 0 ? "up" : "down") as "up" | "down", text: `${Math.abs(pct)}% vs last month` };
   }, [sales]);
 
   if (loading) {

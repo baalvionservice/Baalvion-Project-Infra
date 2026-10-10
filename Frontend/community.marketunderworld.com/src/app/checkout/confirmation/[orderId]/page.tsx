@@ -36,7 +36,7 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ or
           try {
             posthog.capture("purchase_completed", { 
               order_id: o.id, 
-              value: o.totalPrice 
+              value: Number(o.totalAmount) 
             });
           } catch (e) {}
         }

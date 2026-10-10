@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Star, ShoppingCart, Heart } from "lucide-react"
 import posthog from "posthog-js"
 import { NexusButton } from "@/components/ui/nexus-button"

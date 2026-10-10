@@ -243,7 +243,7 @@ export function EliteHostClient() {
                     </div>
                     
                     <div className="space-y-2 mb-6">
-                      {party.perks.map(perk => (
+                      {party.perks.map((perk: string) => (
                         <div key={perk} className="flex items-center gap-2 text-sm text-gray-300">
                           <CheckCircle2 className="w-4 h-4 text-amber-500" /> {perk}
                         </div>
