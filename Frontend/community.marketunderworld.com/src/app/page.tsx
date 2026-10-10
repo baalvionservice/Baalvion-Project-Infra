@@ -22,6 +22,10 @@ import {
   BookOpen,
   Radio,
   TrendingUp,
+  AlertTriangle,
+  Wifi,
+  Camera,
+  Cpu,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -173,6 +177,231 @@ const EMBER_PARTICLES = [
   { bottom: 18, size: 7, delay: 1.98, duration: 2.20 },
 ];
 
+// ─── Full-screen Site Entry Warning Overlay ───────────────────────────────────
+function SiteEntryWarning({ onEnter }: { onEnter: () => void }) {
+  const [phase, setPhase] = useState(0); // 0=scanning, 1=warning shown, 2=fading
+  const [scanLines, setScanLines] = useState<string[]>([]);
+  const [accepted, setAccepted] = useState(false);
+
+  const SCAN_MESSAGES = [
+    '> INITIALISING SURVEILLANCE PROTOCOL...',
+    '> CAPTURING DEVICE FINGERPRINT...',
+    '> READING BROWSER METADATA...',
+    '> GEOLOCATION: RESOLVED',
+    '> COOKIES: INTERCEPTED',
+    '> ACTIVE SESSIONS: LOGGED',
+    '> NETWORK INTERFACE: MONITORED',
+    '> SCREEN RESOLUTION: CAPTURED',
+    '> OPERATING SYSTEM: IDENTIFIED',
+    '> ALL DATA RECORDED. ENTRY PERMITTED.',
+  ];
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < SCAN_MESSAGES.length) {
+        setScanLines(prev => [...prev, SCAN_MESSAGES[i]]);
+        i++;
+      } else {
+        clearInterval(interval);
+        setPhase(1);
+      }
+    }, 280);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEnter = () => {
+    setAccepted(true);
+    setPhase(2);
+
+    // ── Collect REAL visitor fingerprint ──────────────────────────────────
+    const sessionId = (() => {
+      try {
+        const existing = sessionStorage.getItem('_v_sid');
+        if (existing) return existing;
+        const id = crypto.randomUUID();
+        sessionStorage.setItem('_v_sid', id);
+        return id;
+      } catch { return crypto.randomUUID(); }
+    })();
+
+    const payload = {
+      sessionId,
+      userAgent:    navigator.userAgent,
+      screenWidth:  screen.width,
+      screenHeight: screen.height,
+      language:     navigator.language,
+      referrer:     document.referrer || '',
+      landingPath:  window.location.pathname,
+      pageTitle:    document.title,
+      enteredSite:  true,
+    };
+
+    // Fire-and-forget — never blocks UX
+    fetch('/api/track', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    }).catch(() => {/* non-fatal */});
+
+    setTimeout(onEnter, 700);
+  };
+
+  return (
+    <AnimatePresence>
+      {!accepted && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: '#000', fontFamily: 'monospace' }}
+        >
+          {/* Red scanline overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(200,0,0,0.04) 2px, rgba(200,0,0,0.04) 4px)',
+          }} />
+
+          {/* Red corner brackets */}
+          <div className="absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 border-red-600" />
+          <div className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-red-600" />
+          <div className="absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 border-red-600" />
+          <div className="absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 border-red-600" />
+
+          {/* Pulsing red dot — recording indicator */}
+          <div className="absolute top-5 right-16 flex items-center gap-2">
+            <motion.div
+              animate={{ opacity: [1, 0.1, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+              className="w-2.5 h-2.5 rounded-full bg-red-600"
+            />
+            <span className="text-red-600 text-[10px] tracking-widest uppercase">REC</span>
+          </div>
+
+          <div className="w-full max-w-2xl px-6">
+
+            {/* Warning symbol */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex justify-center mb-6"
+            >
+              <div className="relative">
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="absolute inset-0 rounded-full blur-2xl"
+                  style={{ background: 'rgba(200,0,0,0.4)' }}
+                />
+                <AlertTriangle className="relative z-10 w-20 h-20" style={{ color: '#ff2200' }} strokeWidth={1.5} />
+              </div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-center mb-8"
+            >
+              <div className="text-[11px] tracking-[0.4em] text-red-600 uppercase mb-2">⚠ SECURITY ALERT ⚠</div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-widest">YOU ARE BEING MONITORED</h1>
+              <div className="mt-2 text-[11px] tracking-[0.3em] text-gray-500 uppercase">This site actively scans every visitor</div>
+            </motion.div>
+
+            {/* Live scan terminal */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="rounded border border-red-900/40 p-4 mb-6"
+              style={{ background: 'rgba(20,0,0,0.7)' }}
+            >
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-red-900/30">
+                <Cpu className="w-3 h-3 text-red-600" />
+                <span className="text-[10px] text-red-600 uppercase tracking-widest">SURVEILLANCE ACTIVE</span>
+                <motion.div
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.8 }}
+                  className="ml-auto text-[10px] text-green-500"
+                >
+                  ● LIVE
+                </motion.div>
+              </div>
+              <div className="space-y-1 min-h-[180px]">
+                {scanLines.map((line, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="text-[11px] font-mono"
+                    style={{ color: line.includes('RESOLVED') || line.includes('PERMITTED') ? '#00cc66' : line.includes('INTERCEPTED') || line.includes('LOGGED') || line.includes('MONITORED') ? '#ff8800' : '#555' }}
+                  >
+                    {line}
+                  </motion.div>
+                ))}
+                {phase === 0 && (
+                  <motion.span
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
+                    className="text-[11px] font-mono text-green-600"
+                  >█</motion.span>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Scanning icons row */}
+            <div className="flex justify-center gap-6 mb-6">
+              {[
+                { icon: Wifi,   label: 'NETWORK',  color: '#ff4400' },
+                { icon: Camera, label: 'BROWSER',  color: '#ff8800' },
+                { icon: Eye,    label: 'TRACKING', color: '#cc0000' },
+                { icon: Cpu,    label: 'DEVICE',   color: '#ff4400' },
+                { icon: Lock,   label: 'LOGGING',  color: '#ff8800' },
+              ].map(({ icon: Icon, label, color }) => (
+                <div key={label} className="flex flex-col items-center gap-1">
+                  <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: Math.random() * 1 }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color }} />
+                  </motion.div>
+                  <span className="text-[8px] tracking-widest uppercase" style={{ color: '#333' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Enter button — only shows after scan completes */}
+            <AnimatePresence>
+              {phase >= 1 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center"
+                >
+                  <p className="text-[11px] text-gray-600 uppercase tracking-widest mb-4">
+                    By entering you acknowledge you are being tracked.
+                  </p>
+                  <button
+                    onClick={handleEnter}
+                    className="px-10 py-3 font-black uppercase tracking-widest text-sm text-white border border-red-800/60 hover:border-red-500 hover:bg-red-950/40 transition-all"
+                    style={{ background: 'rgba(120,0,0,0.2)' }}
+                  >
+                    ☠ &nbsp; I UNDERSTAND. ENTER THE SITE &nbsp; ☠
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function CountryCycler({ initialCountry }: { initialCountry: string }) {
   const [country, setCountry] = useState(initialCountry);
   
@@ -191,6 +420,8 @@ function CountryCycler({ initialCountry }: { initialCountry: string }) {
 export default function HomePage() {
   const { identity, isGlobalView, setGlobalView, isLoading } = useIdentity();
   const publicStats = usePublicStats();
+  const [warningDismissed, setWarningDismissed] = useState(false);
+
   const heroStats = publicStats ? [
     { label: 'Clubs Listed', value: publicStats.clubs.toLocaleString('en-IN') },
     { label: 'Cities', value: publicStats.cities.toLocaleString('en-IN') },
@@ -210,6 +441,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#0B0C0F]">
       <style dangerouslySetInnerHTML={{ __html: SCARY_GLOBAL_CSS }} />
+
+      {/* Full-screen warning overlay — shown to every fresh visitor */}
+      <SiteEntryWarning onEnter={() => setWarningDismissed(true)} />
+
       <Navbar />
 
       {/* ══════════════════════════════════════════════════════
@@ -492,6 +727,8 @@ function TerminalPanel({ identity }: { identity: any }) {
   const [shake, setShake] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  // Prevent React Strict Mode from running the boot sequence twice
+  const hasRun = React.useRef(false);
 
   const addLine = (text: string, color?: string, delay = 0) =>
     new Promise<void>((res) => {
@@ -512,8 +749,10 @@ function TerminalPanel({ identity }: { identity: any }) {
     scrollRef.current?.scrollTo({ top: 99999, behavior: 'smooth' });
   }, [lines]);
 
-  // Boot sequence → scan → scary warning → prompt
+  // Boot sequence → scan → prompt
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
     let cancelled = false;
 
     const run = async () => {
@@ -592,6 +831,9 @@ function TerminalPanel({ identity }: { identity: any }) {
     await addLine('  Verifying against encrypted vault...', '#888', 600);
 
     if (code === SECRET_CODE) {
+      // Set access cookie to allow navigating to /auth pages
+      document.cookie = 'underground_unlocked=1; path=/; max-age=86400';
+      
       await addLines([
         ['', undefined, 400],
         ['  ✓ HASH MATCH CONFIRMED', '#00cc66', 200],

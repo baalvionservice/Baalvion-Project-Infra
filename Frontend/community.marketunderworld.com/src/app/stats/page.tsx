@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Platform stats | Market Underworld' 
 interface Stats { clubs: number; cities: number; openListings: number; upcomingEvents: number }
 
 async function load(): Promise<Stats | null> {
-  const base = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? 'https://api.baalvion.com/api/v1/community';
+  const base = process.env.COMMUNITY_UPSTREAM_URL ?? '';
   try {
     const res = await fetch(`${base}/nightlife/stats`, { next: { revalidate: 300 } });
     if (!res.ok) return null;

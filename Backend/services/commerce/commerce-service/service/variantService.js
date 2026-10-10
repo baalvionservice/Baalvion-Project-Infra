@@ -51,6 +51,19 @@ async function upsertPricing(storeId, productId, variantId, body) {
         defaults: { ...body, productId, variantId: variantId || null, storeId },
     });
     if (!created) await pricing.update(body);
+
+    // The price a buyer sees and is charged lives on the variant (the storefront and order-service
+    // read variant.price; a product-level pricing row is never consulted). So an ordinary price (no
+    // schedule) is written there too, otherwise a listing priced from the seller screen shows 0.
+    const scheduled = !!(body.startsAt || body.endsAt);
+    if (!scheduled && body.isActive !== false && body.price !== undefined) {
+        const target = variantId
+            ? { id: variantId, productId }
+            : { productId, isDefault: true };
+        const patch = { price: body.price, currencyCode: body.currencyCode };
+        if (body.compareAtPrice !== undefined) patch.compareAtPrice = body.compareAtPrice;
+        await CommerceProductVariant.update(patch, { where: target });
+    }
     await cache.del(cache.keys.product(productId));
     return pricing.toJSON();
 }

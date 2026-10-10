@@ -58,6 +58,11 @@ const refundPayment = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+const payWithPoints = async (req, res, next) => {
+    try { return sendSuccess(req, res, await require('../service/pointsPayment').payOrder(req.params.storeId, req.params.orderId, actorOf(req)), 201); }
+    catch (err) { return next(err); }
+};
+
 const createPaymentIntent = async (req, res, next) => {
     try {
         const body = req.validated || req.body || {};
@@ -83,4 +88,4 @@ const paymentWebhook = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, listMyOrders, getOrder, lookupOrder, listPaymentGateways, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };
+module.exports = { listOrders, listMyOrders, getOrder, lookupOrder, listPaymentGateways, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook, payWithPoints };

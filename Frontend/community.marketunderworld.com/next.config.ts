@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const authTarget =
       process.env.AUTH_PROXY_TARGET ||
-      'https://api.baalvion.com/api/v1/identity/auth/v1';
+      '';
     // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
     // The gateway session client always calls `${gatewayUrl}/auth/<action>`, so the
     // target here must NOT itself end in `/auth` (verified against the live gateway:

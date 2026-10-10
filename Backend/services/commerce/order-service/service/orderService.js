@@ -1,6 +1,8 @@
 'use strict';
 const crypto = require('crypto');
 const { Op, QueryTypes } = require('sequelize');
+const { ensureBuyerCustomer } = require('./buyerCustomer');
+const buyerAccess = require('./buyerAccess');
 const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, OrdersShipment, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
@@ -416,7 +418,9 @@ async function reserveInventory(t, storeId, items) {
 }
 
 async function createOrder(storeId, body, actor) {
-    const { customerId, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+    await buyerAccess.assertCanBuy(storeId, actor);
+    let { customerId } = body;
+    const { discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
     // shippingAmount is NEVER taken from the client — same trust boundary as price/tax below
     // (a client could otherwise checkout with $0 shipping by simply omitting/zeroing the field).
 
@@ -455,6 +459,11 @@ async function createOrder(storeId, body, actor) {
         if (cust.userId == null && actor && actor.userId != null) {
             await OrdersCustomer.update({ userId: actor.userId }, { where: { id: customerId, storeId, userId: null } });
         }
+    } else if (actor && actor.userId != null) {
+        // The storefront checkout sends no customerId. Without a customer row the order has no
+        // buyer account: it never shows in "my orders", the buyer's reviews can't be marked
+        // verified, and sellers can't see or rate who bought. Give signed-in buyers one here.
+        customerId = await ensureBuyerCustomer(storeId, actor.userId, shippingAddress || billingAddress);
     }
 
     // ── Idempotency / replay safety (Phase 4) ───────────────────────────────────
@@ -656,6 +665,22 @@ async function cancelOrder(storeId, orderId, reason) {
 }
 
 // Manual/admin payment recording (e.g. bank transfer). Hardened with a duplicate-capture guard.
+// Everything that follows a real capture (mirror to the ledger via the durable outbox, commit the
+// inventory holds, send the payment email). Shared by admin-recorded payments and points payments.
+async function postCaptureEffects(storeId, order, payment, body) {
+    await ledgerOutbox.enqueuePaymentCapture({
+        storeId, paymentId: payment.id, orderId: order.id, orderNumber: order.orderNumber,
+        amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
+        provider: body.provider, transactionId: body.transactionId,
+    });
+    // Commit the cross-service inventory holds (reserved → deducted). Idempotent + fail-open.
+    await confirmLocks(storeId, locksFromOrder(order), order.id);
+    // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+    OrdersOrderItem.findAll({ where: { orderId: order.id } })
+        .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
+        .catch(() => {});
+}
+
 async function recordPayment(storeId, orderId, body) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
@@ -688,20 +713,7 @@ async function recordPayment(storeId, orderId, body) {
     // dead-lettered) instead of a swallowed best-effort call. This admin/finance path is not wrapped
     // in a DB transaction, so the enqueue is its own write; the reconciliation sweep is the backstop
     // for the small window between the order update and the enqueue.
-    if (body.status === 'captured') {
-        await ledgerOutbox.enqueuePaymentCapture({
-            storeId, paymentId: payment.id, orderId, orderNumber: order.orderNumber,
-            amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
-            provider: body.provider, transactionId: body.transactionId,
-        });
-        // Commit the cross-service inventory holds (reserved → deducted) on this manual capture.
-        // Idempotent + fail-open (an inventory hiccup never re-fails an already-recorded payment).
-        await confirmLocks(storeId, locksFromOrder(order), orderId);
-        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
-        OrdersOrderItem.findAll({ where: { orderId } })
-            .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
-            .catch(() => {});
-    }
+    if (body.status === 'captured') await postCaptureEffects(storeId, order, payment, body);
     return payment.toJSON();
 }
 
@@ -720,6 +732,8 @@ async function refundPayment(storeId, orderId, body = {}) {
 
     // The captured payment we are refunding against (most recent capture).
     const captured = await OrdersOrderPayment.findOne({ where: { orderId, status: 'captured' }, order: [['createdAt', 'DESC']] });
+    // Points payments are refunded back into the buyer's wallet, not through a payment gateway.
+    if (captured && captured.provider === 'points') return require('./pointsPayment').refundPointsPayment(order, captured, body);
     const captureMoney = Money.fromDatabaseValue(captured ? captured.amount : order.totalAmount, order.currencyCode);
     let refundMoney;
     try {
@@ -1112,3 +1126,4 @@ module.exports = { listOrders, listMyOrders, getOrder, lookupGuestOrder, createO
 // Appended export (separate statement to avoid colliding with concurrent edits to the line above).
 module.exports.capturePaymentFromWebhook = capturePaymentFromWebhook;
 module.exports.settlePayuReturn = settlePayuReturn;
+module.exports.postCaptureEffects = postCaptureEffects;

@@ -9,7 +9,6 @@ import {
   Check,
   ArrowRight,
   ArrowLeft,
-  Camera,
   Plus,
   Sparkles,
   Info,
@@ -22,9 +21,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { submitSellerApplication, listMySellerApplications, type SellerApplication } from '@/lib/api/commerce-admin'
+import { useAuth } from '@/context/auth-context'
 
 const STEPS = [
-  "Welcome", "Store", "Appearance", "Product", "Identity", "Crypto", "Policies", "Launch"
+  "Welcome", "Store", "Appearance", "Products", "Identity", "Crypto", "Policies", "Launch"
 ]
 
 // countryCode/currencyCode must be real ISO codes — commerce-service's createStoreSchema
@@ -54,12 +54,19 @@ export default function SellerOnboarding() {
   const { toast } = useToast()
   const router = useRouter()
 
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
   useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin?redirect=' + encodeURIComponent('/seller/onboarding'))
+      return
+    }
+    if (!isAuthenticated) return
     listMySellerApplications()
       .then((apps) => setExistingApplication(apps.find((a) => a.status === 'pending') ?? null))
       .catch(() => setExistingApplication(null))
       .finally(() => setCheckingExisting(false))
-  }, [])
+  }, [isAuthenticated, authLoading, router])
 
   const [formData, setAnswers] = useState({
     storeName: '',
@@ -71,9 +78,6 @@ export default function SellerOnboarding() {
     banner: null,
     color: '#00E676',
     description: '',
-    productName: '',
-    price: '',
-    stock: '',
     legalFullName: '',
     dateOfBirth: '',
     phoneNumber: '',
@@ -84,6 +88,11 @@ export default function SellerOnboarding() {
 
   const nextStep = () => setStep(s => Math.min(s + 1, 7))
   const prevStep = () => setStep(s => Math.max(s - 1, 0))
+
+  const saveAndExit = () => {
+    try { sessionStorage.setItem('sellerOnboardingDraft', JSON.stringify({ step, formData })) } catch { /* ignore */ }
+    router.push('/dashboard')
+  }
 
   const handleLaunch = async () => {
     setLaunching(true)
@@ -110,6 +119,14 @@ export default function SellerOnboarding() {
     } finally {
       setLaunching(false)
     }
+  }
+
+  if (authLoading || (!isAuthenticated)) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <Clock className="w-6 h-6 text-emerald-500 animate-spin" />
+      </div>
+    )
   }
 
   if (checkingExisting) {
@@ -167,7 +184,7 @@ export default function SellerOnboarding() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="text-xs font-bold text-gray-500 hover:text-white transition-colors">Save & Exit</button>
+            <button className="text-xs font-bold text-gray-500 hover:text-white transition-colors" onClick={saveAndExit}>Save & Exit</button>
           </div>
         </header>
       )}
@@ -243,12 +260,12 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
         
         <div className="grid grid-cols-2 gap-6">
           <NexusCard className="p-6 bg-white/5 border-white/5 space-y-2">
-            <div className="text-[10px] font-bold text-gray-500 uppercase">Avg Earnings</div>
-            <div className="text-2xl font-bold">0.84 ETH<span className="text-xs text-gray-500 ml-1">/mo</span></div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase">Platform Fee</div>
+            <div className="text-2xl font-bold">5%<span className="text-xs text-gray-500 ml-1">per sale</span></div>
           </NexusCard>
           <NexusCard className="p-6 bg-white/5 border-white/5 space-y-2">
-            <div className="text-[10px] font-bold text-gray-500 uppercase">Platform Fee</div>
-            <div className="text-2xl font-bold">20%<span className="text-xs text-gray-500 ml-1">Flat</span></div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase">Category Access</div>
+            <div className="text-2xl font-bold">$2,000<span className="text-xs text-gray-500 ml-1">one-time</span></div>
           </NexusCard>
         </div>
 
@@ -392,18 +409,6 @@ function StoreAppearance({ data, setAnswers, onNext, onPrev }: any) {
 
         <div className="space-y-8">
           <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Store Logo</label>
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-[2rem] bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center cursor-pointer hover:border-[#00E676]/50 transition-colors">
-                <Camera className="w-8 h-8 text-gray-600" />
-              </div>
-              <div className="text-xs text-gray-500 font-medium">
-                Upload a square logo. <br />PNG, JPG up to 2MB.
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Brand Color</label>
             <div className="flex gap-3">
               {['#00E676', '#6C63FF', '#00D4FF', '#FF9500', '#FF6584', '#FFD600'].map(c => (
@@ -467,68 +472,40 @@ function StoreAppearance({ data, setAnswers, onNext, onPrev }: any) {
   )
 }
 
-function FirstProduct({ data, setAnswers, onNext, onPrev }: any) {
+function FirstProduct({ onNext, onPrev }: any) {
+  // Nothing is collected here on purpose. Products need an approved seller account and an unlocked
+  // category, and photos are uploaded on the listing itself, so this step explains the path instead
+  // of asking for details that would be thrown away.
+  const steps = [
+    { n: 1, title: 'Your application is reviewed', body: 'An admin checks your details. You will be notified when it is approved.' },
+    { n: 2, title: 'Unlock a category', body: 'A one-time $2,000 payment in USDT, Bitcoin or Binance Pay unlocks one product category. It is not refundable.' },
+    { n: 3, title: 'Add your first listing', body: 'In Listings you enter the name, price, stock and upload product photos.' },
+    { n: 4, title: 'Listing review, then live', body: 'An admin approves the listing before buyers can see it.' },
+  ]
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="max-w-2xl mx-auto space-y-12"
     >
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-bold">📦 Add First Product</h2>
-          <p className="text-gray-500">Let's get your shop started with one item</p>
-        </div>
-        <button onClick={onNext} className="text-xs font-bold text-gray-500 hover:text-white mt-4">Skip for now →</button>
+      <div className="space-y-2">
+        <h2 className="text-4xl font-bold">📦 Adding products</h2>
+        <p className="text-gray-500">You will add products and photos after your application is approved. Here is how it works.</p>
       </div>
 
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Product Name</label>
-          <Input 
-            value={data.productName}
-            onChange={(e) => setAnswers({ ...data, productName: e.target.value })}
-            placeholder="e.g. iPhone 16 Pro 256GB"
-            className="h-14 bg-black/40 border-white/10" 
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Price (USDT)</label>
-            <Input 
-              value={data.price}
-              onChange={(e) => setAnswers({ ...data, price: e.target.value })}
-              placeholder="1200"
-              className="h-14 bg-black/40 border-white/10 font-bold" 
-            />
-            {data.price && <div className="text-[9px] text-gray-500 font-bold uppercase">≈ {(Number(data.price) / 2900).toFixed(4)} ETH</div>}
-          </div>
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock</label>
-            <Input 
-              value={data.stock}
-              onChange={(e) => setAnswers({ ...data, stock: e.target.value })}
-              placeholder="10"
-              className="h-14 bg-black/40 border-white/10 font-bold" 
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Product Images</label>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="aspect-square rounded-2xl bg-white/5 border-2 border-dashed border-[#00E676]/30 flex items-center justify-center cursor-pointer">
-              <Plus className="w-6 h-6 text-gray-600" />
+      <ol className="space-y-4">
+        {steps.map((st) => (
+          <li key={st.n} className="flex gap-4 p-5 rounded-2xl bg-white/5 border border-white/5">
+            <span className="w-8 h-8 rounded-full bg-[#00E676]/15 text-[#00E676] flex items-center justify-center font-bold text-sm shrink-0">{st.n}</span>
+            <div>
+              <div className="font-bold text-white">{st.title}</div>
+              <p className="text-sm text-gray-500">{st.body}</p>
             </div>
-            {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-square rounded-2xl bg-white/5 border border-white/5" />
-            ))}
-          </div>
-        </div>
-      </div>
+          </li>
+        ))}
+      </ol>
 
-      <div className="pt-8 flex gap-4">
+      <div className="pt-4 flex gap-4">
         <NexusButton variant="outline" className="flex-1 h-14 border-white/10" onClick={onPrev}>Back</NexusButton>
         <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext}>Continue</NexusButton>
       </div>
@@ -669,6 +646,7 @@ function CryptoSetup({ data, setAnswers, onNext, onPrev }: any) {
 }
 
 function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
+  const [agreed, setAgreed] = useState(false);
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -697,12 +675,12 @@ function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
           <label className="text-sm font-bold">Seller Agreement</label>
           <div className="max-h-40 overflow-y-auto p-6 bg-black/40 border border-white/10 rounded-2xl text-[10px] text-gray-500 leading-relaxed space-y-4 no-scrollbar">
             <p>1. PROVISION OF SERVICES. NEXUS provides a platform for sellers to list and sell products to global buyers.</p>
-            <p>2. PLATFORM FEES. A standard fee of 20% is deducted from each successful transaction.</p>
+            <p>2. PLATFORM FEES. A standard fee of 5% is deducted from each successful transaction.</p>
             <p>3. CRYPTO SETTLEMENT. Payments are held in escrow until order completion is verified.</p>
             <p>4. COMPLIANCE. Sellers must comply with all local and global trade regulations.</p>
           </div>
           <div className="flex items-start gap-3 p-2">
-            <input type="checkbox" className="mt-1 accent-[#00E676]" id="agree" />
+            <input type="checkbox" className="mt-1 accent-[#00E676]" id="agree" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
             <label htmlFor="agree" className="text-xs text-gray-400">I have read and agree to the NEXUS Seller Terms of Service</label>
           </div>
         </div>
@@ -710,7 +688,7 @@ function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
 
       <div className="pt-8 flex gap-4">
         <NexusButton variant="outline" className="flex-1 h-14 border-white/10" onClick={onPrev}>Back</NexusButton>
-        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext}>Continue</NexusButton>
+        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext} disabled={!agreed}>Continue</NexusButton>
       </div>
     </motion.div>
   )
@@ -737,7 +715,6 @@ function LaunchReview({ data, onLaunch, launching, launchError, onPrev }: any) {
               { label: 'Marketplace Category', val: data.category[0], status: 'complete' },
               { label: 'Identity Verified', val: 'Basic Level', status: 'complete' },
               { label: 'Payout Method', val: `${data.payoutCoin} (${data.payoutSchedule})`, status: 'complete' },
-              { label: 'Initial Product', val: data.productName || 'None listed', status: data.productName ? 'complete' : 'optional' },
               { label: 'Logo & Branding', val: 'Default theme', status: 'optional' },
             ].map((item, i) => (
               <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
