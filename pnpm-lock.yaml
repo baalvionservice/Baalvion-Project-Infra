@@ -22,7 +22,7 @@ overrides:
   '@types/react-dom': 19.3.0
   cross-spawn: 7.0.5
   next: 15.5.24
-  handlebars: 4.7.9
+  handlebars: 4.7.10
   protobufjs: 7.6.5
   '@protobufjs/utf8': 1.1.1
   fast-uri: 3.1.6
@@ -2716,8 +2716,8 @@ importers:
         specifier: ^7.5.0
         version: 7.5.1(express@5.2.1)
       handlebars:
-        specifier: 4.7.9
-        version: 4.7.9
+        specifier: 4.7.10
+        version: 4.7.10
       helmet:
         specifier: ^8.1.0
         version: 8.2.0
@@ -15836,8 +15836,8 @@ packages:
     resolution: {integrity: sha512-ax7ZYomf6jqPTQ4+XCpUGyXKHk5WweS+e05MBO4/y3WJ5RkmPXNKvX+bx1behVILVwr6JSQvZAku021CHPXG3Q==}
     engines: {node: '>=10'}
 
-  handlebars@4.7.9:
-    resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
     engines: {node: '>=0.4.7'}
     hasBin: true
 
@@ -22497,7 +22497,7 @@ snapshots:
       '@types/node': 24.13.4
       colorette: 2.0.20
       dotprompt: 1.1.2
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       json5: 2.2.3
       node-fetch: 3.3.2
       partial-json: 0.1.7
@@ -22520,7 +22520,7 @@ snapshots:
       '@types/node': 24.13.4
       colorette: 2.0.20
       dotprompt: 1.1.2
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       json5: 2.2.3
       node-fetch: 3.3.2
       partial-json: 0.1.7
@@ -29821,7 +29821,7 @@ snapshots:
 
   dotprompt@1.1.2:
     dependencies:
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       yaml: 2.8.3
 
   dottie@2.0.7: {}
@@ -31394,7 +31394,7 @@ snapshots:
     dependencies:
       duplexer: 0.1.2
 
-  handlebars@4.7.9:
+  handlebars@4.7.10:
     dependencies:
       minimist: 1.2.8
       neo-async: 2.6.2
@@ -36120,7 +36120,7 @@ snapshots:
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       jest: 30.5.1(@types/node@24.13.4)(ts-node@10.9.2(@swc/core@1.15.43)(@types/node@24.13.4)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
