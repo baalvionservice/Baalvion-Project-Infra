@@ -426,7 +426,7 @@ export default function DatingPage() {
   useEffect(() => {
     const saved = localStorage.getItem('dating_liked_founders');
     if (saved) {
-      try { setLikedIds(JSON.parse(saved)); } catch (e) {}
+      try { setLikedIds(JSON.parse(saved)); } catch { /* ignore corrupt saved list */ }
     }
   }, []);
 
