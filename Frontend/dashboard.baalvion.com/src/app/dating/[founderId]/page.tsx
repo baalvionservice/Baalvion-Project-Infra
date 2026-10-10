@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { FOUNDERS } from '../page';
+import { FOUNDERS } from '../founders-data';
 
 // ─── Extended Founder Data ─────────────────────────────────────────────────────
 const FOUNDER_PROFILES: Record<string, FounderProfile> = {
@@ -473,6 +473,7 @@ function SectionBlock({ icon: Icon, title, children, defaultOpen = true }: {
 
 // ─── Main Profile Page ─────────────────────────────────────────────────────────
 export default function FounderProfilePage() {
+  const { toast } = useToast();
   const params = useParams();
   const founderId = params?.founderId as string;
   let founder = FOUNDER_PROFILES[founderId];
@@ -483,9 +484,13 @@ export default function FounderProfilePage() {
       founder = {
         ...basicInfo,
         hometown: basicInfo.city,
+        age: 0,
+        height: '',
+        headline: `${basicInfo.title}, ${basicInfo.company}`,
+        shortBio: basicInfo.bio,
+        fullStory: `I am the ${basicInfo.title} of ${basicInfo.company}, focusing on ${basicInfo.sector} in ${basicInfo.city}. ${basicInfo.bio}`,
         kycVerified: basicInfo.verified,
         gallery: ['✨', '🏢', '🤝', '📈'],
-        story: `I am the ${basicInfo.title} of ${basicInfo.company}, focusing on ${basicInfo.sector} in ${basicInfo.city}. ${basicInfo.bio}`,
         dreams: `My vision is to scale ${basicInfo.company} to new heights and build something truly impactful in the ${basicInfo.sector} space.`,
         thoughts: `Building a company in ${basicInfo.city} has been an incredible journey. I'm always looking to connect with like-minded people.`,
         dailyLife: `A mix of deep work, team meetings, and strategic planning. Always making time for learning and networking.`,
@@ -502,13 +507,13 @@ export default function FounderProfilePage() {
           offices: [basicInfo.city],
         },
         kyc: {
-          panVerified: true,
-          aadharVerified: true,
-          gstVerified: true,
-          incorporationVerified: true,
-          linkedinVerified: true,
-          verifiedAt: '2026-10-10',
-          verifiedBy: 'Baalvion Trust & Safety',
+          panVerified: false,
+          aadharVerified: false,
+          gstVerified: false,
+          incorporationVerified: false,
+          linkedinVerified: false,
+          verifiedAt: '',
+          verifiedBy: '',
         },
         interests: basicInfo.tags,
         hobbies: ['Reading', 'Networking', 'Travel'],
@@ -518,8 +523,8 @@ export default function FounderProfilePage() {
           instagram: `@${basicInfo.name.toLowerCase().replace(' ', '')}`,
         },
         testimonials: [
-          { name: 'Aakash V.', role: 'Founder', rating: 5, comment: 'Incredible session. Got exactly the insights I needed.', date: '2 weeks ago' },
-          { name: 'Sneha M.', role: 'Investor', rating: 5, comment: 'Very professional and highly knowledgeable.', date: '1 month ago' },
+          { id: 't1', clientName: 'Aakash V.', city: basicInfo.city, rating: 5, text: 'Incredible session. Got exactly the insights I needed.', date: '2 weeks ago' },
+          { id: 't2', clientName: 'Sneha M.', city: basicInfo.city, rating: 5, text: 'Very professional and highly knowledgeable.', date: '1 month ago' },
         ],
       };
     }
@@ -625,8 +630,8 @@ export default function FounderProfilePage() {
           {/* Personal Stats */}
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-4">
             <span>📍 From {founder.hometown}</span>
-            <span>🎂 {founder.age} years old</span>
-            <span>📏 {founder.height}</span>
+            {founder.age > 0 && <span>🎂 {founder.age} years old</span>}
+            {founder.height && <span>📏 {founder.height}</span>}
             <span className={`flex items-center gap-1 font-medium ${availabilityColor}`}>
               <span className={`h-2 w-2 rounded-full ${availabilityDot} animate-pulse`} />
               {founder.availability}
