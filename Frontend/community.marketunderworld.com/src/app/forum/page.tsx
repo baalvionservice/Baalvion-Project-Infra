@@ -1,6 +1,6 @@
-import Link from "next/link";
 import Image from "next/image";
-import { getCommunities } from "@/lib/api/community";
+import Link from "next/link";
+import { getCommunities, getCommunity, type CommunityDetail } from "@/lib/api/community";
 import { CommunityCard } from "@/components/forums/community-card";
 import { XenCategoryTable } from "@/components/forums/xen-category-table";
 import { LiveActivityFeed } from "@/components/forums/live-activity-feed";
@@ -8,7 +8,12 @@ import { FORUM_CATEGORIES } from "@/lib/forum-data";
 
 export default async function ForumHubPage() {
   const allCommunities = await getCommunities();
-  const communities = allCommunities.filter((c) => c.isForum);
+  const forumCommunities = allCommunities.filter((c) => c.isForum);
+
+  // Enrich each community with the current user's membership status (returns null on 401/error)
+  const enriched: CommunityDetail[] = await Promise.all(
+    forumCommunities.map((c) => getCommunity(c.slug).then((d) => d ?? { ...c, membership: null }))
+  );
 
   return (
     <div className="baal-page">
@@ -39,7 +44,7 @@ export default async function ForumHubPage() {
         <div className="baal-hero-content">
           <div className="baal-eyebrow">
             <span className="baal-eyebrow-icon">⚡</span>
-            MarketUnderworld Communities
+            Hell Road Communities
           </div>
           <h1 className="baal-title">
             <span className="baal-title-glow">BAAL</span>
@@ -158,11 +163,11 @@ export default async function ForumHubPage() {
             </div>
           </div>
 
-          {communities.length > 0 && (
+          {enriched.length > 0 && (
             <div className="mt-12">
               <h3 className="text-xl font-bold text-gray-300 mb-6">Additional Communities</h3>
               <div className="baal-grid">
-                {communities.map((community) => (
+                {enriched.map((community) => (
                   <CommunityCard key={community.slug} community={community} />
                 ))}
               </div>
@@ -184,7 +189,7 @@ export default async function ForumHubPage() {
       {/* ── CINEMATIC DIVIDER ── */}
       <div className="baal-cinematic-divider">
         <div className="baal-cinematic-line" />
-        <span className="baal-cinematic-glyph">⚡ BAALVION ⚡</span>
+        <span className="baal-cinematic-glyph">⚡ HELL ROAD ⚡</span>
         <div className="baal-cinematic-line" />
       </div>
 

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Star, ShoppingCart, Heart } from "lucide-react"
+import posthog from "posthog-js"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useCart } from "@/context/cart-context"
 import { useToast } from "@/hooks/use-toast"
@@ -23,13 +24,26 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
   const { isAuthenticated } = useAuth();
   const [wishlisted, setWishlisted] = useState(false);
   const [wishlistBusy, setWishlistBusy] = useState(false);
+  const trackedRef = useRef(false);
 
   useEffect(() => {
+    if (!trackedRef.current) {
+      trackedRef.current = true;
+      try {
+        posthog.capture("product_viewed", {
+          product_id: product.id,
+          name: product.name,
+          price: product.price,
+          category: categorySlug
+        });
+      } catch (e) {}
+    }
+    
     if (!isAuthenticated) return;
     getMyWishlist(MARKET_UNDERWORLD_STORE_ID)
       .then((w) => setWishlisted(w.items.some((i) => i.productId === product.id)))
       .catch(() => {});
-  }, [isAuthenticated, product.id]);
+  }, [isAuthenticated, product.id, product.name, product.price, categorySlug]);
 
   const handleAddToCart = async () => {
     try {

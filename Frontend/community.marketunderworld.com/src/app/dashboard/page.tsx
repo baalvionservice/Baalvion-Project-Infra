@@ -14,16 +14,25 @@ import {
   ArrowRight,
   CreditCard,
   Clock,
+  BarChart2,
+  Wallet,
+  FolderTree,
+  KeyRound,
+  Users,
+  Store,
 } from "lucide-react"
 import { NexusCard, NexusBadge } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useAuth } from "@/context/auth-context"
-import { listMyOrders, getMyWishlist, type Order } from "@/lib/api/orders"
+import { listMyOrders, getMyWishlist, listMySales, type Order, type SellerSale } from "@/lib/api/orders"
+import { getMyMember, type MyMember } from "@/lib/api/members"
+import { getBuyerAccess, type BuyerAccessStatus } from "@/lib/api/buyer-access"
+import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
+import { MemberIdCard } from "@/components/dashboard/member-id-card"
+import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
 import { getMyOrders as getMyGiftCardOrders, type GiftCardOrder } from "@/lib/api/giftcards"
 import { getMyWallet, usdAvailable, type Wallet as WalletAccount } from "@/lib/api/wallet"
-import { WalletBalanceCard } from "@/components/wallet/wallet-balance-card"
-import { DepositModal } from "@/components/wallet/deposit-modal"
 import { DashboardGiftCardGrid } from "@/components/marketplace/dashboard-giftcard-grid"
 
 const STATUS_VARIANT: Record<Order["paymentStatus"], "success" | "warning" | "default"> = {
@@ -46,6 +55,15 @@ const QUICK_LINKS = [
   { label: "Settings", description: "Notifications & language", href: "/settings/notifications", icon: Settings },
 ]
 
+const SELLER_LINKS = [
+  { label: "Listings",   description: "Manage your live & draft products",  href: "/seller/listings",   icon: Package,    tone: "text-cyan-400"    },
+  { label: "Orders",     description: "Incoming orders & buyer details",     href: "/seller/sales",     icon: Users,      tone: "text-purple-400"  },
+  { label: "Analytics",  description: "Revenue, AOV & conversion metrics",   href: "/seller/analytics", icon: BarChart2,   tone: "text-emerald-400" },
+  { label: "Payouts",    description: "Earnings history & withdrawals",       href: "/seller/payouts",   icon: Wallet,     tone: "text-amber-400"   },
+  { label: "Categories", description: "Manage your unlocked categories",      href: "/seller/categories",icon: FolderTree,  tone: "text-pink-400"    },
+  { label: "Access",     description: "Tokens, payments & store status",      href: "/seller/access",    icon: KeyRound,   tone: "text-gray-400"    },
+]
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
@@ -53,10 +71,12 @@ export default function DashboardPage() {
   const [wishlistCount, setWishlistCount] = useState(0)
   const [giftCardOrders, setGiftCardOrders] = useState<GiftCardOrder[]>([])
   const [wallet, setWallet] = useState<WalletAccount | null>(null)
-  const [depositModalOpen, setDepositModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-
-  const refreshWallet = () => { getMyWallet().then(setWallet) }
+  const [member, setMember] = useState<MyMember | null>(null)
+  const [access, setAccess] = useState<BuyerAccessStatus | null>(null)
+  const [points, setPoints] = useState<PointsWallet | null>(null)
+  const [sales, setSales] = useState<SellerSale[]>([])
+  const [tab, setTab] = useState<"selling" | "buying">("buying")
 
   useEffect(() => {
     if (authLoading) return
@@ -69,11 +89,21 @@ export default function DashboardPage() {
       getMyWishlist(MARKET_UNDERWORLD_STORE_ID).catch(() => ({ items: [] as { id: string }[] })),
       getMyGiftCardOrders().catch(() => []),
       getMyWallet(),
-    ]).then(([o, w, g, wal]) => {
+      getMyMember().catch(() => null),
+      getBuyerAccess().catch(() => null),
+      getPointsWallet().catch(() => null),
+    ]).then(async ([o, w, g, wal, m, acc, pts]) => {
+      setAccess(acc)
+      setPoints(pts)
       setOrders(o)
       setWishlistCount(w.items.length)
       setGiftCardOrders(g)
       setWallet(wal)
+      setMember(m)
+      if (m?.seller) {
+        setTab("selling")
+        if (m.isSeller) setSales(await listMySales(MARKET_UNDERWORLD_STORE_ID).catch(() => []))
+      }
       setLoading(false)
     })
   }, [authLoading, isAuthenticated, router])
@@ -95,6 +125,9 @@ export default function DashboardPage() {
     [orders]
   )
 
+  // Their chosen/derived name when they have one; otherwise their sign-in name (private page, so fine).
+  const greetingName = member && !member.displayName.startsWith("Member HR-") ? member.displayName : user?.email ? user.email.split("@")[0] : ""
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#050508] text-white pt-24 pb-32 flex items-center justify-center gap-3 text-gray-500">
@@ -108,13 +141,56 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-6 space-y-12">
         <header>
           <p className="text-cyan-400 font-bold text-[12px] uppercase tracking-[0.2em] mb-3">Dashboard</p>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
-          <p className="text-gray-500 font-medium text-lg">Your orders, wishlist, and gift cards in one place.</p>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Welcome back{greetingName ? `, ${greetingName}` : ""}</h1>
+          <p className="text-gray-500 font-medium text-lg">{member?.seller ? "Your store, your orders and your purchases in one place." : "Your orders, wishlist, and gift cards in one place."}</p>
         </header>
 
-        <div className="max-w-sm">
-          <WalletBalanceCard balance={usdAvailable(wallet)} onDeposit={() => setDepositModalOpen(true)} />
-        </div>
+        {member && <MemberIdCard member={member} onChange={setMember} />}
+
+        {member?.seller ? (
+          <div className="inline-flex p-1 rounded-xl bg-white/5 border border-white/5" role="tablist">
+            {(["selling", "buying"] as const).map((t) => (
+              <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+                className={`px-6 h-9 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${tab === t ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}>
+                {t === "selling" ? "Selling" : "Buying"}
+              </button>
+            ))}
+          </div>
+        ) : member ? (
+          <NexusCard className="p-6 bg-white/[0.02] border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-white mb-1">Want to sell on Hell Road?</h2>
+              <p className="text-sm text-gray-500 max-w-2xl">Apply as a seller, unlock a product category with a one-time $2,000 payment in USDT, Bitcoin or Binance Pay, list your physical products and get paid by buyers. You'll get a roadmap here that tracks each step.</p>
+            </div>
+            <Link href="/seller/onboarding" className="shrink-0"><NexusButton>Start selling <ArrowRight className="w-4 h-4 ml-2 inline" /></NexusButton></Link>
+          </NexusCard>
+        ) : null}
+
+        {member?.seller && tab === "selling" && <SellerOverviewPanel seller={member.seller} sales={sales} />}
+
+        {(!member?.seller || tab === "buying") && (<>
+        {access && !access.hasAccess && (
+          <NexusCard className="p-6 bg-amber-500/5 border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-white mb-1">{access.payment?.status === "payment_submitted" ? "Your access pass is being confirmed" : "Get your marketplace access pass"}</h2>
+              <p className="text-sm text-gray-400">{access.payment?.status === "payment_submitted" ? "An admin is checking your payment. Access starts as soon as it is confirmed." : `A one-time $${access.priceUsd} pass lets you browse every category and buy anything listed by our sellers.`}</p>
+            </div>
+            <Link href="/buyer-pass" className="shrink-0"><NexusButton>{access.payment?.status === "payment_submitted" ? "View status" : `Pay $${access.priceUsd}`}</NexusButton></Link>
+          </NexusCard>
+        )}
+        {access?.hasAccess && access.reason === "paid" && (
+          <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest">Marketplace access pass: active</p>
+        )}
+        <Link href="/wallet" className="block max-w-sm">
+          <NexusCard className="p-6 bg-white/[0.02] border-white/5 hover:border-amber-400/30 transition-colors space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Wallet points</span>
+              <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest">+ Load wallet</span>
+            </div>
+            <div className="text-3xl font-bold">{points ? points.points.toLocaleString() : "—"} <span className="text-sm text-gray-500 font-medium">pts</span></div>
+            {points && <div className="text-xs text-gray-500">≈ ${points.usdValue.toFixed(2)} · {points.pointsPerUsd} points = $1{points.openTopup ? " · a load is waiting" : ""}</div>}
+          </NexusCard>
+        </Link>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
@@ -135,6 +211,40 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* ── Seller Hub — only visible to approved sellers ────────────── */}
+        {member?.isSeller && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <Store className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Seller Hub</h2>
+                  <p className="text-xs text-gray-600">Manage your store</p>
+                </div>
+              </div>
+              <Link href="/seller/listings" className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest hover:text-cyan-300">
+                Open Store →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {SELLER_LINKS.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <NexusCard className="p-4 bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all group h-full">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center mb-3">
+                      <link.icon className={`w-4 h-4 ${link.tone}`} />
+                    </div>
+                    <div className="text-xs font-bold text-white mb-1">{link.label}</div>
+                    <p className="text-[11px] text-gray-600 leading-snug">{link.description}</p>
+                  </NexusCard>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Buyer Quick Links ─────────────────────────────────────────── */}
         <section className="space-y-6">
           <h2 className="text-xl font-bold text-white">Quick Links</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -232,9 +342,9 @@ export default function DashboardPage() {
             </div>
           </section>
         )}
+        </>)}
       </div>
 
-      <DepositModal open={depositModalOpen} onOpenChange={setDepositModalOpen} onCredited={refreshWallet} />
     </div>
   )
 }

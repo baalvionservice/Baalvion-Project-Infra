@@ -4,7 +4,7 @@ import { createProxy, proxyMethod } from '@/lib/api/proxy-handler';
 // /orders (routes/v1.js: router.use('/wishlists/stores/:storeId', ...)), not nested under it, so
 // this needs its own base rather than reusing order-proxy's ORDER_API_BASE (which already bakes
 // in the /orders segment).
-const WISHLIST_API_BASE = process.env.NEXT_PUBLIC_WISHLIST_API_BASE ?? 'https://api.baalvion.com/api/v1/wishlists';
+const WISHLIST_API_BASE = process.env.WISHLIST_UPSTREAM_URL ?? '';
 const proxy = createProxy(WISHLIST_API_BASE);
 
 export const GET = proxyMethod(proxy);

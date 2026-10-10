@@ -28,6 +28,8 @@ db.CommerceCollectionProduct = require('./commerceCollectionProduct')(sequelize,
 db.CommerceDiscount       = require('./commerceDiscount')(sequelize, DataTypes);
 db.CommerceReview         = require('./commerceReview')(sequelize, DataTypes);
 db.CommerceSellerApplication = require('./commerceSellerApplication')(sequelize, DataTypes);
+db.CommerceSellerCategoryBond = require('./commerceSellerCategoryBond')(sequelize, DataTypes);
+db.CommerceMemberProfile = require('./commerceMemberProfile')(sequelize, DataTypes);
 
 // Associations
 db.CommerceStore.hasMany(db.CommerceCategory,     { foreignKey: 'storeId', as: 'categories' });

@@ -2,6 +2,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ListingCard } from '@/components/ui/ListingCard';
 import { GlobalActivityIntelligence } from '@/components/admin/GlobalActivityIntelligence';
 import { GlobalRegionIntelligence } from '@/components/admin/GlobalRegionIntelligence';
@@ -69,28 +70,37 @@ export default function SuperAdminDashboard() {
       </header>
 
       {activeTab === 'intelligence' && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ListingCard className="p-10 border-brand-green/20 bg-brand-green/5 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <ListingCard className="p-8 border-brand-green/20 bg-brand-green/5 space-y-4">
             <div className="text-[10px] font-bold text-brand-green uppercase tracking-[0.3em]">Total Users</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.userCount.count).toLocaleString()}</div>
+            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.userCount.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-brand-green">
               <Activity className="w-4 h-4" /> ACROSS {Number(stats.orgCount.count).toLocaleString()} ORGS
             </div>
           </ListingCard>
-          <ListingCard className="p-10 border-white/5 bg-white/[0.02] space-y-6">
+          <ListingCard className="p-8 border-white/5 bg-white/[0.02] space-y-4">
             <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Active Sessions</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.sessionCount.count).toLocaleString()}</div>
+            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.sessionCount.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
               <Activity className="w-4 h-4" /> LIVE RIGHT NOW
             </div>
           </ListingCard>
-          <ListingCard className="p-10 border-white/5 bg-white/[0.02] space-y-6">
+          <ListingCard className="p-8 border-white/5 bg-white/[0.02] space-y-4">
             <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Logins (24h)</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.recentLogins.count).toLocaleString()}</div>
+            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.recentLogins.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
               <ShieldCheck className="w-4 h-4" /> {Number(stats.failedLogins.count).toLocaleString()} FAILED
             </div>
           </ListingCard>
+          <Link href="/escrow/admin-dashboard">
+            <ListingCard className="p-8 border-red-500/30 bg-red-950/20 space-y-4 hover:border-red-500 transition-colors cursor-pointer h-full">
+              <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.3em]">Escrow Cold Vault</div>
+              <div className="text-4xl font-bold text-emerald-400 font-mono leading-none">$34,000 USDT</div>
+              <div className="flex items-center gap-2 text-xs font-bold text-red-400">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" /> 34 AGENTS • 2 DISPUTES
+              </div>
+            </ListingCard>
+          </Link>
         </div>
       )}
 

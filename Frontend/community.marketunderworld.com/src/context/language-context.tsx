@@ -72,8 +72,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr');
 
   useEffect(() => {
-    setDir(language === 'ar' ? 'rtl' : 'ltr');
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    if (typeof window === 'undefined') return;
+    const dir = language === 'ar' ? 'rtl' : 'ltr';
+    setDir(dir);
+    document.documentElement.dir = dir;
     document.documentElement.lang = language;
   }, [language]);
 

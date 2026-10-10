@@ -10,6 +10,8 @@ const { validate } = require('../middleware/validate');
 const { loadStoreRole, requireStoreRole } = require('../middleware/commerceAccess');
 const { createReviewSchema, moderateReviewSchema } = require('../validators/reviewSchemas');
 
+const { ownProductOnMarketplace, sellerCannotModerate } = require('../middleware/marketplaceGuard');
+
 const router = Router({ mergeParams: true });
 
 // Customer self-service (any authenticated user; no store role required).
@@ -17,7 +19,7 @@ router.post('/', validate(createReviewSchema), ctrl.createReview);
 router.get('/mine', ctrl.getMyReview);
 
 // Store-team moderation.
-router.get('/', loadStoreRole, requireStoreRole('store_viewer'), ctrl.listAllReviews);
-router.patch('/:reviewId', loadStoreRole, requireStoreRole('content_editor'), validate(moderateReviewSchema), ctrl.moderateReview);
+router.get('/', loadStoreRole, ownProductOnMarketplace, requireStoreRole('store_viewer'), ctrl.listAllReviews);
+router.patch('/:reviewId', loadStoreRole, ownProductOnMarketplace, sellerCannotModerate, requireStoreRole('content_editor'), validate(moderateReviewSchema), ctrl.moderateReview);
 
 module.exports = router;

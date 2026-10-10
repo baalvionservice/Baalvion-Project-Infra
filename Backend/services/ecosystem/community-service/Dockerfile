@@ -1,13 +1,13 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/community-service/Dockerfile -t community-service .
-FROM node:26.9-alpine AS base
+FROM node:26-alpine AS base
 RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.10.4 prune community-service --docker
+RUN pnpm dlx turbo@2.9.14 prune community-service --docker
 
 # The @baalvion/* packages this service depends on are TypeScript and compile to dist/, which
 # is .gitignored and therefore never in the build context. turbo prune's filtered install cannot
@@ -35,7 +35,7 @@ COPY --from=pruner /repo/out/full/ ./
 COPY --from=pkgbuild /dists/Backend/packages ./Backend/packages
 RUN pnpm deploy --filter=community-service --prod /out
 
-FROM node:26.9-alpine AS final
+FROM node:26-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \

@@ -10,7 +10,7 @@
 import { io, Socket } from 'socket.io-client';
 
 const WS_URL =
-  process.env.NEXT_PUBLIC_REALTIME_WS_URL || 'wss://api.baalvion.com/api/v1/infrastructure/realtime';
+  process.env.NEXT_PUBLIC_REALTIME_WS_URL ?? '';
 
 export interface ChatMessage {
   id: string;
