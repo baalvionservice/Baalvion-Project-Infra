@@ -6,11 +6,15 @@
 // instead of blanking it; writes never fall back — a failed submit must say so.
 
 import { INDIAN_CLUBS, type Club, type VipPackage } from "@/data/clubs-data";
+import { MUMBAI_CLUBS } from "@/data/mumbai-clubs";
+
+// All static clubs combined — used as fallback when backend is unreachable
+const ALL_STATIC_CLUBS: Club[] = [...INDIAN_CLUBS, ...MUMBAI_CLUBS];
 import { ALL_LISTINGS, type LocalListing } from "@/data/locals-listings";
 import type { RoleRequirement, RoleCategory } from "@/data/locals-roles";
 
 const PROXY_BASE = "/api/community-proxy";
-const DIRECT_BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? "https://api.baalvion.com/api/v1/community";
+const DIRECT_BASE = process.env.COMMUNITY_UPSTREAM_URL ?? '';
 
 interface Envelope<T> {
   success: boolean;
@@ -94,16 +98,23 @@ export async function getClubs(): Promise<Club[]> {
     const { items } = await call<{ items: ApiClub[] }>("/nightlife/clubs?limit=200");
     return items.map(toClub);
   } catch {
-    return INDIAN_CLUBS;
+    return ALL_STATIC_CLUBS;
   }
 }
 
 export async function getClub(idOrSlug: string): Promise<Club | null> {
+  // Normalise the lookup key so both "mumbai-c1" and "mumbai_c1" work
+  const staticMatch =
+    ALL_STATIC_CLUBS.find((c) => c.id === idOrSlug) ??
+    ALL_STATIC_CLUBS.find((c) => c.id === idOrSlug.replace(/_/g, "-")) ??
+    null;
   try {
     return toClub(await call<ApiClub>(`/nightlife/clubs/${encodeURIComponent(idOrSlug)}`));
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) return null;
-    return INDIAN_CLUBS.find((c) => c.id === idOrSlug) ?? null;
+  } catch {
+    // When COMMUNITY_UPSTREAM_URL is not configured the fetch hits the local
+    // Next.js server which returns its own 404 HTML → ApiError(404). We must
+    // NOT treat that as "club doesn't exist"; fall back to bundled data first.
+    return staticMatch;
   }
 }
 
@@ -131,6 +142,8 @@ export const submitGuestList = (clubSlug: string, input: GuestListInput) =>
   send<{ id: string }>("POST", `/nightlife/clubs/${encodeURIComponent(clubSlug)}/guest-list`, input);
 export const submitVipTable = (clubSlug: string, input: VipTableInput) =>
   send<{ id: string }>("POST", `/nightlife/clubs/${encodeURIComponent(clubSlug)}/vip-tables`, input);
+export const getMyBookings = () =>
+  send<{ items: ClubBooking[]; total: number }>("GET", "/nightlife/bookings/me");
 
 export type BookingStatus = "pending" | "confirmed" | "declined" | "cancelled";
 export interface ClubBooking {
@@ -369,4 +382,14 @@ export const admin = {
     send<{ items: ListingApplication[]; total: number }>("GET", `/admin/nightlife/applications${qs({ ...f, limit: 100 })}`),
   setApplicationStatus: (id: string, status: Exclude<ApplicationStatus, "withdrawn">) =>
     send<ListingApplication>("PATCH", `/admin/nightlife/applications/${id}`, { status }),
+  // New Administrative Endpoints for Club Operations
+  djDemands: () => send<{ items: any[]; total: number }>("GET", "/admin/nightlife/dj-demands"),
+  createDjDemand: (data: any) => send<any>("POST", "/admin/nightlife/dj-demands", data),
+  pledgeDjDemand: (id: string, amount: number) => send<any>("POST", `/admin/nightlife/dj-demands/${id}/pledge`, { amount }),
+  eliteHostApplications: () => send<{ items: any[]; total: number }>("GET", "/admin/nightlife/elite-host"),
+  createEliteHostApplication: (data: any) => send<any>("POST", "/nightlife/elite-host", data),
+  updateEliteHostApplication: (id: string, status: string) => send<any>("PATCH", `/admin/nightlife/elite-host/${id}`, { status }),
+  lotteryDraws: () => send<{ items: any[]; total: number }>("GET", "/admin/nightlife/lottery"),
+  enterLottery: (data: any) => send<any>("POST", "/nightlife/lottery", data),
+  runLotteryDraw: (data: any) => send<any>("POST", "/admin/nightlife/lottery/draw", data),
 };

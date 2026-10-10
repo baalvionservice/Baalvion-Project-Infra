@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // happens, so every client component just calls same-origin /api/community-proxy/* with
 // ordinary same-origin fetch (cookie sent automatically), same shape whether or not the
 // caller is signed in (public reads work with no cookie at all).
-const COMMUNITY_API_BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? 'https://api.baalvion.com/api/v1/community';
+const COMMUNITY_API_BASE = process.env.COMMUNITY_UPSTREAM_URL ?? '';
 
 async function proxy(request: NextRequest, path: string[]) {
   const target = new URL(`${COMMUNITY_API_BASE}/${path.join('/')}`);

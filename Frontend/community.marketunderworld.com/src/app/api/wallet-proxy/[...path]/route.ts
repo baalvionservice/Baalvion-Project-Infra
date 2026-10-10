@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Same-origin bridge to wallet-service — mirrors api/giftcard-proxy/route.ts exactly. Targets the
 // auth-gateway's /api/wallets alias (Backend/services/identity/auth-gateway/routes/proxy.js),
 // which forwards to wallet-service's own /api/v1/wallets/* controller root.
-const WALLET_API_BASE = process.env.NEXT_PUBLIC_WALLET_API_BASE ?? 'https://api.baalvion.com/api/wallets';
+const WALLET_API_BASE = process.env.WALLET_UPSTREAM_URL ?? '';
 
 async function proxy(request: NextRequest, path: string[]) {
   const target = new URL(`${WALLET_API_BASE}/${path.join('/')}`);

@@ -9,7 +9,7 @@ import {
   type ForumSubNode,
 } from "./forum-data";
 
-const THREADS_STORAGE_KEY = "baalvion_forum_threads_v1";
+const THREADS_STORAGE_KEY = "mu_forum_threads_v1";
 
 // Helper to get all threads (initial + user created)
 export function getAllThreads(): ForumThreadItem[] {

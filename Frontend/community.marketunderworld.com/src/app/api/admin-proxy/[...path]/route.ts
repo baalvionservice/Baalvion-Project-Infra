@@ -7,7 +7,7 @@ import { createProxy, proxyMethod } from '@/lib/api/proxy-handler';
 // SIBLINGS under /v1 (routes/v1.js: /admin/*, /identity/*, /support/*, /ai/*, /developer/*,
 // /staff/*), not all nested under /admin. Callers in admin-users.ts must include the full segment
 // themselves (e.g. `/admin/users`, `/identity/risk-events`) — this proxy does no path rewriting.
-const ADMIN_API_BASE = process.env.NEXT_PUBLIC_ADMIN_API_BASE ?? 'https://api.baalvion.com/api/v1';
+const ADMIN_API_BASE = process.env.ADMIN_UPSTREAM_URL ?? '';
 const proxy = createProxy(ADMIN_API_BASE);
 
 export const GET = proxyMethod(proxy);

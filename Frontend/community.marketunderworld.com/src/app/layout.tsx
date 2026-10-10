@@ -14,6 +14,10 @@ import { GlobalSearch } from "@/components/layout/global-search";
 import { GoogleAnalytics } from "@/components/layout/google-analytics";
 import { ScaryTransitionProvider } from "@/components/layout/scary-transition-provider";
 import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
+import { CSPostHogProvider } from "@/components/providers/posthog-provider";
+import { CookieBanner } from "@/components/layout/cookie-banner";
+import { AiAssistantWidget } from "@/components/chat/ai-assistant-widget";
+import { CustomerSupportWidget } from "@/components/chat/customer-support-widget";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -45,8 +49,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Baalvion | Elite Global Trade Network",
-    template: "%s | Baalvion"
+    default: "Hell Road",
+    template: "%s | Hell Road"
   },
   description: "The world's premier secure intelligence node for global knowledge exchange and commodity trade. Verified operators only.",
   // This app deploys to community.marketunderworld.com (wrangler worker
@@ -58,11 +62,11 @@ export const metadata: Metadata = {
   // canonical link and search engines were left to guess which URL is authoritative.
   alternates: { canonical: '/' },
   openGraph: {
-    title: "Baalvion",
-    description: "Secure Trade & Intelligence Node",
+    title: "Hell Road",
+    description: "Underground community",
     type: "website",
     url: "https://community.marketunderworld.com",
-    siteName: "Baalvion",
+    siteName: "Hell Road",
   },
 };
 
@@ -85,27 +89,32 @@ export default function RootLayout({
         style={isDev ? { fontFamily: 'system-ui, -apple-system, sans-serif' } : {}}
       >
         <LanguageProvider>
-          <AuthProvider>
-            <CartProvider>
-              <NotificationProvider>
-                <IdentityProvider>
-                  <ScaryTransitionProvider>
-                    <header>
-                      <CryptoTicker />
-                    </header>
-                    <main className="flex-1 flex flex-col">
-                      {children}
-                    </main>
-                    <ToastContainer />
-                    <Toaster />
-                    <GlobalSearch />
-                    <BountyChatWidget />
-                    <AnnouncementBanner />
-                  </ScaryTransitionProvider>
-                </IdentityProvider>
-              </NotificationProvider>
-            </CartProvider>
-          </AuthProvider>
+          <CSPostHogProvider>
+            <AuthProvider>
+              <CartProvider>
+                <NotificationProvider>
+                  <IdentityProvider>
+                    <ScaryTransitionProvider>
+                      <header>
+                        <CryptoTicker />
+                      </header>
+                      <main className="flex-1 flex flex-col">
+                        {children}
+                      </main>
+                      <ToastContainer />
+                      <Toaster />
+                      <GlobalSearch />
+                      <BountyChatWidget />
+                      <AiAssistantWidget />
+                      <CustomerSupportWidget />
+                      <CookieBanner />
+                      <AnnouncementBanner />
+                    </ScaryTransitionProvider>
+                  </IdentityProvider>
+                </NotificationProvider>
+              </CartProvider>
+            </AuthProvider>
+          </CSPostHogProvider>
         </LanguageProvider>
       </body>
     </html>

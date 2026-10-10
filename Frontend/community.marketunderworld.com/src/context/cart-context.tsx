@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { MARKET_UNDERWORLD_STORE_ID } from '@/lib/api/commerce';
 import * as cartApi from '@/lib/api/cart';
+import posthog from 'posthog-js';
 import { useAuth } from './auth-context';
 
 const CART_ID_KEY = 'mu_cart_id';
@@ -43,8 +44,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
-    ensureCart().finally(() => setIsLoading(false));
+    let mounted = true;
+    ensureCart().finally(() => {
+      if (mounted) setIsLoading(false);
+    });
+    return () => { mounted = false; };
   }, [ensureCart]);
 
   // Claim-on-login: once authenticated, adopt the guest cart so it survives past this session
@@ -66,6 +70,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       quantity: item.quantity ?? 1,
     });
     setCart(updated);
+    try {
+      posthog.capture('add_to_cart', {
+        product_id: item.productId,
+        variant_id: item.variantId,
+        sku: item.sku,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity ?? 1,
+      });
+    } catch (e) {}
   }, [cart, ensureCart]);
 
   const updateItemQuantity: CartContextType['updateItemQuantity'] = useCallback(async (key, quantity) => {

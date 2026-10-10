@@ -13,11 +13,9 @@ const SITE_URL = 'https://community.marketunderworld.com';
 // community-service's public endpoint, called directly (same target community-proxy's route
 // forwards to) instead of going through /api/community-proxy — that proxy is same-origin by
 // design for cookie translation, which would make this route self-fetch its own Worker.
-// Hardcoded rather than process.env.NEXT_PUBLIC_COMMUNITY_API_BASE for the same reason as
-// SITE_URL above: .env.local points that var at a local-only container (http://localhost:3064)
-// for dev, and this Worker's builds run locally with no CI to strip .env.local out — reading
-// it here silently zeroed out every forum-community sitemap entry on first deploy.
-const COMMUNITY_API_BASE = 'https://api.baalvion.com/api/v1/community';
+// COMMUNITY_UPSTREAM_URL is a server-only env var, so it must be set on the Worker at deploy time;
+// unset, the forum-community entries are simply left out of the sitemap.
+const COMMUNITY_API_BASE = process.env.COMMUNITY_UPSTREAM_URL ?? '';
 
 interface PublicCommunity {
   slug: string;
@@ -57,9 +55,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/live-sessions`, priority: 0.5, changeFrequency: 'weekly' },
     { url: `${SITE_URL}/match`, priority: 0.4, changeFrequency: 'monthly' },
     { url: `${SITE_URL}/premium`, priority: 0.4, changeFrequency: 'monthly' },
-    ...['about', 'terms', 'privacy', 'contact', 'refund-policy', 'shipping-policy', 'payments', 'grievance'].map(
-      (slug) => ({ url: `${SITE_URL}/${slug}`, priority: 0.2, changeFrequency: 'yearly' as const }),
-    ),
   ];
 
   const forumRoutes: MetadataRoute.Sitemap = forumSlugs.map((slug) => ({

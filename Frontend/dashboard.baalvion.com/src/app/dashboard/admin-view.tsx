@@ -8,6 +8,8 @@ import {
   BellRing,
   Activity,
   Building,
+  BadgeCheck,
+  Crown
 } from "lucide-react";
 import {
   Card,
@@ -300,6 +302,29 @@ export default function AdminView() {
       {tourVisible && <ProductTour onComplete={() => setTourVisible(false)} />}
       <div className="space-y-8">
         {isNewUser && <SetupChecklist />}
+        
+        {/* Quick Actions / Platform Management */}
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
+          <Button asChild variant="outline" className="flex-col h-24 gap-2 border-primary/20 hover:border-primary/50 bg-primary/5 hover:bg-primary/10">
+            <Link href="/dating/admin-kyc">
+              <BadgeCheck className="h-6 w-6 text-primary" />
+              <div className="text-center">
+                <div className="text-sm font-semibold text-primary">KYC Review</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Approve Founders</div>
+              </div>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-col h-24 gap-2">
+            <Link href="/dating">
+              <Crown className="h-6 w-6" />
+              <div className="text-center">
+                <div className="text-sm font-semibold">Dating App</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Directory</div>
+              </div>
+            </Link>
+          </Button>
+        </div>
+
         <div
           id="dashboard-stats"
           className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"

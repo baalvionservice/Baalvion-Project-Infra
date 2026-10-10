@@ -26,7 +26,7 @@ app.use(cookieParser());
 app.use(requestContext);
 app.use(rateLimit());
 
-app.get('/', (req, res) => res.json({ service: 'Baalvion Community Service', version: config.apiVersion }));
+app.get('/', (req, res) => res.json({ status: 'ok' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/v1', v1Routes);
@@ -56,7 +56,7 @@ const start = async () => {
         console.error(JSON.stringify({ evt: 'payment_outbox.wire_failed', msg: err.message }));
     }
     const server = app.listen(config.port, () =>
-        console.log(`Baalvion Community Service running on port ${config.port}`)
+        console.log(`Community service running on port ${config.port}`)
     );
 
     registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });

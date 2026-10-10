@@ -16,6 +16,7 @@ import {
   FileText,
   Globe,
   Home,
+  Heart,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -40,6 +41,9 @@ import {
   Link as LinkIcon,
   Landmark,
   Puzzle,
+  Crown,
+  Calendar,
+  BadgeCheck,
 } from 'lucide-react';
 
 export const navItems = [
@@ -73,6 +77,11 @@ export const navItems = [
   { href: '/ai/strategy', icon: BrainCircuit, label: 'Strategic Planner' },
   { href: '/sync', icon: RefreshCw, label: 'Sync' },
   { href: '/marketplace', icon: Puzzle, label: 'Marketplace' },
+  { href: '/dating', icon: Crown, label: 'Rent a Founder' },
+  { href: '/dating/my-bookings', icon: Calendar, label: 'My Bookings' },
+  { href: '/dating/founder-dashboard', icon: Heart, label: 'Founder Portal' },
+  { href: '/dating/verify', icon: Shield, label: 'Apply as Founder' },
+  { href: '/dating/admin-kyc', icon: BadgeCheck, label: 'KYC Review' },
   { href: '/compliance', icon: ShieldCheck, label: 'Compliance' },
   { href: '/compliance/gdpr', icon: BookLock, label: 'GDPR' },
   { href: '/security/audit', icon: Shield, label: 'Audit Logs' },

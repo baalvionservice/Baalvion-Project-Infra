@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ShieldCheck, Search, Filter, CheckCircle, XCircle, ArrowRightLeft } from 'lucide-react';
+import Link from 'next/link';
+import { ShieldCheck, Search, Filter, CheckCircle, XCircle, ArrowRightLeft, ExternalLink } from 'lucide-react';
 
 const MOCK_ESCROW = [
   { id: "ESC-8842", buyer: "hacker99", seller: "ZeroDayVendor", item: "Custom Malware FUD", amount: "$450.00", status: "Awaiting Release", date: "2026-10-01" },
@@ -31,12 +32,27 @@ export default function EscrowManager() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-fuchsia-500" />
-          Escrow Manager
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">Resolve disputes and release funds held in escrow.</p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-fuchsia-500" />
+            Escrow Manager
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">Resolve disputes and release funds held in escrow.</p>
+        </div>
+        <Link href="/escrow/admin-dashboard" className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-lg shadow-red-950/40">
+          Intermediary & $1k Collateral Admin <ExternalLink className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
+      <div className="bg-gradient-to-r from-red-950/60 to-zinc-900 border border-red-800/60 p-4 rounded-xl flex justify-between items-center">
+        <div>
+          <h3 className="font-bold text-white text-sm">Verified Intermediaries & Collateral Arbitration</h3>
+          <p className="text-xs text-zinc-400">Verify $1,000 USDT deposits on-chain, review applicant TXIDs, and resolve buyer fiat disputes.</p>
+        </div>
+        <Link href="/escrow/admin-dashboard" className="bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1">
+          Open Console <ExternalLink className="w-3 h-3" />
+        </Link>
       </div>
 
       <div className="bg-[#121217] border border-white/5 rounded-xl overflow-hidden">

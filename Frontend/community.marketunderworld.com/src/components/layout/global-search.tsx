@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, ShoppingBag, MessageSquare, ArrowRight, Loader2 } from "lucide-react"
+import posthog from "posthog-js"
 import { getStorefrontProducts } from "@/lib/api/commerce"
 
 const slugifyCategory = (name: string) => name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "general";
@@ -51,6 +52,9 @@ export const GlobalSearch = () => {
     const handle = setTimeout(() => {
       getStorefrontProducts(undefined, { search: query, limit: 8 })
         .then((products) => {
+          try {
+            posthog.capture("search_performed", { query, result_count: products.length });
+          } catch (e) {}
           setResults(products.map((p) => ({
             type: 'Product',
             name: p.name,

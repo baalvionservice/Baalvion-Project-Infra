@@ -36,7 +36,10 @@ import {
   GraduationCap,
   Fingerprint,
   Radio,
-  ScrollText
+  ScrollText,
+  Ticket,
+  Star,
+  Crown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -54,6 +57,10 @@ const ADMIN_NAV = [
       { name: "User Registry", path: "/admin/users", icon: Users },
       { name: "Seller Marketplace", path: "/admin/sellers", icon: ShieldCheck },
       { name: "Seller Applications", path: "/admin/seller-applications", icon: ClipboardCheck },
+      { name: "Seller Payments", path: "/admin/seller-payments", icon: Wallet },
+      { name: "Payment Addresses", path: "/admin/payment-addresses", icon: Bitcoin },
+      { name: "Wallet Receipts", path: "/admin/points", icon: Wallet },
+      { name: "Seller Chat", path: "/admin/seller-chat", icon: MessageSquare },
       { name: "Listing Moderation", path: "/admin/moderation", icon: FileCheck },
       { name: "Listing Oversight", path: "/admin/marketplace", icon: ShoppingBag },
       { name: "Categories", path: "/admin/categories", icon: FolderTree },
@@ -76,6 +83,7 @@ const ADMIN_NAV = [
     group: "MARKETPLACE ESCROW",
     items: [
       { name: "Escrow Manager", path: "/admin/marketplace/escrow", icon: Wallet },
+      { name: "Intermediary Oversight", path: "/escrow/admin-dashboard", icon: ShieldCheck },
       { name: "Crypto Payouts", path: "/admin/marketplace/payouts", icon: Bitcoin },
       { name: "Commission Tiers", path: "/admin/marketplace/commissions", icon: Percent },
     ]
@@ -112,8 +120,11 @@ const ADMIN_NAV = [
     items: [
       { name: "Clubs Directory", path: "/admin/clubs", icon: MapPin },
       { name: "Events Calendar", path: "/admin/clubs/events", icon: MapPin },
+      { name: "Celebrity & DJ Events", path: "/admin/clubs/celebrity-events", icon: Star },
+      { name: "DJ Demand Requests", path: "/admin/clubs/dj-demands", icon: Radio },
       { name: "Guest List & VIP Requests", path: "/admin/clubs/bookings", icon: MessageSquare },
-      { name: "Staffing Verification", path: "/nightlife/verify", icon: ShieldCheck },
+      { name: "Ticket Lottery", path: "/admin/clubs/lottery", icon: Ticket },
+      { name: "Elite Hosted Parties", path: "/admin/clubs/elite-host", icon: Crown },
     ]
   },
   {

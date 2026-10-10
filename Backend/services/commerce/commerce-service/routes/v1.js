@@ -3,6 +3,12 @@ const { Router } = require('express');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const storeRoutes = require('./storeRoutes');
 const sellerApplicationRoutes = require('./sellerApplicationRoutes');
+const sellerBondRoutes = require('./sellerBondRoutes');
+const paymentDestinationRoutes = require('./paymentDestinationRoutes');
+const buyerAccessRoutes = require('./buyerAccessRoutes');
+const walletRoutes = require('./walletRoutes');
+const sellerTokenRoutes = require('./sellerTokenRoutes');
+const memberRoutes = require('./memberRoutes');
 const categoryRoutes = require('./categoryRoutes');
 const adminCategoryRoutes = require('./adminCategoryRoutes');
 const adminProductRoutes = require('./adminProductRoutes');
@@ -24,6 +30,13 @@ router.use('/commerce/storefront/:storeId', storefrontRoutes);
 // controller/mediaServeController.js for why this isn't behind authMiddleware.
 router.get('/commerce/media/:mediaId/raw', mediaServeController.serveMedia);
 
+// Public member profiles (reputation only). The caller's own profile is authenticated and mounted
+// first so 'me' is never read as a member number.
+router.use('/commerce/members/me', authMiddleware, memberRoutes.me);
+// (exact path first: this one needs a signed-in member, the profile itself is public)
+router.use('/commerce/members', (req, res, next) => (/^\/[^/]+\/listings\/?$/.test(req.path) ? authMiddleware(req, res, next) : next()), memberRoutes.listings);
+router.use('/commerce/members', memberRoutes.pub);
+
 // Public market registry (currency / tax / FX per supported country). No authMiddleware.
 router.get('/commerce/markets', marketController.list);
 
@@ -35,6 +48,11 @@ router.use('/commerce/admin/products', authMiddleware, adminProductRoutes);
 
 router.use('/commerce/stores', authMiddleware, storeRoutes);
 router.use('/commerce/seller-applications', authMiddleware, sellerApplicationRoutes);
+router.use('/commerce/seller-bonds', authMiddleware, sellerBondRoutes);
+router.use('/commerce/seller-tokens', authMiddleware, sellerTokenRoutes);
+router.use('/commerce/wallet', authMiddleware, walletRoutes);
+router.use('/commerce/buyer-access', authMiddleware, buyerAccessRoutes);
+router.use('/commerce/payment-destinations', authMiddleware, paymentDestinationRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);
 router.use('/commerce/stores/:storeId/products/:productId/reviews', authMiddleware, reviewRoutes);
 router.use('/commerce/stores/:storeId/products', authMiddleware, productRoutes);
