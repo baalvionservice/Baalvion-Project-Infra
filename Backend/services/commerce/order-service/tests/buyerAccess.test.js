@@ -1,4 +1,5 @@
 'use strict';
+process.env.JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY || 'dummy';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
