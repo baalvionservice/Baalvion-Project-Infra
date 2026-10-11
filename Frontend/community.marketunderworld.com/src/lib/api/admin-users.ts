@@ -89,8 +89,18 @@ export async function sendUserVerification(userId: string): Promise<void> {
   await adminFetch<{ message: string }>(`/admin/users/${userId}/send-verification`, { method: 'POST' });
 }
 
+// The service reports { users: { total }, orgs: { total }, activeSessions, last24h: { logins, failedLogins }, loginTrend }.
 export async function getPlatformStats(): Promise<PlatformStats> {
-  return adminFetch<PlatformStats>('/admin/stats');
+  const s = await adminFetch<Record<string, any>>('/admin/stats');
+  const c = (v: unknown) => ({ count: String(v ?? 0) });
+  return {
+    userCount: s.userCount ?? c(s.users?.total),
+    orgCount: s.orgCount ?? c(s.orgs?.total),
+    sessionCount: s.sessionCount ?? c(s.activeSessions),
+    recentLogins: s.recentLogins ?? c(s.last24h?.logins),
+    failedLogins: s.failedLogins ?? c(s.last24h?.failedLogins),
+    loginTrend: Array.isArray(s.loginTrend) ? s.loginTrend : [],
+  };
 }
 
 export interface AdminSession {
