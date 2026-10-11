@@ -17,7 +17,6 @@ import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
 import { CSPostHogProvider } from "@/components/providers/posthog-provider";
 import { CookieBanner } from "@/components/layout/cookie-banner";
 import { AiAssistantWidget } from "@/components/chat/ai-assistant-widget";
-import { CustomerSupportWidget } from "@/components/chat/customer-support-widget";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -101,7 +100,6 @@ export default function RootLayout({
                       <GlobalSearch />
                       <BountyChatWidget />
                       {process.env.NEXT_PUBLIC_AI_ASSISTANT === "on" && <AiAssistantWidget />}
-                      <CustomerSupportWidget />
                       <CookieBanner />
                       <AnnouncementBanner />
                     </ScaryTransitionProvider>

@@ -44,22 +44,22 @@ export default function BountyChatPage() {
   const handle = user?.email?.split("@")[0] ?? "Hunter"
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white flex flex-col">
+    <div className="h-[100dvh] md:pt-8 bg-[#050508] text-white flex flex-col">
 
       {/* Chat Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0F]/95 backdrop-blur-md border-b border-red-900/40">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/bounty" className="p-2 text-gray-500 hover:text-white transition-colors">
+      <header className="shrink-0 bg-[#0A0A0F] border-b border-red-900/40">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3 sm:gap-4">
+          <Link href="/bounty" aria-label="Back to the bounty page" className="p-2 -ml-2 text-gray-500 hover:text-white transition-colors shrink-0">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <div className="w-10 h-10 rounded-xl bg-red-950 border border-red-600 flex items-center justify-center shadow-[0_0_12px_rgba(220,38,38,0.4)]">
+          <div className="hidden sm:flex w-10 h-10 shrink-0 rounded-xl bg-red-950 border border-red-600 items-center justify-center shadow-[0_0_12px_rgba(220,38,38,0.4)]">
             <Skull className="w-5 h-5 text-red-500 animate-pulse" />
           </div>
-          <div className="flex-1">
-            <div className="font-bold text-white text-sm">Admin — Bug Bounty HQ</div>
-            <span className="text-[10px] text-gray-500 font-mono uppercase">Replies are not instant</span>
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-white text-sm truncate">Admin — Bug Bounty HQ</div>
+            <span className="text-xs text-gray-500">Replies are not instant</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/30 rounded-lg shrink-0">
             <Shield className="w-3.5 h-3.5 text-red-400" />
             <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Private</span>
           </div>
@@ -68,7 +68,7 @@ export default function BountyChatPage() {
         <div className="max-w-4xl mx-auto px-4 pb-3">
           <div className="bg-black/40 border border-[#1E2028] rounded-xl px-4 py-2 flex items-center gap-3">
             <Zap className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
-            <span className="text-[11px] text-gray-300 font-mono">
+            <span className="text-xs text-gray-300 leading-relaxed">
               Use this chat for questions. Submit vulnerabilities as a formal report from the <Link href="/bounty" className="underline text-yellow-400">Bounty page</Link> so they are tracked.
             </span>
           </div>
@@ -76,7 +76,7 @@ export default function BountyChatPage() {
       </header>
 
       {/* Messages */}
-      <main className="flex-1 overflow-y-auto pt-36 pb-32 max-w-4xl mx-auto w-full px-4 space-y-4">
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-6 sm:py-8 max-w-4xl mx-auto w-full px-4 space-y-5">
         {messages.length === 0 && !error && (
           <p className="text-center text-sm text-gray-600 pt-10">No messages yet. Say hello — the admin team will reply here.</p>
         )}
@@ -105,7 +105,7 @@ export default function BountyChatPage() {
                     : "bg-red-600/20 border border-red-500/30 text-white rounded-tr-sm"}`}>
                   {msg.content}
                 </div>
-                <span className="text-[9px] text-gray-600 font-mono px-1">{timeOf(msg.createdAt)}</span>
+                <span className="text-[11px] text-gray-500 px-1">{timeOf(msg.createdAt)}</span>
               </div>
             </motion.div>
           ))}
@@ -115,7 +115,7 @@ export default function BountyChatPage() {
       </main>
 
       {/* Input */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-[#0A0A0F]/95 backdrop-blur-md border-t border-red-900/30 p-4">
+      <footer className="shrink-0 bg-[#0A0A0F] border-t border-red-900/30 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-3">
           <input
             ref={inputRef}
@@ -123,7 +123,7 @@ export default function BountyChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask the admin team a question..." maxLength={4000}
-            className="flex-1 bg-black/60 border border-[#252A33] focus:border-red-500/60 rounded-2xl px-5 py-3.5 text-sm text-white outline-none transition-all placeholder:text-gray-600"
+            className="flex-1 min-w-0 bg-black/60 border border-[#252A33] focus:border-red-500/60 rounded-2xl px-4 sm:px-5 py-3 text-base sm:text-sm text-white outline-none transition-all placeholder:text-gray-600"
           />
           <button
             type="submit"
@@ -133,8 +133,8 @@ export default function BountyChatPage() {
             <Send className="w-4 h-4" />
           </button>
         </form>
-        <p className="text-center text-[9px] text-gray-700 mt-2 font-mono uppercase tracking-wider max-w-4xl mx-auto">
-          All messages are logged · Only you and admin can see this chat
+        <p className="text-center text-[11px] text-gray-600 mt-2 max-w-4xl mx-auto">
+          Messages are logged. Only you and the admin team can see this chat.
         </p>
       </footer>
     </div>

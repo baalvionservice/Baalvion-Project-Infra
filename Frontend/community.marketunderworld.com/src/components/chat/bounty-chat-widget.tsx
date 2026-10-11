@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { MessageSquare, X, Send, Skull } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +9,7 @@ import { useBountyThread } from './use-bounty-thread';
 
 export function BountyChatWidget() {
   const { isAuthenticated } = useAuth();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const { messages, error, sending, send } = useBountyThread(isAuthenticated && isOpen);
@@ -17,7 +19,8 @@ export function BountyChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  if (!isAuthenticated) return null;
+  // The full chat page is the same conversation, so the floating button is not needed there.
+  if (!isAuthenticated || pathname?.startsWith('/bounty/chat')) return null;
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
