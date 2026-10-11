@@ -27,5 +27,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ClubsRootPage() {
-  return <ClubsClient clubs={await getClubs()} />;
+  // The list shows cards, so send only what a card needs (a venue's long content loads on its own page).
+  const clubs = (await getClubs()).map((c) => ({
+    id: c.id, name: c.name, state: c.state, city: c.city, suburb: c.suburb, address: c.address, image: c.image,
+    musicType: c.musicType, daysOpen: c.daysOpen, description: (c.description || "").slice(0, 180), coverCharge: c.coverCharge,
+    rating: c.rating, venueType: c.venueType, openingHours: c.openingHours,
+  }));
+  return <ClubsClient clubs={clubs} />;
 }

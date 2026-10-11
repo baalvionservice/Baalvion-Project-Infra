@@ -13,7 +13,11 @@ export const metadata: Metadata = {
 
 export default async function StateClubsPage({ params }: { params: Promise<{ state: string }> }) {
   const { state } = await params;
-  const clubs = await getClubs();
+  const clubs = (await getClubs()).map((c) => ({
+    id: c.id, name: c.name, state: c.state, city: c.city, suburb: c.suburb, address: c.address, image: c.image,
+    musicType: c.musicType, daysOpen: c.daysOpen, description: (c.description || "").slice(0, 180), coverCharge: c.coverCharge,
+    rating: c.rating, venueType: c.venueType, openingHours: c.openingHours,
+  }));
   const known = INDIAN_NIGHTLIFE_STATES.some((s) => toSlug(s) === state)
     || clubs.some((c) => toSlug(c.state) === state || toSlug(c.city ?? "") === state);
   if (!known) notFound();
