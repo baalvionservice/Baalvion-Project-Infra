@@ -90,8 +90,8 @@ async function apply(authCtx, body) {
             if (existing) await sequelize.query(`DELETE FROM ${T} WHERE id = :id`, { replacements: { id: existing.id }, transaction: t });
             const slug = await uniqueSlug(profile.displayName, t);
             const [[row]] = await sequelize.query(
-                `INSERT INTO ${T} (user_id, slug, display_name, bio, services, languages, commission_note, trade_limit_usd, status, deposit_bond_id)
-                 VALUES (:u, :slug, :name, :bio, :services::jsonb, :languages::jsonb, :commission, :limit, 'applied', :bond) RETURNING id`,
+                `INSERT INTO ${T} (user_id, slug, display_name, bio, services, languages, commission_note, trade_limit_usd, status, deposit_bond_id, terms_accepted_at)
+                 VALUES (:u, :slug, :name, :bio, :services::jsonb, :languages::jsonb, :commission, :limit, 'applied', :bond, NOW()) RETURNING id`,
                 { replacements: { u: authCtx.userId, slug, name: profile.displayName, bio: profile.bio, services: JSON.stringify(profile.services), languages: JSON.stringify(profile.languages), commission: profile.commissionNote, limit: profile.tradeLimitUsd, bond: payment.id }, transaction: t },
             );
             await insertQrs(row.id, qrs, t);

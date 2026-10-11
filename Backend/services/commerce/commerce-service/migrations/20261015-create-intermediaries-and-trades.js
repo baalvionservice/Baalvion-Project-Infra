@@ -25,6 +25,8 @@ module.exports = {
             deposit_usd: { type: Sequelize.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
             deposit_confirmed_at: { type: Sequelize.DATE, allowNull: true },
             deposit_bond_id: { type: Sequelize.UUID, allowNull: true },
+            // When the applicant accepted the intermediary rules (pay only via their listed QR, deposit terms, disputes).
+            terms_accepted_at: { type: Sequelize.DATE, allowNull: true },
             approved_by: { type: Sequelize.BIGINT, allowNull: true },
             approved_at: { type: Sequelize.DATE, allowNull: true },
             created_at: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.literal('NOW()') },

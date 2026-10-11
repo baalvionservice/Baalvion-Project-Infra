@@ -5,7 +5,7 @@ const assert = require('node:assert');
 const s = require('../validators/intermediarySchemas');
 
 const img = { mime: 'image/jpeg', data: 'x'.repeat(200) };
-const base = { displayName: 'Test Person', services: ['buy_usdt'], qrs: [{ ...img, label: 'PhonePe' }], currency: 'USDT', network: 'TRC20' };
+const base = { displayName: 'Test Person', services: ['buy_usdt'], qrs: [{ ...img, label: 'PhonePe' }], currency: 'USDT', network: 'TRC20', acceptTerms: true };
 
 test('an application needs a name, a service, a QR and a way to pay the deposit', () => {
     assert.ok(s.applySchema.safeParse(base).success);
@@ -15,6 +15,8 @@ test('an application needs a name, a service, a QR and a way to pay the deposit'
     assert.ok(!s.applySchema.safeParse({ ...base, qrs: [img, img, img, img] }).success);
     assert.ok(!s.applySchema.safeParse({ ...base, services: ['steal_money'] }).success);
     assert.ok(!s.applySchema.safeParse({ ...base, currency: 'EUR' }).success);
+    assert.ok(!s.applySchema.safeParse({ ...base, acceptTerms: false }).success);
+    assert.ok(!s.applySchema.safeParse({ ...base, acceptTerms: undefined }).success);
 });
 
 test('trade requests are bounded', () => {

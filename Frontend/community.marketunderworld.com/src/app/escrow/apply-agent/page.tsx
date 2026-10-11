@@ -32,6 +32,7 @@ export default function ApplyAgentPage() {
   const [commission, setCommission] = useState("");
   const [limit, setLimit] = useState("");
   const [qrs, setQrs] = useState<Qr[]>([]);
+  const [accepted, setAccepted] = useState(false);
   const [method, setMethod] = useState<"BTC" | "USDT" | "BINANCE">("USDT");
   const [network, setNetwork] = useState<"TRC20" | "BEP20" | "ERC20" | "SOLANA">("TRC20");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -60,7 +61,7 @@ export default function ApplyAgentPage() {
       await applyToBeIntermediary({
         displayName, bio: bio || undefined, services, languages: languages.split(",").map((s) => s.trim()).filter(Boolean),
         commissionNote: commission || undefined, tradeLimitUsd: limit ? Number(limit) : undefined,
-        qrs: qrs.map(({ mime, data, label }) => ({ mime, data, label })), currency: method, network: method === "USDT" ? network : undefined,
+        acceptTerms: true, qrs: qrs.map(({ mime, data, label }) => ({ mime, data, label })), currency: method, network: method === "USDT" ? network : undefined,
       });
       await load();
     } catch (e) {
@@ -80,7 +81,8 @@ export default function ApplyAgentPage() {
   const me = state.intermediary;
   const pay = state.payment;
   const canApply = !me || me.status === "rejected";
-  const valid = displayName.trim().length >= 2 && services.length > 0 && qrs.length > 0;
+  const valid = displayName.trim().length >= 2 && services.length > 0 && qrs.length > 0 && accepted;
+  const step = !me || me.status === "rejected" ? 1 : me.status === "applied" ? 2 : me.status === "payment_submitted" ? 3 : me.status === "active" ? 4 : 1;
   const available = (m: string) => methods.find((x) => x.method === m)?.available !== false;
 
   return (
@@ -91,6 +93,37 @@ export default function ApplyAgentPage() {
           Help members buy USDT, trade crypto and set up accounts, and get paid directly by the customer. Apply, pay the ${DEPOSIT_USD.toLocaleString()} refundable deposit, and once an admin approves you are listed automatically.
         </p>
       </div>
+
+      <ol className="grid grid-cols-4 gap-2 mb-6 text-center text-[11px]" aria-label="Onboarding steps">
+        {["Apply", `Pay $${DEPOSIT_USD.toLocaleString()} deposit`, "Admin review", "You are listed"].map((label, i) => (
+          <li key={label} className={`rounded-lg border px-2 py-3 ${i + 1 < step ? "border-emerald-700 bg-emerald-950/40 text-emerald-300" : i + 1 === step ? "border-red-500 bg-red-950/40 text-white font-bold" : "border-zinc-800 text-zinc-500"}`}>
+            <div className="text-base">{i + 1 < step ? "✓" : i + 1}</div>{label}
+          </li>
+        ))}
+      </ol>
+
+      {canApply && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <h2 className="font-bold mb-2">How it works</h2>
+            <ol className="list-decimal list-inside space-y-1 text-zinc-300">
+              <li>Tell us who you are and add the QR codes customers will scan to pay you.</li>
+              <li>Pay the ${DEPOSIT_USD.toLocaleString()} refundable deposit to the platform and send your payment screenshot.</li>
+              <li>An admin checks the payment and your application.</li>
+              <li>You are listed and verified. Customers send you trade requests; you are paid directly.</li>
+            </ol>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <h2 className="font-bold mb-2">What you need</h2>
+            <ul className="list-disc list-inside space-y-1 text-zinc-300">
+              <li>A Baalvion account (you are signed in)</li>
+              <li>At least one payment QR in your own name</li>
+              <li>${DEPOSIT_USD.toLocaleString()} in USDT, BTC or Binance Pay for the deposit</li>
+              <li>Time to answer customers in the trade chat</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 sm:p-8 space-y-6">
         {me?.status === "active" && (
@@ -176,6 +209,20 @@ export default function ApplyAgentPage() {
                   </select>
                 )}
               </div>
+            </div>
+
+            <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 text-xs text-zinc-300 space-y-2">
+              <p className="font-bold text-white text-sm">Intermediary rules</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Customers pay you directly. Only ever take payment to the QR codes shown on your page, and never ask a customer to pay somewhere else.</li>
+                <li>Your deposit is the guarantee behind your trades. If a dispute is decided for a customer, the refund is taken from it, and you are delisted when it runs out.</li>
+                <li>The deposit is returned, minus any refunds, if you leave in good standing. An admin returns it by hand.</li>
+                <li>Do your part in the trade chat and keep payment screenshots. Admins read them when there is a dispute.</li>
+                <li>Admins can suspend a listing that breaks these rules.</li>
+              </ul>
+              <label className="flex items-start gap-2 pt-1 text-sm text-white">
+                <input type="checkbox" className="accent-red-500 mt-1" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /> I have read and accept these rules.
+              </label>
             </div>
 
             <button onClick={submit} disabled={busy || !valid} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold py-3.5 rounded-xl">

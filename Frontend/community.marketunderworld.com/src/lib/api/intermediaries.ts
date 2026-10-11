@@ -56,7 +56,7 @@ export const qrUrl = (intermediaryId: string, qrId: string) => `${BASE}/public/i
 // Applicant
 export interface ApplyBody {
   displayName: string; bio?: string; services: ServiceType[]; languages?: string[]; commissionNote?: string; tradeLimitUsd?: number;
-  qrs: (ProofUpload & { label?: string })[]; currency: 'BTC' | 'USDT' | 'BINANCE'; network?: 'TRC20' | 'BEP20' | 'ERC20' | 'SOLANA';
+  acceptTerms: true; qrs: (ProofUpload & { label?: string })[]; currency: 'BTC' | 'USDT' | 'BINANCE'; network?: 'TRC20' | 'BEP20' | 'ERC20' | 'SOLANA';
 }
 export const myIntermediary = () => call<{ intermediary: OwnIntermediary | null; payment: CategoryPayment | null }>('/intermediaries/mine');
 export const applyToBeIntermediary = (body: ApplyBody) => post<{ intermediaryId: string; payment: CategoryPayment }>('/intermediaries/apply', body);

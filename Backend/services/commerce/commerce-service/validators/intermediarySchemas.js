@@ -15,6 +15,8 @@ exports.applySchema = z.object({
     commissionNote: z.string().trim().max(200).optional(),
     tradeLimitUsd: z.number().int().min(10).max(1000000).optional(),
     qrs: z.array(image.extend({ label: z.string().trim().max(60).optional() })).min(1).max(3),
+    // The applicant must accept the intermediary rules.
+    acceptTerms: z.literal(true),
     // How the intermediary pays the activation deposit.
     currency: z.enum(['BTC', 'USDT', 'BINANCE']),
     network: z.enum(['TRC20', 'BEP20', 'ERC20', 'SOLANA']).optional(),
