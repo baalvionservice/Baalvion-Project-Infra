@@ -106,7 +106,7 @@ async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
         throw new AppError('VALIDATION_ERROR', 'Attach a screenshot of the payment or enter the transaction reference', 400);
     }
     const wait = await paymentSettings.getReviewWaitMinutes();
-    return sequelize.transaction(async (t) => {
+    const saved = await sequelize.transaction(async (t) => {
         const bond = await CommerceSellerCategoryBond.findByPk(bondId, { transaction: t, lock: t.LOCK.UPDATE });
         if (!bond || String(bond.sellerUserId) !== String(authCtx.userId)) throw new AppError('NOT_FOUND', 'Payment not found', 404);
         if (bond.status !== 'awaiting_payment') throw new AppError('CONFLICT', `Payment is ${bond.status}`, 409);
@@ -117,8 +117,10 @@ async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
                 { replacements: { bond: bond.id, user: authCtx.userId, mime: p.mime, size: p.size, data: p.data }, transaction: t },
             );
         }
-        return present(bond);
+        return bond;
     });
+    // After commit, so the screenshot count includes what was just stored.
+    return present(saved);
 }
 
 // Admin: the screenshots a payer attached, as data URLs (small, JSON-safe through the same-origin proxy).
