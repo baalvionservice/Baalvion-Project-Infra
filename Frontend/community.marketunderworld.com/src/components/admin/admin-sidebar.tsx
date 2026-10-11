@@ -47,7 +47,7 @@ const ADMIN_NAV = [
   {
     group: "OVERVIEW",
     items: [
-      { name: "Global Dashboard", path: "/admin", icon: LayoutDashboard },
+      { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
       { name: "Regional Analytics", path: "/admin/analytics", icon: Globe },
     ]
   },
@@ -82,9 +82,7 @@ const ADMIN_NAV = [
   {
     group: "MARKETPLACE ESCROW",
     items: [
-      { name: "Escrow Manager", path: "/admin/marketplace/escrow", icon: Wallet },
       { name: "Intermediary Oversight", path: "/escrow/admin-dashboard", icon: ShieldCheck },
-      { name: "Crypto Payouts", path: "/admin/marketplace/payouts", icon: Bitcoin },
       { name: "Commission Tiers", path: "/admin/marketplace/commissions", icon: Percent },
     ]
   },
@@ -92,7 +90,6 @@ const ADMIN_NAV = [
     group: "SUPPORT DESK",
     items: [
       { name: "Support Tickets", path: "/admin/support/tickets", icon: LifeBuoy },
-      { name: "Refund Reversals", path: "/admin/support/refunds", icon: Undo2 },
     ]
   },
   {
@@ -121,9 +118,7 @@ const ADMIN_NAV = [
       { name: "Clubs Directory", path: "/admin/clubs", icon: MapPin },
       { name: "Events Calendar", path: "/admin/clubs/events", icon: MapPin },
       { name: "Celebrity & DJ Events", path: "/admin/clubs/celebrity-events", icon: Star },
-      { name: "DJ Demand Requests", path: "/admin/clubs/dj-demands", icon: Radio },
       { name: "Guest List & VIP Requests", path: "/admin/clubs/bookings", icon: MessageSquare },
-      { name: "Ticket Lottery", path: "/admin/clubs/lottery", icon: Ticket },
       { name: "Elite Hosted Parties", path: "/admin/clubs/elite-host", icon: Crown },
     ]
   },
@@ -158,12 +153,12 @@ export const AdminSidebar = () => {
     <div className="flex flex-col h-full bg-[#050508] border-r border-white/5 w-72 fixed left-0 top-0 z-50">
       <div className="p-8 border-b border-white/5">
         <Link href="/admin" className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-brand-green flex items-center justify-center text-black shadow-lg">
-            <span className="font-bold text-[14px]">NX</span>
+          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-lg">
+            <span className="font-bold text-sm">HR</span>
           </div>
           <div>
-            <span className="font-bold text-xl tracking-tight text-white block leading-none">NEXUS</span>
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{tier === "super" ? "Super Admin" : tier === "admin" ? "Admin" : "Moderator"}</span>
+            <span className="font-bold text-lg text-white block leading-tight">Hell Road Admin</span>
+            <span className="text-xs font-semibold text-red-400">{tier === "super" ? "Super admin" : tier === "admin" ? "Admin" : "Moderator"}</span>
           </div>
         </Link>
       </div>
@@ -200,7 +195,7 @@ export const AdminSidebar = () => {
         <Link href="/">
           <button className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all">
             <LogOut className="w-4 h-4" />
-            <span className="text-sm font-bold">Terminate Session</span>
+            <span className="text-sm font-semibold">Back to the site</span>
           </button>
         </Link>
       </div>

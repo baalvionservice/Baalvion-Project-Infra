@@ -17,6 +17,11 @@ async function proxy(request: NextRequest, path: string[]) {
   headers.set('content-type', 'application/json');
   const accessToken = request.cookies.get('access_token')?.value;
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
+  // The edge only lets admin API calls through when they come from this site's own server: it checks this key
+  // and strips it. The service still requires a signed-in staff member, so the key alone grants nothing.
+  if (path[0] === 'admin' && process.env.COMMUNITY_ADMIN_EDGE_KEY) {
+    headers.set('x-edge-key', process.env.COMMUNITY_ADMIN_EDGE_KEY);
+  }
 
   const hasBody = !['GET', 'HEAD'].includes(request.method);
   const upstream = await fetch(target.toString(), {

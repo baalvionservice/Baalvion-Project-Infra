@@ -1,154 +1,130 @@
-
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ListingCard } from '@/components/ui/ListingCard';
-import { GlobalActivityIntelligence } from '@/components/admin/GlobalActivityIntelligence';
-import { GlobalRegionIntelligence } from '@/components/admin/GlobalRegionIntelligence';
-import { Activity, Globe, Database, Terminal, ShieldCheck, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { getPlatformStats, getAuditLogs, type PlatformStats, type AuditLogEntry } from '@/lib/api/admin-users';
+import React, { useEffect, useState } from "react"
+import Link from "next/link"
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
+import { useAdminAccess } from "@/components/admin/admin-access"
+import { adminOverview, type AdminOverview } from "@/lib/api/admin-overview"
 
-const TABS = [
-  { id: 'intelligence', label: 'Global Intel', icon: Activity },
-  { id: 'regions', label: 'Regional Load', icon: Globe },
-  { id: 'audit', label: 'Audit Tunnel', icon: Database },
-];
+// Where each waiting item is handled.
+const QUEUES: { key: keyof AdminOverview["queues"]; label: string; href: string; need: string }[] = [
+  { key: "pendingBookings", label: "Guest list and VIP requests", href: "/admin/clubs/bookings", need: "content.handle" },
+  { key: "pendingApplications", label: "Applications to Locals listings", href: "/admin/locals/applications", need: "content.handle" },
+  { key: "pendingProfiles", label: "Candidate profiles to review", href: "/nightlife/verify", need: "verify.review" },
+  { key: "pendingEmployers", label: "Employers to review", href: "/nightlife/verify", need: "verify.review" },
+  { key: "submittedReports", label: "Bug bounty reports", href: "/admin/bounty", need: "bounty.manage" },
+  { key: "unreadThreads", label: "Unread bounty messages", href: "/admin/bounty", need: "bounty.manage" },
+]
 
-export default function SuperAdminDashboard() {
-  const [activeTab, setActiveTab] = useState('intelligence');
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
-  const [auditLoading, setAuditLoading] = useState(false);
+const INVENTORY: { key: keyof AdminOverview["inventory"]; label: string }[] = [
+  { key: "clubs", label: "Clubs" },
+  { key: "listings", label: "Locals listings" },
+  { key: "upcomingEvents", label: "Upcoming events" },
+  { key: "activeGigs", label: "Open gigs" },
+  { key: "hunters", label: "Bounty hunters" },
+]
 
-  useEffect(() => {
-    getPlatformStats().then(setStats).catch(() => setStats(null));
-  }, []);
+const SHORTCUTS = [
+  { href: "/admin/seller-payments", label: "Seller payments", note: "Confirm deposits and passes" },
+  { href: "/escrow/admin-dashboard", label: "Intermediaries", note: "Applications, disputes, refunds" },
+  { href: "/admin/seller-applications", label: "Seller applications", note: "Approve new sellers" },
+  { href: "/admin/payment-addresses", label: "Payment addresses", note: "Where payments are sent" },
+  { href: "/admin/moderation", label: "Listing moderation", note: "Review submitted listings" },
+  { href: "/admin/orders", label: "Orders", note: "Marketplace orders" },
+]
 
-  useEffect(() => {
-    if (activeTab !== 'audit') return;
-    setAuditLoading(true);
-    getAuditLogs({ limit: 25 })
-      .then((res) => setAuditLogs(res.items))
-      .catch(() => setAuditLogs([]))
-      .finally(() => setAuditLoading(false));
-  }, [activeTab]);
+// Hell Road admin home. Every number comes from live counts; nothing is estimated.
+export default function AdminHome() {
+  const { tier, can } = useAdminAccess()
+  const [data, setData] = useState<AdminOverview | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const load = () => {
+    setLoading(true)
+    setError(null)
+    adminOverview()
+      .then(setData)
+      .catch((e) => setError(e instanceof Error ? e.message : "Could not load the counts"))
+      .finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const queues = QUEUES.filter((q) => can(q.need as never))
+  const waiting = data ? queues.reduce((n, q) => n + (data.queues?.[q.key] ?? 0), 0) : 0
 
   return (
-    <div className="p-10 pb-32 max-w-[1600px] mx-auto space-y-12">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-brand-green font-bold text-xs uppercase tracking-[0.3em]">
-            <ShieldCheck className="w-4 h-4" /> MASTER OVERSIGHT PANEL
-          </div>
-          <h1 className="text-5xl font-bold tracking-tight uppercase font-display italic leading-none text-white">
-            Command <span className="text-brand-green">Terminal.</span>
-          </h1>
-          <p className="text-text-muted font-mono text-xs uppercase tracking-widest">
-            Global Node Administration • {stats ? `${Number(stats.userCount.count).toLocaleString()} Agents` : '…'} • Level 5 Clearance
+    <div className="max-w-6xl mx-auto space-y-10">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-red-400">Hell Road Admin</p>
+          <h1 className="text-3xl font-bold text-white mt-1">Dashboard</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Signed in as {tier === "super" ? "super admin" : tier === "admin" ? "admin" : "moderator"}.
+            {data ? ` ${waiting} item${waiting === 1 ? "" : "s"} waiting for you.` : ""}
           </p>
         </div>
-        
-        <div className="flex gap-2 p-1 bg-brand-surface border border-brand-border rounded-lg">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "flex items-center gap-2 px-6 py-2.5 rounded-md text-[10px] font-bold uppercase tracking-[0.1em] transition-all whitespace-nowrap",
-                activeTab === tab.id 
-                  ? "bg-brand-green text-brand-void shadow-lg shadow-brand-green/20" 
-                  : "text-text-muted hover:text-white hover:bg-brand-elevated"
-              )}
-            >
-              <tab.icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <button onClick={load} className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white border border-white/10 rounded-lg px-4 py-2">
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+        </button>
       </header>
 
-      {activeTab === 'intelligence' && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <ListingCard className="p-8 border-brand-green/20 bg-brand-green/5 space-y-4">
-            <div className="text-[10px] font-bold text-brand-green uppercase tracking-[0.3em]">Total Users</div>
-            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.userCount.count).toLocaleString()}</div>
-            <div className="flex items-center gap-2 text-xs font-bold text-brand-green">
-              <Activity className="w-4 h-4" /> ACROSS {Number(stats.orgCount.count).toLocaleString()} ORGS
-            </div>
-          </ListingCard>
-          <ListingCard className="p-8 border-white/5 bg-white/[0.02] space-y-4">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Active Sessions</div>
-            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.sessionCount.count).toLocaleString()}</div>
-            <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
-              <Activity className="w-4 h-4" /> LIVE RIGHT NOW
-            </div>
-          </ListingCard>
-          <ListingCard className="p-8 border-white/5 bg-white/[0.02] space-y-4">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Logins (24h)</div>
-            <div className="text-4xl font-bold text-white font-mono leading-none">{Number(stats.recentLogins.count).toLocaleString()}</div>
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
-              <ShieldCheck className="w-4 h-4" /> {Number(stats.failedLogins.count).toLocaleString()} FAILED
-            </div>
-          </ListingCard>
-          <Link href="/escrow/admin-dashboard">
-            <ListingCard className="p-8 border-red-500/30 bg-red-950/20 space-y-4 hover:border-red-500 transition-colors cursor-pointer h-full">
-              <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.3em]">Escrow Cold Vault</div>
-              <div className="text-4xl font-bold text-emerald-400 font-mono leading-none">$34,000 USDT</div>
-              <div className="flex items-center gap-2 text-xs font-bold text-red-400">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" /> 34 AGENTS • 2 DISPUTES
-              </div>
-            </ListingCard>
-          </Link>
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-200">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">The counts could not be loaded.</p>
+            <p className="text-amber-200/80">{error}. You can still use the links below.</p>
+          </div>
         </div>
       )}
 
-      <main>
-        {activeTab === 'intelligence' && <GlobalActivityIntelligence />}
-        {activeTab === 'regions' && <GlobalRegionIntelligence />}
-        
-        {activeTab === 'audit' && (
-          <div className="space-y-12">
-            <ListingCard className="p-10 border-brand-border bg-brand-surface">
-              <div className="flex items-center justify-between mb-12">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-brand-green" /> Global Platform Audit Log
-                  </h3>
-                  <p className="text-[9px] text-text-muted font-mono uppercase">Real activity from auth.audit_logs</p>
+      {loading && !data ? (
+        <div className="flex items-center gap-3 text-gray-400 py-10"><Loader2 className="w-5 h-5 animate-spin" /> Loading…</div>
+      ) : data ? (
+        <>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-4">Needs attention</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {queues.map((q) => {
+                const n = data.queues?.[q.key] ?? 0
+                return (
+                  <Link key={q.key} href={q.href} className={`rounded-xl border p-5 transition-colors ${n > 0 ? "border-red-500/40 bg-red-950/20 hover:border-red-400" : "border-white/10 bg-white/[0.02] hover:border-white/20"}`}>
+                    <div className={`text-3xl font-bold ${n > 0 ? "text-red-300" : "text-gray-300"}`}>{n.toLocaleString()}</div>
+                    <div className="text-sm text-gray-300 mt-1">{q.label}</div>
+                  </Link>
+                )
+              })}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-white mb-4">On the site</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {INVENTORY.map((i) => (
+                <div key={i.key} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                  <div className="text-2xl font-bold text-white">{(data.inventory?.[i.key] ?? 0).toLocaleString()}</div>
+                  <div className="text-sm text-gray-400 mt-1">{i.label}</div>
                 </div>
-              </div>
-              {auditLoading ? (
-                <div className="flex items-center justify-center gap-3 text-text-muted py-16">
-                  <Loader2 className="w-5 h-5 animate-spin" /> Loading…
-                </div>
-              ) : auditLogs.length === 0 ? (
-                <p className="text-text-muted text-sm py-16 text-center">No audit activity yet.</p>
-              ) : (
-                <div className="space-y-4">
-                  {auditLogs.map((log) => (
-                    <div key={log.id} className="p-5 bg-brand-void rounded border border-brand-border flex justify-between items-center group hover:border-brand-green transition-all">
-                      <div className="flex items-center gap-6">
-                        <div className="w-2 h-2 rounded-full bg-brand-green" />
-                        <div>
-                          <div className="text-xs font-bold text-white uppercase font-mono tracking-tight">{log.action}</div>
-                          <div className="text-[9px] text-text-muted uppercase font-mono mt-1">
-                            {log.user_email || log.user_id || 'system'} {log.ip_address ? `• IP: ${log.ip_address}` : ''}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <span className="text-[10px] font-mono text-text-ghost">{new Date(log.created_at).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ListingCard>
+              ))}
+            </div>
+          </section>
+        </>
+      ) : null}
+
+      {(tier === "super" || tier === "admin") && (
+        <section>
+          <h2 className="text-lg font-bold text-white mb-4">Shortcuts</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SHORTCUTS.map((s) => (
+              <Link key={s.href} href={s.href} className="rounded-xl border border-white/10 bg-white/[0.02] p-5 hover:border-red-500/50 transition-colors">
+                <div className="font-semibold text-white">{s.label}</div>
+                <div className="text-sm text-gray-400 mt-1">{s.note}</div>
+              </Link>
+            ))}
           </div>
-        )}
-      </main>
+        </section>
+      )}
     </div>
-  );
+  )
 }

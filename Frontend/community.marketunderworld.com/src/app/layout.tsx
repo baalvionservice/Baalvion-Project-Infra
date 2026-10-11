@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AnnouncementBanner } from "@/components/announcements/announcement-banner";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { CryptoTicker } from "@/components/layout/ticker";
 import { IdentityProvider } from "@/context/identity-context";
@@ -25,12 +25,6 @@ const isDev = process.env.NODE_ENV === 'development';
 const inter = Inter({ 
   subsets: ["latin"], 
   variable: "--font-inter",
-  display: 'swap',
-});
-
-const spaceGrotesk = Space_Grotesk({ 
-  subsets: ["latin"], 
-  variable: "--font-space",
   display: 'swap',
 });
 
@@ -83,7 +77,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          !isDev ? `${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}` : "font-sans",
+          !isDev ? `${inter.variable} ${jetbrainsMono.variable}` : "font-sans",
           "bg-[#0B0C0F] text-white antialiased min-h-screen flex flex-col"
         )}
         style={isDev ? { fontFamily: 'system-ui, -apple-system, sans-serif' } : {}}
