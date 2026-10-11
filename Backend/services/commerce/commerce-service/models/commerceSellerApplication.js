@@ -23,6 +23,8 @@ module.exports = function (sequelize, DataTypes) {
         // Crypto payout destination, collected on the same onboarding step.
         payoutCurrency: { type: DataTypes.STRING(10), allowNull: true },
         payoutWalletAddress: { type: DataTypes.STRING(200), allowNull: true },
+        // What the applicant told us about the business, products and shipping (see validators/sellerApplicationSchemas.js).
+        details: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
     }, {
         schema: 'commerce',
         tableName: 'commerce_seller_applications',

@@ -45,3 +45,14 @@ test('a paid tier payment names one real tier and a payment method', () => {
     assert.ok(!b.startTierSchema.safeParse({ tierSlug: 'free-forever', currency: 'USDT' }).success);
     assert.ok(!b.startTierSchema.safeParse({ tierSlug: 'vip-access', currency: 'DOGE' }).success);
 });
+
+test('a seller application accepts structured details and drops anything else', () => {
+    const a = require('../validators/sellerApplicationSchemas');
+    const base = { storeName: 'Shop', storeCode: 'shop', countryCode: 'IN', currencyCode: 'INR' };
+    const ok = a.createApplicationSchema.safeParse({ ...base, details: { businessType: 'individual', city: 'Pune', productTypes: ['phones'], sampleProducts: [{ name: 'Phone', price: '₹10,000' }], shippingMethod: 'courier', handlingDays: 2, returns: '7_days', hackerField: 'x' } });
+    assert.ok(ok.success);
+    assert.strictEqual(ok.data.details.hackerField, undefined);
+    assert.ok(!a.createApplicationSchema.safeParse({ ...base, details: { handlingDays: 99 } }).success);
+    assert.ok(!a.createApplicationSchema.safeParse({ ...base, details: { sampleProducts: [1, 2, 3, 4].map((n) => ({ name: 'p' + n })) } }).success);
+    assert.ok(a.createApplicationSchema.safeParse(base).success);
+});

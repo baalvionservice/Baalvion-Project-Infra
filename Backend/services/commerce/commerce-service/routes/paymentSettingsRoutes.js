@@ -12,7 +12,9 @@ const wrap = (fn) => async (req, res, next) => {
 
 const router = Router();
 // Any signed-in user may read how long a review takes; only a platform admin changes it.
-router.get('/', wrap(async () => ({ reviewWaitMinutes: await svc.getReviewWaitMinutes(), min: svc.MIN_WAIT, max: svc.MAX_WAIT })));
+router.get('/', wrap(async () => ({ reviewWaitMinutes: await svc.getReviewWaitMinutes(), min: svc.MIN_WAIT, max: svc.MAX_WAIT, autoPublishListings: await svc.getAutoPublish() })));
+router.put('/auto-publish', requirePlatformAdmin, validate(z.object({ autoPublishListings: z.boolean() })),
+    wrap((req) => svc.setAutoPublish(req.auth.userId, req.validated.autoPublishListings)));
 router.put('/', requirePlatformAdmin, validate(z.object({ reviewWaitMinutes: z.number().int().min(svc.MIN_WAIT).max(svc.MAX_WAIT) })),
     wrap((req) => svc.setReviewWaitMinutes(req.auth.userId, req.validated.reviewWaitMinutes)));
 

@@ -125,7 +125,11 @@ async function publishProduct(storeId, productId, userId) {
     if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
     if (!['draft', 'rejected'].includes(product.status)) throw new AppError('CONFLICT', 'Product must be a draft (or rejected listing) to submit for review', 409);
     await sellerBondService.assertCanSellInCategory(product.createdBy, product.categoryId);
-    await product.update({ status: 'pending_review', lastEditedBy: userId });
+    // An admin has already approved this seller and the seller has paid for this category, so with the setting on the
+    // listing goes straight to the marketplace. An admin can still unpublish it, or switch the setting off.
+    const goLive = await require('./paymentSettingsService').getAutoPublish();
+    if (goLive) await product.update({ status: 'published', publishedAt: new Date(), lastEditedBy: userId });
+    else await product.update({ status: 'pending_review', lastEditedBy: userId });
     await cache.del(cache.keys.product(productId));
     return product.toJSON();
 }

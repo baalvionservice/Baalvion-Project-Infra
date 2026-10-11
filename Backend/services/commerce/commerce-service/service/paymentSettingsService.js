@@ -29,4 +29,21 @@ async function setReviewWaitMinutes(adminUserId, minutes) {
     return { reviewWaitMinutes: n };
 }
 
-module.exports = { getReviewWaitMinutes, setReviewWaitMinutes, MIN_WAIT, MAX_WAIT, DEFAULT_WAIT };
+const AUTO_KEY = 'auto_publish_listings';
+
+// When on, a listing from an approved seller who has paid for its category goes live on submit; when off it waits for an admin.
+async function getAutoPublish() {
+    const [row] = await sequelize.query(`SELECT value FROM ${T} WHERE key = :k`, { type: QueryTypes.SELECT, replacements: { k: AUTO_KEY } });
+    return row ? row.value === 'on' : true;
+}
+
+async function setAutoPublish(adminUserId, on) {
+    await sequelize.query(
+        `INSERT INTO ${T} (key, value, updated_by) VALUES (:k, :v, :by)
+         ON CONFLICT (key) DO UPDATE SET value = :v, updated_by = :by, updated_at = NOW()`,
+        { replacements: { k: AUTO_KEY, v: on ? 'on' : 'off', by: adminUserId } },
+    );
+    return { autoPublishListings: !!on };
+}
+
+module.exports = { getAutoPublish, setAutoPublish, getReviewWaitMinutes, setReviewWaitMinutes, MIN_WAIT, MAX_WAIT, DEFAULT_WAIT };
