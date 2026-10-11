@@ -12,7 +12,16 @@
     // route 500s). This app has no middleware.ts, so minimal mode (which
     // skips that lookup) has no functional cost. See
     // https://github.com/opennextjs/opennextjs-cloudflare/issues/1232
-    "NEXT_PRIVATE_MINIMAL_MODE": "1"
+    "NEXT_PRIVATE_MINIMAL_MODE": "1",
+    // Server-only upstream API addresses read by the /api/*-proxy routes and server components.
+    "COMMUNITY_UPSTREAM_URL": "https://api.baalvion.com/api/v1/community",
+    "COMMERCE_UPSTREAM_URL": "https://api.baalvion.com/api/v1/commerce",
+    "ORDER_UPSTREAM_URL": "https://api.baalvion.com/api/v1/orders",
+    "WALLET_UPSTREAM_URL": "https://api.baalvion.com/api/wallets",
+    "WISHLIST_UPSTREAM_URL": "https://api.baalvion.com/api/v1/wishlists",
+    "GIFTCARD_UPSTREAM_URL": "https://api.baalvion.com/api/v1/giftcards",
+    "ADMIN_UPSTREAM_URL": "https://api.baalvion.com/api/v1",
+    "OAUTH_AUTHORIZE_URL": "https://api.baalvion.com/oidc-provider/oauth/authorize"
   },
   "assets": {
     "directory": ".open-next/assets",
