@@ -18,6 +18,7 @@ const discountRoutes = require('./discountRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const storefrontRoutes = require('./storefrontRoutes');
 const paymentSettingsRoutes = require('./paymentSettingsRoutes');
+const { publicRouter: publicIntermediaryRoutes, intermediaryRouter: intermediaryRoutes, tradeRouter: intermediaryTradeRoutes } = require('./intermediaryRoutes');
 const marketController = require('../controller/marketController');
 const mediaServeController = require('../controller/mediaServeController');
 
@@ -40,6 +41,8 @@ router.use('/commerce/members', memberRoutes.pub);
 
 // Public market registry (currency / tax / FX per supported country). No authMiddleware.
 router.get('/commerce/markets', marketController.list);
+// Public intermediary directory and QR images (no authMiddleware).
+router.use('/commerce/public/intermediaries', publicIntermediaryRoutes);
 
 // Platform-scoped (cross-store) category administration — gated by requirePlatformAdmin INSIDE
 // the router, per-route (see adminCategoryRoutes.js), same convention as
@@ -55,6 +58,8 @@ router.use('/commerce/wallet', authMiddleware, walletRoutes);
 router.use('/commerce/buyer-access', authMiddleware, buyerAccessRoutes);
 router.use('/commerce/payment-destinations', authMiddleware, paymentDestinationRoutes);
 router.use('/commerce/payment-settings', authMiddleware, paymentSettingsRoutes);
+router.use('/commerce/intermediaries', authMiddleware, intermediaryRoutes);
+router.use('/commerce/intermediary-trades', authMiddleware, intermediaryTradeRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);
 router.use('/commerce/stores/:storeId/products/:productId/reviews', authMiddleware, reviewRoutes);
 router.use('/commerce/stores/:storeId/products', authMiddleware, productRoutes);

@@ -32,6 +32,7 @@ async function issuePayment(authCtx, { kind, categoryId, currency, network, amou
     if (!CURRENCIES.includes(currency)) throw new AppError('VALIDATION_ERROR', `currency must be one of ${CURRENCIES.join(', ')}`, 400);
     const isPass = kind === 'buyer_access';
     const isTopup = kind === 'wallet_topup';
+    const isActivation = kind === 'agent_activation';
     if (isTopup) {
         const { minTopupUsd, maxTopupUsd } = config.points;
         if (!Number.isFinite(amountUsd) || amountUsd < minTopupUsd || amountUsd > maxTopupUsd) {
@@ -40,7 +41,7 @@ async function issuePayment(authCtx, { kind, categoryId, currency, network, amou
     }
 
     let rootId = null;
-    if (!isPass && !isTopup) {
+    if (!isPass && !isTopup && !isActivation) {
         if (!(await isApprovedSeller(authCtx.userId))) throw new AppError('FORBIDDEN', 'Your seller application must be approved first', 403);
         rootId = await rootCategoryId(categoryId);
     }
@@ -50,13 +51,14 @@ async function issuePayment(authCtx, { kind, categoryId, currency, network, amou
     const existing = await CommerceSellerCategoryBond.findOne({
         where: isTopup ? { sellerUserId: authCtx.userId, kind: 'wallet_topup', status: ['awaiting_payment', 'payment_submitted'] }
             : isPass ? { sellerUserId: authCtx.userId, kind: 'buyer_access', status: LIVE }
+            : isActivation ? { sellerUserId: authCtx.userId, kind: 'agent_activation', status: LIVE }
             : { sellerUserId: authCtx.userId, kind: 'category', categoryId: rootId, status: LIVE },
     });
     if (existing) throw new AppError('CONFLICT', isTopup ? 'You already have a wallet load in progress' : isPass ? 'You already have an access pass' : 'You already have access to this category', 409);
 
     const bond = await CommerceSellerCategoryBond.create({
-        sellerUserId: authCtx.userId, kind: isTopup ? 'wallet_topup' : isPass ? 'buyer_access' : 'category', categoryId: rootId,
-        amountUsd: isTopup ? amountUsd : isPass ? config.buyerAccess.amountUsd : config.sellerBond.amountUsd, currency,
+        sellerUserId: authCtx.userId, kind: isTopup ? 'wallet_topup' : isPass ? 'buyer_access' : isActivation ? 'agent_activation' : 'category', categoryId: rootId,
+        amountUsd: isTopup ? amountUsd : isPass ? config.buyerAccess.amountUsd : isActivation ? config.intermediary.depositUsd : config.sellerBond.amountUsd, currency,
         // Frozen on the payment: what the payer was told is what the admin checks against, even if the address is changed later.
         payToAddress: dest.address, payToNetwork: dest.network, payToLabel: dest.label,
     });
@@ -119,6 +121,7 @@ async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
         }
         return bond;
     });
+    if (saved.kind === 'agent_activation') await require('./intermediaryService').onPaymentSubmitted(saved.id);
     // After commit, so the screenshot count includes what was just stored.
     return present(saved);
 }
@@ -152,12 +155,18 @@ async function listAll(query = {}) {
         { type: QueryTypes.SELECT, replacements: { ids: rows.map((r) => r.id) } },
     ) : [];
     const proofCount = new Map(proofRows.map((r) => [r.bondId, r.n]));
+    const actRows = rows.filter((r) => r.kind === 'agent_activation').map((r) => r.id);
+    const actInfo = actRows.length ? await sequelize.query(
+        'SELECT id, deposit_bond_id AS "bondId", display_name AS "name" FROM commerce.commerce_intermediaries WHERE deposit_bond_id IN (:ids)',
+        { type: QueryTypes.SELECT, replacements: { ids: actRows } },
+    ) : [];
+    const actByBond = new Map(actInfo.map((a) => [a.bondId, a]));
     const memberNo = new Map(profiles.map((m) => [String(m.userId), m.memberNumber]));
     const catName = new Map(cats.map((c) => [c.id, c.name]));
     const seller = new Map(apps.map((a) => [String(a.applicantUserId), a]));
     const data = rows.map((r) => {
         const a = seller.get(String(r.sellerUserId));
-        return { ...r.toJSON(), proofCount: proofCount.get(r.id) || 0, categoryName: catName.get(r.categoryId) || null, sellerName: a ? (a.legalFullName || a.storeName) : null, storeName: a ? a.storeName : null, memberNumber: memberNo.get(String(r.sellerUserId)) ? `HR-${memberNo.get(String(r.sellerUserId))}` : null };
+        return { ...r.toJSON(), intermediaryId: (actByBond.get(r.id) || {}).id || null, intermediaryName: (actByBond.get(r.id) || {}).name || null, proofCount: proofCount.get(r.id) || 0, categoryName: catName.get(r.categoryId) || null, sellerName: a ? (a.legalFullName || a.storeName) : null, storeName: a ? a.storeName : null, memberNumber: memberNo.get(String(r.sellerUserId)) ? `HR-${memberNo.get(String(r.sellerUserId))}` : null };
     });
     return buildPaginated(data, count, { page, limit });
 }
@@ -187,7 +196,10 @@ async function confirmPayment(authCtx, bondId, { amountReceived, note, creditUsd
                 `INSERT INTO commerce.commerce_points_ledger (user_id, delta, reason, ref_id, member_number, note) VALUES (:u, :points, 'topup', :ref, :member, :note)`,
                 { replacements: { u: bond.sellerUserId, points: Math.round(usd * config.points.perUsd), ref: bond.id, member: profile ? profile.member_number : null, note: `Wallet load: $${usd.toFixed(2)} received` }, transaction: t },
             );
-        } else if (bond.kind !== 'buyer_access') {
+        } else if (bond.kind === 'agent_activation') {
+            // The deposit activates and lists the intermediary; it credits nothing.
+            await require('./intermediaryService').onPaymentConfirmed(bond.id, authCtx.userId, Number(bond.amountUsd), t);
+        } else if (bond.kind === 'category') {
             // Tokens come with a seller's category payment only; a buyer's access pass credits nothing.
             await sequelize.query(
                 `INSERT INTO commerce.commerce_seller_token_ledger (seller_user_id, delta, reason, ref_id) VALUES (:seller, :delta, 'category_payment', :ref)`,
@@ -197,8 +209,11 @@ async function confirmPayment(authCtx, bondId, { amountReceived, note, creditUsd
         return bond.toJSON();
     });
 }
-const rejectPayment = (authCtx, bondId, { note }) =>
-    transition(bondId, ['payment_submitted'], { status: 'rejected', confirmedBy: authCtx.userId, closedAt: new Date(), note });
+const rejectPayment = async (authCtx, bondId, { note }) => {
+    const bond = await transition(bondId, ['payment_submitted'], { status: 'rejected', confirmedBy: authCtx.userId, closedAt: new Date(), note });
+    if (bond.kind === 'agent_activation') await require('./intermediaryService').onPaymentClosed(bond.id, 'rejected');
+    return bond;
+};
 
 // Once access to a category is revoked, the seller's listings in that category must leave the storefront.
 async function archiveListings(bond) {
@@ -218,7 +233,8 @@ async function closeBond(authCtx, bondId, from, status, note) {
     const existing = await CommerceSellerCategoryBond.findByPk(bondId, { attributes: ['kind'] });
     if (existing && existing.kind === 'wallet_topup') throw new AppError('CONFLICT', 'A wallet load cannot be revoked here — its points are already in the buyer\'s wallet', 409);
     const bond = await transition(bondId, from, { status, confirmedBy: authCtx.userId, closedAt: new Date(), note });
-    if (bond.kind !== 'buyer_access') await archiveListings(bond);
+    if (bond.kind === 'category') await archiveListings(bond);
+    if (bond.kind === 'agent_activation') await require('./intermediaryService').onPaymentClosed(bond.id, 'suspended');
     return bond;
 }
 

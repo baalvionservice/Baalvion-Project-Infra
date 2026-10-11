@@ -28,7 +28,6 @@ import {
   Globe,
   Plus
 } from "lucide-react";
-import { createNewTrade } from "@/lib/escrow-store";
 
 interface FounderProfile {
   id: string;
@@ -217,15 +216,6 @@ export default function ScalingDatingPlatformPage() {
     if (!selectedFounder) return;
 
     const totalUsdt = selectedFounder.hourlyRateUsdt * hours;
-    createNewTrade({
-      memberId: selectedFounder.id,
-      memberName: `${selectedFounder.name} (${selectedFounder.companyName})`,
-      serviceType: "crypto_trade",
-      amount: totalUsdt,
-      paymentMethod: paymentMethod === 'usdt' ? 'USDT' : paymentMethod,
-      instructions: `FOUNDER DATE BOOKING: ${sessionType.toUpperCase()} with ${selectedFounder.name} for ${hours} hours ($${totalUsdt} USDT held in Escrow)`
-    });
-
     setRentedFounders((prev) => [...prev, selectedFounder]);
     setBookingSuccess(true);
   };

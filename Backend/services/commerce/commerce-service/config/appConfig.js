@@ -69,6 +69,10 @@ module.exports = {
         minTopupUsd: Number(process.env.WALLET_TOPUP_MIN_USD || 10),
         maxTopupUsd: Number(process.env.WALLET_TOPUP_MAX_USD || 5000),
     },
+    // Refundable deposit an intermediary pays to be activated and listed (an admin confirms it; refunds are manual).
+    intermediary: {
+        depositUsd: Number(process.env.INTERMEDIARY_DEPOSIT_USD || 1000),
+    },
     // One-time fee a buyer pays to enter the marketplace and buy.
     buyerAccess: {
         amountUsd: Number(process.env.BUYER_ACCESS_USD || 50),

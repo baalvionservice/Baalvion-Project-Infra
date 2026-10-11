@@ -1,327 +1,247 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { 
-  MessageSquare, 
-  AlertCircle, 
-  FileUp, 
-  ShieldCheck, 
-  QrCode, 
-  Send, 
-  CheckCircle, 
-  Clock, 
-  ExternalLink,
-  ChevronRight,
-  RefreshCw,
-  X
-} from "lucide-react";
-import { getStoredTrades, appendChatMessage, updateTradeState, AGENTS, buildUpiUri } from "@/lib/escrow-store";
-import { ServiceRequest } from "@/lib/escrow-types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ImagePlus, Loader2, Send, X } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { fileToProof, type ProofWithPreview } from "@/lib/image-proof";
+import {
+  SERVICE_LABEL, addTradeProofs, cancelTrade, completeTrade, confirmTradePayment, disputeTrade, getTrade, listTrades, markTradePaid,
+  qrUrl, sendTradeMessage, tradeProofs, type Trade, type TradeDetail, type TradeProofImage, type TradeStatus,
+} from "@/lib/api/intermediaries";
 
-export default function MyTradesPage() {
-  const [trades, setTrades] = useState<ServiceRequest[]>([]);
-  const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
-  const [inputText, setInputText] = useState("");
-  
-  // Modals
-  const [showQrModal, setShowQrModal] = useState(false);
-  const [showProofModal, setShowProofModal] = useState(false);
-  const [utrRef, setUtrRef] = useState("");
+const STATUS_LABEL: Record<TradeStatus, string> = {
+  created: "Waiting for your payment", payment_submitted: "Payment sent, waiting for the intermediary", in_progress: "In progress",
+  completed: "Completed", cancelled: "Cancelled", disputed: "In dispute, an admin is reviewing",
+};
+const STATUS_COLOR: Record<TradeStatus, string> = {
+  created: "text-amber-400", payment_submitted: "text-sky-400", in_progress: "text-purple-400", completed: "text-emerald-400", cancelled: "text-zinc-500", disputed: "text-red-400",
+};
+
+function Shots({ value, onChange }: { value: ProofWithPreview[]; onChange: (v: ProofWithPreview[]) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const add = async (files: FileList | null) => {
+    if (!files) return;
+    const next = await Promise.all(Array.from(files).slice(0, 3 - value.length).map((f) => fileToProof(f)));
+    onChange([...value, ...next]);
+    if (ref.current) ref.current.value = "";
+  };
+  return (
+    <div className="flex flex-wrap gap-2">
+      {value.map((s, i) => (
+        <div key={i} className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={s.preview} alt={`Screenshot ${i + 1}`} className="h-20 w-16 object-cover rounded-md border border-zinc-700" />
+          <button aria-label="Remove" onClick={() => onChange(value.filter((_, j) => j !== i))} className="absolute -top-1.5 -right-1.5 bg-black border border-zinc-600 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+        </div>
+      ))}
+      {value.length < 3 && (
+        <button onClick={() => ref.current?.click()} className="h-20 w-16 flex flex-col items-center justify-center gap-1 rounded-md border border-dashed border-zinc-600 text-zinc-400 hover:text-white text-[10px]"><ImagePlus className="w-5 h-5" /> Add</button>
+      )}
+      <input ref={ref} type="file" accept="image/*" multiple className="hidden" aria-label="Attach screenshot" onChange={(e) => void add(e.target.files)} />
+    </div>
+  );
+}
+
+function Trades() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [trades, setTrades] = useState<Trade[] | null>(null);
+  const [selected, setSelected] = useState<string | null>(params.get("trade"));
+  const [detail, setDetail] = useState<TradeDetail | null>(null);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [shots, setShots] = useState<ProofWithPreview[]>([]);
+  const [note, setNote] = useState("");
+  const [disputing, setDisputing] = useState(false);
+  const [reason, setReason] = useState("");
+  const [images, setImages] = useState<TradeProofImage[] | null>(null);
+  const [big, setBig] = useState<string | null>(null);
+  const bottom = useRef<HTMLDivElement>(null);
+
+  const fail = (title: string, e: unknown) => toast({ variant: "destructive", title, description: e instanceof Error ? e.message : "Please try again." });
+  const loadList = useCallback(async () => { try { setTrades((await listTrades()).items); } catch (e) { fail("Couldn't load trades", e); setTrades([]); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const loadDetail = useCallback(async (id: string) => { try { setDetail(await getTrade(id)); } catch { setDetail(null); } }, []);
 
   useEffect(() => {
-    const list = getStoredTrades();
-    setTrades(list);
-    if (list.length > 0 && !selectedTradeId) {
-      setSelectedTradeId(list[0].id);
-    }
-  }, []);
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push("/auth/signin?redirect=/escrow/my-trades"); return; }
+    void loadList();
+    const t = setInterval(() => void loadList(), 20000);
+    return () => clearInterval(t);
+  }, [authLoading, isAuthenticated, router, loadList]);
 
-  const refreshTrades = () => {
-    const list = getStoredTrades();
-    setTrades(list);
+  useEffect(() => {
+    if (!selected) { setDetail(null); return; }
+    setImages(null);
+    void loadDetail(selected);
+    const t = setInterval(() => void loadDetail(selected), 8000);
+    return () => clearInterval(t);
+  }, [selected, loadDetail]);
+
+  useEffect(() => { bottom.current?.scrollIntoView({ behavior: "smooth" }); }, [detail?.messages.length]);
+
+  const run = async (fn: () => Promise<TradeDetail>, ok?: string) => {
+    setBusy(true);
+    try { setDetail(await fn()); if (ok) toast({ title: ok }); void loadList(); }
+    catch (e) { fail("That did not work", e); }
+    finally { setBusy(false); }
   };
 
-  const activeTrade = trades.find((t) => t.id === selectedTradeId);
-  const assignedAgent = AGENTS.find((a) => a.id === activeTrade?.memberId);
-
-  const inrTotal = (activeTrade?.totalCost || 100) * 90;
-  const upiUri = assignedAgent?.upiId && activeTrade
-    ? buildUpiUri(assignedAgent.upiId, inrTotal, assignedAgent.name || "Intermediary", activeTrade.id)
-    : "";
-
-  const handleSendMessage = () => {
-    if (!inputText.trim() || !activeTrade) return;
-
-    appendChatMessage(activeTrade.id, {
-      requestId: activeTrade.id,
-      senderId: "current_user",
-      senderName: "You (Buyer)",
-      senderRole: "customer",
-      text: inputText.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-
-    setInputText("");
-    refreshTrades();
+  const showShots = async () => {
+    if (!detail) return;
+    try { setImages(await tradeProofs(detail.id)); } catch (e) { fail("Couldn't load screenshots", e); }
   };
 
-  const handleSubmitProof = () => {
-    if (!activeTrade || !utrRef.trim()) return;
-
-    updateTradeState(activeTrade.id, {
-      status: "payment_verification",
-      paymentProviderReference: utrRef.trim()
-    });
-
-    appendChatMessage(activeTrade.id, {
-      requestId: activeTrade.id,
-      senderId: "current_user",
-      senderName: "You (Buyer)",
-      senderRole: "customer",
-      text: `Submitted Fiat Payment Proof! UTR Ref: ${utrRef.trim()}`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-
-    setShowProofModal(false);
-    setUtrRef("");
-    refreshTrades();
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "payment_verification":
-        return <span className="bg-yellow-950 text-yellow-400 border border-yellow-800 text-xs px-2.5 py-0.5 rounded font-bold">Verifying Payment</span>;
-      case "in_progress":
-        return <span className="bg-blue-950 text-blue-400 border border-blue-800 text-xs px-2.5 py-0.5 rounded font-bold">Agent In Progress</span>;
-      case "completed":
-        return <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs px-2.5 py-0.5 rounded font-bold">Completed</span>;
-      default:
-        return <span className="bg-zinc-900 text-zinc-400 border border-zinc-800 text-xs px-2.5 py-0.5 rounded font-bold">Created</span>;
-    }
-  };
+  const d = detail;
+  const isCustomer = d?.role === "customer";
+  const isInt = d?.role === "intermediary";
+  const open = d && !["completed", "cancelled"].includes(d.status);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 text-white min-h-screen flex flex-col md:flex-row gap-6">
-      
-      {/* Left Column: Trade Directory */}
-      <div className={`transition-all ${selectedTradeId ? 'w-full md:w-5/12' : 'w-full'}`}>
-        <div className="flex justify-between items-end mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Escrow Workspaces</h1>
-            <p className="text-zinc-400 text-xs mt-1">Manage active agent trades & fiat transfers.</p>
-          </div>
-          <Link href="/escrow/access-counter" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition-colors">
-            + New Trade
-          </Link>
+    <div className="max-w-6xl mx-auto p-6 text-white min-h-screen">
+      <div className="flex justify-between items-end mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">My trades</h1>
+          <p className="text-sm text-zinc-400">Trades you started, and trades customers started with you.</p>
         </div>
-
-        <div className="space-y-3">
-          {trades.map((t) => (
-            <div 
-              key={t.id} 
-              onClick={() => setSelectedTradeId(t.id)}
-              className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                selectedTradeId === t.id 
-                  ? "bg-zinc-900 border-red-500/80 shadow-lg shadow-red-950/20" 
-                  : "bg-zinc-950 border-zinc-800/80 hover:border-zinc-700"
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <div className="font-bold text-sm text-white">{t.instructions || t.serviceType}</div>
-                  <div className="text-[11px] font-mono text-zinc-400 mt-0.5">{t.id} • {new Date(t.createdAt).toLocaleDateString()}</div>
-                </div>
-                {getStatusBadge(t.status)}
-              </div>
-
-              <div className="flex justify-between items-center text-xs text-zinc-300 mt-3 pt-3 border-t border-zinc-800/60">
-                <div className="flex items-center gap-1.5 text-zinc-400">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> {t.memberName || "Verified Agent"}
-                </div>
-                <div className="font-bold font-mono text-emerald-400">{t.amount} USDT (≈ ₹{(t.totalCost * 90).toLocaleString()})</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <Link href="/escrow/intermediaries" className="text-sm text-red-400 hover:underline">Find an intermediary</Link>
       </div>
 
-      {/* Right Column: Interactive Workspace & Chat */}
-      {activeTrade ? (
-        <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col h-[82vh] sticky top-20 overflow-hidden shadow-2xl">
-          
-          {/* Header */}
-          <div className="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-bold text-base text-white">{activeTrade.id}</h2>
-                <span className="text-xs text-zinc-500 font-mono">• {activeTrade.serviceType.toUpperCase()}</span>
-              </div>
-              <p className="text-xs text-emerald-400 font-medium">Assigned Agent: {activeTrade.memberName}</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowQrModal(true)}
-                className="bg-purple-950/80 hover:bg-purple-900 border border-purple-800 text-purple-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
-              >
-                <QrCode className="w-4 h-4 text-purple-400" /> PhonePe / GPay QR
+      {trades === null ? <div className="py-16 flex justify-center text-zinc-400"><Loader2 className="w-5 h-5 animate-spin" /></div> : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-2 lg:col-span-1">
+            {trades.length === 0 && <p className="text-sm text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-6">No trades yet. Pick an intermediary to start one.</p>}
+            {trades.map((t) => (
+              <button key={t.id} onClick={() => { setSelected(t.id); router.replace(`/escrow/my-trades?trade=${t.id}`); }}
+                className={`w-full text-left bg-zinc-900 border rounded-xl p-4 hover:border-zinc-600 ${selected === t.id ? "border-red-500" : "border-zinc-800"}`}>
+                <div className="flex justify-between text-sm"><span className="font-mono">{t.ref}</span><span className={`text-xs ${STATUS_COLOR[t.status]}`}>{t.status.replace(/_/g, " ")}</span></div>
+                <div className="text-xs text-zinc-400 mt-1">{SERVICE_LABEL[t.serviceType]}{t.amountUsdt ? ` · ${t.amountUsdt} USDT` : ""} · {t.role === "customer" ? `with ${t.intermediary.name}` : "you are the intermediary"}</div>
               </button>
-            </div>
+            ))}
           </div>
 
-          {/* Payment Guidance Bar */}
-          <div className="p-4 bg-zinc-950/80 border-b border-zinc-800 flex flex-wrap justify-between items-center gap-3 text-xs">
-            <div>
-              <span className="text-zinc-400">Total Payable: </span>
-              <strong className="text-emerald-400 font-bold text-sm">₹{inrTotal.toLocaleString()} INR ({activeTrade.totalCost} USDT)</strong>
-            </div>
+          <div className="lg:col-span-2">
+            {!d ? <p className="text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center">{selected ? "Loading…" : "Select a trade to see the chat and next steps."}</p> : (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+                <div className="flex flex-wrap justify-between gap-3">
+                  <div>
+                    <div className="font-mono text-lg">{d.ref}</div>
+                    <div className="text-sm text-zinc-400">{SERVICE_LABEL[d.serviceType]}{d.amountUsdt ? ` · ${d.amountUsdt} USDT` : ""} · {isCustomer ? d.intermediary.name : `customer #${d.customerUserId}`}</div>
+                  </div>
+                  <div className={`text-sm font-bold ${STATUS_COLOR[d.status]}`}>{STATUS_LABEL[d.status]}</div>
+                </div>
+                {d.instructions && <p className="text-sm text-zinc-300 bg-zinc-950 border border-zinc-800 rounded-lg p-3 whitespace-pre-line">{d.instructions}</p>}
+                {d.disputeReason && <p className="text-sm text-red-300">Dispute: {d.disputeReason}</p>}
+                {d.resolutionNote && <p className="text-sm text-zinc-300">Admin decision: {d.resolutionNote}</p>}
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowProofModal(true)}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-colors"
-              >
-                <FileUp className="w-3.5 h-3.5" /> Submit Fiat Payment UTR
-              </button>
-              <Link 
-                href="/escrow/disputes" 
-                className="bg-zinc-800 hover:bg-zinc-700 text-orange-400 border border-orange-900/40 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors"
-              >
-                <AlertCircle className="w-3.5 h-3.5" /> Dispute
-              </Link>
-            </div>
-          </div>
+                {isCustomer && (d.status === "created" || d.status === "payment_submitted") && d.payQrs.length > 0 && (
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
+                    <p className="text-sm text-zinc-300">Agree the amount in the chat, then pay by scanning. The name shown must be <strong className="text-white">{d.intermediary.name}</strong>.</p>
+                    <div className="flex flex-wrap gap-4">
+                      {d.payQrs.map((q) => (
+                        <div key={q.id} className="space-y-1">
+                          <p className="text-xs font-bold">{q.label}</p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={qrUrl(d.intermediary.id, q.id)} alt={`${d.intermediary.name} ${q.label} QR`} className="w-40 h-40 rounded-md border border-zinc-800 bg-white object-contain" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          {/* Chat Stream */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-900/50">
-            <div className="text-center text-[11px] text-zinc-500 my-2 border-b border-zinc-800/80 pb-3">
-              Trade chat with your intermediary • Pay only by scanning the QR shown on their page
-            </div>
+                <div className="flex flex-wrap gap-2">
+                  {isCustomer && d.status === "created" && <button onClick={() => setPaying(true)} className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">I have paid</button>}
+                  {isInt && d.status === "payment_submitted" && <button disabled={busy} onClick={() => run(() => confirmTradePayment(d.id), "Payment confirmed")} className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Payment received</button>}
+                  {isInt && d.status === "in_progress" && <button disabled={busy} onClick={() => run(() => completeTrade(d.id), "Marked as completed")} className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Mark completed</button>}
+                  {open && d.status !== "disputed" && ((isCustomer && d.status === "created") || (isInt && ["created", "payment_submitted", "in_progress"].includes(d.status))) && (
+                    <button disabled={busy} onClick={() => run(() => cancelTrade(d.id), "Trade cancelled")} className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm">Cancel trade</button>
+                  )}
+                  {(["payment_submitted", "in_progress"].includes(d.status) || d.status === "completed") && d.role !== "admin" && (
+                    <button onClick={() => setDisputing(true)} className="bg-red-900/40 hover:bg-red-900/70 text-red-300 px-4 py-2 rounded-lg text-sm">Raise a dispute</button>
+                  )}
+                  {d.proofs.length > 0 && <button onClick={showShots} className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm">View {d.proofs.length} screenshot{d.proofs.length > 1 ? "s" : ""}</button>}
+                </div>
 
-            {(activeTrade.chatMessages || []).map((msg) => (
-              <div key={msg.id} className={`flex flex-col ${msg.senderId === 'current_user' ? 'items-end' : 'items-start'}`}>
-                <span className="text-[10px] text-zinc-500 mb-1">{msg.senderName} • {msg.timestamp}</span>
-                <div className={`p-3.5 rounded-2xl max-w-[80%] text-sm ${
-                  msg.senderId === 'current_user' 
-                    ? 'bg-red-600 text-white rounded-br-none' 
-                    : 'bg-zinc-950 border border-zinc-800 text-zinc-200 rounded-bl-none'
-                }`}>
-                  {msg.text}
+                {images && (
+                  <div className="flex flex-wrap gap-3">
+                    {images.map((p) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={p.id} src={p.dataUrl} alt={`Screenshot from the ${p.uploaderRole}`} onClick={() => setBig(p.dataUrl)} className="h-36 rounded-lg border border-zinc-700 cursor-zoom-in" />
+                    ))}
+                  </div>
+                )}
+
+                <div className="border-t border-zinc-800 pt-4">
+                  <div className="h-64 overflow-y-auto space-y-2 pr-1" aria-label="Trade chat">
+                    {d.messages.length === 0 && <p className="text-xs text-zinc-500">No messages yet. Say hello and agree the details here.</p>}
+                    {d.messages.map((m) => (
+                      <div key={m.id} className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${m.senderRole === d.role ? "ml-auto bg-red-900/40" : "bg-zinc-800"}`}>
+                        <div className="text-[10px] text-zinc-400 mb-0.5">{m.senderRole === d.role ? "You" : m.senderRole} · {new Date(m.createdAt).toLocaleString()}</div>
+                        <div className="whitespace-pre-line break-words">{m.body}</div>
+                      </div>
+                    ))}
+                    <div ref={bottom} />
+                  </div>
+                  {d.status !== "cancelled" && (
+                    <form className="flex gap-2 mt-3" onSubmit={(e) => { e.preventDefault(); const b = text.trim(); if (!b) return; setText(""); void run(() => sendTradeMessage(d.id, b)); }}>
+                      <input value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} placeholder="Type a message…" aria-label="Message" className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm" />
+                      <button disabled={busy || !text.trim()} className="bg-red-600 hover:bg-red-700 disabled:opacity-40 rounded-lg px-4" aria-label="Send"><Send className="w-4 h-4" /></button>
+                    </form>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Message Input */}
-          <div className="p-4 border-t border-zinc-800 bg-zinc-950 flex gap-2">
-            <input 
-              type="text" 
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Type message to agent..." 
-              className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 font-sans"
-            />
-            <button 
-              onClick={handleSendMessage}
-              className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl transition-colors flex items-center justify-center"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center border-2 border-dashed border-zinc-800 rounded-2xl text-zinc-500 text-sm">
-          Select a trade workspace to view live chat & PhonePe QR details.
-        </div>
-      )}
-
-      {/* Dynamic UPI / PhonePe / GPay QR Modal */}
-      {showQrModal && activeTrade && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-white text-center relative">
-            <button 
-              onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-bold text-lg mb-1">Scan & Pay via PhonePe / GPay</h3>
-            <p className="text-xs text-zinc-400 mb-4">Scan with any Indian UPI app to pay agent directly.</p>
-
-            {(assignedAgent?.paymentQrs ?? []).map((q) => (
-              <div key={q.url} className="mb-4 space-y-1">
-                <p className="text-xs font-bold text-white">{q.label}</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={q.url} alt={`${assignedAgent?.name} ${q.label} QR`} className="mx-auto w-full max-w-[220px] rounded-lg bg-white border border-zinc-800" />
-              </div>
-            ))}
-
-            <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-left space-y-2 text-xs font-mono mb-4">
-              <div><span className="text-zinc-500">Pay to: </span><strong className="text-purple-400">{assignedAgent?.name ?? "—"}</strong> (check this name in your UPI app)</div>
-              <div><span className="text-zinc-500">Amount: </span><strong className="text-emerald-400">₹{inrTotal.toLocaleString()} INR</strong></div>
-              <div><span className="text-zinc-500">Trade Ref: </span><strong className="text-white">{activeTrade.id}</strong></div>
-            </div>
-
-            {upiUri && (
-              <a
-                href={upiUri}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors text-xs flex items-center justify-center gap-2"
-              >
-                Open in my UPI app
-              </a>
             )}
           </div>
         </div>
       )}
 
-      {/* Submit Payment Proof Modal */}
-      {showProofModal && activeTrade && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 text-white relative">
-            <button 
-              onClick={() => setShowProofModal(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-              <FileUp className="w-5 h-5 text-red-500" /> Submit Payment UTR Reference
-            </h3>
-            <p className="text-xs text-zinc-400 mb-4">Enter the 12-digit UTR reference number from your PhonePe or GPay transaction receipt.</p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-semibold">12-Digit PhonePe / GPay UTR Reference</label>
-                <input 
-                  type="text" 
-                  value={utrRef}
-                  onChange={(e) => setUtrRef(e.target.value)}
-                  placeholder="e.g. 429104829102" 
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-red-500"
-                />
-              </div>
-
-              <div className="border-2 border-dashed border-zinc-800 p-4 rounded-xl text-center">
-                <FileUp className="w-8 h-8 text-zinc-500 mx-auto mb-2" />
-                <span className="text-xs text-zinc-400 block font-semibold">Upload Payment Screenshot</span>
-                <span className="text-[10px] text-zinc-600">JPG, PNG up to 5MB</span>
-              </div>
-
-              <button
-                onClick={handleSubmitProof}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
-              >
-                <CheckCircle className="w-4 h-4" /> Notify Agent of Payment
-              </button>
+      {paying && d && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h2 className="text-xl font-bold">Tell {d.intermediary.name} you have paid</h2>
+            <p className="text-sm text-zinc-400">Attach a screenshot of your payment so they can check it.</p>
+            <Shots value={shots} onChange={setShots} />
+            <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Note, for example the amount (optional)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm" />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => { setPaying(false); setShots([]); }} className="px-4 py-2 text-sm text-zinc-400">Cancel</button>
+              <button disabled={busy || shots.length === 0} onClick={async () => { await run(() => markTradePaid(d.id, shots.map(({ mime, data }) => ({ mime, data })), note || undefined), "Sent for checking"); setPaying(false); setShots([]); setNote(""); }}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 px-5 py-2 rounded-lg text-sm font-bold">Send</button>
             </div>
           </div>
         </div>
       )}
 
+      {disputing && d && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h2 className="text-xl font-bold">Raise a dispute</h2>
+            <p className="text-sm text-zinc-400">An admin will read the chat and screenshots and decide. Explain what went wrong (at least 10 characters).</p>
+            <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} maxLength={1000} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm" />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDisputing(false)} className="px-4 py-2 text-sm text-zinc-400">Cancel</button>
+              <button disabled={busy || reason.trim().length < 10} onClick={async () => { await run(() => disputeTrade(d.id, reason.trim()), "Dispute raised"); setDisputing(false); setReason(""); }}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-40 px-5 py-2 rounded-lg text-sm font-bold">Raise dispute</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {big && (
+        <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-6 cursor-zoom-out" onClick={() => setBig(null)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={big} alt="Screenshot, full size" className="max-h-full max-w-full rounded-lg" />
+        </div>
+      )}
     </div>
   );
+}
+
+export default function MyTradesPage() {
+  return <Suspense fallback={<div className="p-24 flex justify-center text-zinc-400"><Loader2 className="w-5 h-5 animate-spin" /></div>}><Trades /></Suspense>;
 }
