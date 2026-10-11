@@ -53,6 +53,20 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
           <Breadcrumbs items={breadcrumbItems} />
         </div>
 
+        <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { href: "/clubs/events", title: "Events and DJ nights", note: "Upcoming nights at partner clubs" },
+            { href: "/clubs/lottery", title: "Ticket draw", note: "Enter with wallet points" },
+            { href: "/clubs/dj-demand", title: "Demand your DJ", note: "Pledge toward a booking" },
+            { href: "/clubs/my-bookings", title: "My bookings", note: "Guest list and VIP requests" },
+          ].map((f) => (
+            <Link key={f.href} href={f.href} className="bg-white border border-gray-200 p-4 hover:border-black transition-colors">
+              <div className="font-bold text-sm">{f.title}</div>
+              <div className="text-xs text-gray-500 mt-1">{f.note}</div>
+            </Link>
+          ))}
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Main Content Area */}
