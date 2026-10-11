@@ -6,7 +6,7 @@ export function WithNavbar({ children, pad = true }: { children: React.ReactNode
   return (
     <>
       <Navbar />
-      <div className={pad ? "pt-24" : undefined}>{children}</div>
+      <div className={pad ? "pt-24" : "pt-4"}>{children}</div>
     </>
   )
 }
