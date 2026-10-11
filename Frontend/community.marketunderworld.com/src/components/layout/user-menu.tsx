@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ChevronDown, LayoutDashboard, LogOut, Settings, ShieldCheck, ShoppingBag, UserRound, Wallet } from "lucide-react"
+import { ChevronDown, Handshake, LayoutDashboard, LogOut, Settings, ShieldCheck, ShoppingBag, UserRound, Wallet } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { getMyProfile, photoUrl, type MyProfile } from "@/lib/api/profile"
 
@@ -16,6 +16,7 @@ const ITEMS = [
   { href: "/kyc", label: "Identity verification (KYC)", icon: ShieldCheck },
   { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/invoices", label: "My orders", icon: ShoppingBag },
+  { href: "/escrow/my-trades", label: "My trades", icon: Handshake },
   { href: "/settings/notifications", label: "Settings", icon: Settings },
 ]
 

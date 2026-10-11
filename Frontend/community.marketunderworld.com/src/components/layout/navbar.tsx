@@ -23,7 +23,6 @@ const NAV_ITEMS: { name: string; path: string; authOnly?: boolean }[] = [
   { name: 'Live Sessions', path: '/live-sessions' },
   { name: 'Dating', path: '/dating' },
   { name: 'Intermediaries', path: '/escrow/intermediaries' },
-  { name: 'My Trades', path: '/escrow/my-trades', authOnly: true },
 ];
 
 export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: boolean } = {}) => {
@@ -88,7 +87,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
           </Link>
 
           {/* ── Desktop Nav Links (lg+) ── */}
-          <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-center px-4">
+          <div className="hidden xl:flex items-center gap-0.5 flex-1 justify-center px-4">
             {NAV_ITEMS.filter((item) => !item.authOnly || isAuthenticated).map((item) => (
               <a
                 key={item.name}
@@ -102,17 +101,6 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
                 {item.name}
               </a>
             ))}
-            {isAuthenticated && (
-              <Link
-                href="/dashboard"
-                className={cn(
-                  "relative px-3 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center rounded-md hover:bg-white/5 whitespace-nowrap",
-                  pathname === '/dashboard' ? "text-brand-green bg-brand-green/5" : "text-text-muted hover:text-white"
-                )}
-              >
-                Dashboard
-              </Link>
-            )}
           </div>
 
           {/* ── Right side actions ── */}
@@ -193,7 +181,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
 
             {/* Hamburger — visible below lg */}
             <button
-              className="lg:hidden p-2.5 text-text-muted min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-colors ml-1"
+              className="xl:hidden p-2.5 text-text-muted min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-colors ml-1"
               onClick={() => setIsMobileOpen(true)}
               aria-label="Open Navigation Menu"
             >
@@ -212,7 +200,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm xl:hidden"
               onClick={() => setIsMobileOpen(false)}
             />
 
@@ -222,7 +210,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className="fixed top-0 right-0 bottom-0 w-[min(320px,90vw)] z-[2001] bg-[#0B0C0F] border-l border-[#252A33] flex flex-col lg:hidden"
+              className="fixed top-0 right-0 bottom-0 w-[min(320px,90vw)] z-[2001] bg-[#0B0C0F] border-l border-[#252A33] flex flex-col xl:hidden"
             >
               {/* Drawer header */}
               <div className="flex justify-between items-center px-6 py-5 border-b border-[#252A33]">
