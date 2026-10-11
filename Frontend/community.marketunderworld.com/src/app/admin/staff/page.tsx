@@ -40,7 +40,7 @@ export default function StaffAccessPage() {
   useEffect(() => { if (isSuper) load(); }, [isSuper, load]);
 
   const grant = async () => {
-    if (!/^[0-9a-f-]{36}$/i.test(form.userId.trim())) return setError("Paste the person's user id (a UUID from the User Registry).");
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(form.userId.trim())) return setError("Paste the person's user id (from the User Registry).");
     try { setError(""); await access.grant(form.userId.trim(), form.tier, form.label.trim()); setForm({ ...form, userId: "", label: "" }); await load(); } catch (e) { setError(msg(e, "Could not grant access")); }
   };
   const revoke = async (m: StaffMember) => {
@@ -80,7 +80,7 @@ export default function StaffAccessPage() {
           <div className={`${box} p-6 space-y-3`}>
             <h2 className="font-semibold">Grant access</h2>
             <div className="grid md:grid-cols-4 gap-3">
-              <input className={`${input} md:col-span-2`} placeholder="User id (UUID, from the User Registry)" value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} />
+              <input className={`${input} md:col-span-2`} placeholder="User id (from the User Registry)" value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} />
               <input className={input} placeholder="Name or email, for display" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} />
               <select className={input} value={form.tier} onChange={(e) => setForm({ ...form, tier: e.target.value as "admin" | "moderator" })}><option value="moderator">Moderator</option><option value="admin">Admin</option></select>
             </div>

@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('ClubBooking', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     club_id: { type: DataTypes.UUID, allowNull: false },
-    user_id: { type: DataTypes.UUID, allowNull: true },
+    user_id: { type: DataTypes.STRING(64), allowNull: true },
     kind: { type: DataTypes.ENUM('guest_list', 'vip_table'), allowNull: false },
     first_name: { type: DataTypes.STRING(80), allowNull: false },
     last_name: { type: DataTypes.STRING(80), allowNull: false },

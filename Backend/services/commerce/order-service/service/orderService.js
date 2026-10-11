@@ -7,6 +7,7 @@ const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersC
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const { getProvider, payuVerifyReturn, payuParseReturn } = require('./paymentProvider');
+const paypal = require('./paypal');
 const config = require('../config/appConfig');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const ownership = require('./ownership');
@@ -1016,6 +1017,64 @@ async function settlePayuReturn(body) {
     return { ok: true, orderId: order.id, market: order.market, returnUrl, settled: 'failed' };
 }
 
+// PayPal return settlement. The shopper comes back from PayPal with ?token=<paypal order id>; the
+// token is only a LOOKUP KEY. We capture server-side, then trust nothing but PayPal's own capture
+// response: the captured amount + currency must equal the order total before the order is paid.
+// Idempotent (PayPal answers ORDER_ALREADY_CAPTURED -> we read it back; the order-row lock in
+// capturePaymentFromWebhook makes a racing webhook a no-op).
+async function settlePaypalReturn(paypalOrderId) {
+    if (!paypalOrderId) return { ok: false, reason: 'missing_token' };
+    const payment = await OrdersOrderPayment.findOne({ where: { transactionId: String(paypalOrderId), provider: 'paypal' }, attributes: ['orderId'] });
+    if (!payment) return { ok: false, reason: 'unknown_order' };
+    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount', 'currencyCode', 'metadata', 'paymentStatus'] });
+    if (!order) return { ok: false, reason: 'order_not_found' };
+    const returnUrl = (order.metadata && order.metadata.returnUrl) || null;
+    const base = { ok: true, orderId: order.id, market: order.market, returnUrl };
+    if (order.paymentStatus === 'paid') return { ...base, settled: 'paid' };
+
+    let result;
+    try { result = await paypal.captureOrder(paypalOrderId); } catch { return { ...base, settled: 'pending' }; }
+    if (result.status === 'not_approved' || result.status === 'pending') return { ...base, settled: 'pending' };
+    if (result.status === 'failed') {
+        await failPayment(order.storeId, order.id, String(paypalOrderId), 'paypal_capture_failed').catch(() => {});
+        return { ...base, settled: 'failed' };
+    }
+    let match = false;
+    try {
+        match = Money.fromDecimal(result.value, result.currency).equals(Money.fromDatabaseValue(order.totalAmount, order.currencyCode));
+    } catch { match = false; }
+    if (!match) {
+        // Money moved but not the amount we asked for. Never mark paid; leave it for a human.
+        console.error(JSON.stringify({ evt: 'paypal_return_amount_mismatch', orderId: order.id, seen: `${result.value} ${result.currency}`, expected: `${order.totalAmount} ${order.currencyCode}` }));
+        securityAudit.payment('captured', 'deny', { storeId: order.storeId, resource: { type: 'order', id: order.id }, metadata: { via: 'paypal_return', reason: 'amount_mismatch' } });
+        return { ...base, settled: 'failed' };
+    }
+    await capturePaymentFromWebhook({ providerOrderId: String(paypalOrderId), providerPaymentId: result.captureId });
+    return { ...base, settled: 'paid' };
+}
+
+// Signature-verified PayPal webhook (async backstop for a shopper who never returns to the site).
+async function handlePaypalWebhook(event) {
+    const type = event && event.event_type;
+    const resource = (event && event.resource) || {};
+    const providerOrderId = resource.supplementary_data && resource.supplementary_data.related_ids && resource.supplementary_data.related_ids.order_id;
+    if (!providerOrderId) return { ok: true, ignored: true };
+    if (type === 'PAYMENT.CAPTURE.COMPLETED') {
+        const cur = resource.amount && resource.amount.currency_code;
+        return capturePaymentFromWebhook({
+            providerOrderId, providerPaymentId: resource.id,
+            amount: resource.amount ? Money.fromDecimal(resource.amount.value, cur).minor.toString() : null,
+            currencyCode: cur,
+        });
+    }
+    if (type === 'PAYMENT.CAPTURE.DENIED' || type === 'PAYMENT.CAPTURE.DECLINED') {
+        const payment = await OrdersOrderPayment.findOne({ where: { transactionId: providerOrderId }, attributes: ['orderId'] });
+        const order = payment && await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId'] });
+        if (order) await failPayment(order.storeId, order.id, providerOrderId, 'paypal_capture_denied').catch(() => {});
+    }
+    return { ok: true };
+}
+
 async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
     const order = await OrdersOrder.findOne({ where: { id: orderId }, attributes: ['id', 'storeId', 'paymentStatus'] });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
@@ -1126,4 +1185,6 @@ module.exports = { listOrders, listMyOrders, getOrder, lookupGuestOrder, createO
 // Appended export (separate statement to avoid colliding with concurrent edits to the line above).
 module.exports.capturePaymentFromWebhook = capturePaymentFromWebhook;
 module.exports.settlePayuReturn = settlePayuReturn;
+module.exports.settlePaypalReturn = settlePaypalReturn;
+module.exports.handlePaypalWebhook = handlePaypalWebhook;
 module.exports.postCaptureEffects = postCaptureEffects;

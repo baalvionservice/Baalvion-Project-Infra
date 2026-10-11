@@ -10,5 +10,5 @@ module.exports = (sequelize) => sequelize.define('Announcement', {
     starts_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     ends_at: { type: DataTypes.DATE, allowNull: true },
     status: { type: DataTypes.ENUM('draft', 'published', 'archived'), allowNull: false, defaultValue: 'draft' },
-    created_by: { type: DataTypes.UUID, allowNull: false },
+    created_by: { type: DataTypes.STRING(64), allowNull: false },
 }, { tableName: 'announcements', schema: 'community', underscored: true, timestamps: true, indexes: [{ fields: ['status', 'starts_at'] }] });

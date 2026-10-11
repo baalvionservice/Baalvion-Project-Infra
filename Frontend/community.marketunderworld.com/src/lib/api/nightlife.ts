@@ -14,7 +14,7 @@ import { ALL_LISTINGS, type LocalListing } from "@/data/locals-listings";
 import type { RoleRequirement, RoleCategory } from "@/data/locals-roles";
 
 const PROXY_BASE = "/api/community-proxy";
-const DIRECT_BASE = process.env.COMMUNITY_UPSTREAM_URL ?? '';
+const DIRECT_BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? "https://api.baalvion.com/api/v1/community";
 
 interface Envelope<T> {
   success: boolean;

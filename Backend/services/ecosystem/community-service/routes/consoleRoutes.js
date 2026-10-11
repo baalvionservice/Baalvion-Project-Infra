@@ -25,6 +25,8 @@ const parse = (schema, body) => {
     return r.data;
 };
 const label = (req) => { const e = decodeEmailFromRequest(req); return e ? e.slice(0, 160) : null; };
+const USER_ID = /^[A-Za-z0-9_-]{1,64}$/;
+const needUser = (req, res, next) => (USER_ID.test(req.params.userId) ? next() : next(new AppError('NOT_FOUND', 'Not found', 404)));
 const need = (re) => (req, res, next) => (UUID.test(req.params[re]) ? next() : next(new AppError('NOT_FOUND', 'Not found', 404)));
 
 
@@ -36,11 +38,11 @@ router.get('/staff/me', ...authed, h(async (req, res) => {
 
 // ── Staff management (super only) ─────────────────────────────────────────────
 router.get('/admin/staff', ...authed, requirePerm('staff.manage'), h(async (req, res) => sendSuccess(req, res, await staff.list())));
-router.put('/admin/staff/:userId', ...authed, need('userId'), requirePerm('staff.manage'), h(async (req, res) => {
+router.put('/admin/staff/:userId', ...authed, needUser, requirePerm('staff.manage'), h(async (req, res) => {
     if (req.params.userId === req.auth.userId) throw new AppError('FORBIDDEN', 'You cannot change your own access', 403);
     return sendSuccess(req, res, await staff.grant(req.auth.userId, req.params.userId, parse(v.staffGrantSchema, req.body)));
 }));
-router.delete('/admin/staff/:userId', ...authed, need('userId'), requirePerm('staff.manage'), h(async (req, res) => sendSuccess(req, res, await staff.revoke(req.params.userId))));
+router.delete('/admin/staff/:userId', ...authed, needUser, requirePerm('staff.manage'), h(async (req, res) => sendSuccess(req, res, await staff.revoke(req.params.userId))));
 
 // ── Audit log ─────────────────────────────────────────────────────────────────
 router.get('/admin/audit', ...authed, requirePerm('audit.view'), h(async (req, res) => sendSuccess(req, res, await staff.auditList(req.query))));

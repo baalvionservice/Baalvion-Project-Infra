@@ -5,22 +5,13 @@ import { submitVipTable } from "@/lib/api/nightlife";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Check, Phone } from "lucide-react";
+import { ChevronRight, Check, Star, Phone } from "lucide-react";
 import { Club } from "@/data/clubs-data";
 import { Breadcrumbs } from "@/components/ui/breadcrumb";
 import { ClubPhoto } from "@/components/clubs/club-photo";
 
-import { useAuth } from "@/context/auth-context";
-import { useRouter } from "next/navigation";
-const getTomorrow = () => {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
-};
-
 export function VipTablesClient({ club, state }: { club: Club; state: string }) {
   const [submitted, setSubmitted] = useState(false);
-  const [bookingRef, setBookingRef] = useState("");
   const packages = club.vipPackages ?? [];
   const [selectedPackage, setSelectedPackage] = useState(packages.find((p) => p.popular)?.name ?? packages[0]?.name ?? "");
   const [formData, setFormData] = useState({
@@ -35,62 +26,13 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const tomorrow = getTomorrow();
-
-  const { isAuthenticated, user, isLoading } = useAuth();
-  const router = useRouter();
-
-  useState(() => {
-    if (user?.email && !formData.email) {
-      setFormData(prev => ({ ...prev, email: user.email }));
-    }
-  });
-
-  const sendConfirmationEmail = async (ref: string) => {
-    try {
-      await fetch("/api/send-booking-confirmation", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          kind: "vip_table",
-          clubName: club.name,
-          clubCity: club.city,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          visitDate: formData.dateAttending,
-          groupSize: Number(formData.groupSize),
-          tablePackage: selectedPackage || undefined,
-          notes: formData.specialRequests || undefined,
-          bookingRef: ref,
-        }),
-      });
-    } catch { /* email is best-effort — never block the flow */ }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    // ── Date validation: must be at least tomorrow ──────────────────────────
-    if (!formData.dateAttending) {
-      setError("Please select a visit date.");
-      return;
-    }
-    const chosen = new Date(formData.dateAttending);
-    const todayEnd = new Date();
-    todayEnd.setHours(0, 0, 0, 0);
-    if (chosen <= todayEnd) {
-      setError("Visit date must be tomorrow or later. Same-day VIP requests are not accepted.");
-      return;
-    }
-    // ────────────────────────────────────────────────────────────────────────
-
     setSubmitting(true);
     try {
-      // Try real API first; fall back to local store
-      const booking = await submitVipTable(club.id, {
+      await submitVipTable(club.id, {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -100,11 +42,9 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
         tablePackage: selectedPackage || undefined,
         notes: formData.specialRequests || undefined,
       });
-      setBookingRef(booking.id);
-      await sendConfirmationEmail(booking.id);
       setSubmitted(true);
-    } catch (error: any) {
-      setError(error?.message || "Something went wrong. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not submit your request. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -208,33 +148,10 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
               </p>
 
               {submitted ? (
-              <div className="bg-green-900/30 border border-green-500/40 text-green-300 p-6 text-center rounded-xl">
+                <div className="bg-green-900/30 border border-green-500/40 text-green-300 p-6 text-center">
                   <Check className="w-10 h-10 mx-auto mb-3 text-green-400" />
-                  <h3 className="text-xl font-bold mb-2 text-white">Reservation Request Received! 🎉</h3>
-                  <p className="text-sm mb-3">Your VIP table request for <strong className="text-white">{club.name}</strong> has been submitted. The venue will contact you to confirm availability and pricing; nothing is charged at this stage.</p>
-                  {bookingRef && (
-                    <p className="text-xs bg-green-900/40 border border-green-700/40 px-3 py-2 rounded-lg font-mono text-green-300 mb-4">
-                      Booking Ref: <strong>{bookingRef}</strong>
-                    </p>
-                  )}
-                  <Link
-                    href="/clubs/my-bookings"
-                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm mt-1"
-                  >
-                    📋 View My Bookings
-                  </Link>
-                </div>
-              ) : !isAuthenticated && !isLoading ? (
-                <div className="bg-[#2a2a2a] p-8 text-center rounded-xl space-y-6">
-                  <h3 className="text-2xl font-bold text-white">
-                    SIGN IN TO RESERVE
-                  </h3>
-                  <p className="text-gray-400">You must be logged into your account to request VIP table service for {club.name}.</p>
-                  <div className="pt-4">
-                    <Link href={`/auth/signin?redirect=${encodeURIComponent(`/clubs/${state}/${club.id}/vip-tables`)}`} className="inline-flex items-center gap-2 bg-[#ed6c2a] hover:bg-[#d55b1f] text-white font-bold px-8 py-3 rounded-xl transition-colors">
-                      Sign In
-                    </Link>
-                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-white">Reservation Request Received!</h3>
+                  <p className="text-sm">Your VIP table request for {club.name} has been submitted. The venue will contact you to confirm availability and pricing; nothing is charged at this stage.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -297,12 +214,10 @@ export function VipTablesClient({ club, state }: { club: Club; state: string }) 
                       <label className="text-xs text-gray-400 uppercase tracking-wide block mb-1">Event Date *</label>
                       <input
                         type="date" required
-                        min={tomorrow}
                         value={formData.dateAttending}
                         onChange={e => setFormData({ ...formData, dateAttending: e.target.value })}
                         className="w-full bg-[#303030] text-[#bfbfbf] border-0 p-3 text-sm outline-none focus:ring-1 focus:ring-[#ed6c2a]"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Future dates only. Same-day VIP not accepted.</p>
                     </div>
                     <div>
                       <label className="text-xs text-gray-400 uppercase tracking-wide block mb-1">Group Size *</label>
