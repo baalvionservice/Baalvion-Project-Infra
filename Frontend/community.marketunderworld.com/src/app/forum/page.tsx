@@ -2,9 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCommunities, getCommunity, type CommunityDetail } from "@/lib/api/community";
 import { CommunityCard } from "@/components/forums/community-card";
-import { XenCategoryTable } from "@/components/forums/xen-category-table";
-import { LiveActivityFeed } from "@/components/forums/live-activity-feed";
-import { FORUM_CATEGORIES } from "@/lib/forum-data";
 
 export default async function ForumHubPage() {
   const allCommunities = await getCommunities();
@@ -149,23 +146,8 @@ export default async function ForumHubPage() {
             investors, traders, and builders.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-14">
-            {/* Left side: Main Forum Categories (75% width on large screens) */}
-            <div className="lg:col-span-3 space-y-6">
-              {FORUM_CATEGORIES.map((category) => (
-                <XenCategoryTable key={category.slug} category={category} />
-              ))}
-            </div>
-
-            {/* Right side: Live Activity Feed (25% width on large screens) */}
-            <div className="lg:col-span-1">
-              <LiveActivityFeed />
-            </div>
-          </div>
-
           {enriched.length > 0 && (
-            <div className="mt-12">
-              <h3 className="text-xl font-bold text-gray-300 mb-6">Additional Communities</h3>
+            <div className="mt-8">
               <div className="baal-grid">
                 {enriched.map((community) => (
                   <CommunityCard key={community.slug} community={community} />
@@ -173,6 +155,8 @@ export default async function ForumHubPage() {
               </div>
             </div>
           )}
+
+          <p className="mt-8 text-sm text-gray-400">New here? <Link href="/forum/join" className="underline text-red-300">Start with the guide</Link>: what you want to learn, the rules, and how access and payment work.</p>
 
           {/* Access tiers notice */}
           <Link href="/access" className="baal-access-notice">
