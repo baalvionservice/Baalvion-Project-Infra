@@ -11,9 +11,9 @@ const AREAS_SHOWN = 10
 
 function Facet({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="py-5 border-t border-gray-100 first:border-t-0 first:pt-0">
-      <legend className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">{title}</legend>
-      <div className="space-y-1.5">{children}</div>
+    <fieldset className="m-0 min-w-0 border-0 border-t border-solid border-gray-100 px-0 py-5 first:border-t-0 first:pt-0">
+      <legend className="float-left w-full p-0 text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">{title}</legend>
+      <div className="clear-both space-y-1.5">{children}</div>
     </fieldset>
   )
 }
