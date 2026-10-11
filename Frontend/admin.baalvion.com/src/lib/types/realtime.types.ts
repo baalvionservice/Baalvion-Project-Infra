@@ -13,17 +13,39 @@ export interface PlatformStats {
   orgs:            number;
 }
 
+export type LiveEventType =
+  | 'auth'
+  | 'security'
+  | 'payment'
+  | 'system'
+  | 'user'
+  | 'admin'
+  | 'oauth'
+  | 'order'
+  | 'support'
+  | 'marketplace'
+  | 'message'
+  | 'community'
+  | 'job'
+  | 'brand'
+  | 'cms';
+
 export interface LiveEvent {
   id:          string;
-  type:        'auth' | 'security' | 'payment' | 'system' | 'user' | 'admin' | 'oauth';
+  type:        LiveEventType;
   action:      string;
   severity:    'info' | 'warning' | 'error' | 'critical';
   userId?:     string;
   userEmail?:  string;
+  userName?:   string;
   ip?:         string;
   orgId?:      string;
   country?:    string;
   timestamp:   string;
+  /** Human-readable summary for the notification bell */
+  summary?:    string;
+  /** Deep-link to the relevant admin page */
+  href?:       string;
   meta?:       Record<string, unknown>;
 }
 

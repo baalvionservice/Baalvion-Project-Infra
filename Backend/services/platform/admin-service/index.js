@@ -86,6 +86,12 @@ async function start() {
     });
     registerShutdown('status-prober', async () => { stopStatusProber(); });
 
+    // Live event consumer — listens on Redis for platform-wide activity events (admin:live_events)
+    // and streams them down the WebSocket to admin dashboards.
+    const { startLiveEventConsumer, stopLiveEventConsumer } = require('./service/liveEventConsumer');
+    await startLiveEventConsumer().catch((err) => logger.error({ err: err.message }, 'live-events consumer failed to start'));
+    registerShutdown('live-events-consumer', async () => { await stopLiveEventConsumer(); });
+
     registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });
     initGracefulShutdown(server);
 }

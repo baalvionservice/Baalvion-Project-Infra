@@ -6,6 +6,9 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 // Unmatched /staff paths fall through to the authenticated staff router below.
 router.use('/staff', require('./staffPublicRoutes'));
 
+// Public tracking
+router.use('/track', require('./trackRoutes'));
+
 router.use(authMiddleware);
 // Phase 2 modules. The specific /admin/* prefixes MUST be registered BEFORE the generic
 // /admin mount, otherwise Express routes /admin/feature-flags|analytics into adminRoutes
