@@ -38,7 +38,7 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ or
               order_id: o.id, 
               value: Number(o.totalAmount) 
             });
-          } catch (e) {}
+          } catch { /* analytics must never break confirmation */ }
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Order not found'))

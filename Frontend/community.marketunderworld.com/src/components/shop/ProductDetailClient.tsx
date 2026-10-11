@@ -36,7 +36,7 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
           price: product.price,
           category: categorySlug
         });
-      } catch (e) {}
+      } catch { /* analytics must never break the page */ }
     }
     
     if (!isAuthenticated) return;

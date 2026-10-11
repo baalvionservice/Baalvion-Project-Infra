@@ -125,7 +125,22 @@ const createEventSchema = z.object(eventFields);
 const updateEventSchema = z.object({ ...eventFields, status: z.enum(['active', 'cancelled']) }).partial()
     .refine((d) => Object.keys(d).length > 0, { message: 'No fields to update' });
 
+const eliteHostApplySchema = z.object({
+    budget: z.coerce.number().int().min(100000).max(1000000000),
+    state: z.string().trim().min(2).max(80),
+    city: z.string().trim().min(2).max(80),
+    area: z.string().trim().max(80).optional(),
+    clubId: z.string().trim().max(80).optional(),
+    clubName: z.string().trim().max(160).optional(),
+    hostAlias: z.string().trim().min(2).max(80).optional(),
+    guests: z.coerce.number().int().min(1).max(100).optional(),
+    partyDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').optional(),
+    perks: z.array(z.string().trim().min(1).max(80)).max(10).optional().default([]),
+});
+const eliteHostStatusSchema = z.object({ status: z.enum(['pending', 'approved', 'rejected']) });
+
 module.exports = {
+    eliteHostApplySchema, eliteHostStatusSchema,
     createEventSchema, updateEventSchema,
     createClubSchema, updateClubSchema, guestListSchema, vipTableSchema, bookingStatusSchema,
     createListingSchema, updateListingSchema, applyListingSchema, applicationStatusSchema,

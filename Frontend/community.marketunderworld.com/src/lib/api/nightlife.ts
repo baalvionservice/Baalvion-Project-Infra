@@ -386,6 +386,7 @@ export const admin = {
   djDemands: () => send<{ items: any[]; total: number }>("GET", "/admin/nightlife/dj-demands"),
   createDjDemand: (data: any) => send<any>("POST", "/admin/nightlife/dj-demands", data),
   pledgeDjDemand: (id: string, amount: number) => send<any>("POST", `/admin/nightlife/dj-demands/${id}/pledge`, { amount }),
+  eliteHostParties: () => send<{ items: any[]; total: number }>("GET", "/nightlife/elite-host"),
   eliteHostApplications: () => send<{ items: any[]; total: number }>("GET", "/admin/nightlife/elite-host"),
   createEliteHostApplication: (data: any) => send<any>("POST", "/nightlife/elite-host", data),
   updateEliteHostApplication: (id: string, status: string) => send<any>("PATCH", `/admin/nightlife/elite-host/${id}`, { status }),

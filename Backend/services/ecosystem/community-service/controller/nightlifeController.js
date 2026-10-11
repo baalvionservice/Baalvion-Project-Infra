@@ -72,4 +72,12 @@ module.exports = {
     }))),
     adminSetApplicationStatus: h(async (req, res) => sendSuccess(req, res,
         await svc.setApplicationStatus(req.params.id, parse(v.applicationStatusSchema, req.body).status))),
+
+    applyEliteHost: h(async (req, res) => sendSuccess(req, res,
+        await svc.applyEliteHost(userId(req), parse(v.eliteHostApplySchema, req.body)), 201)),
+    approvedEliteParties: h(async (req, res) => sendSuccess(req, res, await svc.listApprovedEliteParties())),
+    adminListEliteApplications: h(async (req, res) => sendSuccess(req, res,
+        await svc.listEliteApplications({ status: req.query.status, ...page(req) }))),
+    adminSetEliteStatus: h(async (req, res) => sendSuccess(req, res,
+        await svc.setEliteApplicationStatus(req.params.id, parse(v.eliteHostStatusSchema, req.body).status, userId(req)))),
 };

@@ -79,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         price: item.price,
         quantity: item.quantity ?? 1,
       });
-    } catch (e) {}
+    } catch { /* analytics must never break the cart */ }
   }, [cart, ensureCart]);
 
   const updateItemQuantity: CartContextType['updateItemQuantity'] = useCallback(async (key, quantity) => {
