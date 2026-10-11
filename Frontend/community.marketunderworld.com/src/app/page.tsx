@@ -420,7 +420,15 @@ function CountryCycler({ initialCountry }: { initialCountry: string }) {
 export default function HomePage() {
   const { identity, isGlobalView, setGlobalView, isLoading } = useIdentity();
   const publicStats = usePublicStats();
-  const [warningDismissed, setWarningDismissed] = useState(false);
+  // The entry warning is shown once per visitor; null until the browser has been asked.
+  const [warningSeen, setWarningSeen] = useState<boolean | null>(null);
+  useEffect(() => {
+    try { setWarningSeen(localStorage.getItem('_hr_entry_seen') === '1'); } catch { setWarningSeen(false); }
+  }, []);
+  const dismissWarning = () => {
+    try { localStorage.setItem('_hr_entry_seen', '1'); } catch { /* private mode: it may show again */ }
+    setWarningSeen(true);
+  };
 
   const heroStats = publicStats ? [
     { label: 'Clubs Listed', value: publicStats.clubs.toLocaleString('en-IN') },
@@ -442,8 +450,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#0B0C0F]">
       <style dangerouslySetInnerHTML={{ __html: SCARY_GLOBAL_CSS }} />
 
-      {/* Full-screen warning overlay — shown to every fresh visitor */}
-      <SiteEntryWarning onEnter={() => setWarningDismissed(true)} />
+      {/* Full-screen warning overlay — shown once to each new visitor */}
+      {warningSeen === false && <SiteEntryWarning onEnter={dismissWarning} />}
 
       <Navbar />
 
