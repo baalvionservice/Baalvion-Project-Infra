@@ -8,7 +8,7 @@ export function ClubPhoto({ src, name, className = "" }: { src?: string | null; 
   const [failed, setFailed] = useState(false)
   if (!src || failed) {
     return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-[#1b1b24] to-[#0b0b10] text-white/30 font-black text-6xl select-none ${className}`} role="img" aria-label={name}>
+      <div className={`flex items-center justify-center bg-gradient-to-br from-[#1b1b24] to-[#0b0b10] text-white/25 font-bold text-4xl select-none ${className}`} role="img" aria-label={name}>
         {name.charAt(0).toUpperCase()}
       </div>
     )

@@ -1,7 +1,8 @@
 import "./forum.css"
-import { BaalHeader } from "@/components/forums/baal-header"
+import { Navbar } from "@/components/layout/navbar"
 import { BaalFooter } from "@/components/forums/baal-footer"
 
+// The forum shares the site navigation, so a visitor can always move to another section.
 export default function ForumLayout({
   children,
 }: {
@@ -9,7 +10,7 @@ export default function ForumLayout({
 }) {
   return (
     <div className="baal-root">
-      <BaalHeader />
+      <Navbar />
       <main className="baal-main">
         {children}
       </main>

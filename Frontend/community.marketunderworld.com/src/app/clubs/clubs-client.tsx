@@ -71,11 +71,11 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
           
           {/* Main Content Area */}
           <div className="flex-1 bg-white p-6 md:p-10 shadow-sm border border-gray-200">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#111]">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-[#111]">
               {normalizedState === "All" ? "Indian Nightclubs" : `${normalizedState} Nightclubs`}
             </h1>
             
-            <p className="text-lg text-[#555] mb-8 leading-relaxed">
+            <p className="text-base text-[#555] mb-8 leading-relaxed">
               Get on the free guest list for top nightclubs in {normalizedState === "All" ? "Mumbai, Delhi, and Gurgaon" : normalizedState}. Book VIP bottle service, check 2026 DJ lineups, dress codes & prices.
             </p>
 
@@ -94,9 +94,9 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
                       href={stateName === "All" ? "/clubs" : `/clubs/${toSlug(stateName)}`}
                       onClick={() => setSuburbFilter("All")}
                       className={cn(
-                        "px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border",
+                        "px-4 py-2 rounded-full text-sm font-semibold transition-colors border",
                         isActive
-                          ? "bg-[#222] text-white border-[#222] shadow-md scale-105"
+                          ? "bg-[#222] text-white border-[#222]"
                           : "bg-white text-gray-600 border-gray-200 hover:border-[#ed6c2a] hover:text-[#ed6c2a] hover:bg-[#fff9f5]"
                       )}
                     >
@@ -142,7 +142,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
               ) : (
                 filteredClubs.slice(0, visibleCount).map((club) => (
                   <div key={club.id} className="flex flex-col">
-                    <Link href={`/clubs/venue/${club.id}`} className="relative h-56 w-full mb-4 group cursor-pointer overflow-hidden block">
+                    <Link href={`/clubs/venue/${club.id}`} className="relative h-40 sm:h-48 w-full mb-4 group cursor-pointer overflow-hidden block rounded-lg">
                       <ClubPhoto
                         src={club.image}
                         name={club.name}
@@ -154,7 +154,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
                     </Link>
 
                     <Link href={`/clubs/venue/${club.id}`}>
-                      <h3 className="text-2xl font-bold mb-2 hover:text-[#ed6c2a] cursor-pointer transition-colors">
+                      <h3 className="text-xl font-bold mb-2 hover:text-[#ed6c2a] cursor-pointer transition-colors">
                         {club.name}
                       </h3>
                     </Link>

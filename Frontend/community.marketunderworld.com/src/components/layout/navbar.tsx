@@ -13,18 +13,16 @@ import { useNotifications } from '@/context/notification-context';
 import { useScaryTransition } from '@/components/layout/scary-transition-provider';
 import { useCart } from '@/context/cart-context';
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { name: string; path: string; authOnly?: boolean }[] = [
   { name: 'Marketplace', path: '/marketplace' },
-  { name: 'Dating', path: '/dating' },
   { name: 'Clubs', path: '/clubs' },
   { name: 'Forum', path: '/forum' },
-  { name: 'Live Sessions', path: '/live-sessions' },
-  { name: 'Calendar', path: '/calendar' },
   { name: 'Locals', path: '/locals' },
-  { name: 'Escrow', path: '/escrow/access-counter' },
-  { name: 'My Trades', path: '/escrow/my-trades' },
-  { name: 'Agent Ops', path: '/escrow/agent-dashboard' },
-  { name: 'Admin Escrow', path: '/escrow/admin-dashboard' },
+  { name: 'Calendar', path: '/calendar' },
+  { name: 'Live Sessions', path: '/live-sessions' },
+  { name: 'Dating', path: '/dating' },
+  { name: 'Intermediaries', path: '/escrow/intermediaries' },
+  { name: 'My Trades', path: '/escrow/my-trades', authOnly: true },
 ];
 
 export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: boolean } = {}) => {
@@ -90,7 +88,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
 
           {/* ── Desktop Nav Links (lg+) ── */}
           <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-center px-4">
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS.filter((item) => !item.authOnly || isAuthenticated).map((item) => (
               <a
                 key={item.name}
                 href={item.path}
@@ -252,7 +250,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               {/* Drawer nav links */}
               <nav className="flex-1 overflow-y-auto px-4 py-4">
                 <div className="flex flex-col gap-1">
-                  {NAV_ITEMS.map((item) => (
+                  {NAV_ITEMS.filter((item) => !item.authOnly || isAuthenticated).map((item) => (
                     <a
                       key={item.name}
                       href={item.path}
