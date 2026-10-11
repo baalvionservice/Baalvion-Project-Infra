@@ -57,7 +57,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
     <div className="space-y-4 p-4 rounded-lg bg-black/40 border border-white/10">
       <p className="text-xs text-gray-400">
         {isBinance
-          ? <>Pay <strong className="text-white">{usd}</strong> in USDT with Binance Pay. Scan this QR in the Binance app{pay.address ? " or use the Pay ID" : ""}:</>
+          ? <>Pay <strong className="text-white">{usd}</strong> in USDT with Binance Pay. Scan this QR in the Binance app — that is the safest way, because it goes straight to the right account:</>
           : <>Send exactly <strong className="text-white">{usd}</strong> worth of {pay.label}{pay.networkLabel && payment.currency === "USDT" ? <> on the <strong className="text-white">{pay.networkLabel}</strong> network</> : null} to:</>}
       </p>
 
@@ -70,7 +70,11 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
           <ExternalLink className="w-3.5 h-3.5" /> Open in the Binance app
         </a>
       )}
-      {pay.address && (
+      {isBinance && pay.address && (
+        <p className="text-[11px] text-gray-400">Binance ID (UID) for this account: <code className="text-emerald-400 select-all">{pay.address}</code>
+          {pay.recipient ? <> — the name Binance shows must be <strong className="text-white">{pay.recipient}</strong>. If it is a different name, stop and use the QR.</> : null}</p>
+      )}
+      {!isBinance && pay.address && (
         <div className="flex items-center gap-2">
           <code className="text-sm text-emerald-400 break-all flex-1 select-all">{pay.address}</code>
           <button aria-label="Copy address" onClick={() => navigator.clipboard?.writeText(pay.address ?? "")} className="text-gray-500 hover:text-white"><Copy className="w-4 h-4" /></button>

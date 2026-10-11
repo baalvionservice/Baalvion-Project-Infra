@@ -124,7 +124,7 @@ function EntryEditor({ d, e, onSaved }: { d: PaymentDestination; e: PaymentDesti
         {e.updatedAt && <div className="text-[11px] text-text-ghost mt-1">Last changed {new Date(e.updatedAt).toLocaleString()} by admin #{e.updatedBy ?? '?'}</div>}
       </div>
       <div className="grid md:grid-cols-2 gap-3">
-        <input value={address} onChange={(ev) => setAddress(ev.target.value)} placeholder={`New ${d.idLabel}`} aria-label={`New ${name} address`} autoComplete="off" spellCheck={false}
+        <input value={address} onChange={(ev) => setAddress(ev.target.value)} placeholder={`New ${d.method === "BINANCE" ? "Binance ID (UID)" : d.idLabel}`} aria-label={`New ${name} address`} autoComplete="off" spellCheck={false}
           className="h-10 px-3 rounded-lg bg-black border border-brand-border text-sm text-white font-mono" />
         <input value={confirm} onChange={(ev) => setConfirm(ev.target.value)} placeholder="Type it again to confirm" aria-label={`Confirm ${name} address`} autoComplete="off" spellCheck={false}
           className="h-10 px-3 rounded-lg bg-black border border-brand-border text-sm text-white font-mono" />
