@@ -54,7 +54,7 @@ export const GlobalSearch = () => {
         .then((products) => {
           try {
             posthog.capture("search_performed", { query, result_count: products.length });
-          } catch (e) {}
+          } catch { /* analytics must never break search */ }
           setResults(products.map((p) => ({
             type: 'Product',
             name: p.name,
