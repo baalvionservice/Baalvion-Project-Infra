@@ -1,12 +1,12 @@
 # baalvion-admin-platform — Next 15 standalone image (pnpm + Turborepo monorepo).
 #
-# The repo's default Frontend/admin-platform/Dockerfile uses `npm ci`, which CANNOT build
+# The repo's default Frontend/admin.baalvion.com/Dockerfile uses `npm ci`, which CANNOT build
 # this app: admin-platform is a pnpm workspace member (no package-lock.json) that depends on
 # @baalvion/auth-sdk (workspace:*). This deploy Dockerfile is monorepo-aware (turbo prune +
 # pnpm) and bakes the prod NEXT_PUBLIC_* into the client bundle.
 #
 # Build context = REPO ROOT:
-#   docker build -f Frontend/admin-platform/Dockerfile.deploy -t admin-web .
+#   docker build -f Frontend/admin.baalvion.com/Dockerfile.deploy -t admin-web .
 FROM node:26-alpine AS base
 # Install pnpm directly via npm rather than `corepack enable`. node:20-alpine ships an older
 # corepack whose signed lazy-download of pnpm@9.15.0 now fails in CI ("Corepack is about to
@@ -18,7 +18,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps.
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.9.14 prune baalvion-admin-platform --docker
+RUN pnpm dlx turbo@2.9.14 prune admin.baalvion.com --docker
 
 # 2) Install the pruned deps. --no-frozen-lockfile: turbo prune can drop catalog/override
 #    snapshots (e.g. uuid@11) from the pruned lockfile, which a frozen install rejects.
@@ -78,22 +78,22 @@ COPY --from=pruner /app/out/full/ ./
 COPY tsconfig.base.json ./tsconfig.base.json
 # admin-platform ships no public/ dir, but the runner stage COPYs it. Next standalone does not
 # require one — create it so the COPY can't fail "public: not found".
-RUN mkdir -p Frontend/admin-platform/public
-RUN pnpm dlx turbo@2.9.14 run build --filter=baalvion-admin-platform
+RUN mkdir -p Frontend/admin.baalvion.com/public
+RUN pnpm dlx turbo@2.9.14 run build --filter=admin.baalvion.com
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3030 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-WORKDIR /app/Frontend/admin-platform
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/standalone /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/.next/static ./.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin-platform/public ./public
+WORKDIR /app/Frontend/admin.baalvion.com
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/.next/standalone /app
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/admin.baalvion.com/public ./public
 USER nextjs
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Next standalone emits the workspace server.js under the package path. WORKDIR is already
-# /app/Frontend/admin-platform, so use an ABSOLUTE path — a relative one doubles the prefix
-# (/app/Frontend/admin-platform/Frontend/admin-platform/server.js) and crash-loops MODULE_NOT_FOUND.
-CMD ["node", "/app/Frontend/admin-platform/server.js"]
+# /app/Frontend/admin.baalvion.com, so use an ABSOLUTE path — a relative one doubles the prefix
+# (/app/Frontend/admin.baalvion.com/Frontend/admin.baalvion.com/server.js) and crash-loops MODULE_NOT_FOUND.
+CMD ["node", "/app/Frontend/admin.baalvion.com/server.js"]
