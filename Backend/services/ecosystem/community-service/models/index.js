@@ -28,6 +28,7 @@ db.NightClub = require('./night_club')(sequelize);
 db.ClubBooking = require('./club_booking')(sequelize);
 db.LocalListing = require('./local_listing')(sequelize);
 db.LocalApplication = require('./local_application')(sequelize);
+db.EliteHostApplication = require('./elite_host_application')(sequelize);
 db.NightProfile = require('./night_profile')(sequelize);
 db.NightEmployer = require('./night_employer')(sequelize);
 db.NightGig = require('./night_gig')(sequelize);

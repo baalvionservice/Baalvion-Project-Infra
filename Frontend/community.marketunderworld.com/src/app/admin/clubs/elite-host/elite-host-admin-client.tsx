@@ -24,10 +24,17 @@ interface Application {
 
 import { admin } from "@/lib/api/nightlife";
 
-const SEED_APPLICATIONS: Application[] = [
-  { id: "app-001", hostName: "Rahul Sharma", budget: "₹10,00,000", city: "Mumbai", area: "Andheri", venue: "Bastian - At The Top", status: "pending", dateApplied: "2024-10-24 14:30", kycStatus: "verified" },
-  { id: "app-002", hostName: "Anonymous", budget: "₹25,00,000", city: "Pune", area: "Koregaon Park", venue: "Penthouze", status: "approved", dateApplied: "2024-10-23 09:15", kycStatus: "verified" },
-];
+const toRow = (i: any): Application => ({
+  id: i.id,
+  hostName: i.hostAlias || "Member application",
+  budget: `₹${Number(i.budget).toLocaleString("en-IN")}`,
+  city: i.city,
+  area: i.area || "",
+  venue: i.clubName || "",
+  status: i.status,
+  dateApplied: i.createdAt ? new Date(i.createdAt).toLocaleString("en-IN") : "",
+  state: i.state,
+});
 
 export function EliteHostAdminClient() {
   const [activeTab, setActiveTab] = useState<"applications" | "banners">("applications");
@@ -36,10 +43,10 @@ export function EliteHostAdminClient() {
 
   useEffect(() => {
     admin.eliteHostApplications().then(res => {
-      setApplications(res.items.length > 0 ? res.items : SEED_APPLICATIONS);
+      setApplications((res.items || []).map(toRow));
       setLoading(false);
     }).catch(() => {
-      setApplications(SEED_APPLICATIONS);
+      setApplications([]);
       setLoading(false);
     });
   }, []);
@@ -47,10 +54,10 @@ export function EliteHostAdminClient() {
   const refresh = () => {
     setLoading(true);
     admin.eliteHostApplications().then(res => {
-      setApplications(res.items.length > 0 ? res.items : SEED_APPLICATIONS);
+      setApplications((res.items || []).map(toRow));
       setLoading(false);
     }).catch(() => {
-      setApplications(SEED_APPLICATIONS);
+      setApplications([]);
       setLoading(false);
     });
   };

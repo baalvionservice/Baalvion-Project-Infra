@@ -296,9 +296,57 @@ async function setApplicationStatus(id, status) {
     return toApplication(row);
 }
 
+// ── Elite Host: a signed-in member applies to host a party; staff approve; approved ones show publicly ──
+const toEliteApplication = (r) => ({
+    id: r.id, hostAlias: r.host_alias, budget: Number(r.budget_inr), state: r.state, city: r.city, area: r.area,
+    clubId: r.club_id, clubName: r.club_name, date: r.party_date, guests: r.guests, perks: r.perks || [],
+    status: r.status, createdAt: r.createdAt, reviewedAt: r.reviewed_at,
+});
+
+// Public view: no user id, no contact details.
+const toPublicEliteParty = (r) => ({
+    id: r.id, hostAlias: r.host_alias, budget: Number(r.budget_inr), city: r.city, area: r.area,
+    clubName: r.club_name, date: r.party_date, guests: r.guests, perks: r.perks || [],
+});
+
+async function applyEliteHost(userId, data) {
+    const open = await db.EliteHostApplication.count({ where: { user_id: userId, status: 'pending' } });
+    if (open >= 3) throw new AppError('TOO_MANY_PENDING', 'You already have three applications under review', 409);
+    const row = await db.EliteHostApplication.create({
+        user_id: userId, host_alias: data.hostAlias || null, budget_inr: data.budget, state: data.state, city: data.city,
+        area: data.area || null, club_id: data.clubId || null, club_name: data.clubName || null,
+        party_date: data.partyDate || null, guests: data.guests || null, perks: data.perks || [],
+    });
+    return toEliteApplication(row);
+}
+
+async function listApprovedEliteParties() {
+    const rows = await db.EliteHostApplication.findAll({
+        where: { status: 'approved' }, order: [['party_date', 'ASC'], ['created_at', 'DESC']], limit: 50,
+    });
+    return { items: rows.map(toPublicEliteParty), total: rows.length };
+}
+
+async function listEliteApplications({ status, limit, offset } = {}) {
+    const where = status ? { status } : {};
+    const { rows, count } = await db.EliteHostApplication.findAndCountAll({
+        where, order: [['created_at', 'DESC']],
+        limit: Math.min(Number(limit) || 50, MAX_PAGE_SIZE), offset: Number(offset) || 0,
+    });
+    return { items: rows.map(toEliteApplication), total: count };
+}
+
+async function setEliteApplicationStatus(id, status, reviewerId) {
+    const row = await db.EliteHostApplication.findByPk(id);
+    if (!row) throw new AppError('NOT_FOUND', 'Application not found', 404);
+    await row.update({ status, reviewed_by: reviewerId || null, reviewed_at: new Date() });
+    return toEliteApplication(row);
+}
+
 module.exports = {
     publicStats, listClubs, getClub, createClub, updateClub, listEvents, getEvent, createEvent, updateEvent,
     createBooking, listMyBookings, listBookings, setBookingStatus,
     listListings, getListing, createListing, updateListing,
     applyToListing, listMyApplications, listApplications, setApplicationStatus,
+    applyEliteHost, listApprovedEliteParties, listEliteApplications, setEliteApplicationStatus,
 };

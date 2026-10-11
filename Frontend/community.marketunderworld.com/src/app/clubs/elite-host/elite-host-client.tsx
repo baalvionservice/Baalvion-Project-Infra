@@ -13,35 +13,10 @@ const ELITE_HOST_KEY = "baalvion_elite_host_applications";
 
 const ALL_CLUBS = [...INDIAN_CLUBS, ...MUMBAI_CLUBS];
 
-const DUMMY_PARTIES = [
-  {
-    id: "p1",
-    hostAlias: "Mr. R.S.",
-    clubName: "Bastian - At The Top",
-    city: "Mumbai",
-    date: "This Friday, 10 PM",
-    budget: "₹5,000,000+",
-    slots: 10,
-    filled: 4,
-    perks: ["S-Class Pick/Drop", "Presidential Table", "Unlimited Food & Premium Drinks"],
-  },
-  {
-    id: "p2",
-    hostAlias: "Anonymous Elite",
-    clubName: "Dragonfly Experience",
-    city: "Mumbai",
-    date: "Next Saturday, 11 PM",
-    budget: "₹1,000,000",
-    slots: 5,
-    filled: 2,
-    perks: ["Luxury Sedan Cab", "VVIP Table", "Dom Perignon"],
-  },
-];
-
 export function EliteHostClient() {
   // ── All hooks declared at the top — no hooks after computed values ──
   const [activeTab, setActiveTab] = useState<"host" | "guest">("guest");
-  const [parties, setParties] = useState<any[]>(DUMMY_PARTIES);
+  const [parties, setParties] = useState<any[]>([]);
   const [budget, setBudget] = useState("500000");
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [selectedState, setSelectedState] = useState("Maharashtra");
@@ -50,24 +25,19 @@ export function EliteHostClient() {
   const [selectedClub, setSelectedClub] = useState("mumbai-c1");
 
   React.useEffect(() => {
-    admin.eliteHostApplications()
+    admin.eliteHostParties()
       .then(res => {
-        if (res.items && res.items.length > 0) {
-          const approved = res.items.filter(i => i.status === "approved");
-          if (approved.length > 0) {
-            setParties(approved.map((i: any) => ({
-              id: i.id,
-              hostAlias: i.hostAlias || "Anonymous Elite",
-              clubName: i.clubId || "Exclusive Venue",
-              city: i.city || "Mumbai",
-              date: i.date || "Upcoming",
-              budget: `₹${Number(i.budget || 500000).toLocaleString("en-IN")}`,
-              slots: i.guests || 5,
-              filled: 0,
-              perks: i.perks || ["Luxury Transport", "Premium Table"],
-            })));
-          }
-        }
+        setParties((res.items || []).map((i: any) => ({
+          id: i.id,
+          hostAlias: i.hostAlias || "Anonymous host",
+          clubName: i.clubName || "Venue shared on approval",
+          city: i.city,
+          date: i.date ? new Date(i.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Date to be announced",
+          budget: `₹${Number(i.budget).toLocaleString("en-IN")}`,
+          slots: i.guests || null,
+          filled: null,
+          perks: i.perks || [],
+        })));
       })
       .catch(() => {});
   }, []);
@@ -228,6 +198,9 @@ export function EliteHostClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {parties.length === 0 && (
+                  <p className="md:col-span-2 text-center text-gray-400 py-12">No Elite parties are open right now. Approved parties appear here.</p>
+                )}
                 {parties.map(party => (
                   <div key={party.id} className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-amber-500/30 transition-all">
                     <div className="flex justify-between items-start mb-4">
@@ -238,7 +211,7 @@ export function EliteHostClient() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-semibold bg-white/10 px-3 py-1 rounded-full">{party.date}</div>
-                        <div className="text-xs text-gray-400 mt-2">{party.slots - party.filled} slots left</div>
+                        {party.slots ? <div className="text-xs text-gray-400 mt-2">{party.slots} guests</div> : null}
                       </div>
                     </div>
                     

@@ -121,3 +121,25 @@ describe('staff/support validators', () => {
         expect(sv.ticketStaffUpdateSchema.safeParse({ assignedTo: 'someone-else' }).success).toBe(false);
     });
 });
+
+describe('elite host validators', () => {
+    const ok = { budget: '500000', state: 'Maharashtra', city: 'Mumbai' };
+
+    it('accepts a minimal application and coerces the budget', () => {
+        const r = v.eliteHostApplySchema.safeParse(ok);
+        expect(r.success).toBe(true);
+        expect(r.data.budget).toBe(500000);
+        expect(r.data.perks).toEqual([]);
+    });
+
+    it('rejects a tiny budget, a bad date and too many guests', () => {
+        expect(v.eliteHostApplySchema.safeParse({ ...ok, budget: '50' }).success).toBe(false);
+        expect(v.eliteHostApplySchema.safeParse({ ...ok, partyDate: '01/01/2030' }).success).toBe(false);
+        expect(v.eliteHostApplySchema.safeParse({ ...ok, guests: 500 }).success).toBe(false);
+    });
+
+    it('only allows the three review statuses', () => {
+        expect(v.eliteHostStatusSchema.safeParse({ status: 'approved' }).success).toBe(true);
+        expect(v.eliteHostStatusSchema.safeParse({ status: 'deleted' }).success).toBe(false);
+    });
+});

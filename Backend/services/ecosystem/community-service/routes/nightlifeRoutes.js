@@ -52,4 +52,10 @@ router.patch('/admin/nightlife/locals/:id', ...adminAuth, requirePerm('content.m
 router.get('/admin/nightlife/applications', ...adminAuth, requirePerm('content.handle'), ctrl.adminListApplications);
 router.patch('/admin/nightlife/applications/:id', ...adminAuth, requirePerm('content.handle'), uuidParam, ctrl.adminSetApplicationStatus);
 
+// Elite Host parties
+router.get('/nightlife/elite-host', ctrl.approvedEliteParties);
+router.post('/nightlife/elite-host', authMw, ctrl.applyEliteHost);
+router.get('/admin/nightlife/elite-host', ...adminAuth, requirePerm('content.handle'), ctrl.adminListEliteApplications);
+router.patch('/admin/nightlife/elite-host/:id', ...adminAuth, requirePerm('content.handle'), uuidParam, ctrl.adminSetEliteStatus);
+
 module.exports = router;
