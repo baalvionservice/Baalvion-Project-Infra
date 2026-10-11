@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 // Append-only record of what staff did. Rows are only ever inserted; no route updates or deletes them.
 module.exports = (sequelize) => sequelize.define('AuditEvent', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    actor_id: { type: DataTypes.UUID, allowNull: false },
+    actor_id: { type: DataTypes.STRING(64), allowNull: false },
     actor_label: { type: DataTypes.STRING(160), allowNull: true },
     actor_tier: { type: DataTypes.STRING(20), allowNull: true },
     action: { type: DataTypes.STRING(120), allowNull: false },

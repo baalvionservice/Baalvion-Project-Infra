@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('CommunityChatMessage', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     community_id: { type: DataTypes.UUID, allowNull: false },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     username: { type: DataTypes.STRING(120), allowNull: true },
     content: { type: DataTypes.TEXT, allowNull: false },
 }, {

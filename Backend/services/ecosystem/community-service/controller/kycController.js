@@ -36,7 +36,7 @@ module.exports = {
     },
 
     internalStatus: h(async (req, res) => {
-        if (!/^[0-9a-f-]{36}$/i.test(req.params.userId)) throw new AppError('NOT_FOUND', 'Not found', 404);
+        if (!/^[A-Za-z0-9_-]{1,64}$/.test(req.params.userId)) throw new AppError('NOT_FOUND', 'Not found', 404);
         return sendSuccess(req, res, await svc.statusForUser(req.params.userId));
     }),
 };

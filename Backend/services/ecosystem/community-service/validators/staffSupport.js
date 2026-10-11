@@ -1,7 +1,9 @@
 'use strict';
 const { z } = require('zod');
 
-const uuid = z.string().uuid();
+// Platform user ids are whatever the auth service puts in the token's `sub` (a number such as
+// "134" today), so they are validated as opaque ids rather than UUIDs.
+const userId = z.string().trim().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Invalid user id');
 // Relative site paths or https links only (these render as clickable links).
 const safeLink = z.string().trim().max(300).refine((u) => /^\/(?!\/)/.test(u) || /^https:\/\//i.test(u), 'Use a site path like /kyc or an https link');
 
@@ -38,7 +40,7 @@ const announcementUpdateSchema = z.object({ ...announcementFields, status: z.enu
     .refine((d) => Object.keys(d).length > 0, { message: 'No fields to update' });
 
 const notifySchema = z.object({
-    userId: uuid,
+    userId,
     type: z.enum(['seller', 'listing', 'order', 'support']),
     title: z.string().trim().min(3).max(120),
     body: z.string().trim().min(3).max(500),

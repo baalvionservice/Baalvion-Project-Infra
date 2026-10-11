@@ -9,7 +9,7 @@ module.exports = (sequelize) => sequelize.define('CommunityThread', {
     thread_type: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'discussion' },
     is_answered: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     accepted_pid: { type: DataTypes.INTEGER, allowNull: true },
-    author_user_id: { type: DataTypes.UUID, allowNull: false },
+    author_user_id: { type: DataTypes.STRING(64), allowNull: false },
 }, {
     tableName: 'community_threads',
     schema: 'community',

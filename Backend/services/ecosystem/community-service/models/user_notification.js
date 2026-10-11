@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 // In-app notification feed (the site's bell). One row per event per user.
 module.exports = (sequelize) => sequelize.define('UserNotification', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     type: { type: DataTypes.STRING(40), allowNull: false },
     title: { type: DataTypes.STRING(200), allowNull: false },
     body: { type: DataTypes.STRING(1000), allowNull: false },

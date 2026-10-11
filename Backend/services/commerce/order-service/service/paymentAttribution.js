@@ -19,6 +19,7 @@ const PROVIDER_RAIL = {
     stripe: 'stripe',
     payu: 'payu',
     cashfree: 'cashfree',
+    paypal: 'paypal',
     bank: 'bank_transfer',
     bank_transfer: 'bank_transfer',
     crypto: 'crypto',

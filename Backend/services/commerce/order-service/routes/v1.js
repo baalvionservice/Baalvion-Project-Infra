@@ -12,6 +12,7 @@ const adminCartRoutes = require('./adminCartRoutes');
 const paymentWebhookRoutes = require('./paymentWebhookRoutes');
 const razorpayWebhookRoutes = require('./razorpayWebhookRoutes');
 const payuReturnRoutes = require('./payuReturnRoutes');
+const paypalRoutes = require('./paypalRoutes');
 const reconciliationRoutes = require('./reconciliationRoutes');
 const consignmentRoutes = require('./consignmentRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
@@ -35,6 +36,8 @@ router.use('/orders/webhooks/razorpay', razorpayWebhookRoutes);
 // PayU redirect/return (form-POST, SHA-512 reverse-hash verified). More specific than the bare
 // /orders/webhooks mount below, so it must precede it.
 router.use('/orders/webhooks/payu', payuReturnRoutes);
+// PayPal return (server-side capture) + signature-verified webhook. Same precedence rule as PayU.
+router.use('/orders/webhooks/paypal', paypalRoutes);
 router.use('/orders/webhooks', paymentWebhookRoutes);
 
 router.use('/orders/stores/:storeId/analytics', authMiddleware, analyticsRoutes);

@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => sequelize.define('KycAccessLog', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     verification_id: { type: DataTypes.UUID, allowNull: false },
-    admin_id: { type: DataTypes.UUID, allowNull: false },
+    admin_id: { type: DataTypes.STRING(64), allowNull: false },
     action: { type: DataTypes.ENUM('view_id', 'view_selfie', 'approve', 'reject'), allowNull: false },
 }, {
     tableName: 'kyc_access_log', schema: 'community', underscored: true, timestamps: true, updatedAt: false,

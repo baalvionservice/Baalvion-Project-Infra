@@ -16,6 +16,7 @@ const crypto = require('crypto');
 // Central key vault — resolves PSP keys from the CMS "Integrations & Keys" store (managed in the
 // admin panel, encrypted at rest). Returns null → fall back to env, so a vault outage never breaks pay.
 const { getPaymentCreds } = require('./cmsVault');
+const paypal = require('./paypal');
 // Money crosses the PSP boundary as an exact integer count of minor units. The old
 // `Math.round(Number(amount) * 100)` hardcoded a 2-decimal world: correct for the five
 // markets live today, a 100x overcharge the day a zero-decimal currency (JPY, KRW) is
@@ -603,6 +604,41 @@ async function cashfreeVerifyWebhook({ rawBody, signature, timestamp }) {
   return timingSafeHex(signature, expected);
 }
 
+// ── PayPal (REAL) ─────────────────────────────────────────────────────────────
+// Orders v2 redirect flow. createPaymentIntent makes the PayPal order and hands the browser the
+// approval URL; PayPal sends the shopper back to OUR return route (routes/paypalRoutes.js), which
+// captures server-side and verifies amount + currency before the order is marked paid. A client
+// confirm never captures, and the intent id is the PayPal order id.
+const paypalReturnUrl = () => process.env.PAYPAL_RETURN_URL || 'http://localhost:3013/api/v1/orders/webhooks/paypal/return';
+const paypalProvider = {
+  name: 'paypal',
+  PRODUCTION: true,
+  async createPaymentIntent({ orderId, amount, currencyCode }) {
+    const ret = paypalReturnUrl();
+    const order = await paypal.createOrder({
+      orderId, amount, currencyCode,
+      returnUrl: ret,
+      cancelUrl: `${ret.replace(/\/return\/?$/, '')}/cancel`,
+      brandName: process.env.PAYPAL_BRAND_NAME || null,
+    });
+    return { intentId: order.paypalOrderId, status: 'requires_action', redirectUrl: order.approvalUrl, mode: order.mode, amount: order.value, currency: order.currency };
+  },
+  async confirmPayment() { return { status: 'pending', transactionId: null, reason: 'awaiting_paypal_return' }; },
+  async getPaymentStatus({ intentId }) {
+    if (!intentId) return { status: 'pending' };
+    const r = await paypal.getOrderStatus(intentId);
+    if (r.status !== 'captured') return { status: 'pending' };
+    return { status: 'captured', transactionId: r.captureId, amountMinor: Number(require('@baalvion/money').Money.fromDecimal(r.value, r.currency).minor), currency: r.currency };
+  },
+  async failPayment() { return { status: 'failed' }; },
+  async cancelPayment() { return { status: 'voided' }; },
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
+    if (!transactionId) throw new Error('paypal: refund requires the captured payment id');
+    const out = await paypal.refundCapture({ captureId: transactionId, amount, currencyCode, reason });
+    return { status: 'refunded', provider: 'paypal', refundId: out.refundId, amount };
+  },
+};
+
 // Future real adapters — interface-compatible, intentionally unimplemented until configured.
 const unconfigured = (name) => ({
   name,
@@ -636,7 +672,7 @@ function getProvider(selectedGateway = null) {
     case 'crypto': case 'crypto_manual': return cryptoManualProvider;
     case 'payu':                    return payuProvider;
     case 'cashfree':                return cashfreeProvider;
-    case 'paypal':                  return unconfigured('paypal');
+    case 'paypal':                  return paypalProvider;
     case 'mock':
       // Explicit opt-in required everywhere. A developer who wants it says so; nobody gets it by
       // omission, and no environment inherits it from an unset variable.
@@ -669,6 +705,7 @@ async function configuredGateways() {
     ['stripe', stripeCreds],
     ['payu', payuCreds],
     ['cashfree', cashfreeCreds],
+    ['paypal', paypal.paypalCreds],
   ];
   const available = [];
   for (const [name, resolve] of checks) {

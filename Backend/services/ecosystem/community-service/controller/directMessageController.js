@@ -5,7 +5,7 @@ const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
 const startConversationSchema = z.object({
-    recipientUserId: z.string().uuid(),
+    recipientUserId: z.string().trim().regex(/^[A-Za-z0-9_-]{1,64}$/),
     contextLabel: z.string().max(200).optional(),
 });
 const sendMessageSchema = z.object({ content: z.string().min(1).max(4000) });
