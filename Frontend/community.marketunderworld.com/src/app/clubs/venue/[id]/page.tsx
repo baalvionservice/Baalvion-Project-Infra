@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const club = await getClub(id);
   if (!club) return { title: "Venue not found" };
   const where = [club.suburb, club.city].filter(Boolean).join(", ");
-  const title = `${club.name}, ${where}: ${typeWord(club)} address, hours and guest list | Hell Road`;
+  const title = `${club.name}, ${where}: ${typeWord(club)} address, hours and guest list`;
   const description = club.description || `${club.name} is a ${typeWord(club)} in ${where}, ${club.state}.${club.address ? ` Address: ${club.address}.` : ""} Request the guest list or a VIP table.`;
   return { title, description, alternates: { canonical: `/clubs/venue/${club.id}` }, openGraph: { title, description, type: "website", url: `${SITE}/clubs/venue/${club.id}`, ...(club.image ? { images: [club.image] } : {}) } };
 }

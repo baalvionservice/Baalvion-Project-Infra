@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const { city, area } = await params
   const r = await load(city, area)
   if (!r) return { title: "Not found" }
-  const title = `Pubs, Bars and Nightclubs in ${r.a.name}, ${r.g.name} (${r.a.clubs.length}) | Hell Road`
+  const title = `Pubs, Bars and Nightclubs in ${r.a.name}, ${r.g.name} (${r.a.clubs.length})`
   const description = `${r.a.clubs.length} pubs, bars and nightclubs in ${r.a.name}, ${r.g.name}. See addresses and opening hours, and request the guest list or a VIP table.`
   return { title, description, alternates: { canonical: `/clubs/city/${r.g.slug}/${r.a.slug}` }, openGraph: { title, description, type: "website", url: `${SITE}/clubs/city/${r.g.slug}/${r.a.slug}` } }
 }
