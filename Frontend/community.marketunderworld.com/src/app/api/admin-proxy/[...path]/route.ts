@@ -8,7 +8,7 @@ import { createProxy, proxyMethod } from '@/lib/api/proxy-handler';
 // /staff/*), not all nested under /admin. Callers in admin-users.ts must include the full segment
 // themselves (e.g. `/admin/users`, `/identity/risk-events`) — this proxy does no path rewriting.
 const ADMIN_API_BASE = process.env.ADMIN_UPSTREAM_URL ?? '';
-const proxy = createProxy(ADMIN_API_BASE, { scrub: true });
+const proxy = createProxy(ADMIN_API_BASE, { edgeKey: true, scrub: true });
 
 export const GET = proxyMethod(proxy);
 export const POST = proxyMethod(proxy);
