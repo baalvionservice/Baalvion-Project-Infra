@@ -76,7 +76,7 @@ export default function SignIn() {
         return
       }
 
-      router.push(isAdminIdentity(identity) ? '/admin' : '/bounty')
+      router.push(isAdminIdentity(identity) ? '/admin' : '/dashboard')
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Invalid credentials. Try again.";
       toast({ variant: 'destructive', title: "Authentication Failed", description: message })

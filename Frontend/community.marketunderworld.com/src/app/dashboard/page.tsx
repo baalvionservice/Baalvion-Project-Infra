@@ -148,7 +148,7 @@ export default function DashboardPage() {
         </header>
 
         {member && <MemberIdCard member={member} onChange={setMember} />}
-        {member && <ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} />}
+        {member && <div id="profile" className="scroll-mt-32"><ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} /></div>}
 
         {member?.seller ? (
           <div className="inline-flex p-1 rounded-xl bg-white/5 border border-white/5" role="tablist">

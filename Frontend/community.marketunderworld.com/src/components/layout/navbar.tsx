@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserMenu } from '@/components/layout/user-menu';
 import { Search, Menu, X, MapPin, Bell, Globe, ArrowRight, Heart, ShoppingCart, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIdentity } from '@/context/identity-context';
@@ -173,14 +174,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
 
             {/* Sign In / Out — always visible */}
             {isAuthenticated ? (
-              <button
-                onClick={() => logout()}
-                className="hidden sm:flex px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all min-h-[40px] items-center gap-2"
-                title={user?.email}
-              >
-                <span className="w-2 h-2 rounded-full bg-brand-green" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
+              <UserMenu />
             ) : (
               <button
                 onClick={() => {
