@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUIStore } from '@/lib/store/uiStore';
 import { staffApi } from '@/lib/api/staff';
 import { formatRelative, formatDate } from '@/lib/utils/format';
+import InviteToWebsitesButton from '@/components/cms/InviteToWebsitesButton';
 import type { Employee, Department, Team, StaffInvitation, OnboardingChecklist } from '@/lib/types/staff.types';
 import { cn } from '@/lib/utils/cn';
 
@@ -249,9 +250,7 @@ export default function StaffPage() {
         title="Staff Management"
         description="Employees, departments, teams, invitations, and onboarding"
         actions={
-          <Button size="sm" className="gap-1.5 text-xs">
-            <UserPlus className="h-3.5 w-3.5" /> Invite Staff
-          </Button>
+          <InviteToWebsitesButton size="sm" className="text-xs" label="Invite Staff" />
         }
       />
 
@@ -416,9 +415,7 @@ export default function StaffPage() {
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Mail className="h-4 w-4" /> Staff Invitations
                 </CardTitle>
-                <Button size="sm" variant="outline" className="text-xs gap-1">
-                  <UserPlus className="h-3.5 w-3.5" /> Invite
-                </Button>
+                <InviteToWebsitesButton size="sm" variant="outline" className="text-xs" />
               </div>
               <CardDescription>Pending and historical staff invitations</CardDescription>
             </CardHeader>

@@ -183,7 +183,7 @@ export const websitesApi = {
    */
   grantAccess: async (payload: GrantSiteAccessPayload) => {
     const res = await cmsApiClient.post<ApiResponse<GrantSiteAccessResult>>(
-      '/websites/access-grants',
+      '/cms/websites/access-grants',
       payload,
     );
     return res.data.data;

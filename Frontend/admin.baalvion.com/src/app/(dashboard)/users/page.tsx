@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, Plus, UserX, UserCheck, Mail } from 'lucide-react';
 import { format } from 'date-fns';
+import InviteToWebsitesButton from '@/components/cms/InviteToWebsitesButton';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import DataTable from '@/components/data-table/DataTable';
@@ -155,10 +156,7 @@ export default function UsersPage() {
         title="Users"
         description={`${data?.pagination.total ?? 0} total users`}
         actions={
-          <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Invite User
-          </Button>
+          <InviteToWebsitesButton size="sm" label="Invite User" />
         }
       />
 
