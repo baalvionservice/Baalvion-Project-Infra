@@ -28,6 +28,18 @@ const clubFields = {
     vibe: z.string().trim().max(160).optional(),
     requiredRoles: z.array(z.string().trim().min(1).max(80)).max(30).optional(),
     rating: z.number().min(0).max(5).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    website: httpUrl(300).optional(),
+    phone: z.string().trim().max(80).optional(),
+    openingHours: z.string().trim().max(300).optional(),
+    venueType: z.enum(['pub', 'bar', 'nightclub', 'biergarten']).optional(),
+    priceRange: z.enum(['₹', '₹₹', '₹₹₹', '₹₹₹₹']).optional(),
+    seoTitle: z.string().trim().max(160).optional(),
+    seoDescription: z.string().trim().max(320).optional(),
+    about: z.string().trim().max(10000).optional(),
+    faqs: z.array(z.object({ q: z.string().trim().min(3).max(200), a: z.string().trim().min(3).max(1000) })).max(12).optional(),
+    gallery: z.array(z.object({ url: httpUrl(600), alt: z.string().trim().max(160).optional() })).max(12).optional(),
 };
 
 const createClubSchema = z.object(clubFields);

@@ -27,6 +27,7 @@ const toClub = (r, { admin = false } = {}) => ({
     requiredRoles: r.required_roles, vipPackages: r.vip_packages || [], rating: r.rating === null ? null : Number(r.rating),
     status: r.status,
     latitude: r.latitude, longitude: r.longitude, website: r.website, phone: r.phone, openingHours: r.opening_hours, venueType: r.venue_type,
+    seoTitle: r.seo_title, seoDescription: r.seo_description, about: r.about, faqs: r.faqs || [], gallery: r.gallery || [], priceRange: r.price_range,
 });
 
 // How much a venue page can actually say: more verified facts ranks higher, so complete listings lead.
@@ -62,6 +63,8 @@ const clubColumns = (d) => ({
     music_types: d.musicTypes, days_open: d.daysOpen, description: d.description,
     cover_charge: d.coverCharge, vibe: d.vibe, required_roles: d.requiredRoles, vip_packages: d.vipPackages, rating: d.rating, contact_email: d.contactEmail,
     status: d.status,
+    latitude: d.latitude, longitude: d.longitude, website: d.website, phone: d.phone, opening_hours: d.openingHours, venue_type: d.venueType,
+    seo_title: d.seoTitle, seo_description: d.seoDescription, about: d.about, faqs: d.faqs, gallery: d.gallery, price_range: d.priceRange,
 });
 const defined = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
 

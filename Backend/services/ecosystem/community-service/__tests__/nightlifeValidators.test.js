@@ -143,3 +143,18 @@ describe('elite host validators', () => {
         expect(v.eliteHostStatusSchema.safeParse({ status: 'deleted' }).success).toBe(false);
     });
 });
+
+describe('club SEO and content fields', () => {
+    const v = require('../validators/nightlife');
+    const base = { name: 'Test Club', state: 'Maharashtra', city: 'Mumbai' };
+    test('accepts a full set of SEO fields', () => {
+        const r = v.createClubSchema.safeParse({ ...base, seoTitle: 'Test Club, Mumbai', seoDescription: 'A short description.', about: 'Long text.', priceRange: '₹₹', venueType: 'bar',
+            faqs: [{ q: 'Is there a dress code?', a: 'Smart casual.' }], gallery: [{ url: 'https://example.com/a.jpg', alt: 'The bar' }], latitude: 19.07, longitude: 72.87 });
+        expect(r.success).toBe(true);
+    });
+    test('rejects an unknown price range, a bad venue type and a non-link gallery url', () => {
+        expect(v.createClubSchema.safeParse({ ...base, priceRange: '$$$$$' }).success).toBe(false);
+        expect(v.createClubSchema.safeParse({ ...base, venueType: 'casino' }).success).toBe(false);
+        expect(v.createClubSchema.safeParse({ ...base, gallery: [{ url: 'javascript:alert(1)' }] }).success).toBe(false);
+    });
+});

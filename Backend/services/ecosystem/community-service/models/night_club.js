@@ -27,6 +27,13 @@ module.exports = (sequelize) => sequelize.define('NightClub', {
     opening_hours: { type: DataTypes.STRING(300), allowNull: true },
     venue_type: { type: DataTypes.STRING(20), allowNull: true },
     osm_ref: { type: DataTypes.STRING(30), allowNull: true },
+    // What the page says about itself in search results and on the page: written by staff in the admin panel.
+    seo_title: { type: DataTypes.STRING(160), allowNull: true },
+    seo_description: { type: DataTypes.STRING(320), allowNull: true },
+    about: { type: DataTypes.TEXT, allowNull: true },
+    faqs: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+    gallery: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+    price_range: { type: DataTypes.STRING(8), allowNull: true },
     status: { type: DataTypes.ENUM('active', 'archived'), allowNull: false, defaultValue: 'active' },
 }, {
     tableName: 'night_clubs',
