@@ -78,6 +78,12 @@ export interface ApiClub {
   phone: string | null;
   openingHours: string | null;
   venueType: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  about: string | null;
+  faqs: { q: string; a: string }[];
+  gallery: { url: string; alt?: string }[];
+  priceRange: string | null;
 }
 
 // The pages route on Club.id, so the view model carries the slug there (stable, readable URLs).
@@ -103,6 +109,12 @@ const toClub = (c: ApiClub): Club => ({
   phone: c.phone ?? undefined,
   openingHours: c.openingHours ?? undefined,
   venueType: c.venueType ?? undefined,
+  seoTitle: c.seoTitle ?? undefined,
+  seoDescription: c.seoDescription ?? undefined,
+  about: c.about ?? undefined,
+  faqs: c.faqs ?? [],
+  gallery: c.gallery ?? [],
+  priceRange: c.priceRange ?? undefined,
 });
 
 export async function getClubs(): Promise<Club[]> {
@@ -367,6 +379,18 @@ export interface ClubInput {
   vipPackages?: VipPackage[];
   contactEmail?: string;
   status?: "active" | "archived";
+  latitude?: number;
+  longitude?: number;
+  website?: string;
+  phone?: string;
+  openingHours?: string;
+  venueType?: string;
+  priceRange?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  about?: string;
+  faqs?: { q: string; a: string }[];
+  gallery?: { url: string; alt?: string }[];
 }
 export type ListingInput = Partial<Omit<ApiListing, "id" | "slug" | "postedAt">>;
 

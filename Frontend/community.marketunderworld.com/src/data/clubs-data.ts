@@ -31,6 +31,12 @@ export interface Club {
   phone?: string;
   openingHours?: string;
   venueType?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  about?: string;
+  faqs?: { q: string; a: string }[];
+  gallery?: { url: string; alt?: string }[];
+  priceRange?: string;
 }
 
 import { MUMBAI_CLUBS } from "./mumbai-clubs";

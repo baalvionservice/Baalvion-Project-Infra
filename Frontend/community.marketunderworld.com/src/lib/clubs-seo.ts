@@ -48,7 +48,19 @@ export function venueJsonLd(c: Club) {
     ...(c.phone ? { telephone: c.phone } : {}),
     ...(c.website ? { sameAs: [c.website] } : {}),
     ...(c.openingHours ? { openingHours: c.openingHours } : {}),
-    ...(c.image ? { image: c.image } : {}),
+    ...(c.gallery && c.gallery.length > 0 || c.image ? { image: [c.image, ...(c.gallery ?? []).map((g) => g.url)].filter(Boolean) } : {}),
+    ...(c.priceRange ? { priceRange: c.priceRange } : {}),
+    ...(c.about || c.description ? { description: (c.about || c.description || "").slice(0, 500) } : {}),
+  };
+}
+
+export function faqJsonLd(c: Club) {
+  const items = (c.faqs ?? []).filter((f) => f.q && f.a);
+  if (items.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
   };
 }
 

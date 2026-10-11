@@ -8,16 +8,16 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ClubPhoto } from "@/components/clubs/club-photo";
 import { ShareButton } from "@/components/clubs/share-button";
-import { SITE, slugOf, typeWord, venueJsonLd } from "@/lib/clubs-seo";
+import { SITE, faqJsonLd, slugOf, typeWord, venueJsonLd } from "@/lib/clubs-seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const club = await getClub(id);
   if (!club) return { title: "Venue not found" };
   const where = [club.suburb, club.city].filter(Boolean).join(", ");
-  const title = `${club.name}, ${where}: ${typeWord(club)} address, hours and guest list`;
-  const description = club.description || `${club.name} is a ${typeWord(club)} in ${where}, ${club.state}.${club.address ? ` Address: ${club.address}.` : ""} Request the guest list or a VIP table.`;
-  return { title, description, alternates: { canonical: `/clubs/venue/${club.id}` }, openGraph: { title, description, type: "website", url: `${SITE}/clubs/venue/${club.id}`, ...(club.image ? { images: [club.image] } : {}) } };
+  const title = club.seoTitle || `${club.name}, ${where}: ${typeWord(club)} address, hours and guest list`;
+  const description = club.seoDescription || club.description || `${club.name} is a ${typeWord(club)} in ${where}, ${club.state}.${club.address ? ` Address: ${club.address}.` : ""} Request the guest list or a VIP table.`;
+  return { title, description, alternates: { canonical: `/clubs/venue/${club.id}` }, openGraph: { title, description, type: "website", url: `${SITE}/clubs/venue/${club.id}`, ...(club.image || club.gallery?.length ? { images: [club.image, ...(club.gallery ?? []).map((g) => g.url)].filter(Boolean) as string[] } : {}) } };
 }
 
 // Only facts we hold are shown. A row with no value is left out, not filled with a guess.
@@ -52,6 +52,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
     <main className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(venueJsonLd(club)) }} />
+      {faqJsonLd(club) && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(club)) }} />}
 
       <div className="flex-grow pt-28 pb-24">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
@@ -82,9 +83,15 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
             <div className="lg:col-span-2 space-y-12">
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-5">About this place</h2>
+                {club.about ? (
+                  <div className="space-y-5 text-gray-700 leading-8 text-lg">
+                    {club.about.split(/\n\s*\n/).map((para, i) => <p key={i}>{para}</p>)}
+                  </div>
+                ) : (
                 <p className="text-gray-700 leading-8 text-lg">
                   {club.description || `${club.name} is a ${typeWord(club)} in ${where}, ${club.state}.${club.address ? ` You can find it at ${club.address}.` : ""}${club.openingHours ? ` Opening hours: ${club.openingHours}.` : ""}`}
                 </p>
+                )}
                 {(club.musicType.length > 0 || club.vibe) && (
                   <p className="mt-5 flex items-center gap-2 text-gray-700"><Music className="w-4 h-4 text-gray-400" /> {[club.vibe, club.musicType.join(", ")].filter(Boolean).join(" · ")}</p>
                 )}
@@ -97,11 +104,38 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
                   {club.openingHours && <Fact icon={<Clock className="w-5 h-5" />} label="Opening hours">{club.openingHours}</Fact>}
                   {club.daysOpen && <Fact icon={<Clock className="w-5 h-5" />} label="Open on">{club.daysOpen}</Fact>}
                   {club.coverCharge && <Fact icon={<Ticket className="w-5 h-5" />} label="Entry">{club.coverCharge}</Fact>}
+                  {club.priceRange && <Fact icon={<Ticket className="w-5 h-5" />} label="Price range">{club.priceRange}</Fact>}
                   {club.phone && <Fact icon={<Phone className="w-5 h-5" />} label="Phone"><a className="underline" href={`tel:${club.phone.replace(/[^+\d]/g, "")}`}>{club.phone}</a></Fact>}
                   {site && <Fact icon={<Globe className="w-5 h-5" />} label="Website"><a className="underline" href={site} target="_blank" rel="noopener noreferrer nofollow">{site.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a></Fact>}
                 </div>
                 <p className="text-xs text-gray-400 mt-3">Location details come from OpenStreetMap contributors (ODbL) and Hell Road&apos;s own listings. If something is wrong, tell us on the contact page.</p>
               </section>
+
+              {club.gallery && club.gallery.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-5">Photos</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {club.gallery.map((g, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={g.url} alt={g.alt || `${club.name}, ${where}`} loading="lazy" className="w-full h-44 object-cover rounded-xl" />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {club.faqs && club.faqs.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-5">Questions about {club.name}</h2>
+                  <div className="divide-y divide-gray-200 border border-gray-200 rounded-2xl">
+                    {club.faqs.map((f, i) => (
+                      <details key={i} className="group p-5">
+                        <summary className="cursor-pointer font-semibold text-gray-900 list-none flex justify-between gap-4">{f.q}<span className="text-gray-400 group-open:rotate-45 transition-transform">+</span></summary>
+                        <p className="mt-3 text-gray-600 leading-7">{f.a}</p>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {club.requiredRoles && club.requiredRoles.length > 0 && (
                 <section>

@@ -6,6 +6,7 @@ import { INDIAN_NIGHTLIFE_STATES } from "@/data/clubs-data";
 import { admin, type ApiClub, type ClubInput } from "@/lib/api/nightlife";
 import type { VipPackage } from "@/data/clubs-data";
 import { ImageUpload } from "@/components/upload/image-upload";
+import { ClubSeoFields } from "@/components/admin/club-seo-fields";
 
 const emptyForm: Partial<ApiClub> = {
   name: "",
@@ -83,6 +84,21 @@ export default function AdminClubsPage() {
       coverCharge: blank(form.coverCharge),
       description: blank(form.description),
       contactEmail: blank(form.contactEmail),
+      suburb: blank(form.suburb),
+      address: blank(form.address),
+      vibe: blank(form.vibe),
+      latitude: form.latitude ?? undefined,
+      longitude: form.longitude ?? undefined,
+      website: blank(form.website),
+      phone: blank(form.phone),
+      openingHours: blank(form.openingHours),
+      venueType: blank(form.venueType),
+      priceRange: blank(form.priceRange),
+      seoTitle: blank(form.seoTitle),
+      seoDescription: blank(form.seoDescription),
+      about: blank(form.about),
+      faqs: (form.faqs ?? []).filter((f) => f.q.trim() && f.a.trim()),
+      gallery: (form.gallery ?? []).filter((g) => g.url.trim()).map((g) => ({ url: g.url.trim(), alt: blank(g.alt) })),
       vipPackages: (form.vipPackages ?? []).filter((p) => p.name.trim() && p.minimumSpend.trim()),
     };
     setSaving(true);
@@ -311,6 +327,18 @@ export default function AdminClubsPage() {
                 ))}
               </div>
 
+              <div className="grid sm:grid-cols-2 gap-4">
+                <label className="block text-sm font-medium text-gray-700">Neighbourhood / area
+                  <input value={form.suburb ?? ""} onChange={e => setForm({...form, suburb: e.target.value})} placeholder="e.g. Lower Parel" className="w-full border p-2.5 rounded-lg outline-none focus:border-fuchsia-500 mt-1" />
+                </label>
+                <label className="block text-sm font-medium text-gray-700">Vibe (short)
+                  <input value={form.vibe ?? ""} onChange={e => setForm({...form, vibe: e.target.value})} placeholder="e.g. Rooftop lounge" className="w-full border p-2.5 rounded-lg outline-none focus:border-fuchsia-500 mt-1" />
+                </label>
+                <label className="block text-sm font-medium text-gray-700 sm:col-span-2">Full address
+                  <input value={form.address ?? ""} onChange={e => setForm({...form, address: e.target.value})} placeholder="Street, area, city, pincode" className="w-full border p-2.5 rounded-lg outline-none focus:border-fuchsia-500 mt-1" />
+                </label>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea 
@@ -320,6 +348,8 @@ export default function AdminClubsPage() {
                   className="w-full border p-2.5 rounded-lg outline-none focus:border-fuchsia-500 resize-none" 
                 />
               </div>
+
+              <ClubSeoFields form={form} setForm={setForm} />
 
             </div>
 
