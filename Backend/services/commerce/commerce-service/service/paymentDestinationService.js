@@ -22,11 +22,17 @@ const normNetwork = (method, network) => {
     return String(network || '').toUpperCase();
 };
 
-function validate(method, address, network, label) {
+function validate(method, address, network, label, qrImageUrl, payLink) {
     const m = METHODS[method];
     if (!m) throw new AppError('VALIDATION_ERROR', `Unknown payment method "${method}"`, 400);
     const a = String(address || '').trim();
-    if (!a) throw new AppError('VALIDATION_ERROR', 'Address is required', 400);
+    const qr = String(qrImageUrl || '').trim() || null;
+    const link = String(payLink || '').trim() || null;
+    if (qr && !/^(\/[A-Za-z0-9._\-\/]+|https:\/\/[^\s]+)$/.test(qr)) throw new AppError('VALIDATION_ERROR', 'QR image must be a site path or an https URL', 400);
+    if (link && !/^https:\/\/(app|www)\.binance\.com\/[^\s]+$/.test(link)) throw new AppError('VALIDATION_ERROR', 'The pay link must be a binance.com https link', 400);
+    if ((qr || link) && method !== 'BINANCE') throw new AppError('VALIDATION_ERROR', 'A QR image or pay link is only for Binance Pay', 400);
+    // Binance Pay can run on its QR alone until the numeric Pay ID is known; every other method needs an address.
+    if (!a && !(method === 'BINANCE' && (qr || link))) throw new AppError('VALIDATION_ERROR', 'Address is required', 400);
     const net = normNetwork(method, network);
     if (!m.networks.includes(net)) throw new AppError('VALIDATION_ERROR', `${m.label} network must be one of ${m.networks.join(', ')}`, 400);
     const bad = (msg) => new AppError('INVALID_ADDRESS', msg, 400);
@@ -36,9 +42,9 @@ function validate(method, address, network, label) {
         if ((net === 'ERC20' || net === 'BEP20') && !isEvmAddress(a)) throw bad(`That is not a valid ${net} address — it must be 0x followed by 40 hex characters.`);
         if (net === 'SOLANA' && !isSolanaAddress(a)) throw bad('That is not a valid Solana address.');
     }
-    if (method === 'BINANCE' && !isBinancePayId(a)) throw bad('A Binance Pay ID is digits only (6 to 20 of them).');
+    if (method === 'BINANCE' && a && !isBinancePayId(a)) throw bad('A Binance Pay ID is digits only (6 to 20 of them).');
     const lab = String(label || '').replace(/\s+/g, ' ').trim().slice(0, 80);
-    return { address: a, network: net, label: lab || null };
+    return { address: a, network: net, label: lab || null, qrImageUrl: qr, payLink: link };
 }
 
 // What sellers are paid to for one (method, network). The database wins; the SELLER_BOND_* env vars
@@ -52,8 +58,8 @@ async function resolve(method, network) {
         return null;
     }
     if (!m.networks.includes(net)) return null;
-    const [row] = await sequelize.query(`SELECT address, network, label, is_active AS "isActive" FROM ${T} WHERE method = :method AND network = :network`, { type: QueryTypes.SELECT, replacements: { method, network: net } });
-    if (row) return row.isActive ? { address: row.address, network: row.network || null, label: row.label, source: 'database' } : null;
+    const [row] = await sequelize.query(`SELECT address, network, label, is_active AS "isActive", qr_image_url AS "qrImageUrl", pay_link AS "payLink" FROM ${T} WHERE method = :method AND network = :network`, { type: QueryTypes.SELECT, replacements: { method, network: net } });
+    if (row) return row.isActive ? { address: row.address, network: row.network || null, label: row.label, qrImageUrl: row.qrImageUrl, payLink: row.payLink, source: 'database' } : null;
     const env = config.sellerBond.addresses[method];
     const envNet = method === 'BTC' ? 'bitcoin' : method === 'USDT' ? config.sellerBond.usdtNetwork : '';
     if (env && envNet === net) return { address: env, network: net || null, label: null, source: 'env' };
@@ -97,19 +103,19 @@ async function set(adminUserId, method, body) {
     if (confirmAddress !== undefined && String(confirmAddress).trim() !== String(address || '').trim()) {
         throw new AppError('VALIDATION_ERROR', 'The two addresses do not match', 400);
     }
-    const v = validate(method, address, body.network, body.label);
+    const v = validate(method, address, body.network, body.label, body.qrImageUrl, body.payLink);
     return sequelize.transaction(async (t) => {
         const [old] = await sequelize.query(`SELECT address FROM ${T} WHERE method = :method AND network = :network FOR UPDATE`, { type: QueryTypes.SELECT, replacements: { method, network: v.network }, transaction: t });
         await sequelize.query(
-            `INSERT INTO ${T} (method, network, address, label, is_active, updated_by) VALUES (:method, :network, :address, :label, :active, :by)
-             ON CONFLICT (method, network) DO UPDATE SET address = :address, label = :label, is_active = :active, updated_by = :by, updated_at = NOW()`,
-            { replacements: { method, network: v.network, address: v.address, label: v.label, active: isActive !== false, by: adminUserId }, transaction: t },
+            `INSERT INTO ${T} (method, network, address, label, qr_image_url, pay_link, is_active, updated_by) VALUES (:method, :network, :address, :label, :qr, :link, :active, :by)
+             ON CONFLICT (method, network) DO UPDATE SET address = :address, label = :label, qr_image_url = :qr, pay_link = :link, is_active = :active, updated_by = :by, updated_at = NOW()`,
+            { replacements: { method, network: v.network, address: v.address, label: v.label, qr: v.qrImageUrl, link: v.payLink, active: isActive !== false, by: adminUserId }, transaction: t },
         );
         await sequelize.query(
             `INSERT INTO ${LOG} (method, old_address, new_address, old_network, new_network, action, changed_by) VALUES (:method, :oa, :na, :net, :net, :action, :by)`,
             { replacements: { method, oa: old ? old.address : null, na: v.address, net: v.network, action: old ? 'updated' : 'created', by: adminUserId }, transaction: t },
         );
-        return { method, network: v.network || null, address: v.address, label: v.label };
+        return { method, network: v.network || null, address: v.address, label: v.label, qrImageUrl: v.qrImageUrl, payLink: v.payLink };
     });
 }
 

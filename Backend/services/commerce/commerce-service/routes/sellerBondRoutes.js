@@ -14,6 +14,7 @@ router.post('/:id/payment', validate(submitPaymentSchema), ctrl.submitPayment);
 
 // Platform admin side
 router.get('/', requirePlatformAdmin, ctrl.list);
+router.get('/:id/proofs', requirePlatformAdmin, ctrl.proofs);
 router.post('/:id/confirm', requirePlatformAdmin, validate(confirmSchema), ctrl.confirm);
 router.post('/:id/reject', requirePlatformAdmin, validate(noteSchema), ctrl.reject);
 router.post('/:id/forfeit', requirePlatformAdmin, validate(noteSchema), ctrl.forfeit);

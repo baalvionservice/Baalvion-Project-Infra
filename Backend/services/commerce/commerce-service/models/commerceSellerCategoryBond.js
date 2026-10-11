@@ -22,6 +22,8 @@ module.exports = function (sequelize, DataTypes) {
         payToNetwork: { type: DataTypes.STRING(30), allowNull: true },
         payToLabel: { type: DataTypes.STRING(80), allowNull: true },
         note: { type: DataTypes.TEXT, allowNull: true },
+        submittedAt: { type: DataTypes.DATE, allowNull: true },
+        reviewWaitMinutes: { type: DataTypes.INTEGER, allowNull: true },
     }, {
         schema: 'commerce',
         tableName: 'commerce_seller_category_bonds',

@@ -7,7 +7,15 @@ exports.createBondSchema = z.object({
     // USDT only: which chain the seller will pay on.
     network: z.enum(['TRC20', 'BEP20', 'ERC20', 'SOLANA']).optional(),
 });
-exports.submitPaymentSchema = z.object({ txHash: z.string().min(8).max(200) });
+const proofSchema = z.object({
+    mime: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+    data: z.string().min(100).max(4 * 1024 * 1024),
+});
+// A payer proves payment with a screenshot, a transaction reference, or both (at least one).
+exports.submitPaymentSchema = z.object({
+    txHash: z.string().trim().min(6).max(200).optional(),
+    proofs: z.array(proofSchema).max(3).optional(),
+}).refine((d) => !!d.txHash || (d.proofs && d.proofs.length > 0), { message: 'Attach a screenshot or enter the transaction reference' });
 exports.confirmSchema = z.object({ amountReceived: z.string().min(1).max(60), note: z.string().max(500).optional(), creditUsd: z.number().positive().max(100000).optional() });
 exports.noteSchema = z.object({ note: z.string().min(1).max(500) });
 
@@ -17,6 +25,8 @@ exports.destinationSchema = z.object({
     network: z.string().max(30).optional().nullable(),
     label: z.string().max(80).optional().nullable(),
     isActive: z.boolean().optional(),
+    qrImageUrl: z.string().trim().max(300).optional().nullable(),
+    payLink: z.string().trim().max(300).optional().nullable(),
 });
 
 exports.createPassSchema = z.object({

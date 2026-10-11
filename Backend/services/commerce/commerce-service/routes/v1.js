@@ -17,6 +17,7 @@ const collectionRoutes = require('./collectionRoutes');
 const discountRoutes = require('./discountRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const storefrontRoutes = require('./storefrontRoutes');
+const paymentSettingsRoutes = require('./paymentSettingsRoutes');
 const marketController = require('../controller/marketController');
 const mediaServeController = require('../controller/mediaServeController');
 
@@ -53,6 +54,7 @@ router.use('/commerce/seller-tokens', authMiddleware, sellerTokenRoutes);
 router.use('/commerce/wallet', authMiddleware, walletRoutes);
 router.use('/commerce/buyer-access', authMiddleware, buyerAccessRoutes);
 router.use('/commerce/payment-destinations', authMiddleware, paymentDestinationRoutes);
+router.use('/commerce/payment-settings', authMiddleware, paymentSettingsRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);
 router.use('/commerce/stores/:storeId/products/:productId/reviews', authMiddleware, reviewRoutes);
 router.use('/commerce/stores/:storeId/products', authMiddleware, productRoutes);

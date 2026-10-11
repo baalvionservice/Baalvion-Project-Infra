@@ -6,6 +6,7 @@
  *   node scripts/setPaymentDestination.cjs --method USDT --network TRC20 --address T... [--label "Recipient name"] [--by <adminUserId>]
  *   node scripts/setPaymentDestination.cjs --method BTC --address bc1...
  *   node scripts/setPaymentDestination.cjs --method BINANCE --address 123456789
+ *   node scripts/setPaymentDestination.cjs --method BINANCE --label "Mr Balenciaga" --qr /pay/binance-pay.jpg --link https://app.binance.com/uni-qr/XXXX   (Pay ID optional with a QR)
  *   node scripts/setPaymentDestination.cjs --list
  */
 const svc = require('../service/paymentDestinationService');
@@ -20,10 +21,11 @@ const arg = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 
     } else {
         const method = (arg('method') || '').toUpperCase();
         const address = arg('address');
-        if (!method || !address) throw new Error('--method and --address are required');
+        if (!method) throw new Error('--method is required');
+        if (!address && !(method === 'BINANCE' && (arg('qr') || arg('link')))) throw new Error('--address is required (Binance Pay may use --qr/--link instead)');
         const by = arg('by') ? Number(arg('by')) : null;
-        const r = await svc.set(by, method, { address, confirmAddress: address, network: arg('network'), label: arg('label') });
-        console.log(`saved ${r.method}${r.network ? ` ${r.network}` : ''}: ${r.address}${r.label ? ` (${r.label})` : ''}`);
+        const r = await svc.set(by, method, { address: address || '', confirmAddress: address || '', network: arg('network'), label: arg('label'), qrImageUrl: arg('qr'), payLink: arg('link') });
+        console.log(`saved ${r.method}${r.network ? ` ${r.network}` : ''}: ${r.address || '(QR only)'}${r.label ? ` (${r.label})` : ''}${r.qrImageUrl ? ` qr=${r.qrImageUrl}` : ''}`);
     }
     await sequelize.close();
 })().catch((e) => { console.error(e.message); process.exit(1); });
