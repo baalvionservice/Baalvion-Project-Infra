@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, FolderOpen, Pencil, Trash2, GripVertical } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, FolderOpen, Folder, Pencil, ChevronRight, ChevronDown, Search, Package } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,10 +17,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { useCommerceCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/lib/queries/commerce-stores.queries';
+import { useCommerceCategories, useCreateCategory, useUpdateCategory } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import type { CommerceCategory } from '@/lib/types/commerce.types';
+import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 
 interface CategoryFormState {
   name: string;
@@ -29,15 +31,13 @@ interface CategoryFormState {
 
 const defaultForm: CategoryFormState = { name: '', description: '', parentId: '' };
 
-function flattenCategories(categories: CommerceCategory[], depth = 0): Array<CommerceCategory & { depth: number }> {
-  const result: Array<CommerceCategory & { depth: number }> = [];
-  for (const cat of categories) {
-    result.push({ ...cat, depth });
-    if (cat.children?.length) {
-      result.push(...flattenCategories(cat.children, depth + 1));
-    }
-  }
-  return result;
+// Total products at or below a node, so a brand row shows everything under it.
+function totalProducts(c: CommerceCategory): number {
+  return (c.productCount ?? 0) + (c.children ?? []).reduce((n, k) => n + totalProducts(k), 0);
+}
+
+function matches(c: CommerceCategory, q: string): boolean {
+  return c.name.toLowerCase().includes(q) || (c.children ?? []).some((k) => matches(k, q));
 }
 
 export default function CategoriesPage() {
@@ -48,19 +48,20 @@ export default function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CommerceCategory | null>(null);
   const [form, setForm] = useState<CategoryFormState>(defaultForm);
+  const [query, setQuery] = useState('');
+  const [closed, setClosed] = useState<Record<string, boolean>>({});
 
   const { data: categories, isLoading } = useCommerceCategories(storeId);
   const createCategory = useCreateCategory(storeId);
   const updateCategory = useUpdateCategory(storeId);
-  const deleteCategory = useDeleteCategory(storeId);
 
   useEffect(() => {
     setBreadcrumbs([{ label: 'Commerce', href: '/commerce' }, { label: 'Categories' }]);
   }, [setBreadcrumbs]);
 
-  const openCreate = () => {
+  const openCreate = (parentId = '') => {
     setEditing(null);
-    setForm(defaultForm);
+    setForm({ ...defaultForm, parentId });
     setDialogOpen(true);
   };
 
@@ -83,21 +84,84 @@ export default function CategoriesPage() {
     }
   };
 
-  const flat = flattenCategories(categories ?? []);
-  const topLevel = (categories ?? []).filter((c) => !c.parentId);
+  const tree = categories ?? [];
+  const options = flattenCategoryPaths(tree);
+  const q = query.trim().toLowerCase();
+  const visibleTree = q ? tree.filter((c) => matches(c, q)) : tree;
+  const brands = tree.length;
+  const subs = options.length - brands;
+
+  const renderNode = (cat: CommerceCategory, depth: number): React.ReactNode => {
+    const kids = (cat.children ?? []).filter((k) => !q || matches(k, q) || cat.name.toLowerCase().includes(q));
+    const isClosed = !q && closed[cat.id];
+    const count = totalProducts(cat);
+    return (
+      <div key={cat.id}>
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2.5 transition-colors hover:bg-muted/30 sm:px-4"
+          style={{ paddingLeft: `${12 + depth * 20}px` }}
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            {kids.length ? (
+              <button
+                type="button"
+                aria-label={isClosed ? 'Expand' : 'Collapse'}
+                className="rounded p-0.5 text-muted-foreground hover:bg-muted"
+                onClick={() => setClosed((c) => ({ ...c, [cat.id]: !c[cat.id] }))}
+              >
+                {isClosed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            ) : (
+              <span className="w-5" />
+            )}
+            {depth === 0 ? <FolderOpen className="h-4 w-4 shrink-0 text-primary" /> : <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />}
+            <div className="min-w-0">
+              <p className={`truncate text-sm ${depth === 0 ? 'font-semibold' : 'font-medium'}`}>{cat.name}</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {depth === 0 ? 'Brand' : depth === 1 ? 'Category' : 'Subcategory'}
+                {cat.children?.length ? ` · ${cat.children.length} inside` : ''}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Badge variant={count ? 'default' : 'secondary'} className="text-xs">
+              {count} {count === 1 ? 'product' : 'products'}
+            </Badge>
+            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" asChild>
+              <Link href={`/commerce/products/new?category=${cat.id}`}>
+                <Package className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add product</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={() => openCreate(cat.id)}>
+              <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Sub</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(cat)} aria-label={`Edit ${cat.name}`}>
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+        {!isClosed && kids.map((k) => renderNode(k, depth + 1))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Categories"
-        description={`${flat.length} categories`}
+        title="Brands & categories"
+        description={`${brands} brands · ${subs} categories and subcategories. Open any row to add a product straight into it.`}
         actions={
-          <Button size="sm" onClick={openCreate} disabled={!storeId}>
+          <Button size="sm" onClick={() => openCreate()} disabled={!storeId}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            New brand / category
           </Button>
         }
       />
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search brands and categories" className="pl-9" />
+      </div>
 
       <Card>
         <CardContent className="p-0">
@@ -105,49 +169,18 @@ export default function CategoriesPage() {
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12" />)}
             </div>
-          ) : flat.length === 0 ? (
+          ) : !storeId ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              Pick a store first (Commerce overview, or the Online shop section on the website page).
+            </div>
+          ) : visibleTree.length === 0 ? (
             <div className="py-16 text-center">
               <FolderOpen className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground mb-4">No categories yet</p>
-              <Button size="sm" onClick={openCreate} disabled={!storeId}>Add Category</Button>
+              <p className="text-sm text-muted-foreground mb-4">{q ? 'Nothing matches that search' : 'No categories yet'}</p>
+              {!q && <Button size="sm" onClick={() => openCreate()}>Add Category</Button>}
             </div>
           ) : (
-            <div className="divide-y">
-              {flat.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
-                  style={{ paddingLeft: `${16 + cat.depth * 24}px` }}
-                >
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="h-4 w-4 text-muted-foreground/40" />
-                    <FolderOpen className={`h-4 w-4 ${cat.depth === 0 ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <div>
-                      <p className="text-sm font-medium">{cat.name}</p>
-                      {cat.description && (
-                        <p className="text-xs text-muted-foreground">{cat.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {cat.children?.length ? (
-                      <Badge variant="secondary" className="text-xs">{cat.children.length} sub</Badge>
-                    ) : null}
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(cat)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive"
-                      onClick={() => deleteCategory.mutate(cat.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div>{visibleTree.map((c) => renderNode(c, 0))}</div>
           )}
         </CardContent>
       </Card>
@@ -155,7 +188,7 @@ export default function CategoriesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Edit Category' : 'New Category'}</DialogTitle>
+            <DialogTitle>{editing ? 'Edit category' : form.parentId ? 'New subcategory' : 'New brand / category'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
@@ -181,11 +214,11 @@ export default function CategoriesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value }))}
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               >
-                <option value="">None (top-level)</option>
-                {topLevel
+                <option value="">None (top-level brand)</option>
+                {options
                   .filter((c) => c.id !== editing?.id)
                   .map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.label}</option>
                   ))}
               </select>
             </div>

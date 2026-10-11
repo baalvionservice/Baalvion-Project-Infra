@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
@@ -19,19 +20,32 @@ import ProductMediaTab from '@/components/commerce/ProductMediaTab';
 import {
   useProduct,
   useUpdateProduct,
-  usePublishProduct,
+  useCreateProduct,
+  useBulkUpdateProducts,
   useVariants,
   useCreateVariant,
+  useUpdateVariant,
   useDeleteVariant,
 } from '@/lib/queries/commerce-products.queries';
 import { useCommerceCategories } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatMoney } from '@/lib/utils/format';
+import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
+
+// The storefront reads the price from customFields.basePrice, falling back to the default
+// variant. Amounts are whole currency units (USD), not cents.
+function displayPrice(product: { customFields?: Record<string, unknown> }, variants?: { price: number; isDefault: boolean }[]) {
+  const cf = product.customFields?.basePrice;
+  if (cf != null && cf !== '') return String(cf);
+  const v = variants?.find((x) => x.isDefault) ?? variants?.[0];
+  return v ? String(Number(v.price)) : '';
+}
 
 export default function ProductEditorPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const presetCategory = useSearchParams().get('category') ?? '';
   const { setBreadcrumbs } = useUIStore();
   const { activeStoreId } = useCommerceStore();
   const storeId = activeStoreId ?? '';
@@ -42,18 +56,24 @@ export default function ProductEditorPage() {
   const { data: categories } = useCommerceCategories(storeId);
 
   const updateProduct = useUpdateProduct(storeId, params.id);
-  const publishProduct = usePublishProduct(storeId);
+  const createProduct = useCreateProduct(storeId);
+  // Bulk "publish" is the direct-to-live path; the single-product publish only submits for
+  // marketplace moderation, which Amarisé does not use.
+  const bulkUpdate = useBulkUpdateProducts(storeId);
   const createVariant = useCreateVariant(storeId, params.id);
+  const updateVariant = useUpdateVariant(storeId, params.id);
   const deleteVariant = useDeleteVariant(storeId, params.id);
+  const categoryOptions = flattenCategoryPaths(categories ?? []);
 
   const [form, setForm] = useState({
     name: '',
     description: '',
     sku: '',
+    shortDescription: '',
     basePrice: '',
     compareAtPrice: '',
-    categoryId: '',
-    brand: '',
+    categoryId: presetCategory,
+    stockQuantity: '0',
     tags: '',
     status: 'draft',
   });
@@ -67,7 +87,7 @@ export default function ProductEditorPage() {
   const [scarcityTag, setScarcityTag] = useState('');
   const [priceVisible, setPriceVisible] = useState(true);
 
-  const [newVariantName, setNewVariantName] = useState('');
+  const [newVariant, setNewVariant] = useState({ name: '', sku: '', price: '' });
 
   useEffect(() => {
     if (product) {
@@ -75,10 +95,11 @@ export default function ProductEditorPage() {
         name: product.name ?? '',
         description: product.description ?? '',
         sku: product.sku ?? '',
-        basePrice: product.basePrice != null ? String(product.basePrice) : '',
-        compareAtPrice: product.compareAtPrice != null ? String(product.compareAtPrice) : '',
+        shortDescription: product.shortDescription ?? '',
+        basePrice: displayPrice(product, variants),
+        compareAtPrice: product.customFields?.compareAtPrice != null ? String(product.customFields.compareAtPrice) : '',
         categoryId: product.categoryId ?? '',
-        brand: product.brand ?? '',
+        stockQuantity: String((product as { stockQuantity?: number }).stockQuantity ?? 0),
         tags: (product.tags ?? []).join(', '),
         status: product.status ?? 'draft',
       });
@@ -89,7 +110,7 @@ export default function ProductEditorPage() {
       setScarcityTag(typeof cf.scarcityTag === 'string' ? cf.scarcityTag : '');
       setPriceVisible(cf.priceVisible !== false);
     }
-  }, [product]);
+  }, [product, variants]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -100,34 +121,66 @@ export default function ProductEditorPage() {
   }, [setBreadcrumbs, isNew, product?.name]);
 
   const handleSave = () => {
+    const price = form.basePrice.trim() === '' ? undefined : Number(form.basePrice);
+    const compareAt = form.compareAtPrice.trim() === '' ? undefined : Number(form.compareAtPrice);
+    if ((price != null && !(price >= 0)) || (compareAt != null && !(compareAt >= 0))) {
+      toast.error('Enter prices as plain numbers, e.g. 4500');
+      return;
+    }
     // customFields is a single JSONB column — the backend REPLACES it wholesale on PATCH,
-    // so this spreads the product's EXISTING customFields first (colors/sizes/isVip/
-    // regions/... set elsewhere) and only overrides the 5 curator fields below. Sending
-    // just { collectorValue, ... } would silently wipe every other custom field.
+    // so spread the EXISTING customFields first (colors/sizes/isVip/regions/... set elsewhere).
     const customFields = {
       ...(product?.customFields ?? {}),
+      basePrice: price,
+      compareAtPrice: compareAt,
       collectorValue: collectorValue.trim() || undefined,
       marketRange: marketRange.trim() || undefined,
       investmentInsight: investmentInsight.trim() || undefined,
       scarcityTag: scarcityTag.trim() || undefined,
       priceVisible,
     };
-    const payload = {
-      name: form.name,
-      description: form.description || undefined,
-      sku: form.sku || undefined,
-      basePrice: form.basePrice ? Number(form.basePrice) : undefined,
-      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
-      categoryId: form.categoryId || undefined,
-      brand: form.brand || undefined,
-      tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
-      customFields,
-    };
-    updateProduct.mutate(payload, {
-      onSuccess: () => {
-        if (isNew) router.push('/commerce/products');
+    const tags = form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+    const stock = Math.max(0, Math.floor(Number(form.stockQuantity) || 0));
+
+    if (isNew) {
+      createProduct.mutate(
+        {
+          name: form.name.trim(),
+          shortDescription: form.shortDescription || undefined,
+          description: form.description || undefined,
+          sku: form.sku || undefined,
+          categoryId: form.categoryId || undefined,
+          price: price ?? 0,
+          tags,
+          customFields,
+          stockQuantity: stock,
+        } as never,
+        { onSuccess: (res) => router.replace(`/commerce/products/${res.data.data.id}`) },
+      );
+      return;
+    }
+
+    updateProduct.mutate(
+      {
+        name: form.name.trim(),
+        shortDescription: form.shortDescription || null,
+        description: form.description || null,
+        sku: form.sku || undefined,
+        categoryId: form.categoryId || null,
+        tags,
+        customFields,
+        stockQuantity: stock,
+      } as never,
+      {
+        onSuccess: () => {
+          // Keep the default variant's price in step with the headline price.
+          const def = variants?.find((v) => v.isDefault) ?? variants?.[0];
+          if (def && price != null && Number(def.price) !== price) {
+            updateVariant.mutate({ variantId: def.id, payload: { price, compareAtPrice: compareAt ?? null } });
+          }
+        },
       },
-    });
+    );
   };
 
   if (!storeId) {
@@ -168,19 +221,30 @@ export default function ProductEditorPage() {
                 Back
               </Link>
             </Button>
-            {product && product.status === 'draft' && (
+            {product && product.status !== 'published' && (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => publishProduct.mutate(params.id)}
+                disabled={bulkUpdate.isPending}
+                onClick={() => bulkUpdate.mutate({ ids: [params.id], action: 'publish' })}
               >
                 <Eye className="mr-2 h-4 w-4" />
-                Publish
+                Publish to site
               </Button>
             )}
-            <Button size="sm" onClick={handleSave} disabled={updateProduct.isPending}>
+            {product && product.status === 'published' && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={bulkUpdate.isPending}
+                onClick={() => bulkUpdate.mutate({ ids: [params.id], action: 'archive' })}
+              >
+                Take off site
+              </Button>
+            )}
+            <Button size="sm" onClick={handleSave} disabled={updateProduct.isPending || createProduct.isPending || !form.name.trim()}>
               <Save className="mr-2 h-4 w-4" />
-              {updateProduct.isPending ? 'Saving...' : 'Save'}
+              {updateProduct.isPending || createProduct.isPending ? 'Saving...' : isNew ? 'Create product' : 'Save'}
             </Button>
           </div>
         }
@@ -199,8 +263,8 @@ export default function ProductEditorPage() {
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="media" disabled={isNew}>Media</TabsTrigger>
-          <TabsTrigger value="variants">Variants {variants ? `(${variants.length})` : ''}</TabsTrigger>
+          <TabsTrigger value="media" disabled={isNew}>Photos</TabsTrigger>
+          <TabsTrigger value="variants" disabled={isNew}>Sizes {variants ? `(${variants.length})` : ''}</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
 
@@ -221,7 +285,17 @@ export default function ProductEditorPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="desc">Description</Label>
+                    <Label htmlFor="short">Short description (shown on cards)</Label>
+                    <Input
+                      id="short"
+                      value={form.shortDescription}
+                      onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))}
+                      placeholder="One line, e.g. Togo leather, palladium hardware"
+                      maxLength={1000}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="desc">Full description</Label>
                     <textarea
                       id="desc"
                       rows={4}
@@ -231,7 +305,7 @@ export default function ProductEditorPage() {
                       className="w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="sku">SKU</Label>
                       <Input
@@ -243,12 +317,13 @@ export default function ProductEditorPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="brand">Brand</Label>
+                      <Label htmlFor="stock">Quantity in stock</Label>
                       <Input
-                        id="brand"
-                        value={form.brand}
-                        onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))}
-                        placeholder="Brand name"
+                        id="stock"
+                        type="number"
+                        min={0}
+                        value={form.stockQuantity}
+                        onChange={(e) => setForm((f) => ({ ...f, stockQuantity: e.target.value }))}
                       />
                     </div>
                   </div>
@@ -257,9 +332,9 @@ export default function ProductEditorPage() {
 
               <Card>
                 <CardHeader><CardTitle className="text-sm">Pricing</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="basePrice">Base Price (cents)</Label>
+                    <Label htmlFor="basePrice">Price (USD)</Label>
                     <Input
                       id="basePrice"
                       type="number"
@@ -269,12 +344,12 @@ export default function ProductEditorPage() {
                     />
                     {form.basePrice && product?.currencyCode && (
                       <p className="text-xs text-muted-foreground">
-                        {formatCurrency(Number(form.basePrice), product.currencyCode)}
+                        {formatMoney(Number(form.basePrice), product.currencyCode)}
                       </p>
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="compareAt">Compare At Price (cents)</Label>
+                    <Label htmlFor="compareAt">Original price (USD, optional)</Label>
                     <Input
                       id="compareAt"
                       type="number"
@@ -303,8 +378,8 @@ export default function ProductEditorPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {(categories ?? []).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        {categoryOptions.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -387,22 +462,49 @@ export default function ProductEditorPage() {
 
         <TabsContent value="variants" className="mt-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-sm">Product Variants</CardTitle>
-              <div className="flex items-center gap-2">
+            <CardHeader className="space-y-3">
+              <div>
+                <CardTitle className="text-sm">Sizes &amp; variants</CardTitle>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add one row per size or colour (e.g. &ldquo;Birkin 30cm &middot; Black&rdquo;) with its own price.
+                  Edit a price below and click away to save it.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_8rem_auto]">
                 <Input
-                  value={newVariantName}
-                  onChange={(e) => setNewVariantName(e.target.value)}
-                  placeholder="Variant name"
-                  className="h-8 w-48"
+                  value={newVariant.name}
+                  onChange={(e) => setNewVariant((v) => ({ ...v, name: e.target.value }))}
+                  placeholder="Size / name, e.g. 30cm Black"
+                  className="h-9"
+                />
+                <Input
+                  value={newVariant.sku}
+                  onChange={(e) => setNewVariant((v) => ({ ...v, sku: e.target.value }))}
+                  placeholder="SKU (auto if empty)"
+                  className="h-9 font-mono text-xs"
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  value={newVariant.price}
+                  onChange={(e) => setNewVariant((v) => ({ ...v, price: e.target.value }))}
+                  placeholder="Price USD"
+                  className="h-9"
                 />
                 <Button
                   size="sm"
+                  className="h-9"
+                  disabled={!newVariant.name.trim() || newVariant.price === '' || createVariant.isPending}
                   onClick={() => {
-                    if (newVariantName.trim()) {
-                      createVariant.mutate({ name: newVariantName.trim() });
-                      setNewVariantName('');
-                    }
+                    const name = newVariant.name.trim();
+                    const base = (product?.sku || product?.slug || 'SKU').toString();
+                    const sku =
+                      newVariant.sku.trim() ||
+                      `${base}-${name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+                    createVariant.mutate(
+                      { name, sku, price: Number(newVariant.price), currencyCode: product?.currencyCode ?? 'USD' },
+                      { onSuccess: () => setNewVariant({ name: '', sku: '', price: '' }) },
+                    );
                   }}
                 >
                   <Plus className="mr-1 h-3 w-3" />
@@ -413,29 +515,46 @@ export default function ProductEditorPage() {
             <CardContent className="p-0">
               {!variants || variants.length === 0 ? (
                 <div className="py-10 text-center">
-                  <p className="text-sm text-muted-foreground">No variants yet</p>
+                  <p className="text-sm text-muted-foreground">No sizes yet</p>
                 </div>
               ) : (
                 <div className="divide-y">
                   {variants.map((v) => (
-                    <div key={v.id} className="flex items-center justify-between px-4 py-3">
-                      <div>
-                        <p className="text-sm font-medium">{v.name}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{v.sku ?? '—'}</p>
+                    <div key={v.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {v.name || 'Default'} {v.isDefault && <Badge variant="secondary" className="ml-1 text-[10px]">default</Badge>}
+                        </p>
+                        <p className="truncate font-mono text-xs text-muted-foreground">{v.sku ?? '—'}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        {v.price != null && (
-                          <span className="text-sm">{formatCurrency(v.price, product?.currencyCode ?? 'USD')}</span>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">$</span>
+                          <Input
+                            type="number"
+                            min={0}
+                            defaultValue={Number(v.price)}
+                            key={`${v.id}-${v.price}`}
+                            className="h-8 w-28"
+                            onBlur={(e) => {
+                              const next = Number(e.target.value);
+                              if (e.target.value !== '' && next >= 0 && next !== Number(v.price)) {
+                                updateVariant.mutate({ variantId: v.id, payload: { price: next } });
+                              }
+                            }}
+                          />
+                        </div>
                         <StatusBadge status={v.isActive ? 'active' : 'inactive'} />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive"
-                          onClick={() => deleteVariant.mutate(v.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        {!v.isDefault && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => deleteVariant.mutate(v.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

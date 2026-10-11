@@ -26,11 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useProducts, useDeleteProduct, usePublishProduct, useDuplicateProduct, useBulkUpdateProducts } from '@/lib/queries/commerce-products.queries';
+import { useProducts, useDeleteProduct, useDuplicateProduct, useBulkUpdateProducts } from '@/lib/queries/commerce-products.queries';
 import { useCommerceCategories } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
-import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { formatMoney, formatDate } from '@/lib/utils/format';
+import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 import type { Product } from '@/lib/types/commerce.types';
 
 export default function ProductsPage() {
@@ -53,7 +54,6 @@ export default function ProductsPage() {
 
   const { data: categoriesData } = useCommerceCategories(storeId);
   const deleteProduct = useDeleteProduct(storeId);
-  const publishProduct = usePublishProduct(storeId);
   const duplicateProduct = useDuplicateProduct(storeId);
   const bulkUpdate = useBulkUpdateProducts(storeId);
 
@@ -126,7 +126,7 @@ export default function ProductsPage() {
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="published">Live on site</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
@@ -136,8 +136,8 @@ export default function ProductsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            {flattenCategoryPaths(categories).map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -240,8 +240,8 @@ export default function ProductsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {product.basePrice != null
-                        ? formatCurrency(product.basePrice, product.currencyCode)
+                      {product.customFields?.basePrice != null && product.customFields.basePrice !== ''
+                        ? formatMoney(Number(product.customFields.basePrice), product.currencyCode ?? 'USD')
                         : '—'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground font-mono">
@@ -265,7 +265,7 @@ export default function ProductsPage() {
                             </Link>
                           </DropdownMenuItem>
                           {product.status === 'draft' && (
-                            <DropdownMenuItem onClick={() => publishProduct.mutate(product.id)}>
+                            <DropdownMenuItem onClick={() => bulkUpdate.mutate({ ids: [product.id], action: 'publish' })}>
                               <Eye className="mr-2 h-4 w-4" />
                               Publish
                             </DropdownMenuItem>
