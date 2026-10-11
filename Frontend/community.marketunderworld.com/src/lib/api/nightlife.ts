@@ -173,7 +173,7 @@ export const submitGuestList = (clubSlug: string, input: GuestListInput) =>
 export const submitVipTable = (clubSlug: string, input: VipTableInput) =>
   send<{ id: string }>("POST", `/nightlife/clubs/${encodeURIComponent(clubSlug)}/vip-tables`, input);
 export const getMyBookings = () =>
-  send<{ items: ClubBooking[]; total: number }>("GET", "/nightlife/bookings/me");
+  send<{ items: ClubBooking[]; total: number }>("GET", "/nightlife/bookings/mine");
 
 export type BookingStatus = "pending" | "confirmed" | "declined" | "cancelled";
 export interface ClubBooking {

@@ -3,7 +3,8 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => sequelize.define('GiftCardOrder', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    user_id: { type: DataTypes.UUID, allowNull: false },
+    // Platform user ids are not always UUIDs (Market Underworld members have numeric ids), so this is a string.
+    user_id: { type: DataTypes.STRING(64), allowNull: false },
     brand_id: { type: DataTypes.UUID, allowNull: false },
     supplier: { type: DataTypes.STRING(40), allowNull: false },
     denomination_value: { type: DataTypes.DECIMAL(12, 2), allowNull: false },

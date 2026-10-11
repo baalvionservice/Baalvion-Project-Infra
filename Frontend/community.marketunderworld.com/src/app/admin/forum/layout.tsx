@@ -18,7 +18,7 @@ export default function ForumAdminLayout({ children }: { children: React.ReactNo
   const pathname = usePathname()
   return (
     <div>
-      <nav aria-label="Forum admin sections" className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-white/10 [scrollbar-width:none]">
+      <nav aria-label="Forum admin sections" className="flex gap-2 overflow-x-auto pt-1 pb-4 mb-6 border-b border-white/10 [scrollbar-width:none]">
         {TABS.map((t) => {
           const on = pathname === t.path
           return (
