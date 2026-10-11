@@ -1,22 +1,21 @@
-"use client";
-import { Share2 } from "lucide-react";
+"use client"
 
-export function ShareButton({ title, url }: { title: string; url: string }) {
-  const handleShare = async () => {
-    if (typeof navigator === "undefined") return;
-    if (navigator.share) {
-      try { await navigator.share({ title, url }); } catch { /* user cancelled */ }
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
-    }
-  };
+import { useState } from "react"
+import { Share2 } from "lucide-react"
+
+export function ShareButton({ title, path }: { title: string; path: string }) {
+  const [copied, setCopied] = useState(false)
+  const share = async () => {
+    const url = `${window.location.origin}${path}`
+    try {
+      if (navigator.share) { await navigator.share({ title, url }); return }
+      await navigator.clipboard.writeText(url)
+      setCopied(true); setTimeout(() => setCopied(false), 1800)
+    } catch { /* cancelled or blocked */ }
+  }
   return (
-    <button
-      onClick={handleShare}
-      className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 hover:border-[#ed6c2a] transition-colors"
-    >
-      <Share2 className="w-4 h-4 text-[#ed6c2a]" /> Share
+    <button onClick={share} className="inline-flex items-center gap-2 px-5 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition">
+      <Share2 className="w-4 h-4 text-[#ed6c2a]" /> {copied ? "Link copied" : "Share"}
     </button>
-  );
+  )
 }

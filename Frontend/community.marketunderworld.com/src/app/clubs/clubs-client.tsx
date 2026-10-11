@@ -20,9 +20,13 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
   }
   const [searchQuery, setSearchQuery] = useState("");
   const [suburbFilter, setSuburbFilter] = useState("All");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [visibleCount, setVisibleCount] = useState(24);
 
   const MAHARASHTRA_SUBURBS = ["All", "Andheri", "Bandra", "Santacruz", "Lower Parel", "Worli", "Dadar", "Juhu"];
+
+  const citiesInView = Array.from(new Set(clubs.filter((c) => normalizedState === "All" || c.state === normalizedState).map((c) => c.city).filter(Boolean))).sort();
 
   const filteredClubs = clubs.filter((club) => {
     const matchesState = normalizedState === "All" || club.state === normalizedState;
@@ -34,7 +38,9 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
       matchesSuburb = club.suburb === suburbFilter;
     }
 
-    return matchesState && matchesSearch && matchesSuburb;
+    const matchesType = !typeFilter || club.venueType === typeFilter;
+    const matchesCity = !cityFilter || club.city === cityFilter;
+    return matchesState && matchesSearch && matchesSuburb && matchesType && matchesCity;
   });
 
   const breadcrumbItems = [
@@ -142,8 +148,23 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
               )}
             </div>
 
+            {/* Filters */}
+            <div className="mb-8 flex flex-wrap items-center gap-3" role="group" aria-label="Filter venues">
+              {([["", "All types"], ["nightclub", "Nightclubs"], ["pub", "Pubs"], ["bar", "Bars"]] as const).map(([v, l]) => (
+                <button key={l} onClick={() => { setTypeFilter(v); setVisibleCount(24); }} aria-pressed={typeFilter === v}
+                  className={cn("px-4 py-2 rounded-full text-sm font-semibold border transition-colors", typeFilter === v ? "bg-[#222] text-white border-[#222]" : "bg-white text-gray-700 border-gray-300 hover:border-black")}>{l}</button>
+              ))}
+              {citiesInView.length > 1 && (
+                <select value={cityFilter} onChange={(e) => { setCityFilter(e.target.value); setVisibleCount(24); }} aria-label="City" className="ml-auto border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                  <option value="">All cities</option>
+                  {citiesInView.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 mb-6">{filteredClubs.length} venue{filteredClubs.length === 1 ? "" : "s"}</p>
+
             {/* Club List (Newspaper Standard Grid) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
               {filteredClubs.length === 0 ? (
                 <div className="col-span-full py-10 text-center">
                   <h3 className="text-xl font-bold text-gray-700">No clubs found</h3>

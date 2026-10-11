@@ -4,7 +4,8 @@ import { notFound } from "next/navigation"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { Breadcrumbs } from "@/components/ui/breadcrumb"
-import { VenueList, areaHref } from "@/components/clubs/venue-list"
+import { areaHref } from "@/components/clubs/venue-list"
+import { CityBrowser } from "@/components/clubs/city-browser"
 import { getClubs } from "@/lib/api/nightlife"
 import { SITE, breadcrumbJsonLd, groupByCity, itemListJsonLd } from "@/lib/clubs-seo"
 
@@ -32,7 +33,7 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
   return (
     <div className="min-h-screen bg-[#f3f4f7] text-[#222]">
       <Navbar />
-      <main className="max-w-[1100px] mx-auto px-4 py-8 mt-20">
+      <main className="max-w-[1100px] mx-auto px-5 sm:px-6 py-10 mt-20">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="mb-6"><Breadcrumbs items={[{ label: "Clubs", href: "/clubs" }, { label: g.name }]} /></div>
         <h1 className="text-3xl md:text-4xl font-bold">Pubs, bars and nightclubs in {g.name}</h1>
@@ -49,10 +50,9 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
           </section>
         )}
 
-        <section className="mt-10">
-          <h2 className="text-xl font-bold mb-3">Top venues in {g.name}</h2>
-          <VenueList clubs={g.clubs.slice(0, 40)} />
-          {g.clubs.length > 40 && <p className="text-sm text-gray-500 mt-4">Showing 40 of {g.clubs.length}. Choose an area above to see the rest.</p>}
+        <section className="mt-12">
+          <h2 className="text-2xl font-bold mb-5">All venues in {g.name}</h2>
+          <CityBrowser clubs={g.clubs} city={g.name} />
         </section>
 
         <p className="text-xs text-gray-400 mt-10">Venue locations, addresses and opening hours come from OpenStreetMap contributors (ODbL) and Hell Road&apos;s own listings.</p>
