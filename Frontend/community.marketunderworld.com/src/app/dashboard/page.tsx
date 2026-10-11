@@ -29,6 +29,8 @@ import { getMyMember, type MyMember } from "@/lib/api/members"
 import { getBuyerAccess, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
+import { ProfilePanel } from "@/components/dashboard/profile-panel"
+import { AccessRequestsPanel } from "@/components/dashboard/access-requests-panel"
 import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
 import { getMyOrders as getMyGiftCardOrders, type GiftCardOrder } from "@/lib/api/giftcards"
@@ -146,6 +148,7 @@ export default function DashboardPage() {
         </header>
 
         {member && <MemberIdCard member={member} onChange={setMember} />}
+        {member && <ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} />}
 
         {member?.seller ? (
           <div className="inline-flex p-1 rounded-xl bg-white/5 border border-white/5" role="tablist">
@@ -165,6 +168,8 @@ export default function DashboardPage() {
             <Link href="/seller/onboarding" className="shrink-0"><NexusButton>Start selling <ArrowRight className="w-4 h-4 ml-2 inline" /></NexusButton></Link>
           </NexusCard>
         ) : null}
+
+        {member && <AccessRequestsPanel />}
 
         {member?.seller && tab === "selling" && <SellerOverviewPanel seller={member.seller} sales={sales} />}
 

@@ -311,9 +311,10 @@ const toEliteApplication = (r) => ({
 });
 
 // Public view: no user id, no contact details.
-const toPublicEliteParty = (r) => ({
+const toPublicEliteParty = (r, approvedGuests = 0) => ({
     id: r.id, hostAlias: r.host_alias, budget: Number(r.budget_inr), city: r.city, area: r.area,
     clubName: r.club_name, date: r.party_date, guests: r.guests, perks: r.perks || [],
+    approvedGuests, slotsLeft: r.guests ? Math.max(0, r.guests - approvedGuests) : null,
 });
 
 async function applyEliteHost(userId, data) {
@@ -331,7 +332,10 @@ async function listApprovedEliteParties() {
     const rows = await db.EliteHostApplication.findAll({
         where: { status: 'approved' }, order: [['party_date', 'ASC'], ['created_at', 'DESC']], limit: 50,
     });
-    return { items: rows.map(toPublicEliteParty), total: rows.length };
+    const guests = require('./eliteGuestService');
+    const items = [];
+    for (const r of rows) items.push(toPublicEliteParty(r, await guests.approvedCount(r.id)));
+    return { items, total: items.length };
 }
 
 async function listEliteApplications({ status, limit, offset } = {}) {

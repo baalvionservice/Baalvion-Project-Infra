@@ -7,16 +7,25 @@ import { Crown, ShieldCheck, Car, GlassWater, CheckCircle2, Search, MapPin } fro
 import { INDIAN_NIGHTLIFE_STATES, INDIAN_CLUBS } from "@/data/clubs-data";
 import { MUMBAI_CLUBS } from "@/data/mumbai-clubs";
 import { useToast } from "@/hooks/use-toast";
-import { admin } from "@/lib/api/nightlife";
+import { admin, getClubs } from "@/lib/api/nightlife";
+import { HostRequests, JoinDialog, MyJoins } from "@/components/clubs/elite-parts";
 
 const ELITE_HOST_KEY = "baalvion_elite_host_applications";
 
-const ALL_CLUBS = [...INDIAN_CLUBS, ...MUMBAI_CLUBS];
+const STATIC_CLUBS = [...INDIAN_CLUBS, ...MUMBAI_CLUBS];
+const PERKS = ["Pick-up and drop for all guests", "VIP table", "Food and drinks covered"];
 
 export function EliteHostClient() {
   // ── All hooks declared at the top — no hooks after computed values ──
   const [activeTab, setActiveTab] = useState<"host" | "guest">("guest");
   const [parties, setParties] = useState<any[]>([]);
+  const [allClubs, setAllClubs] = useState(STATIC_CLUBS);
+  const [joinFor, setJoinFor] = useState<any | null>(null);
+  const [joinsKey, setJoinsKey] = useState(0);
+  const [hostAlias, setHostAlias] = useState("");
+  const [partyDate, setPartyDate] = useState("");
+  const [guests, setGuests] = useState(5);
+  const [perks, setPerks] = useState<string[]>(PERKS);
   const [budget, setBudget] = useState("500000");
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [selectedState, setSelectedState] = useState("Maharashtra");
@@ -35,17 +44,29 @@ export function EliteHostClient() {
           date: i.date ? new Date(i.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Date to be announced",
           budget: `₹${Number(i.budget).toLocaleString("en-IN")}`,
           slots: i.guests || null,
-          filled: null,
+          slotsLeft: i.slotsLeft ?? null,
           perks: i.perks || [],
         })));
       })
       .catch(() => {});
+    // The host picks from the full directory, not the small bundled list.
+    getClubs().then((list) => {
+      setAllClubs(list);
+      const inState = list.filter((c) => c.state === "Maharashtra");
+      const cities = Array.from(new Set(inState.map((c) => c.city))).filter(Boolean).sort() as string[];
+      const city = cities.includes("Mumbai") ? "Mumbai" : cities[0] || "";
+      const inCity = inState.filter((c) => c.city === city);
+      const areas = Array.from(new Set(inCity.map((c) => c.suburb || c.city))).filter(Boolean).sort() as string[];
+      const area = areas[0] || "";
+      setSelectedCity(city); setSelectedArea(area);
+      setSelectedClub(inCity.find((c) => (c.suburb || c.city) === area)?.id || "");
+    }).catch(() => {});
   }, []);
 
   // ── Derived values via useMemo — no hooks after these ──
   const availableClubsInState = useMemo(
-    () => ALL_CLUBS.filter(c => c.state === selectedState),
-    [selectedState]
+    () => allClubs.filter(c => c.state === selectedState),
+    [selectedState, allClubs]
   );
 
   const uniqueCities = useMemo(
@@ -70,7 +91,7 @@ export function EliteHostClient() {
 
   // ── Event Handlers ──
   const handleStateChange = (newState: string) => {
-    const clubsInState = ALL_CLUBS.filter(c => c.state === newState);
+    const clubsInState = allClubs.filter(c => c.state === newState);
     const cities = Array.from(new Set(clubsInState.map(c => c.city))).filter(Boolean).sort() as string[];
     const firstCity = cities[0] || "";
     const clubsInCity = clubsInState.filter(c => c.city === firstCity);
@@ -119,7 +140,11 @@ export function EliteHostClient() {
         city: selectedCity,
         area: selectedArea,
         clubId: selectedClub,
-        clubName: ALL_CLUBS.find(c => c.id === selectedClub)?.name ?? selectedClub,
+        clubName: allClubs.find(c => c.id === selectedClub)?.name ?? selectedClub,
+        hostAlias: hostAlias || undefined,
+        partyDate: partyDate || undefined,
+        guests,
+        perks,
       };
       const result = await admin.createEliteHostApplication(application);
       setAppRef(result?.id ?? `EH-${Date.now()}`);
@@ -129,10 +154,6 @@ export function EliteHostClient() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleApply = () => {
-    toast({ title: "Interest Noted!", description: "Sign up and complete your profile to apply for Elite Party invitations.", variant: "default" });
   };
 
   return (
@@ -211,7 +232,7 @@ export function EliteHostClient() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-semibold bg-white/10 px-3 py-1 rounded-full">{party.date}</div>
-                        {party.slots ? <div className="text-xs text-gray-400 mt-2">{party.slots} guests</div> : null}
+                        {party.slots ? <div className="text-xs text-gray-400 mt-2">{party.slotsLeft !== null ? `${party.slotsLeft} of ${party.slots} places left` : `${party.slots} guests`}</div> : null}
                       </div>
                     </div>
                     
@@ -223,12 +244,13 @@ export function EliteHostClient() {
                       ))}
                     </div>
 
-                    <button onClick={handleApply} className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors">
-                      Apply to Join (KYC Required)
+                    <button onClick={() => setJoinFor(party)} disabled={party.slotsLeft === 0} className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors disabled:opacity-50">
+                      {party.slotsLeft === 0 ? "Party is full" : "Ask to join (KYC required)"}
                     </button>
                   </div>
                 ))}
               </div>
+              <MyJoins refreshKey={joinsKey} />
             </div>
           )}
 
@@ -355,7 +377,27 @@ export function EliteHostClient() {
                     {/* Guest Slots */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-300 mb-2">Number of Guest Slots</label>
-                      <input type="number" min="2" max="20" defaultValue="5" className="w-full bg-black border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" />
+                      <input type="number" min="2" max="20" value={guests} onChange={(e) => setGuests(Math.max(2, Math.min(20, Number(e.target.value) || 2)))} className="w-full bg-black border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Name shown to guests (optional)</label>
+                        <input type="text" value={hostAlias} onChange={(e) => setHostAlias(e.target.value)} maxLength={80} placeholder="e.g. Mr. R.S." className="w-full bg-black border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Party date</label>
+                        <input type="date" value={partyDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setPartyDate(e.target.value)} className="w-full bg-black border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">What you will cover</label>
+                      <div className="space-y-2">
+                        {PERKS.map((perk) => (
+                          <label key={perk} className="flex items-center gap-2 text-sm text-gray-300"><input type="checkbox" className="accent-amber-500" checked={perks.includes(perk)} onChange={() => setPerks((cur) => (cur.includes(perk) ? cur.filter((x) => x !== perk) : [...cur, perk]))} /> {perk}</label>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Terms */}
@@ -374,15 +416,17 @@ export function EliteHostClient() {
                     </div>
 
                     <button type="submit" className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-black text-lg hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all">
-                      Proceed to Payment & KYC
+                      Submit for review
                     </button>
                   </div>
                 </form>
               </div>
             </div>
           )}
+          {activeTab === "host" && <HostRequests />}
         </div>
       </main>
+      {joinFor && <JoinDialog party={{ id: joinFor.id, hostAlias: joinFor.hostAlias, clubName: joinFor.clubName, slotsLeft: joinFor.slotsLeft }} onClose={() => setJoinFor(null)} onDone={() => setJoinsKey((k) => k + 1)} />}
       <Footer />
     </div>
   );

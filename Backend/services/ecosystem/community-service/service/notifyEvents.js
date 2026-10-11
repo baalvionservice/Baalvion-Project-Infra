@@ -6,7 +6,22 @@ const { notify, alertAdmins, fire } = require('./notify');
 const date = (d) => (d ? String(d).slice(0, 10) : '');
 const who = (r) => `${r.first_name || ''} ${r.last_name || ''}`.trim() || 'A guest';
 
+const DEPT = { clubs_team: 'Clubs team', marketplace_team: 'Marketplace team', support_team: 'Support team', forum_moderation: 'Forum moderation', education_team: 'Education team', events_team: 'Events team', other: 'the team' };
+
 module.exports = {
+    // ── Access requests ──────────────────────────────────────────────────────
+    accessRequested(req) {
+        fire(alertAdmins({ key: `access-req-${req.id}`, title: `New access request: ${DEPT[req.department] || req.department}`, body: `${req.requester_label || 'A member'}: ${String(req.message || '').slice(0, 160)}`, url: '/admin/access-requests' }));
+    },
+    accessDecided(req) {
+        const ok = req.status === 'approved';
+        fire(notify({
+            userId: req.user_id, type: 'access', key: `access-${req.status}-${req.id}`,
+            title: ok ? `Your request to join ${DEPT[req.department] || 'the team'} was approved` : `Your request to join ${DEPT[req.department] || 'the team'} was declined`,
+            body: req.decision_note || (ok ? 'A team lead will be in touch about the next steps.' : 'You can send a new request later.'),
+            url: '/dashboard',
+        }));
+    },
     // ── Clubs ────────────────────────────────────────────────────────────────
     bookingReceived(booking, club) {
         const kind = booking.kind === 'vip_table' ? 'VIP table request' : 'guest-list request';

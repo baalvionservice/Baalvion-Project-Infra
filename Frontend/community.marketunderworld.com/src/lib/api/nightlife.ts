@@ -412,3 +412,15 @@ export const admin = {
   enterLottery: (data: any) => send<any>("POST", "/nightlife/lottery", data),
   runLotteryDraw: (data: any) => send<any>("POST", "/admin/nightlife/lottery/draw", data),
 };
+
+// ── Elite parties: asking to join one, and the host's view of those requests ──
+export interface EliteJoin { id: string; partyId: string; males: number; females: number; note: string | null; status: "pending" | "approved" | "declined" | "withdrawn"; createdAt: string }
+export interface HostParty { id: string; clubName: string | null; city: string; date: string | null; guests: number | null; status: string; approvedGuests: number; pendingRequests: number }
+export const elite = {
+  join: (partyId: string, d: { males: number; females: number; note?: string }) => send<EliteJoin>("POST", `/nightlife/elite-host/${partyId}/join`, d),
+  myJoins: () => send<{ items: EliteJoin[] }>("GET", "/nightlife/elite-host/mine/joins"),
+  withdraw: (id: string) => send<EliteJoin>("POST", `/nightlife/elite-host/guests/${id}/withdraw`),
+  myParties: () => send<{ items: HostParty[] }>("GET", "/nightlife/elite-host/mine/parties"),
+  guests: (partyId: string) => send<{ capacity: number | null; approvedGuests: number; items: (EliteJoin & { requesterLabel: string | null })[] }>("GET", `/nightlife/elite-host/${partyId}/guests`),
+  decide: (id: string, approve: boolean) => send<EliteJoin>("POST", `/nightlife/elite-host/guests/${id}/decide`, { approve }),
+};

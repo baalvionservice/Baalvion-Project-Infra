@@ -103,6 +103,7 @@ const ADMIN_NAV = [
     group: "VERIFICATION",
     items: [
       { name: "Identity KYC", path: "/admin/kyc", icon: Fingerprint },
+      { name: "Department Requests", path: "/admin/access-requests", icon: MessageSquare },
       { name: "Investment Listings", path: "/admin/investments", icon: Tag },
     ]
   },

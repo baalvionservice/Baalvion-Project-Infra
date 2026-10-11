@@ -10,6 +10,7 @@ import { access, type Permission, type StaffMe, type Tier } from "@/lib/api/staf
 // super and admin tiers use (those backends enforce their own roles too). Longest prefix wins.
 export const PAGE_REQUIREMENTS: [string, Permission | "platform"][] = [
   ["/admin/staff", "staff.manage"],
+  ["/admin/access-requests", "staff.manage"],
   ["/admin/kyc", "kyc.review"],
   ["/admin/bounty", "bounty.manage"],
   ["/admin/investments", "content.manage"],

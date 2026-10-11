@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Check } from "lucide-react"
+import { useAuth } from "@/context/auth-context"
+import { saveMyProfile } from "@/lib/api/profile"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 
@@ -24,6 +26,7 @@ const NEEDS: Need[] = [
 const KEY = "hr_access_needs"
 
 export default function OnboardingPage() {
+  const { isAuthenticated } = useAuth()
   const [picked, setPicked] = useState<string[]>([])
 
   useEffect(() => {
@@ -34,6 +37,7 @@ export default function OnboardingPage() {
     const next = picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id]
     setPicked(next)
     try { localStorage.setItem(KEY, JSON.stringify(next)) } catch { /* ignore */ }
+    if (isAuthenticated) saveMyProfile({ interests: next }).catch(() => {})
   }
   const chosen = NEEDS.filter((n) => picked.includes(n.id))
 
@@ -42,7 +46,7 @@ export default function OnboardingPage() {
       <Navbar />
       <main className="max-w-[1000px] mx-auto px-4 sm:px-6 pt-32 pb-16">
         <h1 className="text-3xl font-bold">What do you want to do here?</h1>
-        <p className="text-gray-400 mt-2 max-w-2xl">Tick everything that applies. We will show exactly what each one needs, so you only do the steps you need. You can come back and change this any time.</p>
+        <p className="text-gray-400 mt-2 max-w-2xl">Tick everything that applies. We will show exactly what each one needs, so you only do the steps you need. When you are signed in your choices are saved to your profile, and you can change them any time on your dashboard.</p>
 
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {NEEDS.map((n) => {

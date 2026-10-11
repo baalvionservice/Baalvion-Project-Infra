@@ -15,6 +15,8 @@ const kycRoutes = require('./kycRoutes');
 const notificationRoutes = require('./notificationRoutes');
 const mediaRoutes = require('./mediaRoutes');
 const consoleRoutes = require('./consoleRoutes');
+const profileRoutes = require('./profileRoutes');
+const eliteGuestRoutes = require('./eliteGuestRoutes');
 
 const { auditAdmin } = require('../middleware/auditAdmin');
 
@@ -32,6 +34,7 @@ router.use('/community', contentRoutes);
 router.use('/community', billingRoutes);
 router.use('/community', chatRoutes);
 router.use('/community', directMessageRoutes);
+router.use('/community', eliteGuestRoutes);
 router.use('/community', nightlifeRoutes);
 router.use('/community', gigsRoutes);
 router.use('/community', bountyRoutes);
@@ -40,5 +43,6 @@ router.use('/community', kycRoutes);
 router.use('/community', notificationRoutes);
 router.use('/community', mediaRoutes);
 router.use('/community', consoleRoutes);
+router.use('/community', profileRoutes);
 
 module.exports = router;
