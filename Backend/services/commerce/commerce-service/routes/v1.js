@@ -18,6 +18,7 @@ const discountRoutes = require('./discountRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const storefrontRoutes = require('./storefrontRoutes');
 const paymentSettingsRoutes = require('./paymentSettingsRoutes');
+const { publicRouter: publicEngagementRoutes, memberRouter: engagementRoutes } = require('./engagementRoutes');
 const { publicRouter: publicIntermediaryRoutes, intermediaryRouter: intermediaryRoutes, tradeRouter: intermediaryTradeRoutes } = require('./intermediaryRoutes');
 const marketController = require('../controller/marketController');
 const mediaServeController = require('../controller/mediaServeController');
@@ -25,6 +26,7 @@ const mediaServeController = require('../controller/mediaServeController');
 const router = Router();
 
 // Public storefront API (anonymous, read-only, published+public catalog). No authMiddleware.
+router.use('/commerce/storefront/:storeId/engagement', publicEngagementRoutes);
 router.use('/commerce/storefront/:storeId', storefrontRoutes);
 
 // Decrypt-and-stream route for encrypted product media (see lib/encryption.js). Public/
@@ -58,6 +60,7 @@ router.use('/commerce/wallet', authMiddleware, walletRoutes);
 router.use('/commerce/buyer-access', authMiddleware, buyerAccessRoutes);
 router.use('/commerce/payment-destinations', authMiddleware, paymentDestinationRoutes);
 router.use('/commerce/payment-settings', authMiddleware, paymentSettingsRoutes);
+router.use('/commerce/engagement', authMiddleware, engagementRoutes);
 router.use('/commerce/intermediaries', authMiddleware, intermediaryRoutes);
 router.use('/commerce/intermediary-trades', authMiddleware, intermediaryTradeRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);

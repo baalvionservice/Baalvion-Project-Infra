@@ -117,7 +117,8 @@ const ADMIN_NAV = [
     items: [
       { name: "Clubs Directory", path: "/admin/clubs", icon: MapPin },
       { name: "Events Calendar", path: "/admin/clubs/events", icon: MapPin },
-      { name: "Celebrity & DJ Events", path: "/admin/clubs/celebrity-events", icon: Star },
+      { name: "Ticket Draws", path: "/admin/clubs/lottery", icon: Star },
+      { name: "DJ Demands", path: "/admin/clubs/dj-demands", icon: Star },
       { name: "Guest List & VIP Requests", path: "/admin/clubs/bookings", icon: MessageSquare },
       { name: "Elite Hosted Parties", path: "/admin/clubs/elite-host", icon: Crown },
     ]

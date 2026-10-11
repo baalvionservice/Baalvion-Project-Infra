@@ -14,6 +14,8 @@ export const PAGE_REQUIREMENTS: [string, Permission | "platform"][] = [
   ["/admin/bounty", "bounty.manage"],
   ["/admin/investments", "content.manage"],
   ["/admin/clubs/bookings", "content.handle"],
+  ["/admin/clubs/lottery", "platform"],
+  ["/admin/clubs/dj-demands", "platform"],
   ["/admin/clubs", "content.manage"],
   ["/nightlife/verify", "verify.review"],
   ["/admin/locals/applications", "content.handle"],
