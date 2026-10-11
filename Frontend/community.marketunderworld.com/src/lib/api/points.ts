@@ -1,6 +1,6 @@
 // The buyer's wallet: load it with crypto (an admin confirms), it becomes points, and points pay for
 // orders. 100 points = $1 by default; the server tells us the rate so nothing here hard-codes it.
-import { submitPaymentHash, type CategoryPayment, type PaymentMethod } from './seller-access';
+import { submitPayment, submitPaymentHash, type CategoryPayment, type PaymentMethod } from './seller-access';
 
 export interface WalletEntry { id: string; delta: number; reason: 'topup' | 'purchase' | 'refund' | 'adjustment'; orderNumber: string | null; note: string | null; createdAt: string }
 
@@ -46,7 +46,7 @@ export const startWalletTopup = (amountUsd: number, currency: PaymentMethod, net
 export const getPointsReceipts = () => call<PointsReceipts>('/api/commerce-proxy', '/wallet/admin/receipts?limit=200');
 export const payOrderWithPoints = (storeId: string, orderId: string) =>
   call<{ order: { id: string; orderNumber: string }; points?: number; alreadyPaid: boolean }>('/api/order-proxy', `/stores/${storeId}/orders/${orderId}/pay-with-points`, { method: 'POST' });
-export { submitPaymentHash };
+export { submitPayment, submitPaymentHash };
 
 export const formatPoints = (n: number) => `${n.toLocaleString()} pts`;
 export const usdToPoints = (usd: number, perUsd: number) => Math.ceil(Math.round(usd * 100) * perUsd / 100);

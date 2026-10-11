@@ -7,9 +7,10 @@ import { CheckCircle2, Clock, Loader2, ShieldCheck, XCircle } from "lucide-react
 import { NexusCard } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { PayToPanel } from "@/components/payments/pay-to-panel"
+import { ReviewStatus } from "@/components/payments/review-status"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
-import { getBuyerAccess, startAccessPass, submitPaymentHash, type BuyerAccessStatus } from "@/lib/api/buyer-access"
+import { getBuyerAccess, startAccessPass, submitPayment, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { listPaymentMethods, type PaymentMethod, type PaymentMethodInfo } from "@/lib/api/seller-access"
 
 export default function BuyerPassPage() {
@@ -45,10 +46,10 @@ export default function BuyerPassPage() {
     setBusy(true)
     try { await startAccessPass(method, method === "USDT" ? network : undefined); await load() } catch (e) { fail("Couldn't start payment", e) } finally { setBusy(false) }
   }
-  const submit = async (txHash: string) => {
+  const submit = async (body: Parameters<typeof submitPayment>[1]) => {
     if (!status?.payment) return
     setBusy(true)
-    try { await submitPaymentHash(status.payment.id, txHash); await load() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(false) }
+    try { await submitPayment(status.payment.id, body); await load() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(false) }
   }
 
   if (loading || authLoading) return <div className="min-h-screen bg-[#050508] pt-32 flex items-center justify-center gap-3 text-gray-500"><Loader2 className="w-5 h-5 animate-spin" /> Loading…</div>
@@ -74,13 +75,12 @@ export default function BuyerPassPage() {
           </NexusCard>
         ) : pay?.status === "payment_submitted" ? (
           <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-3">
-            <div className="flex items-center gap-3"><Clock className="w-6 h-6 text-amber-400" /><h2 className="text-xl font-bold">Waiting for confirmation</h2></div>
-            <p className="text-sm text-gray-400">We received your reference <code className="text-white">{pay.txHash}</code>. An admin will confirm it after checking the payment, then your access starts. You can close this page and come back.</p>
+            <ReviewStatus payment={pay} onRefresh={load} />
           </NexusCard>
         ) : pay?.status === "awaiting_payment" ? (
           <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-4">
             <h2 className="text-xl font-bold">Pay ${price} to enter</h2>
-            <PayToPanel payment={pay} amountUsd={price} busy={busy} onSubmitHash={submit} />
+            <PayToPanel payment={pay} amountUsd={price} busy={busy} onSubmit={submit} />
           </NexusCard>
         ) : (
           <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-6">

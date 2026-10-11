@@ -9,9 +9,10 @@ import { NexusButton } from "@/components/ui/nexus-button"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { PayToPanel } from "@/components/payments/pay-to-panel"
+import { ReviewStatus } from "@/components/payments/review-status"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
-import { getPointsWallet, startWalletTopup, submitPaymentHash, type PointsWallet } from "@/lib/api/points"
+import { getPointsWallet, startWalletTopup, submitPayment, type PointsWallet } from "@/lib/api/points"
 import { listPaymentMethods, type PaymentMethod, type PaymentMethodInfo } from "@/lib/api/seller-access"
 
 const PRESETS = [50, 100, 250, 500]
@@ -57,10 +58,10 @@ export default function WalletPage() {
     setBusy(true)
     try { await startWalletTopup(amount, method, method === "USDT" ? network : undefined); await load() } catch (e) { fail("Couldn't start your wallet load", e) } finally { setBusy(false) }
   }
-  const submit = async (txHash: string) => {
+  const submit = async (body: Parameters<typeof submitPayment>[1]) => {
     if (!wallet?.openTopup) return
     setBusy(true)
-    try { await submitPaymentHash(wallet.openTopup.id, txHash); await load() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(false) }
+    try { await submitPayment(wallet.openTopup.id, body); await load() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(false) }
   }
 
   if (loading || authLoading) return <div className="min-h-screen bg-[#050508] pt-32 flex items-center justify-center gap-3 text-gray-500"><Loader2 className="w-5 h-5 animate-spin" /> Loading your wallet…</div>
@@ -93,13 +94,12 @@ export default function WalletPage() {
 
           {open?.status === "payment_submitted" ? (
             <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-3">
-              <div className="flex items-center gap-3"><Clock className="w-6 h-6 text-amber-400" /><h2 className="text-xl font-bold">Waiting for confirmation</h2></div>
-              <p className="text-sm text-gray-400">We received your reference <code className="text-white">{open.txHash}</code> for ${Number(open.amountUsd).toFixed(2)}. An admin will confirm it, and your points appear straight away. You can leave this page.</p>
+              <ReviewStatus payment={open} onRefresh={load} />
             </NexusCard>
           ) : open?.status === "awaiting_payment" ? (
             <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-4">
               <h2 className="text-xl font-bold">Send ${Number(open.amountUsd).toFixed(2)} to load {Math.round(Number(open.amountUsd) * wallet.pointsPerUsd).toLocaleString()} points</h2>
-              <PayToPanel payment={open} amountUsd={Number(open.amountUsd)} busy={busy} onSubmitHash={submit} />
+              <PayToPanel payment={open} amountUsd={Number(open.amountUsd)} busy={busy} onSubmit={submit} />
             </NexusCard>
           ) : (
             <NexusCard className="p-8 bg-white/[0.02] border-white/10 space-y-6">

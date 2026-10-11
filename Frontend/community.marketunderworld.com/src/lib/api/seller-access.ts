@@ -19,13 +19,26 @@ export interface CategoryPayment {
   amountReceived: string | null;
   note: string | null;
   createdAt: string;
-  payTo?: { address: string | null; network: string | null; networkLabel: string | null; method: PaymentMethod; label: string; recipient: string | null };
+  payTo?: {
+    address: string | null; network: string | null; networkLabel: string | null; method: PaymentMethod; label: string; recipient: string | null;
+    // Binance Pay: the QR the payer scans and the link that opens it in the Binance app.
+    qrImageUrl?: string | null; payLink?: string | null;
+  };
+  // How long an admin takes to check a payment; once submitted, also when it was sent and when it should be done.
+  review?: PaymentReview;
+  submittedAt?: string | null;
+  reviewWaitMinutes?: number | null;
+  proofCount?: number;
   // Admin list only.
   categoryName?: string | null;
   sellerName?: string | null;
   storeName?: string | null;
   memberNumber?: string | null;
 }
+
+export interface PaymentReview { waitMinutes: number; submittedAt: string | null; reviewBy: string | null }
+export interface PaymentProof { id: string; mime: string; sizeBytes: number; createdAt: string; dataUrl: string }
+export interface ProofUpload { mime: 'image/jpeg' | 'image/png' | 'image/webp'; data: string }
 
 export interface ChatSession {
   id: string;
@@ -79,8 +92,14 @@ const post = <T>(path: string, data?: unknown) =>
 export const listMyPayments = () => call<CategoryPayment[]>('/seller-bonds/mine');
 export const startCategoryPayment = (categoryId: string, currency: PaymentMethod, network?: string) =>
   post<CategoryPayment>('/seller-bonds', { categoryId, currency, network });
-export const submitPaymentHash = (id: string, txHash: string) =>
-  post<CategoryPayment>(`/seller-bonds/${id}/payment`, { txHash });
+// A payer proves payment with a screenshot, a transaction reference, or both.
+export const submitPayment = (id: string, body: { txHash?: string; proofs?: ProofUpload[] }) =>
+  post<CategoryPayment>(`/seller-bonds/${id}/payment`, body);
+export const submitPaymentHash = (id: string, txHash: string) => submitPayment(id, { txHash });
+export const listPaymentProofs = (id: string) => call<PaymentProof[]>(`/seller-bonds/${id}/proofs`);
+export const getReviewWait = () => call<{ reviewWaitMinutes: number; min: number; max: number }>('/payment-settings');
+export const setReviewWait = (reviewWaitMinutes: number) =>
+  call<{ reviewWaitMinutes: number }>('/payment-settings', { method: 'PUT', body: JSON.stringify({ reviewWaitMinutes }) });
 export const getWallet = () => call<SellerWallet>('/seller-tokens/wallet');
 export const startAdminChat = () => post<ChatSession & { balance: number }>('/seller-tokens/admin-chat');
 export const getMyChat = (after?: string) =>

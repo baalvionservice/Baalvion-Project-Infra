@@ -1,9 +1,11 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Copy, Loader2, Lock, MessageSquare, Send, Timer } from 'lucide-react'
+import { Loader2, Lock, MessageSquare, Send, Timer } from 'lucide-react'
 import { ListingCard, Badge } from '@/components/ui/ListingCard'
 import { AppButton } from '@/components/ui/AppButton'
+import { PayToPanel } from '@/components/payments/pay-to-panel'
+import { ReviewStatus } from '@/components/payments/review-status'
 import { useToast } from '@/hooks/use-toast'
 import { MARKET_UNDERWORLD_STORE_ID } from '@/lib/api/commerce'
 import { listStoreCategories, type CommerceCategory } from '@/lib/api/commerce-admin'
@@ -15,7 +17,7 @@ import {
   sendMyChatMessage,
   startAdminChat,
   startCategoryPayment,
-  submitPaymentHash,
+  submitPayment,
   type CategoryPayment,
   type PaymentMethod,
   type PaymentMethodInfo,
@@ -56,7 +58,6 @@ export default function SellerAccessPage() {
   const [currency, setCurrency] = useState<PaymentMethod>('USDT')
   const [methods, setMethods] = useState<PaymentMethodInfo[]>([])
   const [network, setNetwork] = useState<string>('')
-  const [hashes, setHashes] = useState<Record<string, string>>({})
 
   const fail = (title: string, err: unknown) =>
     toast({ variant: 'destructive', title, description: err instanceof Error ? err.message : 'Please try again.' })
@@ -91,11 +92,9 @@ export default function SellerAccessPage() {
     try { await startCategoryPayment(categoryId, currency, currency === 'USDT' ? network : undefined); await refresh() } catch (e) { fail("Couldn't start payment", e) } finally { setBusy(null) }
   }
 
-  const submitHash = async (paymentId: string) => {
-    const txHash = (hashes[paymentId] || '').trim()
-    if (txHash.length < 8) return toast({ variant: 'destructive', title: 'Enter the transaction hash' })
+  const submitProof = async (paymentId: string, body: Parameters<typeof submitPayment>[1]) => {
     setBusy(paymentId)
-    try { await submitPaymentHash(paymentId, txHash); await refresh() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(null) }
+    try { await submitPayment(paymentId, body); await refresh() } catch (e) { fail("Couldn't submit", e) } finally { setBusy(null) }
   }
 
   if (loading) {
@@ -166,33 +165,9 @@ export default function SellerAccessPage() {
               </div>
 
               {pay?.status === 'awaiting_payment' && pay.payTo && (
-                <div className="space-y-3 p-4 rounded-lg bg-brand-void/60 border border-brand-border">
-                  <p className="text-xs text-text-muted">
-                    {pay.currency === 'BINANCE'
-                      ? <>Pay <strong className="text-white">${CATEGORY_PRICE_USD.toLocaleString()}</strong> in USDT with Binance Pay to this Binance Pay ID:</>
-                      : <>Send exactly <strong className="text-white">${CATEGORY_PRICE_USD.toLocaleString()}</strong> worth of {pay.payTo.label}{pay.payTo.networkLabel && pay.currency === 'USDT' ? <> on the <strong className="text-white">{pay.payTo.networkLabel}</strong> network</> : null} to:</>}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm text-brand-green break-all flex-1 select-all">{pay.payTo.address}</code>
-                    <button aria-label="Copy address" onClick={() => navigator.clipboard?.writeText(pay.payTo!.address ?? '')} className="text-text-muted hover:text-white">
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {pay.payTo.recipient && <p className="text-[11px] text-text-muted">Recipient name shown by Binance: <strong className="text-white">{pay.payTo.recipient}</strong></p>}
-                  {pay.payTo.address && <p className="text-[11px] text-text-ghost">Check the address ends in <strong className="text-white font-mono">{pay.payTo.address.slice(-6)}</strong> before you send. A wrong network or address cannot be recovered.</p>}
-                  <p className="text-[11px] text-text-ghost">{pay.currency === 'BINANCE' ? 'Then paste the Binance Pay order or transaction ID below' : 'Then paste the transaction hash below'} so the admin can verify it.</p>
-                  <div className="flex gap-2">
-                    <input
-                      value={hashes[pay.id] || ''}
-                      onChange={(e) => setHashes((h) => ({ ...h, [pay.id]: e.target.value }))}
-                      placeholder={pay.currency === 'BINANCE' ? "Binance Pay order / transaction ID" : "Transaction hash"}
-                      className="flex-1 h-10 px-3 rounded-lg bg-black border border-brand-border text-sm text-white"
-                    />
-                    <AppButton onClick={() => submitHash(pay.id)} disabled={busy === pay.id}>Submit</AppButton>
-                  </div>
-                </div>
+                <PayToPanel payment={pay} amountUsd={CATEGORY_PRICE_USD} busy={busy === pay.id} onSubmit={(body) => submitProof(pay.id, body)} />
               )}
-              {pay?.status === 'payment_submitted' && <p className="text-xs text-text-muted">Hash submitted: <code>{pay.txHash}</code>. An admin will confirm it after checking the blockchain.</p>}
+              {pay?.status === 'payment_submitted' && <ReviewStatus payment={pay} onRefresh={refresh} />}
             </ListingCard>
           )
         })}

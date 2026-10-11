@@ -5,6 +5,8 @@ const { AppError } = require('../utils/errors');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const config = require('../config/appConfig');
 const paymentDestinations = require('./paymentDestinationService');
+const paymentSettings = require('./paymentSettingsService');
+const { decodeProofs } = require('../utils/paymentProof');
 
 const LIVE = ['awaiting_payment', 'payment_submitted', 'active'];
 const CURRENCIES = ['BTC', 'USDT', 'BINANCE'];
@@ -76,21 +78,56 @@ async function present(bond) {
             network = dest ? dest.network : null;
         }
         const recipient = json.payToLabel || null;
+        const live = await paymentDestinations.resolve(json.currency, network);
         json.payTo = {
             address, network, method: json.currency, recipient,
+            qrImageUrl: live ? live.qrImageUrl || null : null, payLink: live ? live.payLink || null : null,
             label: paymentDestinations.METHODS[json.currency] ? paymentDestinations.METHODS[json.currency].label : json.currency,
             networkLabel: paymentDestinations.NETWORK_LABEL[network || ''] || null,
         };
     }
+    // Everything the payer needs to see about the wait: how long review takes and by when it should be done.
+    if (json.status === 'awaiting_payment') {
+        json.review = { waitMinutes: await paymentSettings.getReviewWaitMinutes(), submittedAt: null, reviewBy: null };
+    } else if (json.status === 'payment_submitted') {
+        const submitted = json.submittedAt ? new Date(json.submittedAt) : new Date(json.updatedAt);
+        const wait = json.reviewWaitMinutes || paymentSettings.DEFAULT_WAIT;
+        json.review = { waitMinutes: wait, submittedAt: submitted.toISOString(), reviewBy: new Date(submitted.getTime() + wait * 60000).toISOString() };
+        const [c] = await sequelize.query('SELECT COUNT(*)::int AS n FROM commerce.commerce_payment_proofs WHERE bond_id = :b', { type: QueryTypes.SELECT, replacements: { b: json.id } });
+        json.proofCount = c ? c.n : 0;
+    }
     return json;
 }
 
-async function submitPayment(authCtx, bondId, txHash) {
-    const bond = await CommerceSellerCategoryBond.findByPk(bondId);
-    if (!bond || String(bond.sellerUserId) !== String(authCtx.userId)) throw new AppError('NOT_FOUND', 'Payment not found', 404);
-    if (bond.status !== 'awaiting_payment') throw new AppError('CONFLICT', `Payment is ${bond.status}`, 409);
-    await bond.update({ status: 'payment_submitted', txHash });
-    return bond.toJSON();
+async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
+    const decoded = decodeProofs(proofs);
+    const reference = txHash ? String(txHash).trim() : '';
+    if (!reference && decoded.length === 0) {
+        throw new AppError('VALIDATION_ERROR', 'Attach a screenshot of the payment or enter the transaction reference', 400);
+    }
+    const wait = await paymentSettings.getReviewWaitMinutes();
+    return sequelize.transaction(async (t) => {
+        const bond = await CommerceSellerCategoryBond.findByPk(bondId, { transaction: t, lock: t.LOCK.UPDATE });
+        if (!bond || String(bond.sellerUserId) !== String(authCtx.userId)) throw new AppError('NOT_FOUND', 'Payment not found', 404);
+        if (bond.status !== 'awaiting_payment') throw new AppError('CONFLICT', `Payment is ${bond.status}`, 409);
+        await bond.update({ status: 'payment_submitted', txHash: reference || null, submittedAt: new Date(), reviewWaitMinutes: wait }, { transaction: t });
+        for (const p of decoded) {
+            await sequelize.query(
+                'INSERT INTO commerce.commerce_payment_proofs (bond_id, user_id, mime, size_bytes, data) VALUES (:bond, :user, :mime, :size, :data)',
+                { replacements: { bond: bond.id, user: authCtx.userId, mime: p.mime, size: p.size, data: p.data }, transaction: t },
+            );
+        }
+        return present(bond);
+    });
+}
+
+// Admin: the screenshots a payer attached, as data URLs (small, JSON-safe through the same-origin proxy).
+async function listProofs(bondId) {
+    const rows = await sequelize.query(
+        'SELECT id, mime, size_bytes AS "sizeBytes", data, created_at AS "createdAt" FROM commerce.commerce_payment_proofs WHERE bond_id = :b ORDER BY created_at',
+        { type: QueryTypes.SELECT, replacements: { b: bondId } },
+    );
+    return rows.map((r) => ({ id: r.id, mime: r.mime, sizeBytes: r.sizeBytes, createdAt: r.createdAt, dataUrl: `data:${r.mime};base64,${Buffer.from(r.data).toString('base64')}` }));
 }
 
 async function listMine(userId) {
@@ -108,12 +145,17 @@ async function listAll(query = {}) {
         CommerceSellerApplication.findAll({ where: { applicantUserId: { [Op.in]: [...new Set(rows.map((r) => r.sellerUserId))] }, status: 'approved' }, attributes: ['applicantUserId', 'storeName', 'legalFullName'] }),
         CommerceMemberProfile.findAll({ where: { userId: { [Op.in]: [...new Set(rows.map((r) => r.sellerUserId))] } }, attributes: ['userId', 'memberNumber'] }),
     ]);
+    const proofRows = rows.length ? await sequelize.query(
+        'SELECT bond_id AS "bondId", COUNT(*)::int AS n FROM commerce.commerce_payment_proofs WHERE bond_id IN (:ids) GROUP BY bond_id',
+        { type: QueryTypes.SELECT, replacements: { ids: rows.map((r) => r.id) } },
+    ) : [];
+    const proofCount = new Map(proofRows.map((r) => [r.bondId, r.n]));
     const memberNo = new Map(profiles.map((m) => [String(m.userId), m.memberNumber]));
     const catName = new Map(cats.map((c) => [c.id, c.name]));
     const seller = new Map(apps.map((a) => [String(a.applicantUserId), a]));
     const data = rows.map((r) => {
         const a = seller.get(String(r.sellerUserId));
-        return { ...r.toJSON(), categoryName: catName.get(r.categoryId) || null, sellerName: a ? (a.legalFullName || a.storeName) : null, storeName: a ? a.storeName : null, memberNumber: memberNo.get(String(r.sellerUserId)) ? `HR-${memberNo.get(String(r.sellerUserId))}` : null };
+        return { ...r.toJSON(), proofCount: proofCount.get(r.id) || 0, categoryName: catName.get(r.categoryId) || null, sellerName: a ? (a.legalFullName || a.storeName) : null, storeName: a ? a.storeName : null, memberNumber: memberNo.get(String(r.sellerUserId)) ? `HR-${memberNo.get(String(r.sellerUserId))}` : null };
     });
     return buildPaginated(data, count, { page, limit });
 }
@@ -197,4 +239,4 @@ async function assertCanSellInCategory(userId, categoryId) {
     }
 }
 
-module.exports = { createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };
+module.exports = { listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };

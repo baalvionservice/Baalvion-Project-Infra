@@ -1,6 +1,6 @@
 // The one-time buyer access pass: pay to enter the marketplace and buy. Same payment flow as the
 // seller category payments (same addresses, same hash submission, same admin confirmation).
-import { submitPaymentHash, type CategoryPayment, type PaymentMethod } from './seller-access';
+import { submitPayment, submitPaymentHash, type CategoryPayment, type PaymentMethod } from './seller-access';
 
 const PROXY_BASE = '/api/commerce-proxy';
 
@@ -26,4 +26,4 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const getBuyerAccess = () => call<BuyerAccessStatus>('/buyer-access/me');
 export const startAccessPass = (currency: PaymentMethod, network?: string) =>
   call<CategoryPayment>('/buyer-access', { method: 'POST', body: JSON.stringify({ currency, network }) });
-export { submitPaymentHash };
+export { submitPayment, submitPaymentHash };
