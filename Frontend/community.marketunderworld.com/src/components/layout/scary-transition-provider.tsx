@@ -76,6 +76,9 @@ const SCARY_CSS = `
 
 const BLOOD_DRIPS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
+// Switched off until testing is finished: links go straight to the next page. Set to true to bring the effect back.
+const SCARY_TRANSITION_ENABLED = false;
+
 export function ScaryTransitionProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<"idle" | "darken" | "gate" | "logo" | "exit">("idle");
   const [mounted, setMounted] = useState(false);
@@ -85,6 +88,10 @@ export function ScaryTransitionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const navigateWithScare = useCallback((url: string) => {
+    if (!SCARY_TRANSITION_ENABLED) {
+      window.location.href = url;
+      return;
+    }
     if (phase !== "idle") return;
 
     setPhase("darken");
