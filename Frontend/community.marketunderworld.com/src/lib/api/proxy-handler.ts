@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // shared helper here rather than copy-pasting this extra branching into two near-identical files.
 const BINARY_RESPONSE_PREFIXES = ['image/', 'video/', 'application/octet-stream'];
 
-export function createProxy(apiBase: string) {
+export function createProxy(apiBase: string, opts: { edgeKey?: boolean } = {}) {
   return async function proxy(request: NextRequest, path: string[]): Promise<NextResponse> {
     const target = new URL(`${apiBase}/${path.join('/')}`);
     request.nextUrl.searchParams.forEach((v, k) => target.searchParams.set(k, v));
@@ -16,6 +16,9 @@ export function createProxy(apiBase: string) {
     const headers = new Headers();
     const accessToken = request.cookies.get('access_token')?.value;
     if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
+    // The edge only routes the signed-in commerce API for requests that come from this site's own server; it checks this
+    // key and strips it. The service still verifies the login and the role, so the key alone grants nothing.
+    if (opts.edgeKey && process.env.COMMUNITY_ADMIN_EDGE_KEY) headers.set('x-edge-key', process.env.COMMUNITY_ADMIN_EDGE_KEY);
     // Guest cart ownership (order-service's optionalAuth routes) rides on a signed X-Cart-Session
     // header, not a cookie — forward it through untouched when the client sent one.
     const cartSession = request.headers.get('x-cart-session');

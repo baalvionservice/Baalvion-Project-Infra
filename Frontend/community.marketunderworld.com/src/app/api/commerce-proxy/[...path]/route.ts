@@ -4,7 +4,7 @@ import { createProxy, proxyMethod } from '@/lib/api/proxy-handler';
 // community-proxy/route.ts's cookie-to-Bearer translation, plus PATCH and a multipart pass-through
 // for product-media upload — see lib/api/proxy-handler.ts for why those two extras exist here.
 const COMMERCE_API_BASE = process.env.COMMERCE_UPSTREAM_URL ?? '';
-const proxy = createProxy(COMMERCE_API_BASE);
+const proxy = createProxy(COMMERCE_API_BASE, { edgeKey: true });
 
 export const GET = proxyMethod(proxy);
 export const POST = proxyMethod(proxy);
