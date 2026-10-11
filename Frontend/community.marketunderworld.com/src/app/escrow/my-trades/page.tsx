@@ -16,7 +16,7 @@ import {
   RefreshCw,
   X
 } from "lucide-react";
-import { getStoredTrades, appendChatMessage, updateTradeState, MOCK_AGENTS, buildUpiUri } from "@/lib/escrow-store";
+import { getStoredTrades, appendChatMessage, updateTradeState, AGENTS, buildUpiUri } from "@/lib/escrow-store";
 import { ServiceRequest } from "@/lib/escrow-types";
 
 export default function MyTradesPage() {
@@ -43,15 +43,12 @@ export default function MyTradesPage() {
   };
 
   const activeTrade = trades.find((t) => t.id === selectedTradeId);
-  const assignedAgent = MOCK_AGENTS.find((a) => a.id === activeTrade?.memberId) || MOCK_AGENTS[0];
+  const assignedAgent = AGENTS.find((a) => a.id === activeTrade?.memberId);
 
   const inrTotal = (activeTrade?.totalCost || 100) * 90;
-  const upiUri = buildUpiUri(
-    assignedAgent.upiId || "fastpay.escrow@icici",
-    inrTotal,
-    assignedAgent.name || "Agent",
-    activeTrade?.id || "REQ-8822-B"
-  );
+  const upiUri = assignedAgent?.upiId && activeTrade
+    ? buildUpiUri(assignedAgent.upiId, inrTotal, assignedAgent.name || "Intermediary", activeTrade.id)
+    : "";
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeTrade) return;
@@ -199,7 +196,7 @@ export default function MyTradesPage() {
           {/* Chat Stream */}
           <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-900/50">
             <div className="text-center text-[11px] text-zinc-500 my-2 border-b border-zinc-800/80 pb-3">
-              🔒 Encrypted Escrow Session • Verified Agent Deposit: <strong className="text-emerald-400">$1,000 USDT Secured</strong>
+              Trade chat with your intermediary • Pay only by scanning the QR shown on their page
             </div>
 
             {(activeTrade.chatMessages || []).map((msg) => (
@@ -254,27 +251,28 @@ export default function MyTradesPage() {
             <h3 className="font-bold text-lg mb-1">Scan & Pay via PhonePe / GPay</h3>
             <p className="text-xs text-zinc-400 mb-4">Scan with any Indian UPI app to pay agent directly.</p>
 
-            {/* Dynamic Simulated QR Canvas */}
-            <div className="bg-white p-4 rounded-xl inline-block mb-4 shadow-xl border-4 border-purple-900">
-              <div className="w-48 h-48 bg-zinc-950 flex flex-col items-center justify-center text-black font-mono text-[10px] p-2 relative overflow-hidden rounded">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 pointer-events-none"></div>
-                <QrCode className="w-32 h-32 text-white mb-1" />
-                <span className="text-white font-bold tracking-widest">SCAN UPI QR</span>
+            {(assignedAgent?.paymentQrs ?? []).map((q) => (
+              <div key={q.url} className="mb-4 space-y-1">
+                <p className="text-xs font-bold text-white">{q.label}</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={q.url} alt={`${assignedAgent?.name} ${q.label} QR`} className="mx-auto w-full max-w-[220px] rounded-lg bg-white border border-zinc-800" />
               </div>
-            </div>
+            ))}
 
             <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-left space-y-2 text-xs font-mono mb-4">
-              <div><span className="text-zinc-500">Agent VPA: </span><strong className="text-purple-400">{assignedAgent.upiId || "fastpay.escrow@icici"}</strong></div>
+              <div><span className="text-zinc-500">Pay to: </span><strong className="text-purple-400">{assignedAgent?.name ?? "—"}</strong> (check this name in your UPI app)</div>
               <div><span className="text-zinc-500">Amount: </span><strong className="text-emerald-400">₹{inrTotal.toLocaleString()} INR</strong></div>
               <div><span className="text-zinc-500">Trade Ref: </span><strong className="text-white">{activeTrade.id}</strong></div>
             </div>
 
-            <a 
-              href={upiUri}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors text-xs flex items-center justify-center gap-2"
-            >
-              Open Direct in PhonePe / GPay App
-            </a>
+            {upiUri && (
+              <a
+                href={upiUri}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors text-xs flex items-center justify-center gap-2"
+              >
+                Open in my UPI app
+              </a>
+            )}
           </div>
         </div>
       )}

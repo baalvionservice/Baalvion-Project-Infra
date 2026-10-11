@@ -19,19 +19,27 @@ import {
   ChevronRight,
   DollarSign
 } from "lucide-react";
-import { MOCK_AGENTS, MOCK_REVIEWS, createNewTrade, buildUpiUri } from "@/lib/escrow-store";
+import { AGENTS, REVIEWS, createNewTrade, buildUpiUri } from "@/lib/escrow-store";
 import { VerifiedMemberProfile } from "@/lib/escrow-types";
 
 export default function AgentProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: agentId } = use(params);
+  const agent = AGENTS.find((a) => a.id === agentId || a.userId === agentId);
+  if (!agent) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 text-white min-h-screen text-center py-24">
+        <h1 className="text-2xl font-bold mb-2">Intermediary not found</h1>
+        <p className="text-zinc-400 mb-6">This intermediary is not listed.</p>
+        <Link href="/escrow/intermediaries" className="text-red-400 hover:underline">Back to the directory</Link>
+      </div>
+    );
+  }
+  return <AgentProfile agent={agent} />;
+}
+
+function AgentProfile({ agent }: { agent: VerifiedMemberProfile }) {
   const router = useRouter();
-  const resolvedParams = use(params);
-  const agentId = resolvedParams.id;
-
-  // Find agent or fallback to first agent
-  const agent: VerifiedMemberProfile = 
-    MOCK_AGENTS.find((a) => a.id === agentId || a.userId === agentId) || MOCK_AGENTS[0];
-
-  const agentReviews = MOCK_REVIEWS.filter((r) => r.memberId === agent.id || r.memberId === "agent_alpha");
+  const agentReviews = REVIEWS.filter((r) => r.memberId === agent.id);
 
   // State for Instant Direct Hire Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,18 +90,24 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
               <div className="flex flex-wrap items-center gap-3 mb-1">
                 <h1 className="text-2xl font-bold text-white">{agent.name}</h1>
                 <span className="bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> $1,000 USDT VERIFIED DEPOSIT
+                  <ShieldCheck className="w-3.5 h-3.5" /> {agent.depositPaid ? `$${agent.depositAmount.toLocaleString()} deposit` : "Newly listed"}
                 </span>
               </div>
-              <p className="text-sm font-mono text-zinc-400 mb-3">@{agent.userId} • Member since {agent.verificationDate}</p>
+              <p className="text-sm font-mono text-zinc-400 mb-3">@{agent.userId} • Listed since {agent.verificationDate}</p>
 
               <div className="flex flex-wrap gap-4 text-xs text-zinc-300">
-                <span className="flex items-center gap-1.5 bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" /> Avg Response: <strong className="text-white">{agent.averageResponseMinutes || 3} mins</strong>
-                </span>
-                <span className="flex items-center gap-1.5 bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800">
-                  <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /> Rating: <strong className="text-white">{agent.positiveReviewPercentage}%</strong> ({agent.completedJobs} trades)
-                </span>
+                {agent.averageResponseMinutes ? (
+                  <span className="flex items-center gap-1.5 bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" /> Avg Response: <strong className="text-white">{agent.averageResponseMinutes} mins</strong>
+                  </span>
+                ) : null}
+                {agent.completedJobs > 0 ? (
+                  <span className="flex items-center gap-1.5 bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /> Rating: <strong className="text-white">{agent.positiveReviewPercentage}%</strong> ({agent.completedJobs} trades)
+                  </span>
+                ) : (
+                  <span className="bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800">No completed trades yet</span>
+                )}
               </div>
             </div>
           </div>
@@ -120,10 +134,11 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
               {agent.bio}
             </p>
 
+            {agent.depositPaid && agent.depositTxHash ? (
             <div className="bg-zinc-950 border border-zinc-800/80 p-4 rounded-xl space-y-3 font-mono text-xs">
               <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                 <span className="text-zinc-400">Security Deposit Collateral</span>
-                <span className="text-emerald-400 font-bold">$1,000 USDT (Cold Storage)</span>
+                <span className="text-emerald-400 font-bold">${agent.depositAmount.toLocaleString()} USDT</span>
               </div>
               <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                 <span className="text-zinc-400">Blockchain Transaction Hash</span>
@@ -138,9 +153,10 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-zinc-400">Disputes Upheld Against Agent</span>
-                <span className="text-emerald-400 font-bold">0 (Flawless Record)</span>
+                <span className="text-emerald-400 font-bold">{agent.disputesUpheldCount}</span>
               </div>
             </div>
+            ) : null}
           </div>
 
           {/* Customer Reviews & Feedback */}
@@ -150,6 +166,7 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
             </h2>
 
             <div className="space-y-4">
+              {agentReviews.length === 0 && <p className="text-sm text-zinc-400">No reviews yet. Reviews appear here after real trades.</p>}
               {agentReviews.map((rev) => (
                 <div key={rev.id} className="bg-zinc-950 border border-zinc-800 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
@@ -176,45 +193,25 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
         {/* Right Column: Accepted Payment Gateways & Stats */}
         <div className="space-y-6">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">Supported Payment Methods</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-zinc-950 rounded-lg border border-zinc-800">
-                <div className="w-8 h-8 rounded bg-purple-900/50 border border-purple-800 flex items-center justify-center text-purple-400 font-bold text-xs">
-                  PE
+            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">Pay by scanning</h3>
+            <div className="space-y-5">
+              {(agent.paymentQrs ?? []).map((q) => (
+                <div key={q.url} className="space-y-2">
+                  <p className="text-xs font-bold text-white">{q.label}</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={q.url} alt={`${agent.name} ${q.label} QR`} className="mx-auto w-full max-w-[260px] rounded-lg border border-zinc-800 bg-white" />
                 </div>
-                <div>
-                  <div className="font-bold text-sm text-white">PhonePe</div>
-                  <div className="text-xs text-zinc-400 font-mono">{agent.phonePeNumber || agent.upiId}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-zinc-950 rounded-lg border border-zinc-800">
-                <div className="w-8 h-8 rounded bg-blue-900/50 border border-blue-800 flex items-center justify-center text-blue-400 font-bold text-xs">
-                  GP
-                </div>
-                <div>
-                  <div className="font-bold text-sm text-white">Google Pay (GPay)</div>
-                  <div className="text-xs text-zinc-400 font-mono">{agent.gpayNumber || agent.upiId}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-zinc-950 rounded-lg border border-zinc-800">
-                <div className="w-8 h-8 rounded bg-emerald-900/50 border border-emerald-800 flex items-center justify-center text-emerald-400 font-bold text-xs">
-                  QR
-                </div>
-                <div>
-                  <div className="font-bold text-sm text-white">UPI Dynamic QR Code</div>
-                  <div className="text-xs text-zinc-400">Scannable by any Indian UPI App</div>
-                </div>
-              </div>
+              ))}
+              <p className="text-[11px] text-zinc-400">
+                Scan with any UPI app. The name shown must be <strong className="text-white">{agent.name}</strong>; if it is different, do not pay.
+              </p>
             </div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
-            <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-            <h3 className="font-bold text-white mb-1">100% Escrow Protected</h3>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <h3 className="font-bold text-white mb-1">Before you pay</h3>
             <p className="text-xs text-zinc-400 leading-normal">
-              Your fiat payment is held safely. If the agent fails to deliver your USDT or account setup, the admin automatically refunds you from their $1,000 security deposit.
+              You pay this intermediary directly. Baalvion does not hold your money in this flow. Agree the amount and fee in the trade chat, and keep your payment screenshot. Report any problem from the Disputes page.
             </p>
           </div>
         </div>
@@ -228,7 +225,7 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
               <Sparkles className="w-5 h-5 text-red-500" /> Hire {agent.name}
             </h2>
             <p className="text-xs text-zinc-400 mb-6">
-              Create an escrow service order directly with this verified agent.
+              Start a trade request with this intermediary.
             </p>
 
             <div className="space-y-4">

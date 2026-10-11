@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ShieldCheck, Star, Clock, Search, ArrowRight, Award } from "lucide-react";
-import { MOCK_AGENTS } from "@/lib/escrow-store";
+import { AGENTS } from "@/lib/escrow-store";
 
 export default function IntermediariesPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredAgents = MOCK_AGENTS.filter(
+  const filteredAgents = AGENTS.filter(
     (agent) =>
       (agent.name || "Agent").toLowerCase().includes(searchTerm.toLowerCase()) ||
       agent.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -24,9 +24,9 @@ export default function IntermediariesPage() {
               Verified Intermediary Directory
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white">Verified Members Network</h1>
+          <h1 className="text-3xl font-bold text-white">Intermediaries</h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Search human workers backed by a <strong className="text-emerald-400">$1,000 USDT Security Collateral Deposit</strong> ready to process PhonePe/GPay payments & USDT fulfillment.
+            Find an intermediary who helps with USDT purchases, crypto trades and account setup. Pay only the account shown on the intermediary page, and check the name before you send.
           </p>
         </div>
 
@@ -52,6 +52,7 @@ export default function IntermediariesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAgents.length === 0 && <p className="md:col-span-3 text-center text-zinc-400 py-12">No intermediaries are listed yet.</p>}
         {filteredAgents.map((agent) => (
           <div key={agent.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-red-500/50 transition-all flex flex-col justify-between group">
             <div>
@@ -65,7 +66,7 @@ export default function IntermediariesPage() {
                     <div className="flex flex-col gap-0.5 mt-1">
                       <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
                         <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                        $1,000 Deposit Verified
+                        {agent.depositPaid ? `$${agent.depositAmount.toLocaleString()} deposit` : "Newly listed"}
                       </span>
                     </div>
                   </div>
@@ -73,17 +74,17 @@ export default function IntermediariesPage() {
               </div>
 
               <div className="space-y-2 text-xs text-zinc-300 mb-6 mt-4 pt-4 border-t border-zinc-800/60">
-                <div className="flex justify-between">
+                {agent.averageResponseMinutes ? <div className="flex justify-between">
                   <span className="text-zinc-500">Avg Response Time</span>
                   <span className="text-amber-400 font-bold flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {agent.averageResponseMinutes || 3} Mins
+                    <Clock className="w-3 h-3" /> {agent.averageResponseMinutes} Mins
                   </span>
-                </div>
+                </div> : null}
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Commission Rate</span>
                   <span className="text-red-400 font-semibold">{agent.commissionDetails}</span>
                 </div>
-                <div className="flex justify-between">
+                {agent.completedJobs > 0 ? <><div className="flex justify-between">
                   <span className="text-zinc-500">Completed Trades</span>
                   <span className="font-mono font-bold text-white">{agent.completedJobs}</span>
                 </div>
@@ -92,7 +93,7 @@ export default function IntermediariesPage() {
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {agent.positiveReviewPercentage}%
                   </span>
-                </div>
+                </div></> : null}
               </div>
 
               {/* Supported Gateways */}

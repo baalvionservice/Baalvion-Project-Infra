@@ -21,6 +21,8 @@ export interface VerifiedMemberProfile {
   avatarUrl?: string;
   bio?: string;
   upiId?: string;
+  // Static payment QR codes the agent hands to customers (images under /pay/).
+  paymentQrs?: { label: string; url: string }[];
   phonePeNumber?: string;
   gpayNumber?: string;
   identityVerified: boolean;
