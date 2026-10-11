@@ -1,78 +1,40 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { listTrades, type Trade } from "@/lib/api/intermediaries";
 
 export default function DisputesPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [trades, setTrades] = useState<Trade[] | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push("/auth/signin?redirect=/escrow/disputes"); return; }
+    listTrades().then((r) => setTrades(r.items.filter((t) => t.status === "disputed" || t.resolutionNote))).catch(() => setTrades([]));
+  }, [authLoading, isAuthenticated, router]);
+
   return (
-    <div className="max-w-5xl mx-auto p-6 text-white min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-red-500">Dispute Center</h1>
-        <p className="text-gray-400">Report incomplete work, payment mismatches, failed USDT transactions, or setup issues.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold border-b border-zinc-800 pb-2">Active Disputes</h2>
-          
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-bold text-lg">Request #REQ-9021-A</h3>
-                <p className="text-sm text-gray-400">Service: Purchase USDT · Member: Trade Facilitator #1042</p>
-              </div>
-              <span className="bg-orange-900/50 text-orange-400 border border-orange-800 text-xs px-3 py-1 rounded-full font-medium">
-                Under Review
-              </span>
-            </div>
-            
-            <div className="bg-zinc-950 p-4 rounded border border-zinc-800 mb-4">
-              <h4 className="text-sm font-semibold text-gray-300 mb-1">Issue: Failed USDT Transaction</h4>
-              <p className="text-sm text-gray-400">Payment was sent via PhonePe and verified, but the USDT transfer hasn't arrived on the provided TRC20 address after 4 hours.</p>
-            </div>
-            
-            <div className="flex gap-4 items-center">
-              <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
-                View Evidence
-              </button>
-              <button className="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-900/50 px-4 py-2 rounded text-sm font-medium transition-colors">
-                Add New Evidence
-              </button>
-            </div>
-          </div>
+    <div className="max-w-3xl mx-auto p-6 text-white min-h-screen">
+      <h1 className="text-3xl font-bold mb-2">Disputes</h1>
+      <p className="text-zinc-400 text-sm mb-8">If a trade goes wrong, open it from <Link href="/escrow/my-trades" className="text-red-400 hover:underline">My trades</Link> and press &ldquo;Raise a dispute&rdquo;. An admin reads the chat and screenshots and records a decision here.</p>
+      {trades === null ? <div className="py-12 flex justify-center text-zinc-400"><Loader2 className="w-5 h-5 animate-spin" /></div> : trades.length === 0 ? (
+        <p className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-400">You have no disputes.</p>
+      ) : (
+        <div className="space-y-3">
+          {trades.map((t) => (
+            <Link key={t.id} href={`/escrow/my-trades?trade=${t.id}`} className="block bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-xl p-4 text-sm">
+              <div className="flex justify-between"><span className="font-mono">{t.ref}</span><span className={t.status === "disputed" ? "text-red-400" : "text-zinc-400"}>{t.status === "disputed" ? "under review" : `resolved: ${t.status}`}</span></div>
+              {t.disputeReason && <p className="text-xs text-zinc-400 mt-1">{t.disputeReason}</p>}
+              {t.resolutionNote && <p className="text-xs text-zinc-300 mt-1">Admin decision: {t.resolutionNote}</p>}
+            </Link>
+          ))}
         </div>
-
-        <div className="space-y-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-            <h2 className="text-lg font-bold mb-4">Open a Dispute</h2>
-            <form className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-300">Select Service Request</label>
-                <select className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
-                  <option value="">-- Choose a Request --</option>
-                  <option value="REQ-8822-B">REQ-8822-B (Account Setup)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-300">Issue Type</label>
-                <select className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
-                  <option value="incomplete_work">Incomplete Work</option>
-                  <option value="payment_mismatch">Payment Mismatch / Not Received</option>
-                  <option value="failed_usdt">Failed USDT Transaction</option>
-                  <option value="setup_issue">Account Setup Issue</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-300">Details</label>
-                <textarea 
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500 h-24"
-                  placeholder="Explain the issue clearly..."
-                />
-              </div>
-              <button type="button" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded transition-colors text-sm">
-                Submit Dispute
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

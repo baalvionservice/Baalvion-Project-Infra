@@ -4,20 +4,9 @@ import { useRef, useState } from "react"
 import { Copy, ExternalLink, ImagePlus, X } from "lucide-react"
 import { AppButton } from "@/components/ui/AppButton"
 import type { CategoryPayment, ProofUpload } from "@/lib/api/seller-access"
+import { fileToProof, type ProofWithPreview } from "@/lib/image-proof"
 
 const MAX_SHOTS = 3
-
-// Phone screenshots are large; shrink to a readable JPEG before sending so the upload stays small and fast.
-async function toProof(file: File): Promise<ProofUpload & { preview: string }> {
-  const bitmap = await createImageBitmap(file)
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
-  const canvas = document.createElement("canvas")
-  canvas.width = Math.round(bitmap.width * scale)
-  canvas.height = Math.round(bitmap.height * scale)
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.85)
-  return { mime: "image/jpeg", data: dataUrl.split(",")[1], preview: dataUrl }
-}
 
 /**
  * The "send exactly $X" block shared by payment screens: the address (or Binance QR) the payer was issued,
@@ -30,7 +19,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
   onSubmit: (body: { txHash?: string; proofs?: ProofUpload[] }) => void
 }) {
   const [hash, setHash] = useState("")
-  const [shots, setShots] = useState<(ProofUpload & { preview: string })[]>([])
+  const [shots, setShots] = useState<ProofWithPreview[]>([])
   const [shotError, setShotError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const pay = payment.payTo
@@ -44,7 +33,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
     setShotError(null)
     try {
       const room = MAX_SHOTS - shots.length
-      const next = await Promise.all(Array.from(files).slice(0, room).map(toProof))
+      const next = await Promise.all(Array.from(files).slice(0, room).map((f) => fileToProof(f)))
       setShots((cur) => [...cur, ...next])
     } catch {
       setShotError("That file could not be read as an image. Try a screenshot (PNG or JPEG).")
