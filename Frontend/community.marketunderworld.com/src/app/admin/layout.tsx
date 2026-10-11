@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
-import { AdminNavbar } from '@/components/admin/admin-navbar';
-import { Menu, X } from 'lucide-react';
+import { AdminTopBar } from '@/components/admin/admin-topbar';
+import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AdminGate } from '@/components/admin/admin-access';
 
@@ -13,7 +13,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   return (
     <AdminGate>
-    <div className="min-h-screen bg-[#050508] flex overflow-x-hidden">
+    <div className="min-h-screen bg-[#050508] flex overflow-x-hidden md:pt-8">
       {/* Sidebar - Desktop (Static) */}
       <aside className="hidden lg:block w-72 shrink-0">
         <AdminSidebar />
@@ -49,19 +49,11 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       </AnimatePresence>
 
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
-        <header className="fixed top-0 right-0 left-0 lg:left-72 z-50">
-          <AdminNavbar />
-          {/* Mobile Menu Toggle (Overlaying Navbar) */}
-          <button 
-            onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden absolute top-1/2 -translate-y-1/2 left-6 p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg border border-white/10 z-[60]"
-            aria-label="Open Sidebar"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+        <header className="sticky top-0 md:top-8 z-40">
+          <AdminTopBar onOpenMenu={() => setIsSidebarOpen(true)} />
         </header>
         
-        <main className="flex-1 pt-24 lg:pt-32 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
           {children}
         </main>
       </div>

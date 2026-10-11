@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Info, X, ShieldAlert, User, LogOut } from "lucide-react"
-import { NexusBadge } from "@/components/ui/nexus-card"
+import { Bell, Search, X, ShieldAlert, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useAuth } from "@/context/auth-context"
 
 export const AdminNavbar = () => {
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="fixed top-0 left-72 right-0 z-[60]">
@@ -40,10 +41,7 @@ export const AdminNavbar = () => {
               className="bg-white/5 border border-white/10 h-11 rounded-xl pl-11 pr-4 text-sm text-white w-full outline-none focus:border-brand-green/50 focus:ring-1 focus:ring-brand-green/20 transition-all"
             />
           </div>
-          <div className="hidden xl:flex items-center gap-2">
-            <NexusBadge variant="live" className="bg-brand-green/10 text-brand-green border-none">Node: Optimal</NexusBadge>
-            <NexusBadge variant="info" className="bg-blue-500/10 text-blue-400 border-none">Tunnel: Secure</NexusBadge>
-          </div>
+
         </div>
 
         <div className="flex items-center gap-6">
@@ -54,14 +52,12 @@ export const AdminNavbar = () => {
           <div className="h-10 w-px bg-white/5 mx-2" />
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <div className="text-sm font-bold text-white leading-none mb-1">Operator_8472</div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Level 5 Clearance</div>
+              <div className="text-sm font-bold text-white leading-none mb-1 max-w-[12rem] truncate">{user?.email ?? "Signed in"}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Signed in</div>
             </div>
-            <Link href="/" title="Sign Out">
-              <button className="p-2.5 rounded-xl bg-white/5 text-gray-500 hover:text-white hover:bg-red-500/10 transition-all">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </Link>
+            <button onClick={async () => { await logout(); window.location.href = "/" }} title="Sign out" aria-label="Sign out" className="p-2.5 rounded-xl bg-white/5 text-gray-500 hover:text-white hover:bg-red-500/10 transition-all">
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </nav>

@@ -20,7 +20,7 @@ export function BountyChatWidget() {
   }, [messages, isOpen]);
 
   // The full chat page is the same conversation, so the floating button is not needed there.
-  if (!isAuthenticated || pathname?.startsWith('/bounty/chat')) return null;
+  if (!isAuthenticated || pathname?.startsWith('/bounty/chat') || pathname?.startsWith('/admin')) return null;
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
