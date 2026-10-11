@@ -13,7 +13,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   return (
     <AdminGate>
-    <div className="min-h-screen bg-[#050508] flex overflow-x-hidden md:pt-8">
+    <div className="min-h-screen bg-[#050508] flex overflow-x-hidden">
       {/* Sidebar - Desktop (Static) */}
       <aside className="hidden lg:block w-72 shrink-0">
         <AdminSidebar />
