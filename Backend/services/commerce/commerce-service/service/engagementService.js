@@ -66,11 +66,11 @@ async function drawStats(id, t) {
     const [r] = await sel(`SELECT COUNT(*) FILTER (WHERE status = 'active')::int AS entries, COUNT(DISTINCT user_id) FILTER (WHERE status = 'active')::int AS members FROM ${ENTRIES} WHERE draw_id = :id`, { id }, t);
     return r;
 }
-async function winnersOf(drawId, withIds) {
+async function winnersOf(drawId, withIds, t) {
     const rows = await sel(
         `SELECT e.id AS "entryId", e.user_id AS "userId", e.ticket_no AS "ticketNo", e.win_position AS position, e.claimed_at AS "claimedAt", mp.member_number AS "memberNumber"
-           FROM ${ENTRIES} e LEFT JOIN ${PROFILES} mp ON mp.user_id = e.user_id WHERE e.draw_id = :id AND e.won ORDER BY e.win_position`, { id: drawId });
-    return rows.map((r) => (withIds ? { ...r, userId: String(r.userId) } : { ticketNo: r.ticketNo, position: r.position, memberNumber: r.memberNumber, claimed: !!r.claimedAt }));
+           FROM ${ENTRIES} e LEFT JOIN ${PROFILES} mp ON mp.user_id = e.user_id WHERE e.draw_id = :id AND e.won ORDER BY e.win_position`, { id: drawId }, t);
+    return rows.map((r) => (withIds ? { entryId: r.entryId, ticketNo: r.ticketNo, position: r.position, memberNumber: r.memberNumber, claimed: !!r.claimedAt } : { ticketNo: r.ticketNo, position: r.position, memberNumber: r.memberNumber, claimed: !!r.claimedAt }));
 }
 
 async function createDraw(adminId, b) {
@@ -192,13 +192,13 @@ async function myEntries(userId) {
 async function adminListDraws() {
     const draws = await sel(`SELECT * FROM ${DRAWS} ORDER BY created_at DESC LIMIT 50`, {});
     const out = [];
-    for (const d of draws) out.push(presentDraw(d, await drawStats(d.id)));
+    for (const d of draws) out.push(presentDraw(d, { ...(await drawStats(d.id)), winners: d.status === 'drawn' ? await winnersOf(d.id, true) : [] }));
     return { items: out, total: out.length };
 }
 async function adminGetDraw(id, t) {
     const [d] = await sel(`SELECT * FROM ${DRAWS} WHERE id = :id`, { id }, t);
     if (!d) throw fail('NOT_FOUND', 'Draw not found', 404);
-    return presentDraw(d, { ...(await drawStats(id, t)), winners: d.status === 'drawn' ? await winnersOf(id, true) : [] });
+    return presentDraw(d, { ...(await drawStats(id, t)), winners: d.status === 'drawn' ? await winnersOf(id, true, t) : [] });
 }
 
 // ── DJ demands ───────────────────────────────────────────────────────────────────────────────────
