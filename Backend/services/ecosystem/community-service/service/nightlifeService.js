@@ -26,18 +26,25 @@ const toClub = (r, { admin = false } = {}) => ({
     description: r.description, coverCharge: r.cover_charge, vibe: r.vibe,
     requiredRoles: r.required_roles, vipPackages: r.vip_packages || [], rating: r.rating === null ? null : Number(r.rating),
     status: r.status,
+    latitude: r.latitude, longitude: r.longitude, website: r.website, phone: r.phone, openingHours: r.opening_hours, venueType: r.venue_type,
 });
 
-async function listClubs({ state, city, q, includeArchived = false, limit, offset } = {}) {
+// How much a venue page can actually say: more verified facts ranks higher, so complete listings lead.
+const COMPLETENESS = `(CASE WHEN "NightClub"."image" IS NOT NULL THEN 3 ELSE 0 END + CASE WHEN "NightClub"."description" IS NOT NULL THEN 2 ELSE 0 END
+  + CASE WHEN "NightClub"."website" IS NOT NULL THEN 2 ELSE 0 END + CASE WHEN "NightClub"."opening_hours" IS NOT NULL THEN 1 ELSE 0 END
+  + CASE WHEN "NightClub"."phone" IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN "NightClub"."address" IS NOT NULL THEN 1 ELSE 0 END)`;
+
+async function listClubs({ state, city, suburb, q, includeArchived = false, limit, offset } = {}) {
     const where = includeArchived ? {} : { status: 'active' };
     if (state) where.state = state;
     if (city) where.city = city;
+    if (suburb) where.suburb = suburb;
     if (q) {
         const like = `%${escapeLike(q)}%`;
         where[Op.or] = [{ name: { [Op.iLike]: like } }, { suburb: { [Op.iLike]: like } }, { city: { [Op.iLike]: like } }];
     }
     const { rows, count } = await db.NightClub.findAndCountAll({
-        where, order: [['rating', 'DESC NULLS LAST'], ['name', 'ASC']],
+        where, order: [['rating', 'DESC NULLS LAST'], [db.sequelize.literal(COMPLETENESS), 'DESC'], ['name', 'ASC']],
         limit: Math.min(Number(limit) || MAX_PAGE_SIZE, MAX_PAGE_SIZE), offset: Number(offset) || 0,
     });
     return { items: rows.map((r) => toClub(r, { admin: includeArchived })), total: count };

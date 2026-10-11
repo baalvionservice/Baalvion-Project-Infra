@@ -19,6 +19,14 @@ module.exports = (sequelize) => sequelize.define('NightClub', {
     contact_email: { type: DataTypes.STRING(320), allowNull: true },
     vip_packages: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
     rating: { type: DataTypes.DECIMAL(2, 1), allowNull: true },
+    // Facts from OpenStreetMap (ODbL) for the directory pages; null when the source does not state them.
+    latitude: { type: DataTypes.DOUBLE, allowNull: true },
+    longitude: { type: DataTypes.DOUBLE, allowNull: true },
+    website: { type: DataTypes.STRING(300), allowNull: true },
+    phone: { type: DataTypes.STRING(80), allowNull: true },
+    opening_hours: { type: DataTypes.STRING(300), allowNull: true },
+    venue_type: { type: DataTypes.STRING(20), allowNull: true },
+    osm_ref: { type: DataTypes.STRING(30), allowNull: true },
     status: { type: DataTypes.ENUM('active', 'archived'), allowNull: false, defaultValue: 'active' },
 }, {
     tableName: 'night_clubs',

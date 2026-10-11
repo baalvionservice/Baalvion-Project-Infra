@@ -34,7 +34,7 @@ module.exports = {
     adminUpdateEvent: h(async (req, res) => sendSuccess(req, res, await svc.updateEvent(req.params.id, parse(v.updateEventSchema, req.body)))),
 
     listClubs: h(async (req, res) => sendSuccess(req, res, await svc.listClubs({
-        state: req.query.state, city: req.query.city, q: req.query.q, ...page(req),
+        state: req.query.state, city: req.query.city, suburb: req.query.suburb, q: req.query.q, ...page(req),
     }))),
     getClub: h(async (req, res) => sendSuccess(req, res, await svc.getClub(req.params.id))),
     createGuestList: h(async (req, res) => sendSuccess(req, res,
