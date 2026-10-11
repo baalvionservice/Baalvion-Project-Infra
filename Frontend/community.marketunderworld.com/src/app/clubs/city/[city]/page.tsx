@@ -43,10 +43,20 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
           <section className="mt-8">
             <h2 className="text-xl font-bold mb-3">Areas in {g.name}</h2>
             <ul className="flex flex-wrap gap-2">
-              {g.areas.map((a) => (
-                <li key={a.slug}><Link href={areaHref(g.name, a.name)} className="inline-block bg-white border border-gray-300 hover:border-black rounded-full px-4 py-1.5 text-sm font-semibold">{a.name} <span className="text-gray-400 font-normal">{a.clubs.length}</span></Link></li>
+              {g.areas.slice(0, 14).map((a) => (
+                <li key={a.slug}><Link href={areaHref(g.name, a.name)} className="inline-block bg-white border border-gray-300 hover:border-black rounded-full px-4 py-2 text-sm font-semibold">{a.name} <span className="text-gray-400 font-normal">{a.clubs.length}</span></Link></li>
               ))}
             </ul>
+            {g.areas.length > 14 && (
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm font-semibold underline">Show all {g.areas.length} areas</summary>
+                <ul className="flex flex-wrap gap-2 mt-4">
+                  {g.areas.slice(14).map((a) => (
+                    <li key={a.slug}><Link href={areaHref(g.name, a.name)} className="inline-block bg-white border border-gray-300 hover:border-black rounded-full px-4 py-2 text-sm font-semibold">{a.name} <span className="text-gray-400 font-normal">{a.clubs.length}</span></Link></li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </section>
         )}
 
