@@ -82,7 +82,7 @@ export function AdminNotificationBell() {
         {total > 0 && <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center border-2 border-[#070710]">{total > 99 ? "99+" : total}</span>}
       </button>
       {open && (
-        <div role="dialog" aria-label="What is waiting for you" className="absolute right-0 mt-2 w-[min(24rem,calc(100vw-1.5rem))] rounded-xl border border-white/10 bg-[#0B0C0F] shadow-2xl z-[1200] overflow-hidden">
+        <div role="dialog" aria-label="What is waiting for you" className="fixed left-3 right-3 top-[4.5rem] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[24rem] rounded-xl border border-white/10 bg-[#0B0C0F] shadow-2xl z-[1200] overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <div>
               <p className="text-sm font-semibold text-white">{total > 0 ? `${total} waiting for you` : "Nothing is waiting"}</p>
