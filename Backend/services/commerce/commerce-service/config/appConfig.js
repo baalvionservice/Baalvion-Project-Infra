@@ -73,6 +73,13 @@ module.exports = {
     intermediary: {
         depositUsd: Number(process.env.INTERMEDIARY_DEPOSIT_USD || 1000),
     },
+    // Paid community access tiers. The amounts match the communities' price_usd_cents.
+    communityTiers: {
+        'marketplace-access': { name: 'Marketplace Access', amountUsd: Number(process.env.TIER_MARKETPLACE_USD || 100) },
+        'global-elite': { name: 'Global Elite Access', amountUsd: Number(process.env.TIER_ELITE_USD || 250) },
+        'vip-access': { name: 'VIP Access', amountUsd: Number(process.env.TIER_VIP_USD || 1000) },
+    },
+    communityServiceUrl: process.env.COMMUNITY_SERVICE_URL || 'http://app-community:3064',
     // One-time fee a buyer pays to enter the marketplace and buy.
     buyerAccess: {
         amountUsd: Number(process.env.BUYER_ACCESS_USD || 50),

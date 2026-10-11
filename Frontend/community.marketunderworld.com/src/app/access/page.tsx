@@ -11,7 +11,6 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { GridBackground } from "@/components/access/grid-background";
 import { TierCard, type TierCardData } from "@/components/access/tier-card";
-import { PaymentModal, type AccessTierPlan } from "@/components/access/payment-modal";
 import { getCommunity, type MembershipStatus } from "@/lib/api/community";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
@@ -83,20 +82,20 @@ const SECURITY_BADGES = [
 
 const FAQS = [
   {
+    q: "How do I pay?",
+    a: "Choose a tier, pick Bitcoin, USDT (TRC20, BEP20, ERC20 or Solana) or Binance Pay, and send the exact amount to the address or QR shown. Then attach a screenshot of the payment and send it for review.",
+  },
+  {
+    q: "How long until I get access?",
+    a: "An admin checks every payment by hand. The wait time is shown on your payment screen and is between 5 and 30 minutes. Your access switches on as soon as it is confirmed, and you can see the status on the same page.",
+  },
+  {
     q: "Why is a deposit required?",
-    a: "The deposit is a one-time membership fee that activates your account at the tier you select. It is not refundable once your access has been granted, and it does not accrue as store credit — it unlocks the features listed for that tier. See our Terms and Refund Policy for the full details.",
-  },
-  {
-    q: "How long does verification take?",
-    a: "Usually within a few minutes, once your transaction reaches the required number of blockchain confirmations (3 for BTC, 15 for ETH-BEP20). Your account activates automatically — no manual review, no waiting on support.",
-  },
-  {
-    q: "Which cryptocurrencies are supported?",
-    a: "Bitcoin (BTC), USDT on the TRC20 (Tron) network, and ETH on the BEP20 (BNB Smart Chain) network. TRC20 has substantially lower network fees for most users.",
+    a: "It is a one-time membership fee that activates the tier you select. See the Terms and the Refund Policy for what is and is not refundable.",
   },
   {
     q: "Can I upgrade later?",
-    a: "Yes — you can upgrade to any higher tier by depositing the difference between your current tier and the new one. Contact support to initiate an upgrade.",
+    a: "Yes. Pay for the higher tier from this page, and contact support if you want the difference between tiers worked out.",
   },
 ];
 
@@ -105,8 +104,6 @@ export default function AccessPage() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [statuses, setStatuses] = useState<Record<string, MembershipStatus | "none">>({});
-  const [selectedPlan, setSelectedPlan] = useState<AccessTierPlan | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
@@ -132,8 +129,7 @@ export default function AccessPage() {
       router.push("/auth/signin");
       return;
     }
-    setSelectedPlan({ slug: tier.slug, name: tier.name, priceLabel: tier.priceLabel, redirectTo: tier.redirectTo });
-    setModalOpen(true);
+    router.push(`/access/pay?tier=${tier.slug}`);
   };
 
   return (
@@ -239,7 +235,6 @@ export default function AccessPage() {
         </div>
       </section>
 
-      <PaymentModal plan={selectedPlan} open={modalOpen} onOpenChange={setModalOpen} />
       <Footer />
     </div>
   );

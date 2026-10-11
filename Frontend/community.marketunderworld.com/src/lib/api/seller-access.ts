@@ -10,7 +10,8 @@ export type PaymentStatus = 'awaiting_payment' | 'payment_submitted' | 'active' 
 export interface CategoryPayment {
   id: string;
   sellerUserId: string;
-  kind?: 'category' | 'buyer_access' | 'wallet_topup' | 'agent_activation';
+  kind?: 'category' | 'buyer_access' | 'wallet_topup' | 'agent_activation' | 'community_tier';
+  tierSlug?: string | null;
   categoryId: string | null;
   amountUsd: string;
   currency: PaymentMethod;

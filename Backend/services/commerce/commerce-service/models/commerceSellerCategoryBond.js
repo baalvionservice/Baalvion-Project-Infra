@@ -10,6 +10,8 @@ module.exports = function (sequelize, DataTypes) {
         // 'category' = a seller's $2,000 category payment; 'buyer_access' = a buyer's entry pass (no category).
         kind: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'category' },
         categoryId: { type: DataTypes.UUID, allowNull: true },
+        // For kind 'community_tier': which paid community (marketplace-access, global-elite, vip-access) the payment unlocks.
+        tierSlug: { type: DataTypes.STRING(40), allowNull: true },
         amountUsd: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
         currency: { type: DataTypes.STRING(10), allowNull: false },
         status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'awaiting_payment' },

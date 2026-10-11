@@ -27,12 +27,14 @@ async function isApprovedSeller(userId) {
     return !!(await CommerceSellerApplication.findOne({ where: { applicantUserId: userId, status: 'approved' }, attributes: ['id'] }));
 }
 
-async function issuePayment(authCtx, { kind, categoryId, currency, network, amountUsd }) {
+async function issuePayment(authCtx, { kind, categoryId, currency, network, amountUsd, tierSlug }) {
     if (!authCtx.userId) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
     if (!CURRENCIES.includes(currency)) throw new AppError('VALIDATION_ERROR', `currency must be one of ${CURRENCIES.join(', ')}`, 400);
     const isPass = kind === 'buyer_access';
     const isTopup = kind === 'wallet_topup';
     const isActivation = kind === 'agent_activation';
+    const isTier = kind === 'community_tier';
+    if (isTier && !config.communityTiers[tierSlug]) throw new AppError('VALIDATION_ERROR', 'Unknown access tier', 400);
     if (isTopup) {
         const { minTopupUsd, maxTopupUsd } = config.points;
         if (!Number.isFinite(amountUsd) || amountUsd < minTopupUsd || amountUsd > maxTopupUsd) {
@@ -41,7 +43,7 @@ async function issuePayment(authCtx, { kind, categoryId, currency, network, amou
     }
 
     let rootId = null;
-    if (!isPass && !isTopup && !isActivation) {
+    if (!isPass && !isTopup && !isActivation && !isTier) {
         if (!(await isApprovedSeller(authCtx.userId))) throw new AppError('FORBIDDEN', 'Your seller application must be approved first', 403);
         rootId = await rootCategoryId(categoryId);
     }
@@ -52,13 +54,14 @@ async function issuePayment(authCtx, { kind, categoryId, currency, network, amou
         where: isTopup ? { sellerUserId: authCtx.userId, kind: 'wallet_topup', status: ['awaiting_payment', 'payment_submitted'] }
             : isPass ? { sellerUserId: authCtx.userId, kind: 'buyer_access', status: LIVE }
             : isActivation ? { sellerUserId: authCtx.userId, kind: 'agent_activation', status: LIVE }
+            : isTier ? { sellerUserId: authCtx.userId, kind: 'community_tier', tierSlug, status: LIVE }
             : { sellerUserId: authCtx.userId, kind: 'category', categoryId: rootId, status: LIVE },
     });
-    if (existing) throw new AppError('CONFLICT', isTopup ? 'You already have a wallet load in progress' : isPass ? 'You already have an access pass' : 'You already have access to this category', 409);
+    if (existing) throw new AppError('CONFLICT', isTopup ? 'You already have a wallet load in progress' : isTier ? 'You already have a payment for this tier' : isPass ? 'You already have an access pass' : 'You already have access to this category', 409);
 
     const bond = await CommerceSellerCategoryBond.create({
-        sellerUserId: authCtx.userId, kind: isTopup ? 'wallet_topup' : isPass ? 'buyer_access' : isActivation ? 'agent_activation' : 'category', categoryId: rootId,
-        amountUsd: isTopup ? amountUsd : isPass ? config.buyerAccess.amountUsd : isActivation ? config.intermediary.depositUsd : config.sellerBond.amountUsd, currency,
+        sellerUserId: authCtx.userId, kind: isTopup ? 'wallet_topup' : isPass ? 'buyer_access' : isActivation ? 'agent_activation' : isTier ? 'community_tier' : 'category', categoryId: rootId, tierSlug: isTier ? tierSlug : null,
+        amountUsd: isTier ? config.communityTiers[tierSlug].amountUsd : isTopup ? amountUsd : isPass ? config.buyerAccess.amountUsd : isActivation ? config.intermediary.depositUsd : config.sellerBond.amountUsd, currency,
         // Frozen on the payment: what the payer was told is what the admin checks against, even if the address is changed later.
         payToAddress: dest.address, payToNetwork: dest.network, payToLabel: dest.label,
     });
@@ -196,6 +199,9 @@ async function confirmPayment(authCtx, bondId, { amountReceived, note, creditUsd
                 `INSERT INTO commerce.commerce_points_ledger (user_id, delta, reason, ref_id, member_number, note) VALUES (:u, :points, 'topup', :ref, :member, :note)`,
                 { replacements: { u: bond.sellerUserId, points: Math.round(usd * config.points.perUsd), ref: bond.id, member: profile ? profile.member_number : null, note: `Wallet load: $${usd.toFixed(2)} received` }, transaction: t },
             );
+        } else if (bond.kind === 'community_tier') {
+            // Throws (and so rolls the confirmation back) if the membership cannot be granted, so the admin can simply retry.
+            await require('./communityAccessService').grant(bond);
         } else if (bond.kind === 'agent_activation') {
             // The deposit activates and lists the intermediary; it credits nothing.
             await require('./intermediaryService').onPaymentConfirmed(bond.id, authCtx.userId, Number(bond.amountUsd), t);
@@ -257,4 +263,6 @@ async function assertCanSellInCategory(userId, categoryId) {
     }
 }
 
-module.exports = { listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };
+const createCommunityTier = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'community_tier' });
+
+module.exports = { createCommunityTier, listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };

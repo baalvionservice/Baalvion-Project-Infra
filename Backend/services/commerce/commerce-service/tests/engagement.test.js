@@ -34,3 +34,10 @@ test('pledges start at 100 points and proposals need a DJ, club and city', () =>
     assert.ok(s.proposeSchema.safeParse({ djName: 'DJ X', clubName: 'Club Y', city: 'Mumbai' }).success);
     assert.ok(!s.proposeSchema.safeParse({ djName: 'DJ X', clubName: 'Club Y' }).success);
 });
+
+test('a paid tier payment names one real tier and a payment method', () => {
+    const b = require('../validators/sellerBondSchemas');
+    assert.ok(b.startTierSchema.safeParse({ tierSlug: 'global-elite', currency: 'USDT', network: 'TRC20' }).success);
+    assert.ok(!b.startTierSchema.safeParse({ tierSlug: 'free-forever', currency: 'USDT' }).success);
+    assert.ok(!b.startTierSchema.safeParse({ tierSlug: 'vip-access', currency: 'DOGE' }).success);
+});
