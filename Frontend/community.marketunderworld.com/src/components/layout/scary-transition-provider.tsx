@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 
 interface TransitionContextType {
   navigateWithScare: (url: string) => void;
@@ -82,6 +83,7 @@ const SCARY_TRANSITION_ENABLED = false;
 export function ScaryTransitionProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<"idle" | "darken" | "gate" | "logo" | "exit">("idle");
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -89,7 +91,7 @@ export function ScaryTransitionProvider({ children }: { children: ReactNode }) {
 
   const navigateWithScare = useCallback((url: string) => {
     if (!SCARY_TRANSITION_ENABLED) {
-      window.location.href = url;
+      router.push(url);
       return;
     }
     if (phase !== "idle") return;
@@ -103,7 +105,7 @@ export function ScaryTransitionProvider({ children }: { children: ReactNode }) {
     }, 4200);
     setTimeout(() => setPhase("exit"), 4400);
     setTimeout(() => setPhase("idle"), 5200);
-  }, [phase]);
+  }, [phase, router]);
 
   const isVisible = phase !== "idle";
   const gateActive = phase === "gate" || phase === "logo" || phase === "exit";
