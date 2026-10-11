@@ -609,7 +609,8 @@ async function cashfreeVerifyWebhook({ rawBody, signature, timestamp }) {
 // approval URL; PayPal sends the shopper back to OUR return route (routes/paypalRoutes.js), which
 // captures server-side and verifies amount + currency before the order is marked paid. A client
 // confirm never captures, and the intent id is the PayPal order id.
-const paypalReturnUrl = () => process.env.PAYPAL_RETURN_URL || 'http://localhost:3013/api/v1/orders/webhooks/paypal/return';
+const paypalReturnUrl = () => process.env.PAYPAL_RETURN_URL
+  || (process.env.NODE_ENV === 'production' ? 'https://api.baalvion.com/api/v1/orders/webhooks/paypal/return' : 'http://localhost:3013/api/v1/orders/webhooks/paypal/return');
 const paypalProvider = {
   name: 'paypal',
   PRODUCTION: true,
