@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // The emailed links point at /reset-password and /verify-email; the pages live under /auth.
+      { source: '/reset-password', destination: '/auth/reset-password', permanent: false },
+      { source: '/verify-email', destination: '/auth/verify-email', permanent: false },
       {
         source: '/app',
         destination: '/app/home',

@@ -58,7 +58,7 @@ export function LotteryClient() {
       <main className="container max-w-[900px] mx-auto px-4 py-8 mt-20">
         <div className="mb-6"><Breadcrumbs items={[{ label: "Clubs", href: "/clubs" }, { label: "Ticket draw" }]} /></div>
         <h1 className="text-3xl font-bold mb-2">Club ticket draw</h1>
-        <p className="text-gray-600 mb-6">Pay for an entry with wallet points. When a draw closes, the winners are picked by a random draw and listed here by member number. If a draw is cancelled, every entry is refunded.</p>
+        <p className="text-gray-600 mb-6">Pay $6 for an entry and you are in the monthly draw for your state. When the draw closes, 1,000 winners are picked at random and win a free VIP club ticket. Winners are listed here by member number. You pay with wallet points (100 points = $1), and if a draw is cancelled every entry is refunded. 18 and over only.</p>
 
         {signedIn ? (
           <p className="mb-6 text-sm text-gray-700">Your wallet: <b>{(balance ?? 0).toLocaleString()} points</b> · <Link className="underline" href="/payments">Load wallet</Link></p>
@@ -94,7 +94,7 @@ export function LotteryClient() {
 
                   {d.status === "open" && (
                     <div className="mt-5 flex flex-wrap items-center gap-3">
-                      <span className="text-sm">{d.entryPoints === 0 ? "Free entry" : `${d.entryPoints.toLocaleString()} points per entry`} · closes {when(d.closesAt)}</span>
+                      <span className="text-sm">{d.entryPoints === 0 ? "Free entry" : `$${(d.entryPoints / 100).toFixed(2).replace(/\.00$/, "")} per entry (${d.entryPoints.toLocaleString()} points)`} · closes {when(d.closesAt)}</span>
                       {signedIn && left > 0 && (
                         <button disabled={busy === d.id || !adult} onClick={() => enter(d, 1)} className="inline-flex items-center gap-2 bg-black text-white text-sm font-bold px-5 py-2.5 disabled:opacity-50">
                           {busy === d.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ticket className="w-4 h-4" />} Enter once
