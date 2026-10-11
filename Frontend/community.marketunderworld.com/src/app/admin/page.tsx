@@ -5,6 +5,7 @@ import Link from "next/link"
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import { useAdminAccess } from "@/components/admin/admin-access"
 import { adminOverview, type AdminOverview } from "@/lib/api/admin-overview"
+import { NoticeList, useAdminNotices } from "@/components/admin/admin-notifications"
 
 // Where each waiting item is handled.
 const QUEUES: { key: keyof AdminOverview["queues"]; label: string; href: string; need: string }[] = [
@@ -36,6 +37,7 @@ const SHORTCUTS = [
 // Hell Road admin home. Every number comes from live counts; nothing is estimated.
 export default function AdminHome() {
   const { tier, can } = useAdminAccess()
+  const notices = useAdminNotices()
   const [data, setData] = useState<AdminOverview | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,7 +63,7 @@ export default function AdminHome() {
           <h1 className="text-3xl font-bold text-white mt-1">Dashboard</h1>
           <p className="text-gray-400 text-sm mt-1">
             Signed in as {tier === "super" ? "super admin" : tier === "admin" ? "admin" : "moderator"}.
-            {data ? ` ${waiting} item${waiting === 1 ? "" : "s"} waiting for you.` : ""}
+            {notices.items !== null ? ` ${notices.total} thing${notices.total === 1 ? "" : "s"} waiting for you.` : ""}
           </p>
         </div>
         <button onClick={load} className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white border border-white/10 rounded-lg px-4 py-2">
@@ -84,17 +86,14 @@ export default function AdminHome() {
       ) : data ? (
         <>
           <section>
-            <h2 className="text-lg font-bold text-white mb-4">Needs attention</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {queues.map((q) => {
-                const n = data.queues?.[q.key] ?? 0
-                return (
-                  <Link key={q.key} href={q.href} className={`rounded-xl border p-5 transition-colors ${n > 0 ? "border-red-500/40 bg-red-950/20 hover:border-red-400" : "border-white/10 bg-white/[0.02] hover:border-white/20"}`}>
-                    <div className={`text-3xl font-bold ${n > 0 ? "text-red-300" : "text-gray-300"}`}>{n.toLocaleString()}</div>
-                    <div className="text-sm text-gray-300 mt-1">{q.label}</div>
-                  </Link>
-                )
-              })}
+            <h2 className="text-lg font-bold text-white mb-1">Waiting for you</h2>
+            <p className="text-sm text-gray-500 mb-4">Everything that needs a decision or a reply. Each line opens the page where you act on it.</p>
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
+              {notices.items === null ? (
+                <div className="p-6 flex items-center gap-3 text-gray-500 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Checking…</div>
+              ) : notices.items.length === 0 ? (
+                <p className="p-6 text-sm text-gray-400">You are all caught up. Payments, approvals and help tickets will appear here.</p>
+              ) : <NoticeList items={notices.items} />}
             </div>
           </section>
 

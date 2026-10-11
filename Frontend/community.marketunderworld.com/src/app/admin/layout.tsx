@@ -6,6 +6,7 @@ import { AdminTopBar } from '@/components/admin/admin-topbar';
 import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AdminGate } from '@/components/admin/admin-access';
+import { AdminNoticesProvider } from '@/components/admin/admin-notifications';
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   return (
     <AdminGate>
+    <AdminNoticesProvider>
     <div className="min-h-screen bg-[#050508] flex overflow-x-hidden">
       {/* Sidebar - Desktop (Static) */}
       <aside className="hidden lg:block w-72 shrink-0">
@@ -58,6 +60,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         </main>
       </div>
     </div>
+    </AdminNoticesProvider>
     </AdminGate>
   );
 }

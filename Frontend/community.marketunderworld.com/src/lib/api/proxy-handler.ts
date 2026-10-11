@@ -8,7 +8,17 @@ import { NextRequest, NextResponse } from 'next/server';
 // shared helper here rather than copy-pasting this extra branching into two near-identical files.
 const BINARY_RESPONSE_PREFIXES = ['image/', 'video/', 'application/octet-stream'];
 
-export function createProxy(apiBase: string, opts: { edgeKey?: boolean } = {}) {
+const SENSITIVE_KEYS = /^(password_?hash|mfa_?secret|secret|refresh_?token|access_?token)$/i;
+// Drops credential fields from any JSON an upstream returns, so a service that over-shares cannot leak them to a browser.
+function scrub(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(scrub);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([k]) => !SENSITIVE_KEYS.test(k)).map(([k, v]) => [k, scrub(v)]));
+  }
+  return value;
+}
+
+export function createProxy(apiBase: string, opts: { edgeKey?: boolean; scrub?: boolean } = {}) {
   return async function proxy(request: NextRequest, path: string[]): Promise<NextResponse> {
     const target = new URL(`${apiBase}/${path.join('/')}`);
     request.nextUrl.searchParams.forEach((v, k) => target.searchParams.set(k, v));
@@ -56,7 +66,10 @@ export function createProxy(apiBase: string, opts: { edgeKey?: boolean } = {}) {
       });
     }
 
-    const responseBody = await upstream.text();
+    let responseBody = await upstream.text();
+    if (opts.scrub && responseContentType.includes('json')) {
+      try { responseBody = JSON.stringify(scrub(JSON.parse(responseBody))); } catch { /* not JSON after all: pass it through */ }
+    }
     return new NextResponse(responseBody, {
       status: upstream.status,
       headers: { 'content-type': responseContentType || 'application/json' },

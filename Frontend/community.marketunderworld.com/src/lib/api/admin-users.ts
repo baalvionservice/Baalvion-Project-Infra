@@ -67,7 +67,10 @@ export async function listUsers(opts: { page?: number; limit?: number; search?: 
   if (opts.search) params.set('search', opts.search);
   if (opts.status) params.set('status', opts.status);
   const qs = params.toString();
-  return adminFetch<ListUsersResult>(`/admin/users${qs ? `?${qs}` : ''}`);
+  const out = await adminFetch<ListUsersResult | { data?: unknown }>(`/admin/users${qs ? `?${qs}` : ''}`);
+  // The address this resolves to today belongs to another product's user list, not this site's members.
+  if (!out || !Array.isArray((out as ListUsersResult).items)) throw new Error('USER_REGISTRY_NOT_CONNECTED');
+  return out as ListUsersResult;
 }
 
 export async function getUserDetail(userId: string): Promise<AdminUserDetail> {

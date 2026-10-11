@@ -4,6 +4,7 @@ import Link from "next/link"
 import { LogOut, Menu, Search, Store } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { useAdminAccess } from "@/components/admin/admin-access"
+import { AdminNotificationBell } from "@/components/admin/admin-notifications"
 
 const TIER_LABEL = { super: "Super admin", admin: "Admin", moderator: "Moderator" } as const
 
@@ -24,6 +25,7 @@ export const AdminTopBar = ({ onOpenMenu }: { onOpenMenu: () => void }) => {
       </button>
 
       <div className="flex items-center gap-2 sm:gap-4 ml-auto shrink-0">
+        <AdminNotificationBell />
         <Link href="/" className="hidden sm:inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">
           <Store className="w-4 h-4" /> View site
         </Link>

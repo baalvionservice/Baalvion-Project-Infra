@@ -114,8 +114,13 @@ export default function UserManagementPage() {
         </div>
 
         {error ? (
-          <div className="p-16 text-center text-semantic-error font-medium">
-            {error}
+          <div className="p-16 text-center font-medium">
+            {error === 'USER_REGISTRY_NOT_CONNECTED' ? (
+              <div className="max-w-xl mx-auto space-y-3">
+                <p className="text-white text-lg font-semibold">The user registry is not connected to this admin yet</p>
+                <p className="text-sm text-gray-400 font-normal">The platform&apos;s user service is separate from this site and has no secure route to it. Until that is set up, members are managed from the pages that act on them: KYC, seller applications, department requests and the Staff page.</p>
+              </div>
+            ) : <span className="text-semantic-error">{error}</span>}
             <div className="mt-4">
               <AppButton onClick={() => loadUsers({ page, search })} className="bg-brand-void border border-brand-border text-white px-6 h-10 text-xs font-bold uppercase">
                 Retry
