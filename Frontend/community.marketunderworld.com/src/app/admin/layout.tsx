@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import { AdminNavbar } from '@/components/admin/admin-navbar';
 import { Menu, X } from 'lucide-react';
@@ -9,6 +9,7 @@ import { AdminGate } from '@/components/admin/admin-access';
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  useEffect(() => { document.title = 'Hell Road Admin'; }, []);
 
   return (
     <AdminGate>

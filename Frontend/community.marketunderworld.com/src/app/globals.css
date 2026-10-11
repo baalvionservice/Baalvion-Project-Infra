@@ -91,3 +91,13 @@ body {
   animation: scanline 8s linear infinite;
   pointer-events: none;
 }
+
+/* Typography: one clean sans-serif everywhere, readable sizes, no italic headings.
+   Monospace is kept only for real code. Overrides the tiny, wide-spaced, italic labels used across the site. */
+body { font-size: 16px; line-height: 1.6; letter-spacing: 0; }
+h1, h2, h3, h4, .font-display { font-style: normal; letter-spacing: -0.01em; }
+.italic { font-style: normal; }
+.font-mono:not(code):not(pre):not(kbd):not(samp) { font-family: var(--font-inter), system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+[class*="text-[8px]"], [class*="text-[9px]"], [class*="text-[10px]"] { font-size: 0.75rem; line-height: 1.4; }
+[class*="text-[11px]"] { font-size: 0.8125rem; line-height: 1.45; }
+[class*="tracking-[0.3em]"], [class*="tracking-[0.25em]"], [class*="tracking-[0.2em]"], [class*="tracking-[0.15em]"], .tracking-widest, .tracking-wider { letter-spacing: 0.04em; }
