@@ -10,7 +10,7 @@ export default function AdminLotteryPage() {
   const [draws, setDraws] = useState<Draw[]>([])
   const [error, setError] = useState("")
   const [busy, setBusy] = useState("")
-  const [form, setForm] = useState({ title: "", prize: "", entryPoints: "600", maxEntriesPerUser: "5", winnersCount: "1", closesAt: "" })
+  const [form, setForm] = useState({ title: "", state: "", prize: "", entryPoints: "600", maxEntriesPerUser: "5", winnersCount: "1", closesAt: "" })
 
   const load = useCallback(async () => {
     try { setError(""); setDraws((await adminApi.draws()).items) } catch (e) { setError(e instanceof Error ? e.message : "Could not load") }
@@ -26,7 +26,7 @@ export default function AdminLotteryPage() {
   const create = (e: React.FormEvent) => {
     e.preventDefault()
     run("create", async () => {
-      await adminApi.createDraw({ title: form.title, prize: form.prize, entryPoints: Number(form.entryPoints), maxEntriesPerUser: Number(form.maxEntriesPerUser), winnersCount: Number(form.winnersCount), closesAt: new Date(form.closesAt).toISOString() })
+      await adminApi.createDraw({ title: form.title, state: form.state || undefined, prize: form.prize, entryPoints: Number(form.entryPoints), maxEntriesPerUser: Number(form.maxEntriesPerUser), winnersCount: Number(form.winnersCount), closesAt: new Date(form.closesAt).toISOString() })
       setForm({ ...form, title: "", prize: "", closesAt: "" })
     })
   }
@@ -42,6 +42,7 @@ export default function AdminLotteryPage() {
       <form onSubmit={create} className="rounded-xl border border-white/10 p-5 space-y-3">
         <h2 className="font-semibold text-white">New draw</h2>
         <input required className={input} placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <input className={input} placeholder="State this draw is for (optional, e.g. Maharashtra)" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
         <input required className={input} placeholder="Prize (exactly what the winner gets)" value={form.prize} onChange={(e) => setForm({ ...form, prize: e.target.value })} />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-gray-400">
           <label>Points per entry<input className={input} inputMode="numeric" value={form.entryPoints} onChange={(e) => setForm({ ...form, entryPoints: e.target.value.replace(/\D/g, "") })} /></label>
@@ -58,7 +59,7 @@ export default function AdminLotteryPage() {
           <section key={d.id} className="rounded-xl border border-white/10 p-5">
             <div className="flex flex-wrap justify-between gap-2">
               <div>
-                <h3 className="font-semibold text-white">{d.title}</h3>
+                <h3 className="font-semibold text-white">{d.title}{d.state ? ` · ${d.state}` : ""}</h3>
                 <p className="text-sm text-gray-400">{d.prize} · {d.entryPoints} pts/entry · {d.winnersCount} winner(s) · closes {when(d.closesAt)}</p>
                 <p className="text-sm text-gray-400">{d.entries} entries from {d.members} member(s)</p>
               </div>

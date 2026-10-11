@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClub } from "@/lib/api/nightlife";
@@ -6,6 +7,17 @@ import { MapPin, Star, Share2, Bookmark, Navigation, Clock, Phone, Info, Music, 
 import { Navbar } from "@/components/layout/navbar";
 import { ClubPhoto } from "@/components/clubs/club-photo";
 import { Footer } from "@/components/layout/footer";
+import { SITE, slugOf, typeWord, venueJsonLd } from "@/lib/clubs-seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const club = await getClub(id);
+  if (!club) return { title: "Venue not found" };
+  const where = [club.suburb, club.city].filter(Boolean).join(", ");
+  const title = `${club.name}, ${where}: ${typeWord(club)} address, hours and guest list | Hell Road`;
+  const description = club.description || `${club.name} is a ${typeWord(club)} in ${where}, ${club.state}.${club.address ? ` Address: ${club.address}.` : ""} Request the guest list or a VIP table.`;
+  return { title, description, alternates: { canonical: `/clubs/venue/${club.id}` }, openGraph: { title, description, type: "website", url: `${SITE}/clubs/venue/${club.id}`, ...(club.image ? { images: [club.image] } : {}) } };
+}
 
 export default async function VenuePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,6 +30,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   return (
     <main className="min-h-screen flex flex-col">
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(venueJsonLd(club)) }} />
       <div className="bg-white pb-20 flex-grow">
         
         {/* Breadcrumb */}
@@ -25,7 +38,8 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           <nav className="flex text-sm text-gray-500 font-medium">
             <Link href="/" className="hover:text-[#ed6c2a]">Home</Link>
             <span className="mx-2">/</span>
-            <Link href={`/clubs/${club.state.toLowerCase()}`} className="hover:text-[#ed6c2a]">{club.state}</Link>
+            <Link href={`/clubs/city/${slugOf(club.city)}`} className="hover:text-[#ed6c2a]">{club.city}</Link>
+            {club.suburb && (<><span className="mx-2">/</span><Link href={`/clubs/city/${slugOf(club.city)}/${slugOf(club.suburb)}`} className="hover:text-[#ed6c2a]">{club.suburb}</Link></>)}
             <span className="mx-2">/</span>
             <span className="text-gray-900">{club.name}</span>
           </nav>

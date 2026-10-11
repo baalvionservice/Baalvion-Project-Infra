@@ -24,6 +24,13 @@ export interface Club {
   vibe?: string;
   requiredRoles?: string[];
   vipPackages?: VipPackage[];
+  // Verified facts, present only when the source states them.
+  latitude?: number;
+  longitude?: number;
+  website?: string;
+  phone?: string;
+  openingHours?: string;
+  venueType?: string;
 }
 
 import { MUMBAI_CLUBS } from "./mumbai-clubs";

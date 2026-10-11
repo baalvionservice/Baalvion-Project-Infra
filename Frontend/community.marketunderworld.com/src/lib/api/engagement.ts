@@ -5,7 +5,7 @@ const BASE = '/api/commerce-proxy';
 const PUBLIC = `/storefront/${MARKET_UNDERWORLD_STORE_ID}/engagement`;
 
 export interface Draw {
-  id: string; title: string; prize: string; entryPoints: number; maxEntriesPerUser: number; winnersCount: number;
+  id: string; title: string; state: string | null; prize: string; entryPoints: number; maxEntriesPerUser: number; winnersCount: number;
   closesAt: string; status: 'draft' | 'open' | 'closed' | 'drawn' | 'cancelled'; drawnAt: string | null; drawSeed?: string;
   entries: number; members: number;
   winners: { ticketNo: number; position: number; memberNumber: number | null; claimed: boolean; entryId?: string }[];
@@ -33,7 +33,7 @@ const post = <T>(path: string, data?: unknown) => call<T>(path, { method: 'POST'
 export const listDraws = () => call<{ items: Draw[] }>(`${PUBLIC}/lottery`);
 export const listDemands = () => call<{ items: Demand[]; minPledgePoints: number }>(`${PUBLIC}/dj-demands`);
 export const myEntries = () => call<{ items: MyEntry[]; balance: number }>('/engagement/lottery/mine');
-export const enterDraw = (id: string, count: number) => post<{ tickets: number[]; pointsSpent: number; balance: number }>(`/engagement/lottery/${id}/enter`, { count });
+export const enterDraw = (id: string, count: number) => post<{ tickets: number[]; pointsSpent: number; balance: number }>(`/engagement/lottery/${id}/enter`, { count, confirmAge: true });
 export const myDemandActivity = () => call<{ proposals: Demand[]; pledges: MyPledge[]; balance: number }>('/engagement/dj-demands/mine');
 export const proposeDemand = (d: { djName: string; genre?: string; clubName: string; city: string; state?: string; note?: string }) => post<Demand>('/engagement/dj-demands', d);
 export const pledgeToDemand = (id: string, points: number) => post<Demand>(`/engagement/dj-demands/${id}/pledge`, { points });
@@ -42,7 +42,7 @@ export const withdrawPledge = (id: string) => post<{ refunded: number; balance: 
 export const adminApi = {
   draws: () => call<{ items: Draw[] }>('/engagement/admin/lottery'),
   draw: (id: string) => call<Draw>(`/engagement/admin/lottery/${id}`),
-  createDraw: (d: { title: string; prize: string; entryPoints: number; maxEntriesPerUser: number; winnersCount: number; closesAt: string }) => post<Draw>('/engagement/admin/lottery', d),
+  createDraw: (d: { title: string; state?: string; prize: string; entryPoints: number; maxEntriesPerUser: number; winnersCount: number; closesAt: string }) => post<Draw>('/engagement/admin/lottery', d),
   drawAction: (id: string, action: 'open' | 'close' | 'draw' | 'cancel') => post<Draw>(`/engagement/admin/lottery/${id}/${action}`),
   claimed: (entryId: string) => post<{ ok: boolean }>(`/engagement/admin/lottery/entries/${entryId}/claimed`),
   demands: (status?: string) => call<{ items: Demand[] }>(`/engagement/admin/dj-demands${status ? `?status=${status}` : ''}`),

@@ -182,6 +182,7 @@ function SiteEntryWarning({ onEnter }: { onEnter: () => void }) {
   const [phase, setPhase] = useState(0); // 0=scanning, 1=warning shown, 2=fading
   const [scanLines, setScanLines] = useState<string[]>([]);
   const [accepted, setAccepted] = useState(false);
+  const [adult, setAdult] = useState(false);
 
   const SCAN_MESSAGES = [
     '> INITIALISING SURVEILLANCE PROTOCOL...',
@@ -385,9 +386,14 @@ function SiteEntryWarning({ onEnter }: { onEnter: () => void }) {
                   <p className="text-[11px] text-gray-600 uppercase tracking-widest mb-4">
                     By entering you acknowledge you are being tracked.
                   </p>
+                  <label className="flex items-center justify-center gap-2 text-xs text-gray-300 mb-4 cursor-pointer">
+                    <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
+                    I confirm I am 18 or older.
+                  </label>
                   <button
                     onClick={handleEnter}
-                    className="px-10 py-3 font-black uppercase tracking-widest text-sm text-white border border-red-800/60 hover:border-red-500 hover:bg-red-950/40 transition-all"
+                    disabled={!adult}
+                    className="px-10 py-3 font-black uppercase tracking-widest text-sm text-white border border-red-800/60 hover:border-red-500 hover:bg-red-950/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: 'rgba(120,0,0,0.2)' }}
                   >
                     ☠ &nbsp; I UNDERSTAND. ENTER THE SITE &nbsp; ☠

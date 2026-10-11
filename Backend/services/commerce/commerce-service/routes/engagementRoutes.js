@@ -22,7 +22,7 @@ pub.get('/dj-demands', wrap(() => svc.listDemandsPublic()));
 // Signed in.
 const me = Router();
 me.get('/lottery/mine', wrap((req) => svc.myEntries(uid(req))));
-me.post('/lottery/:id/enter', idParam, validate(s.enterSchema), wrap((req) => svc.enter(uid(req), req.params.id, req.validated.count), 201));
+me.post('/lottery/:id/enter', idParam, validate(s.enterSchema), wrap((req) => svc.enter(uid(req), req.params.id, req.validated.count, req.validated.confirmAge), 201));
 me.get('/dj-demands/mine', wrap((req) => svc.myDemandActivity(uid(req))));
 me.post('/dj-demands', validate(s.proposeSchema), wrap((req) => svc.propose(uid(req), req.validated), 201));
 me.post('/dj-demands/:id/pledge', idParam, validate(s.pledgeSchema), wrap((req) => svc.pledge(uid(req), req.params.id, req.validated.points), 201));

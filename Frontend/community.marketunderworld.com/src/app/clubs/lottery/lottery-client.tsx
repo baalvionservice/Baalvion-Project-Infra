@@ -16,6 +16,7 @@ export function LotteryClient() {
   const [balance, setBalance] = useState<number | null>(null)
   const [signedIn, setSignedIn] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
+  const [adult, setAdult] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [error, setError] = useState("")
 
@@ -64,6 +65,10 @@ export function LotteryClient() {
         ) : (
           <p className="mb-6 text-sm text-gray-700"><Link className="underline" href="/auth/signin">Sign in</Link> to enter a draw.</p>
         )}
+        <label className="mb-6 flex items-start gap-3 text-sm text-gray-800">
+          <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} className="mt-1" />
+          <span>I confirm I am 18 or older. Entry is for adults only.</span>
+        </label>
         {msg && <div className={`mb-6 p-3 text-sm rounded border ${msg.ok ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>{msg.text}</div>}
         {error && <div className="mb-6 p-3 text-sm rounded border bg-red-50 border-red-200 text-red-800">{error}</div>}
 
@@ -80,7 +85,7 @@ export function LotteryClient() {
                 <section key={d.id} className="bg-white border border-gray-200 p-6">
                   <div className="flex flex-wrap justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold">{d.title}</h2>
+                      <h2 className="text-xl font-bold">{d.title}{d.state ? <span className="ml-2 text-xs font-bold uppercase align-middle px-2 py-0.5 border border-gray-300">{d.state}</span> : null}</h2>
                       <p className="text-gray-700 mt-1">Prize: {d.prize}</p>
                       <p className="text-sm text-gray-500 mt-1">{d.winnersCount} winner{d.winnersCount > 1 ? "s" : ""} · {d.entries} entr{d.entries === 1 ? "y" : "ies"} from {d.members} member{d.members === 1 ? "" : "s"}</p>
                     </div>
@@ -91,7 +96,7 @@ export function LotteryClient() {
                     <div className="mt-5 flex flex-wrap items-center gap-3">
                       <span className="text-sm">{d.entryPoints === 0 ? "Free entry" : `${d.entryPoints.toLocaleString()} points per entry`} · closes {when(d.closesAt)}</span>
                       {signedIn && left > 0 && (
-                        <button disabled={busy === d.id} onClick={() => enter(d, 1)} className="inline-flex items-center gap-2 bg-black text-white text-sm font-bold px-5 py-2.5 disabled:opacity-50">
+                        <button disabled={busy === d.id || !adult} onClick={() => enter(d, 1)} className="inline-flex items-center gap-2 bg-black text-white text-sm font-bold px-5 py-2.5 disabled:opacity-50">
                           {busy === d.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ticket className="w-4 h-4" />} Enter once
                         </button>
                       )}

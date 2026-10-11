@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/api/commerce';
+import { getClubs } from '@/lib/api/nightlife';
+import { groupByCity } from '@/lib/clubs-seo';
 
 // Deliberately NOT process.env.NEXT_PUBLIC_APP_URL — that var exists purely for internal
 // same-origin SSR fetches (community.ts/giftcards.ts absoluteUrl()) and .env.local pins it to
@@ -36,11 +38,12 @@ async function getForumSlugs(): Promise<string[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [forumSlugs, categories, products] = await Promise.all([
+  const [forumSlugs, categories, products, clubs] = await Promise.all([
     getForumSlugs(),
     getStorefrontCategories(),
     // Backend caps page size at 200 (parsePagination) — plenty for the current catalog size.
     getStorefrontProducts(undefined, { limit: 200 }),
+    getClubs(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -80,5 +83,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly',
   }));
 
-  return [...staticRoutes, ...forumRoutes, ...categoryRoutes, ...productRoutes];
+  const cityGroups = groupByCity(clubs);
+  const clubRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/clubs`, priority: 0.9, changeFrequency: 'daily' },
+    ...cityGroups.flatMap((g) => [
+      { url: `${SITE_URL}/clubs/city/${g.slug}`, priority: 0.8, changeFrequency: 'weekly' as const },
+      ...g.areas.map((a) => ({ url: `${SITE_URL}/clubs/city/${g.slug}/${a.slug}`, priority: 0.7, changeFrequency: 'weekly' as const })),
+    ]),
+    ...clubs.map((c) => ({ url: `${SITE_URL}/clubs/venue/${c.id}`, priority: 0.6, changeFrequency: 'weekly' as const })),
+  ];
+
+  return [...staticRoutes, ...clubRoutes, ...forumRoutes, ...categoryRoutes, ...productRoutes];
 }

@@ -26,6 +26,10 @@ test('a draw needs a future closing time and sane limits', () => {
     assert.ok(s.drawSchema.safeParse(ok).success);
     assert.ok(!s.drawSchema.safeParse({ ...ok, closesAt: new Date(Date.now() - 1000).toISOString() }).success);
     assert.ok(!s.drawSchema.safeParse({ ...ok, winnersCount: 0 }).success);
+    assert.ok(s.drawSchema.safeParse({ ...ok, state: 'Maharashtra' }).success);
+    assert.ok(s.enterSchema.safeParse({ count: 1, confirmAge: true }).success);
+    assert.ok(!s.enterSchema.safeParse({ count: 1 }).success);
+    assert.ok(!s.enterSchema.safeParse({ count: 1, confirmAge: false }).success);
 });
 test('pledges start at 100 points and proposals need a DJ, club and city', () => {
     assert.ok(s.pledgeSchema.safeParse({ points: 100 }).success);

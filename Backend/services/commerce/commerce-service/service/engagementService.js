@@ -57,7 +57,7 @@ function pickWinners(seed, entries, count) {
 }
 
 const presentDraw = (d, extra = {}) => ({
-    id: d.id, title: d.title, prize: d.prize, entryPoints: d.entry_points, maxEntriesPerUser: d.max_entries_per_user,
+    id: d.id, title: d.title, state: d.state, prize: d.prize, entryPoints: d.entry_points, maxEntriesPerUser: d.max_entries_per_user,
     winnersCount: d.winners_count, closesAt: d.closes_at, status: d.status, drawnAt: d.drawn_at,
     ...(d.status === 'drawn' ? { drawSeed: d.draw_seed } : {}), ...extra,
 });
@@ -75,9 +75,9 @@ async function winnersOf(drawId, withIds, t) {
 
 async function createDraw(adminId, b) {
     const [[row]] = await run(
-        `INSERT INTO ${DRAWS} (title, prize, entry_points, max_entries_per_user, winners_count, closes_at, created_by)
-         VALUES (:title, :prize, :entry, :max, :winners, :closes, :by) RETURNING id`,
-        { title: b.title, prize: b.prize, entry: b.entryPoints, max: b.maxEntriesPerUser, winners: b.winnersCount, closes: b.closesAt, by: adminId });
+        `INSERT INTO ${DRAWS} (title, state, prize, entry_points, max_entries_per_user, winners_count, closes_at, created_by)
+         VALUES (:title, :state, :prize, :entry, :max, :winners, :closes, :by) RETURNING id`,
+        { title: b.title, state: b.state || null, prize: b.prize, entry: b.entryPoints, max: b.maxEntriesPerUser, winners: b.winnersCount, closes: b.closesAt, by: adminId });
     return adminGetDraw(row.id);
 }
 
@@ -96,12 +96,13 @@ async function updateDraw(id, b) {
     if (!d) throw fail('NOT_FOUND', 'Draw not found', 404);
     if (d.status !== 'draft') throw fail('CONFLICT', 'Only a draft draw can be edited', 409);
     await run(
-        `UPDATE ${DRAWS} SET title = :title, prize = :prize, entry_points = :entry, max_entries_per_user = :max, winners_count = :winners, closes_at = :closes, updated_at = NOW() WHERE id = :id`,
-        { id, title: b.title, prize: b.prize, entry: b.entryPoints, max: b.maxEntriesPerUser, winners: b.winnersCount, closes: b.closesAt });
+        `UPDATE ${DRAWS} SET title = :title, state = :state, prize = :prize, entry_points = :entry, max_entries_per_user = :max, winners_count = :winners, closes_at = :closes, updated_at = NOW() WHERE id = :id`,
+        { id, title: b.title, state: b.state || null, prize: b.prize, entry: b.entryPoints, max: b.maxEntriesPerUser, winners: b.winnersCount, closes: b.closesAt });
     return adminGetDraw(id);
 }
 
-async function enter(userId, drawId, count) {
+async function enter(userId, drawId, count, confirmAge) {
+    if (confirmAge !== true) throw fail('AGE_CONFIRMATION', 'You must confirm you are 18 or older to enter', 400);
     return sequelize.transaction(async (t) => {
         await lockUser(userId, t);
         const [d] = await sel(`SELECT * FROM ${DRAWS} WHERE id = :id FOR UPDATE`, { id: drawId }, t);
@@ -120,7 +121,7 @@ async function enter(userId, drawId, count) {
         const tickets = [];
         for (let i = 1; i <= count; i += 1) {
             const [[e]] = await run(
-                `INSERT INTO ${ENTRIES} (draw_id, user_id, ticket_no, points_paid) VALUES (:d, :u, :n, :p) RETURNING id, ticket_no`,
+                `INSERT INTO ${ENTRIES} (draw_id, user_id, ticket_no, points_paid, age_confirmed_at) VALUES (:d, :u, :n, :p, NOW()) RETURNING id, ticket_no`,
                 { d: drawId, u: userId, n: max + i, p: d.entry_points }, t);
             if (d.entry_points > 0) await ledger(userId, -d.entry_points, 'lottery_entry', e.id, `Entry #${e.ticket_no} in "${d.title}"`, t);
             tickets.push(e.ticket_no);

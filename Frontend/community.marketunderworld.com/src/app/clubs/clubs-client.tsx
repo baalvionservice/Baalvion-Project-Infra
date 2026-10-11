@@ -67,6 +67,15 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
           ))}
         </div>
 
+        <nav aria-label="Browse by city" className="mb-8">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-3">Browse by city</h2>
+          <div className="flex flex-wrap gap-2">
+            {["Mumbai", "Pune", "Delhi", "Gurgaon", "Noida", "Bengaluru", "Thane", "Navi Mumbai"].map((c) => (
+              <Link key={c} href={`/clubs/city/${toSlug(c)}`} className="px-4 py-2 rounded-full text-sm font-semibold bg-white border border-gray-300 hover:border-black">Pubs and clubs in {c}</Link>
+            ))}
+          </div>
+        </nav>
+
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Main Content Area */}

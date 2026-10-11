@@ -72,6 +72,12 @@ export interface ApiClub {
   contactEmail?: string | null;
   rating: number | null;
   status: "active" | "archived";
+  latitude: number | null;
+  longitude: number | null;
+  website: string | null;
+  phone: string | null;
+  openingHours: string | null;
+  venueType: string | null;
 }
 
 // The pages route on Club.id, so the view model carries the slug there (stable, readable URLs).
@@ -91,12 +97,24 @@ const toClub = (c: ApiClub): Club => ({
   vibe: c.vibe ?? undefined,
   requiredRoles: c.requiredRoles.length ? c.requiredRoles : undefined,
   vipPackages: c.vipPackages,
+  latitude: c.latitude ?? undefined,
+  longitude: c.longitude ?? undefined,
+  website: c.website ?? undefined,
+  phone: c.phone ?? undefined,
+  openingHours: c.openingHours ?? undefined,
+  venueType: c.venueType ?? undefined,
 });
 
 export async function getClubs(): Promise<Club[]> {
   try {
-    const { items } = await call<{ items: ApiClub[] }>("/nightlife/clubs?limit=200");
-    return items.map(toClub);
+    // The API serves at most 200 per page; read every page so the directory is complete.
+    const all: ApiClub[] = [];
+    for (let offset = 0; offset < 5000; offset += 200) {
+      const { items, total } = await call<{ items: ApiClub[]; total: number }>(`/nightlife/clubs?limit=200&offset=${offset}`);
+      all.push(...items);
+      if (all.length >= total || items.length === 0) break;
+    }
+    return all.map(toClub);
   } catch {
     return ALL_STATIC_CLUBS;
   }
