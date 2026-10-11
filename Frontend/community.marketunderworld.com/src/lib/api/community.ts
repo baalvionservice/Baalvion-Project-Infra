@@ -7,6 +7,8 @@
 // tokens directly, so it works the same from Server Components, Client Components, and
 // Route Handlers alike.
 
+import { memo } from '@/lib/server-cache';
+
 const PROXY_BASE = '/api/community-proxy';
 
 export type CommunityAccessModel = 'free' | 'invite_only' | 'request_approval' | 'paid';
@@ -41,6 +43,12 @@ function absoluteUrl(path: string): string {
 }
 
 async function communityFetch<T>(path: string, init: RequestInit = {}, revalidate?: number): Promise<T> {
+    // Public reads that allow caching (revalidate set) are also kept in memory on the server.
+    if (revalidate !== undefined && (!init.method || init.method === 'GET')) return memo(`community:${path}`, revalidate * 1000, () => communityFetchNow<T>(path, init, revalidate));
+    return communityFetchNow<T>(path, init, revalidate);
+}
+
+async function communityFetchNow<T>(path: string, init: RequestInit = {}, revalidate?: number): Promise<T> {
     const res = await fetch(absoluteUrl(`${PROXY_BASE}${path}`), {
         ...init,
         headers: { 'content-type': 'application/json', ...(init.headers || {}) },

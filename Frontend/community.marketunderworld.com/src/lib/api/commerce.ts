@@ -5,6 +5,8 @@
 // MARKET_UNDERWORLD_STORE_ID is the real store provisioned in commerce-service's
 // production database for this app (see docs/backend.json for provenance).
 
+import { memo } from '@/lib/server-cache';
+
 const COMMERCE_API_BASE = process.env.COMMERCE_UPSTREAM_URL ?? '';
 const PROXY_BASE = '/api/commerce-proxy';
 export const MARKET_UNDERWORLD_STORE_ID = process.env.NEXT_PUBLIC_MU_STORE_ID ?? '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c';
@@ -74,9 +76,11 @@ async function commerceFetch<T>(path: string, params: Record<string, string> = {
   const isServer = typeof window === 'undefined';
   const url = isServer ? new URL(`${COMMERCE_API_BASE}${path}`) : new URL(`${PROXY_BASE}${path}`, window.location.origin);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString(), { next: { revalidate: 60 } });
-  if (!res.ok) throw new Error(`commerce API ${path} failed: ${res.status}`);
-  return res.json();
+  return memo(`commerce:${url.toString()}`, 60_000, async () => {
+    const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+    if (!res.ok) throw new Error(`commerce API ${path} failed: ${res.status}`);
+    return res.json() as Promise<T>;
+  });
 }
 
 export async function getStorefrontProducts(

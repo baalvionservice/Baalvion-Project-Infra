@@ -6,6 +6,7 @@
 // instead of blanking it; writes never fall back — a failed submit must say so.
 
 import { INDIAN_CLUBS, type Club, type VipPackage } from "@/data/clubs-data";
+import { memo } from "@/lib/server-cache";
 import { MUMBAI_CLUBS } from "@/data/mumbai-clubs";
 
 // All static clubs combined — used as fallback when backend is unreachable
@@ -119,14 +120,16 @@ const toClub = (c: ApiClub): Club => ({
 
 export async function getClubs(): Promise<Club[]> {
   try {
-    // The API serves at most 200 per page; read every page so the directory is complete.
-    const all: ApiClub[] = [];
-    for (let offset = 0; offset < 5000; offset += 200) {
-      const { items, total } = await call<{ items: ApiClub[]; total: number }>(`/nightlife/clubs?limit=200&offset=${offset}`);
-      all.push(...items);
-      if (all.length >= total || items.length === 0) break;
-    }
-    return all.map(toClub);
+    return await memo("clubs:all", 5 * 60_000, async () => {
+      // The API serves at most 200 per page; read every page so the directory is complete.
+      const all: ApiClub[] = [];
+      for (let offset = 0; offset < 5000; offset += 200) {
+        const { items, total } = await call<{ items: ApiClub[]; total: number }>(`/nightlife/clubs?limit=200&offset=${offset}`);
+        all.push(...items);
+        if (all.length >= total || items.length === 0) break;
+      }
+      return all.map(toClub);
+    });
   } catch {
     return ALL_STATIC_CLUBS;
   }
