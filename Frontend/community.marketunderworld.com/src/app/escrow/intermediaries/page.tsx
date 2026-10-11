@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Loader2, Search, ShieldCheck } from "lucide-react";
+import { HowItWorks } from "@/components/payments/how-it-works";
 import { SERVICE_LABEL, listIntermediaries, type Intermediary } from "@/lib/api/intermediaries";
 
 // The directory of intermediaries an admin has approved. Everything shown comes from the database.
@@ -38,6 +39,8 @@ export default function IntermediariesPage() {
           <Link href="/escrow/apply-agent" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm whitespace-nowrap">Become an intermediary</Link>
         </div>
       </div>
+
+      <HowItWorks />
 
       {error ? <p className="text-red-400">{error}</p> : items === null ? (
         <div className="flex items-center gap-3 text-zinc-400 py-16 justify-center"><Loader2 className="w-5 h-5 animate-spin" /> Loading…</div>

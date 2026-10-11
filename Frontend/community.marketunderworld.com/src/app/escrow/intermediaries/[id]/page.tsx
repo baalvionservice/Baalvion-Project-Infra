@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { HowItWorks } from "@/components/payments/how-it-works";
 import { SERVICE_LABEL, createTrade, getIntermediary, qrUrl, type Intermediary, type ServiceType } from "@/lib/api/intermediaries";
 
 export default function IntermediaryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -70,6 +71,8 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
         <button onClick={() => (isAuthenticated ? setOpen(true) : router.push(`/auth/signin?redirect=/escrow/intermediaries/${slug}`))}
           className="self-start bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm">Request a trade</button>
       </div>
+
+      <HowItWorks />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
