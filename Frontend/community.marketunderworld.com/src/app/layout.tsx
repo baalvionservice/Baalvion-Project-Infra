@@ -105,7 +105,7 @@ export default function RootLayout({
                       <Toaster />
                       <GlobalSearch />
                       <BountyChatWidget />
-                      <AiAssistantWidget />
+                      {process.env.NEXT_PUBLIC_AI_ASSISTANT === "on" && <AiAssistantWidget />}
                       <CustomerSupportWidget />
                       <CookieBanner />
                       <AnnouncementBanner />
