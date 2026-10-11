@@ -30,10 +30,10 @@ export default function IntermediariesPage() {
             People who help members buy USDT, trade crypto and set up accounts. You pay the intermediary directly by scanning their QR; check the name in your app before you send.
           </p>
         </div>
-        <div className="flex gap-3 items-center">
-          <div className="relative">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative w-full sm:w-auto">
             <input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Search name or service…" aria-label="Search intermediaries"
-              className="w-60 bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-red-500" />
+              className="w-full sm:w-60 bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-red-500" />
             <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
           </div>
           <Link href="/escrow/apply-agent" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm whitespace-nowrap">Become an intermediary</Link>

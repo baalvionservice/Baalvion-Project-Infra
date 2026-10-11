@@ -77,7 +77,8 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          !isDev ? `${inter.variable} ${jetbrainsMono.variable}` : "font-sans",
+          !isDev && `${inter.variable} ${jetbrainsMono.variable}`,
+          "font-sans",
           "bg-[#0B0C0F] text-white antialiased min-h-screen flex flex-col"
         )}
         style={isDev ? { fontFamily: 'system-ui, -apple-system, sans-serif' } : {}}
