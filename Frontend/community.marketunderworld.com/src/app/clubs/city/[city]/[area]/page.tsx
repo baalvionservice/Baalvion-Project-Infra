@@ -35,13 +35,13 @@ export default async function AreaPage({ params }: { params: Promise<{ city: str
   ]
   const nearby = g.areas.filter((x) => x.slug !== a.slug).slice(0, 12)
   return (
-    <div className="min-h-screen bg-[#f3f4f7] text-[#222]">
+    <div className="min-h-screen bg-[#f6f7f9] text-[#1a1a1a]">
       <Navbar />
-      <main className="max-w-[1100px] mx-auto px-5 sm:px-6 py-10 mt-20">
+      <main className="max-w-[1200px] mx-auto px-5 sm:px-8 pt-28 pb-20">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="mb-6"><Breadcrumbs items={[{ label: "Clubs", href: "/clubs" }, { label: g.name, href: `/clubs/city/${g.slug}` }, { label: a.name }]} /></div>
-        <h1 className="text-3xl md:text-4xl font-bold">Pubs, bars and nightclubs in {a.name}, {g.name}</h1>
-        <p className="text-gray-600 mt-3 max-w-3xl">{a.clubs.length} venue{a.clubs.length === 1 ? "" : "s"} in {a.name}. Open one to see its address and hours, and to request the guest list or a VIP table.</p>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight mt-8">Pubs, bars and nightclubs in {a.name}, {g.name}</h1>
+        <p className="text-gray-600 mt-4 text-lg leading-relaxed max-w-3xl">{a.clubs.length} venue{a.clubs.length === 1 ? "" : "s"} in {a.name}. Open one to see its address and hours, and to request the guest list or a VIP table.</p>
         <section className="mt-10"><CityBrowser clubs={a.clubs} city={a.name} showAreaFilter={false} /></section>
         {nearby.length > 0 && (
           <section className="mt-10">
