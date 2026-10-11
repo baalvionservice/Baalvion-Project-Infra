@@ -53,6 +53,17 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
           <Breadcrumbs items={breadcrumbItems} />
         </div>
 
+        {/* Elite Hosted Parties: applications and approved parties are real (see /clubs/elite-host) */}
+        <div className="mb-8 p-5 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl text-black shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold mb-1">Elite Hosted Parties</h2>
+            <p className="text-black/80 text-sm">Host a VIP night or apply to join an exclusive party. Every application is reviewed by an admin.</p>
+          </div>
+          <Link href="/clubs/elite-host" className="bg-black text-white text-center font-bold py-2.5 px-6 rounded-xl text-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+            See Elite Parties
+          </Link>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Main Content Area */}
