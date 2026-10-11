@@ -31,6 +31,7 @@ const many = (n) => args.reduce((a, v, i) => (v === `--${n}` ? [...a, args[i + 1
             `INSERT INTO commerce.commerce_intermediaries (user_id, slug, display_name, bio, services, languages, commission_note, trade_limit_usd, status, verified, deposit_usd, deposit_confirmed_at, approved_at)
              VALUES (:u, :slug, :name, :bio, :services::jsonb, :languages::jsonb, :commission, :limit, 'active', :verified, :deposit, :depositAt, NOW()) RETURNING id`,
             { replacements: { u: one('user-id') || null, slug, name, bio: one('bio') || null, services: JSON.stringify(services), languages: JSON.stringify((one('languages') || '').split(',').filter(Boolean)), commission: one('commission') || null, limit: one('limit') ? Number(one('limit')) : null, verified: args.includes('--verified'), deposit, depositAt: deposit > 0 ? new Date() : null }, transaction: t });
+        if (deposit > 0) await sequelize.query("INSERT INTO commerce.commerce_intermediary_deposit_ledger (intermediary_id, delta_usd, reason, note) VALUES (:id, :d, 'deposit', 'Deposit confirmed by the owner (paid directly)')", { replacements: { id: row.id, d: deposit }, transaction: t });
         let sort = 0;
         for (let i = 0; i < decoded.length; i += 1) {
             await sequelize.query('INSERT INTO commerce.commerce_intermediary_qrs (intermediary_id, label, mime, size_bytes, data, sort) VALUES (:id, :label, :mime, :size, :data, :sort)',

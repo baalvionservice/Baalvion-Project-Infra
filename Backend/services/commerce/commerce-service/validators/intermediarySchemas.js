@@ -30,4 +30,9 @@ exports.messageSchema = z.object({ body: z.string().trim().min(1).max(2000) });
 exports.proofsSchema = z.object({ proofs: z.array(image).min(1).max(3) });
 exports.paidSchema = z.object({ proofs: z.array(image).min(1).max(3), note: z.string().trim().max(500).optional() });
 exports.disputeSchema = z.object({ reason: z.string().trim().min(10).max(1000) });
-exports.resolveSchema = z.object({ outcome: z.enum(['completed', 'cancelled']), note: z.string().trim().min(3).max(1000) });
+exports.resolveSchema = z.object({
+    outcome: z.enum(['completed', 'cancelled', 'refunded']),
+    note: z.string().trim().min(3).max(1000),
+    refundUsd: z.number().positive().max(100000).optional(),
+}).refine((d) => d.outcome !== 'refunded' || d.refundUsd !== undefined, { message: 'Enter the refund amount' });
+exports.releaseSchema = z.object({ note: z.string().trim().max(500).optional() });

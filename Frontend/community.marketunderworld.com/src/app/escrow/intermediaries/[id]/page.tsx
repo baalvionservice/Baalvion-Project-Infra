@@ -58,7 +58,7 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
             <h1 className="text-2xl font-bold">{item.displayName}</h1>
             {item.verified && (
               <span className="bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> Verified{item.depositUsd > 0 ? ` · $${item.depositUsd.toLocaleString()} deposit` : ""}
+                <ShieldCheck className="w-3.5 h-3.5" /> Verified{item.depositUsd > 0 ? ` · protected up to $${item.depositUsd.toLocaleString()}` : ""}
               </span>
             )}
           </div>
@@ -85,7 +85,9 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h3 className="font-bold mb-1">Before you pay</h3>
             <p className="text-xs text-zinc-400 leading-normal">
-              You pay the intermediary directly. Baalvion does not hold your money in this flow. Start a trade request first, agree the amount and fee in the trade chat, then pay and attach your screenshot. If something goes wrong, raise a dispute from the trade and an admin will review it.
+              You pay the intermediary directly; Baalvion does not hold your money. Start a trade request first, agree the amount and fee in the trade chat, then pay and attach your screenshot.
+              {item.depositUsd > 0 ? <> This intermediary has a refundable deposit of <strong className="text-white">${item.depositUsd.toLocaleString()}</strong> held by the platform. If you raise a dispute and an admin decides in your favour, your refund is taken from that deposit, up to the amount it still holds.</> : <> This intermediary has no deposit held, so a dispute cannot be refunded from one.</>}
+              Disputes are reviewed by an admin who reads the chat and screenshots.
             </p>
           </div>
         </div>

@@ -43,6 +43,7 @@ const present = (r, role) => ({
     instructions: r.instructions, intermediary: { id: r.intermediary_id, name: r.intermediary_name, slug: r.intermediary_slug },
     role, customerUserId: String(r.customer_user_id), createdAt: r.created_at, updatedAt: r.updated_at, paidAt: r.paid_at, completedAt: r.completed_at,
     cancelledBy: r.cancelled_by, disputeReason: r.dispute_reason, resolutionNote: r.resolution_note,
+    refundUsd: r.refund_usd === null || r.refund_usd === undefined ? null : Number(r.refund_usd), refundPaidAt: r.refund_paid_at || null,
 });
 
 async function create(authCtx, body) {
@@ -91,7 +92,8 @@ async function detail(trade, role) {
         `SELECT id, uploader_role AS "uploaderRole", mime, size_bytes AS "sizeBytes", created_at AS "createdAt" FROM ${PROOFS} WHERE trade_id = :id ORDER BY created_at`,
         { type: QueryTypes.SELECT, replacements: { id: trade.id } });
     const pub = await intermediaries.getPublic(trade.intermediary_id).catch(() => null);
-    return { ...present(trade, role), messages, proofs, payQrs: pub ? pub.qrs : [] };
+    // What the intermediary's deposit still holds: the most this trade can be refunded from it.
+    return { ...present(trade, role), messages, proofs, payQrs: pub ? pub.qrs : [], protectedUpToUsd: await intermediaries.heldUsd(trade.intermediary_id) };
 }
 
 async function get(authCtx, id) {
@@ -202,15 +204,34 @@ async function adminList(status) {
 }
 async function adminGet(id) { return detail(await loadTrade(id), 'admin'); }
 
-async function resolve(authCtx, id, { outcome, note }) {
+// outcome 'refunded' = decided for the customer: the refund is taken from the intermediary's deposit (up to what it holds)
+// and recorded on the trade; the admin then pays the customer and marks the refund paid.
+async function resolve(authCtx, id, { outcome, note, refundUsd }) {
     const trade = await loadTrade(id);
     if (trade.status !== 'disputed') throw fail('CONFLICT', `This trade is ${trade.status}`, 409);
+    if (outcome === 'refunded' && !(Number(refundUsd) > 0)) throw fail('VALIDATION_ERROR', 'Enter the refund amount in USD');
     const to = outcome === 'completed' ? 'completed' : 'cancelled';
-    await sequelize.query(
-        `UPDATE ${TRADES} SET status = :to, resolution_note = :note, resolved_by = :by, ${to === 'completed' ? 'completed_at = COALESCE(completed_at, NOW()),' : ''} updated_at = NOW() WHERE id = :id`,
-        { replacements: { id, to, note, by: authCtx.userId } });
-    await addMessage(authCtx.userId, trade, 'admin', `Dispute resolved as ${to}. ${note}`);
+    await sequelize.transaction(async (t) => {
+        if (outcome === 'refunded') {
+            await intermediaries.debit(trade.intermediary_id, refundUsd, { reason: 'refund_customer', tradeId: id, note, adminUserId: authCtx.userId }, t);
+        }
+        await sequelize.query(
+            `UPDATE ${TRADES} SET status = :to, resolution_note = :note, resolved_by = :by, refund_usd = :refund,
+                    ${to === 'completed' ? 'completed_at = COALESCE(completed_at, NOW()),' : ''} updated_at = NOW() WHERE id = :id`,
+            { replacements: { id, to, note, by: authCtx.userId, refund: outcome === 'refunded' ? Number(refundUsd) : null }, transaction: t });
+    });
+    const text = outcome === 'refunded' ? `Dispute decided for the customer: $${Number(refundUsd).toFixed(2)} refunded from the intermediary's deposit.` : `Dispute resolved as ${to}.`;
+    await addMessage(authCtx.userId, trade, 'admin', `${text} ${note}`);
     return detail(await loadTrade(id), 'admin');
 }
 
-module.exports = { create, list, get, proofImages, message, addProofs, markPaid, confirmPayment, complete, cancel, dispute, adminList, adminGet, resolve };
+async function markRefundPaid(authCtx, id) {
+    const trade = await loadTrade(id);
+    if (!(Number(trade.refund_usd) > 0)) throw fail('CONFLICT', 'This trade has no refund', 409);
+    if (trade.refund_paid_at) throw fail('CONFLICT', 'The refund is already marked paid', 409);
+    await sequelize.query(`UPDATE ${TRADES} SET refund_paid_at = NOW(), updated_at = NOW() WHERE id = :id`, { replacements: { id } });
+    await addMessage(authCtx.userId, trade, 'admin', `Refund of $${Number(trade.refund_usd).toFixed(2)} has been paid to the customer.`);
+    return detail(await loadTrade(id), 'admin');
+}
+
+module.exports = { create, list, get, proofImages, message, addProofs, markPaid, confirmPayment, complete, cancel, dispute, adminList, adminGet, resolve, markRefundPaid };

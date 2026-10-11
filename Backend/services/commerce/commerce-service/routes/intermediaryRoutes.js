@@ -36,6 +36,8 @@ me.get('/mine', wrap((req) => svc.mine(req.auth.userId)));
 me.post('/apply', validate(s.applySchema), wrap((req) => svc.apply(ctx(req), req.validated), 201));
 me.get('/admin', requirePlatformAdmin, wrap((req) => svc.adminList(req.query.status)));
 me.get('/admin/:id', requirePlatformAdmin, idParam, wrap((req) => svc.adminGet(req.params.id)));
+me.get('/admin/:id/ledger', requirePlatformAdmin, idParam, wrap((req) => svc.adminLedger(req.params.id)));
+me.post('/admin/:id/release-deposit', requirePlatformAdmin, idParam, validate(s.releaseSchema), wrap((req) => svc.releaseDeposit(req.auth.userId, req.params.id, req.validated.note)));
 
 // ── Trades ──
 const tr = Router();
@@ -45,6 +47,7 @@ tr.get('/admin', requirePlatformAdmin, wrap((req) => trades.adminList(req.query.
 tr.get('/admin/:id', requirePlatformAdmin, idParam, wrap((req) => trades.adminGet(req.params.id)));
 tr.get('/admin/:id/proofs', requirePlatformAdmin, idParam, wrap((req) => trades.proofImages(ctx(req), req.params.id, true)));
 tr.post('/admin/:id/resolve', requirePlatformAdmin, idParam, validate(s.resolveSchema), wrap((req) => trades.resolve(ctx(req), req.params.id, req.validated)));
+tr.post('/admin/:id/refund-paid', requirePlatformAdmin, idParam, wrap((req) => trades.markRefundPaid(ctx(req), req.params.id)));
 tr.get('/:id', idParam, wrap((req) => trades.get(ctx(req), req.params.id)));
 tr.get('/:id/proofs', idParam, wrap((req) => trades.proofImages(ctx(req), req.params.id, false)));
 tr.post('/:id/messages', idParam, validate(s.messageSchema), wrap((req) => trades.message(ctx(req), req.params.id, req.validated.body), 201));

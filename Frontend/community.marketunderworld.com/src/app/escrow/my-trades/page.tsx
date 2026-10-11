@@ -139,6 +139,10 @@ function Trades() {
                 {d.instructions && <p className="text-sm text-zinc-300 bg-zinc-950 border border-zinc-800 rounded-lg p-3 whitespace-pre-line">{d.instructions}</p>}
                 {d.disputeReason && <p className="text-sm text-red-300">Dispute: {d.disputeReason}</p>}
                 {d.resolutionNote && <p className="text-sm text-zinc-300">Admin decision: {d.resolutionNote}</p>}
+                {d.refundUsd ? (
+                  <p className="text-sm text-emerald-300">Refund of ${d.refundUsd.toFixed(2)} {d.refundPaidAt ? `paid on ${new Date(d.refundPaidAt).toLocaleDateString()}` : "approved from the intermediary's deposit; an admin will pay it to you"}.</p>
+                ) : null}
+                {isCustomer && open && d.protectedUpToUsd > 0 && <p className="text-xs text-zinc-400">Protected up to ${d.protectedUpToUsd.toLocaleString()} by this intermediary&apos;s deposit if a dispute is decided in your favour.</p>}
 
                 {isCustomer && (d.status === "created" || d.status === "payment_submitted") && d.payQrs.length > 0 && (
                   <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">

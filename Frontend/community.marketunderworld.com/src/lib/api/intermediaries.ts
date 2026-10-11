@@ -23,11 +23,14 @@ export interface Trade {
   intermediary: { id: string; name: string; slug: string }; role: 'customer' | 'intermediary' | 'admin';
   customerUserId: string; createdAt: string; updatedAt: string; paidAt: string | null; completedAt: string | null;
   cancelledBy: string | null; disputeReason: string | null; resolutionNote: string | null;
+  refundUsd: number | null; refundPaidAt: string | null;
 }
 export interface TradeMessage { id: string; senderUserId: string; senderRole: 'customer' | 'intermediary' | 'admin'; body: string; createdAt: string }
 export interface TradeDetail extends Trade {
   messages: TradeMessage[]; proofs: { id: string; uploaderRole: string; mime: string; sizeBytes: number; createdAt: string }[];
   payQrs: { id: string; label: string }[];
+  // What the intermediary's deposit still holds: the most a refund on this trade can be.
+  protectedUpToUsd: number;
 }
 export interface TradeProofImage { id: string; uploaderRole: string; createdAt: string; dataUrl: string }
 
@@ -79,4 +82,8 @@ export const disputeTrade = (id: string, reason: string) => post<TradeDetail>(`/
 export const adminTrades = (status?: string) => call<{ items: Trade[]; total: number }>(`/intermediary-trades/admin${status ? `?status=${status}` : ''}`);
 export const adminTrade = (id: string) => call<TradeDetail>(`/intermediary-trades/admin/${id}`);
 export const adminTradeProofs = (id: string) => call<TradeProofImage[]>(`/intermediary-trades/admin/${id}/proofs`);
-export const resolveTrade = (id: string, outcome: 'completed' | 'cancelled', note: string) => post<TradeDetail>(`/intermediary-trades/admin/${id}/resolve`, { outcome, note });
+export const resolveTrade = (id: string, outcome: 'completed' | 'cancelled' | 'refunded', note: string, refundUsd?: number) =>
+  post<TradeDetail>(`/intermediary-trades/admin/${id}/resolve`, { outcome, note, refundUsd });
+export const markRefundPaid = (id: string) => post<TradeDetail>(`/intermediary-trades/admin/${id}/refund-paid`);
+export const releaseDeposit = (id: string, note?: string) => post<{ returnedUsd: number }>(`/intermediaries/admin/${id}/release-deposit`, { note });
+export const depositLedger = (id: string) => call<{ id: string; deltaUsd: number; reason: string; tradeId: string | null; note: string | null; createdAt: string }[]>(`/intermediaries/admin/${id}/ledger`);

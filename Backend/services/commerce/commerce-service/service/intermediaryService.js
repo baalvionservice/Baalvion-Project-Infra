@@ -11,19 +11,26 @@ const QR = 'commerce.commerce_intermediary_qrs';
 const TRADES = 'commerce.commerce_intermediary_trades';
 const SERVICES = ['buy_usdt', 'crypto_trade', 'account_setup', 'other'];
 const MAX_QRS = 3;
+const LEDGER = 'commerce.commerce_intermediary_deposit_ledger';
 
 const bad = (msg) => new AppError('VALIDATION_ERROR', msg, 400);
 
 // What anyone may see about an intermediary: no user id, no UPI IDs, no contact details.
-const toPublic = (r, qrs, completedTrades) => ({
+const toPublic = (r, qrs, completedTrades, held = 0) => ({
     id: r.id, slug: r.slug, displayName: r.display_name, bio: r.bio, services: r.services || [], languages: r.languages || [],
     commissionNote: r.commission_note, tradeLimitUsd: r.trade_limit_usd, verified: r.verified,
-    depositUsd: Number(r.deposit_usd) > 0 && r.deposit_confirmed_at ? Number(r.deposit_usd) : 0,
+    // What the deposit still holds: the most a customer can be refunded from it.
+    depositUsd: Math.max(0, Number(held) || 0),
     listedSince: r.approved_at || r.created_at, completedTrades: completedTrades || 0,
     qrs: (qrs || []).map((q) => ({ id: q.id, label: q.label })),
 });
 
-const toOwn = (r, qrs) => ({ ...toPublic(r, qrs, 0), status: r.status, userId: r.user_id ? String(r.user_id) : null });
+const toOwn = (r, qrs, held = 0) => ({ ...toPublic(r, qrs, 0, held), status: r.status, userId: r.user_id ? String(r.user_id) : null });
+
+async function heldUsd(id, t) {
+    const [r] = await sequelize.query(`SELECT COALESCE(SUM(delta_usd), 0) AS held FROM ${LEDGER} WHERE intermediary_id = :id`, { type: QueryTypes.SELECT, replacements: { id }, transaction: t });
+    return Number(r.held);
+}
 
 async function qrList(id) {
     return sequelize.query(`SELECT id, label FROM ${QR} WHERE intermediary_id = :id ORDER BY sort, created_at`, { type: QueryTypes.SELECT, replacements: { id } });
@@ -104,7 +111,7 @@ async function mine(userId) {
     const bondService = require('./sellerBondService');
     const payments = await bondService.listMine(userId);
     const payment = payments.find((p) => p.id === row.deposit_bond_id) || null;
-    return { intermediary: toOwn(row, await qrList(row.id)), payment };
+    return { intermediary: toOwn(row, await qrList(row.id), await heldUsd(row.id)), payment };
 }
 
 async function listPublic() {
@@ -112,7 +119,7 @@ async function listPublic() {
     const out = [];
     for (const r of rows) {
         const [c] = await sequelize.query(`SELECT COUNT(*)::int AS n FROM ${TRADES} WHERE intermediary_id = :id AND status = 'completed'`, { type: QueryTypes.SELECT, replacements: { id: r.id } });
-        out.push(toPublic(r, await qrList(r.id), c.n));
+        out.push(toPublic(r, await qrList(r.id), c.n, await heldUsd(r.id)));
     }
     return { items: out, total: out.length };
 }
@@ -121,7 +128,7 @@ async function getPublic(slugOrId) {
     const [r] = await sequelize.query(`SELECT * FROM ${T} WHERE status = 'active' AND (slug = :k OR id::text = :k)`, { type: QueryTypes.SELECT, replacements: { k: slugOrId } });
     if (!r) throw new AppError('NOT_FOUND', 'Intermediary not found', 404);
     const [c] = await sequelize.query(`SELECT COUNT(*)::int AS n FROM ${TRADES} WHERE intermediary_id = :id AND status = 'completed'`, { type: QueryTypes.SELECT, replacements: { id: r.id } });
-    return toPublic(r, await qrList(r.id), c.n);
+    return toPublic(r, await qrList(r.id), c.n, await heldUsd(r.id));
 }
 
 // One QR image, only while the intermediary is listed.
@@ -137,14 +144,16 @@ async function qrImage(intermediaryId, qrId) {
 // Admin review: the application with its QR codes as data URLs (a few small images).
 async function adminList(status) {
     const rows = await sequelize.query(`SELECT * FROM ${T} ${status ? 'WHERE status = :status' : ''} ORDER BY created_at DESC LIMIT 200`, { type: QueryTypes.SELECT, replacements: { status } });
-    return rows.map((r) => ({ ...toOwn(r, []), createdAt: r.created_at, depositBondId: r.deposit_bond_id }));
+    const out = [];
+    for (const r of rows) out.push({ ...toOwn(r, [], await heldUsd(r.id)), createdAt: r.created_at, depositBondId: r.deposit_bond_id });
+    return out;
 }
 
 async function adminGet(id) {
     const [r] = await sequelize.query(`SELECT * FROM ${T} WHERE id = :id`, { type: QueryTypes.SELECT, replacements: { id } });
     if (!r) throw new AppError('NOT_FOUND', 'Not found', 404);
     const qrs = await sequelize.query(`SELECT id, label, mime, data FROM ${QR} WHERE intermediary_id = :id ORDER BY sort`, { type: QueryTypes.SELECT, replacements: { id } });
-    return { ...toOwn(r, qrs), createdAt: r.created_at, qrImages: qrs.map((q) => ({ id: q.id, label: q.label, dataUrl: `data:${q.mime};base64,${Buffer.from(q.data).toString('base64')}` })) };
+    return { ...toOwn(r, qrs, await heldUsd(r.id)), createdAt: r.created_at, qrImages: qrs.map((q) => ({ id: q.id, label: q.label, dataUrl: `data:${q.mime};base64,${Buffer.from(q.data).toString('base64')}` })) };
 }
 
 async function byBond(bondId, t) {
@@ -163,6 +172,10 @@ async function onPaymentConfirmed(bondId, adminUserId, amountUsd, t) {
         `UPDATE ${T} SET status = 'active', verified = TRUE, deposit_usd = :usd, deposit_confirmed_at = NOW(), approved_by = :by, approved_at = NOW(), updated_at = NOW() WHERE id = :id`,
         { replacements: { id: r.id, usd: amountUsd, by: adminUserId }, transaction: t },
     );
+    await sequelize.query(
+        `INSERT INTO ${LEDGER} (intermediary_id, delta_usd, reason, note, created_by) VALUES (:id, :usd, 'deposit', 'Deposit confirmed', :by)`,
+        { replacements: { id: r.id, usd: amountUsd, by: adminUserId }, transaction: t },
+    );
 }
 async function onPaymentClosed(bondId, status) {
     await sequelize.query(`UPDATE ${T} SET status = :status, updated_at = NOW() WHERE deposit_bond_id = :b`, { replacements: { b: bondId, status } });
@@ -174,7 +187,38 @@ async function activeForUser(userId) {
     return r || null;
 }
 
+// Take money out of the deposit (a refund to a customer, or the deposit returned). Never below zero. An intermediary whose deposit
+// is used up is suspended, so the protection shown to customers is never more than what is held.
+async function debit(intermediaryId, usd, { reason, tradeId = null, note = null, adminUserId = null }, t) {
+    const amount = Math.round(Number(usd) * 100) / 100;
+    if (!(amount > 0)) throw bad('Enter an amount above zero');
+    const held = await heldUsd(intermediaryId, t);
+    if (amount > held + 0.001) throw new AppError('INSUFFICIENT_DEPOSIT', `The deposit only holds $${held.toFixed(2)}`, 409);
+    await sequelize.query(
+        `INSERT INTO ${LEDGER} (intermediary_id, delta_usd, reason, trade_id, note, created_by) VALUES (:id, :d, :reason, :trade, :note, :by)`,
+        { replacements: { id: intermediaryId, d: -amount, reason, trade: tradeId, note, by: adminUserId }, transaction: t },
+    );
+    const left = held - amount;
+    if (left <= 0.001) await sequelize.query(`UPDATE ${T} SET status = 'suspended', updated_at = NOW() WHERE id = :id AND status = 'active'`, { replacements: { id: intermediaryId }, transaction: t });
+    return left;
+}
+
+// Admin: return what is left of the deposit and delist (the intermediary is leaving). The money itself is paid back by hand.
+async function releaseDeposit(adminUserId, id, note) {
+    return sequelize.transaction(async (t) => {
+        const held = await heldUsd(id, t);
+        if (held > 0) await debit(id, held, { reason: 'release', note: note || 'Deposit returned', adminUserId }, t);
+        await sequelize.query(`UPDATE ${T} SET status = 'suspended', updated_at = NOW() WHERE id = :id`, { replacements: { id }, transaction: t });
+        return { returnedUsd: held };
+    });
+}
+
+async function adminLedger(id) {
+    return sequelize.query(`SELECT id, delta_usd::float AS "deltaUsd", reason, trade_id AS "tradeId", note, created_at AS "createdAt" FROM ${LEDGER} WHERE intermediary_id = :id ORDER BY created_at DESC`, { type: QueryTypes.SELECT, replacements: { id } });
+}
+
 module.exports = {
+    debit, heldUsd, releaseDeposit, adminLedger,
     SERVICES, apply, mine, listPublic, getPublic, qrImage, adminList, adminGet,
     onPaymentSubmitted, onPaymentConfirmed, onPaymentClosed, activeForUser, config,
 };

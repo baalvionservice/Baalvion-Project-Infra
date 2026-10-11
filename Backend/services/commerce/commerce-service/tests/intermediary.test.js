@@ -34,3 +34,10 @@ test('messages, payment proof and disputes need real content', () => {
     assert.ok(s.disputeSchema.safeParse({ reason: 'Payment sent but not received after an hour' }).success);
     assert.ok(!s.resolveSchema.safeParse({ outcome: 'refund', note: 'x' }).success);
 });
+
+test('a refund decision needs an amount; other decisions do not', () => {
+    assert.ok(s.resolveSchema.safeParse({ outcome: 'completed', note: 'Seller delivered' }).success);
+    assert.ok(!s.resolveSchema.safeParse({ outcome: 'refunded', note: 'Customer was not paid' }).success);
+    assert.ok(s.resolveSchema.safeParse({ outcome: 'refunded', note: 'Customer was not paid', refundUsd: 50 }).success);
+    assert.ok(!s.resolveSchema.safeParse({ outcome: 'refunded', note: 'x', refundUsd: -5 }).success);
+});

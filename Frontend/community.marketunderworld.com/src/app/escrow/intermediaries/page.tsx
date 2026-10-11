@@ -54,7 +54,7 @@ export default function IntermediariesPage() {
                     <h3 className="font-bold">{i.displayName}</h3>
                     {i.verified && (
                       <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                        <ShieldCheck className="w-3 h-3" /> Verified{i.depositUsd > 0 ? ` · $${i.depositUsd.toLocaleString()} deposit` : ""}
+                        <ShieldCheck className="w-3 h-3" /> Verified{i.depositUsd > 0 ? ` · protected up to $${i.depositUsd.toLocaleString()}` : ""}
                       </span>
                     )}
                   </div>

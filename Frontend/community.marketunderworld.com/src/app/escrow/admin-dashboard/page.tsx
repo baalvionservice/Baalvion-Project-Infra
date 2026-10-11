@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
-  SERVICE_LABEL, adminApplication, adminApplications, adminTrade, adminTradeProofs, adminTrades, resolveTrade,
+  SERVICE_LABEL, adminApplication, adminApplications, adminTrade, adminTradeProofs, adminTrades, markRefundPaid, releaseDeposit, resolveTrade,
   type AdminApplication, type Trade, type TradeDetail, type TradeProofImage,
 } from "@/lib/api/intermediaries";
 
@@ -19,21 +19,24 @@ export default function AdminDashboardPage() {
   const [trade, setTrade] = useState<TradeDetail | null>(null);
   const [shots, setShots] = useState<TradeProofImage[]>([]);
   const [note, setNote] = useState("");
+  const [refund, setRefund] = useState("");
+  const [toPay, setToPay] = useState<Trade[]>([]);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
     adminApplications().then(setApps).catch((e) => setError(e instanceof Error ? e.message : "Not allowed"));
     adminTrades("disputed").then((r) => setDisputes(r.items)).catch(() => {});
+    adminTrades("cancelled").then((r) => setToPay(r.items.filter((t) => (t.refundUsd ?? 0) > 0 && !t.refundPaidAt))).catch(() => {});
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const openTrade = async (id: string) => {
     setTrade(await adminTrade(id)); setShots(await adminTradeProofs(id)); setNote("");
   };
-  const decide = async (outcome: "completed" | "cancelled") => {
+  const decide = async (outcome: "completed" | "cancelled" | "refunded") => {
     if (!trade) return;
     setBusy(true);
-    try { await resolveTrade(trade.id, outcome, note.trim()); toast({ title: `Dispute resolved as ${outcome}` }); setTrade(null); load(); }
+    try { await resolveTrade(trade.id, outcome, note.trim(), outcome === "refunded" ? Number(refund) : undefined); toast({ title: outcome === "refunded" ? "Refund taken from the deposit" : `Dispute resolved as ${outcome}` }); setTrade(null); setRefund(""); load(); }
     catch (e) { toast({ variant: "destructive", title: "Couldn't resolve", description: e instanceof Error ? e.message : "Try again." }); }
     finally { setBusy(false); }
   };
@@ -56,7 +59,13 @@ export default function AdminDashboardPage() {
                 <div className="font-bold">{a.displayName}{a.verified ? <span className="ml-2 text-emerald-400 text-xs">verified</span> : null}</div>
                 <div className="text-xs text-zinc-400">{a.status.replace(/_/g, " ")} · {a.services.map((s) => SERVICE_LABEL[s]).join(", ")} · applied {new Date(a.createdAt).toLocaleDateString()}</div>
               </div>
-              <button onClick={async () => setOpen(open?.id === a.id ? null : await adminApplication(a.id))} className="text-red-400 hover:underline text-xs self-center">{open?.id === a.id ? "Hide QR codes" : "Review QR codes"}</button>
+              <div className="flex gap-4 self-center text-xs">
+                {a.status === "active" && <span className="text-zinc-400">Deposit held: <strong className="text-white">${a.depositUsd.toLocaleString()}</strong></span>}
+                {(a.status === "active" || a.depositUsd > 0) && (
+                  <button disabled={busy} onClick={async () => { if (!window.confirm(`Return ${a.displayName}'s remaining deposit ($${a.depositUsd}) and delist them? You still pay the money back by hand.`)) return; setBusy(true); try { const r = await releaseDeposit(a.id); toast({ title: `Deposit of $${r.returnedUsd} released and ${a.displayName} delisted` }); load(); } catch (e) { toast({ variant: "destructive", title: "Couldn't release", description: e instanceof Error ? e.message : "Try again." }); } finally { setBusy(false); } }} className="text-zinc-400 hover:text-white underline">Return deposit and delist</button>
+                )}
+                <button onClick={async () => setOpen(open?.id === a.id ? null : await adminApplication(a.id))} className="text-red-400 hover:underline">{open?.id === a.id ? "Hide QR codes" : "Review QR codes"}</button>
+              </div>
             </div>
             {open?.id === a.id && (
               <div className="mt-4 flex flex-wrap gap-4">
@@ -73,6 +82,20 @@ export default function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {toPay.length > 0 && (
+        <>
+          <h2 className="text-lg font-bold mb-3">Refunds to pay ({toPay.length})</h2>
+          <div className="space-y-3 mb-10">
+            {toPay.map((t) => (
+              <div key={t.id} className="bg-zinc-900 border border-emerald-900/50 rounded-xl p-4 text-sm flex flex-wrap justify-between gap-3">
+                <span><span className="font-mono">{t.ref}</span> · customer #{t.customerUserId} · refund <strong className="text-emerald-300">${(t.refundUsd ?? 0).toFixed(2)}</strong> from {t.intermediary.name}&apos;s deposit</span>
+                <button disabled={busy} onClick={async () => { setBusy(true); try { await markRefundPaid(t.id); toast({ title: "Refund marked as paid" }); load(); } catch (e) { toast({ variant: "destructive", title: "Couldn't update", description: e instanceof Error ? e.message : "Try again." }); } finally { setBusy(false); } }} className="text-emerald-400 hover:underline">I have paid this refund</button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <h2 className="text-lg font-bold mb-3">Open disputes ({disputes.length})</h2>
       <div className="space-y-3">
@@ -97,8 +120,14 @@ export default function AdminDashboardPage() {
               <img key={p.id} src={p.dataUrl} alt={`Screenshot from the ${p.uploaderRole}`} className="h-32 rounded-md border border-zinc-700" />
             ))}</div>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} placeholder="Your decision and why (shown to both sides)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm" />
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-zinc-400">Decide for the customer: refund (USD)</span>
+              <input value={refund} onChange={(e) => setRefund(e.target.value.replace(/[^0-9.]/g, ""))} inputMode="decimal" className="w-28 bg-zinc-950 border border-zinc-800 rounded px-2 py-1" placeholder="0.00" aria-label="Refund amount in USD" />
+              <span className="text-xs text-zinc-500">taken from the deposit, which holds ${trade.protectedUpToUsd.toLocaleString()}</span>
+            </div>
             <div className="flex justify-end gap-3 flex-wrap">
               <button onClick={() => setTrade(null)} className="px-4 py-2 text-sm text-zinc-400">Close</button>
+              <button disabled={busy || note.trim().length < 3 || !(Number(refund) > 0)} onClick={() => void decide("refunded")} className="bg-red-700 hover:bg-red-600 disabled:opacity-40 px-4 py-2 rounded-lg text-sm font-bold">Refund the customer</button>
               <button disabled={busy || note.trim().length < 3} onClick={() => void decide("cancelled")} className="bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 px-4 py-2 rounded-lg text-sm font-bold">Resolve as cancelled</button>
               <button disabled={busy || note.trim().length < 3} onClick={() => void decide("completed")} className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 px-4 py-2 rounded-lg text-sm font-bold">Resolve as completed</button>
             </div>
