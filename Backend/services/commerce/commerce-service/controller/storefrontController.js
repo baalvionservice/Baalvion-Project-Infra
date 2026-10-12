@@ -1,5 +1,6 @@
 'use strict';
 const { sendSuccess } = require('../utils/response');
+const { AppError } = require('../utils/errors');
 const storefront = require('../service/storefrontService');
 const reviewService = require('../service/reviewService');
 const presence = require('../service/presenceService');
@@ -17,8 +18,10 @@ const getProduct = async (req, res, next) => {
 
 // Public product photo. Locked down for a route that anyone can hit: no sniffing, no scripts
 // (an SVG opened directly could otherwise run), cacheable at the edge.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const serveMedia = async (req, res, next) => {
     try {
+        if (!UUID_RE.test(String(req.params.mediaId))) return next(new AppError('NOT_FOUND', 'Media not found', 404));
         const { buffer, contentType } = await mediaService.getPublicMediaForServe(req.params.storeId, req.params.mediaId);
         res.setHeader('content-type', contentType);
         res.setHeader('x-content-type-options', 'nosniff');
