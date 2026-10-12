@@ -1,7 +1,7 @@
 import { PageContent } from "@/components/cms/page-content"
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/cms"
-export const generateMetadata = (): Promise<Metadata> => pageMetadata("marketplace", { title: "Marketplace | Hell Road", description: "Browse the Hell Road marketplace." })
+export const generateMetadata = (): Promise<Metadata> => pageMetadata("marketplace", { title: "Marketplace", description: "Browse the Hell Road marketplace." })
 import { MarketplaceGate } from "@/components/access/marketplace-gate"
 
 function MarketplaceLayout({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 import { PageContent } from "@/components/cms/page-content"
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/cms"
-export const generateMetadata = (): Promise<Metadata> => pageMetadata("gift-cards", { title: "Gift cards | Hell Road", description: "Buy and send Hell Road gift cards." })
+export const generateMetadata = (): Promise<Metadata> => pageMetadata("gift-cards", { title: "Gift cards", description: "Buy and send Hell Road gift cards." })
 import { WithNavbar } from "@/components/layout/with-navbar"
 
 function InnerLayout({ children }: { children: React.ReactNode }) {

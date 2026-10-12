@@ -6,7 +6,7 @@ import { getDraws } from "@/lib/api/draws-server";
 import Link from "next/link";
 
 export const generateMetadata = (): Promise<Metadata> => pageMetadata("clubs/lottery", {
-  title: "Club Ticket Draw: India and Dubai | Baalvion",
+  title: "Club Ticket Draw: India and Dubai",
   description: "Enter the club ticket draw with your wallet points. Winners are picked by a recorded random draw and listed by member number. 18+ only.",
 });
 

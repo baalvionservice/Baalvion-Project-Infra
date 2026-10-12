@@ -1,7 +1,7 @@
 import { PageContent } from "@/components/cms/page-content"
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/cms"
-export const generateMetadata = (): Promise<Metadata> => pageMetadata("match", { title: "Match quiz | Hell Road", description: "Take the Hell Road match quiz." })
+export const generateMetadata = (): Promise<Metadata> => pageMetadata("match", { title: "Match quiz", description: "Take the Hell Road match quiz." })
 
 import { Navbar } from "@/components/layout/navbar"
 import { NeuralNetworkBg } from "@/components/match/neural-network-bg"

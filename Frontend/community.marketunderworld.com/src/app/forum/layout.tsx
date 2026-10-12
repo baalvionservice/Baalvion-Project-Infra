@@ -1,7 +1,7 @@
 import { PageContent } from "@/components/cms/page-content"
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/cms"
-export const generateMetadata = (): Promise<Metadata> => pageMetadata("forum", { title: "Forum communities | Hell Road", description: "Join the Hell Road forum communities: nightlife, trading, education and more." })
+export const generateMetadata = (): Promise<Metadata> => pageMetadata("forum", { title: "Forum communities", description: "Join the Hell Road forum communities: nightlife, trading, education and more." })
 import "./forum.css"
 import { Navbar } from "@/components/layout/navbar"
 import { BaalHeader } from "@/components/forums/baal-header"
