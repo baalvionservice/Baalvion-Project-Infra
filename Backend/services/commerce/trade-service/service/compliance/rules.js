@@ -67,6 +67,11 @@ function checkSanctionedCountries(subject, sanctionedCountries, out) {
 
 /** 2. Sanctioned parties — any party name matching a listed restricted party. */
 function checkSanctionedParties(subject, namedParties, out) {
+    // The real lists arrive as an indexed matcher (lists/partyIndex.js) that grades
+    // each hit; the small curated dataset stays a plain array.
+    if (namedParties && typeof namedParties.match === 'function') {
+        return checkIndexedParties(subject, namedParties, out);
+    }
     for (const party of subject.parties || []) {
         if (norm.isBlank(party.name)) continue;
         for (const listed of namedParties) {
@@ -82,6 +87,55 @@ function checkSanctionedParties(subject, namedParties, out) {
             break; // one violation per party is enough
         }
     }
+    return undefined;
+}
+
+// An exact or reordered match blocks. Anything weaker is a prompt for a person to
+// look, never an automatic block: blocking a real customer on a near-miss is a
+// failure too.
+const BLOCKING_QUALITY = new Set(['exact', 'reordered']);
+const QUALITY_TEXT = {
+    exact: 'matches',
+    reordered: 'matches (words in a different order)',
+    exact_other_country: 'has the same name as, but a different country from,',
+    fuzzy: 'closely resembles',
+    partial: 'contains the listed name of',
+    weak: 'matches a weak alias of',
+    short_exact: 'has the same very short name as',
+    common_name: 'has the same name, made of very common words, as',
+    legal_form_differs: 'has the same name but a different legal form from',
+};
+
+function checkIndexedParties(subject, index, out) {
+    for (const party of subject.parties || []) {
+        if (norm.isBlank(party.name)) continue;
+        const hits = index.match(party.name, { country: party.country });
+        if (!hits.length) continue;
+        const top = hits[0];
+        const listed = top.record;
+        const blocking = BLOCKING_QUALITY.has(top.quality);
+        out.push(violation({
+            check: CHECK.SANCTIONED_PARTY,
+            code: blocking ? 'SANCTIONED_PARTY_MATCH' : 'SANCTIONED_PARTY_POTENTIAL_MATCH',
+            severity: blocking ? (listed.severity || SEVERITY.CRITICAL) : SEVERITY.MEDIUM,
+            subject: party.name,
+            message: `Party "${party.name}"${party.role ? ` (${party.role})` : ''} ${QUALITY_TEXT[top.quality] || 'matches'} listed party "${listed.name}" — ${listed.program || 'restricted party'}${blocking ? '' : '. Needs review by a person'}`,
+            details: {
+                matched: listed.name,
+                matched_on: top.matched_name,
+                match_quality: top.quality,
+                match_score: Math.round(top.score * 1000) / 1000,
+                role: party.role || null,
+                party_type: listed.party_type,
+                program: listed.program,
+                list_source: listed.list_source,
+                source_id: listed.source_id || null,
+                source_list_date: listed.source_list_date || null,
+                other_matches: hits.length - 1,
+            },
+        }));
+    }
+    return undefined;
 }
 
 /** 3+4. Controlled goods — restricted / dual-use / prohibited (HS or keyword). */

@@ -33,9 +33,12 @@ const report = require('./report');
 const dataset = require('./dataset');
 const kycAml = require('./kycAml');
 const { AppError } = require('../../utils/errors');
+const { PartyIndex } = require('./lists/partyIndex');
 
 const REF_CACHE_KEY = cache.key('global', 'compliance:refdata', 'v1');
 const REF_CACHE_TTL = 300; // seconds — reference data is slow-moving
+let refMemo = null;     // { at, data }
+let refLoading = null;  // in-flight load, so concurrent screenings share one query
 const LATEST_NS = 'compliance:latest';
 const LATEST_TTL = 60;
 
@@ -69,34 +72,62 @@ function datasetReferenceData() {
  * static dataset when the tables are missing/empty so screening never runs blind.
  */
 async function loadReferenceData() {
-    const cached = await cache.get(REF_CACHE_KEY);
-    if (cached) return cached;
+    // Held in process memory, not Redis: the party index is an object with methods
+    // and ~50,000 names, which a JSON cache cannot carry. Other instances pick up a
+    // fresh import within REF_CACHE_TTL.
+    if (refMemo && Date.now() - refMemo.at < REF_CACHE_TTL * 1000) return refMemo.data;
+    if (refLoading) return refLoading;
 
-    let refData = datasetReferenceData();
-    try {
-        if (db.SanctionedParty && db.ControlledGood && db.TradeBan) {
-            const [parties, goods, bans] = await Promise.all([
-                db.SanctionedParty.findAll({ where: { active: true } }),
-                db.ControlledGood.findAll({ where: { active: true } }),
-                db.TradeBan.findAll({ where: { active: true } }),
-            ]);
-            // Only adopt the DB as the source of truth when it is actually seeded.
-            if (parties.length || goods.length || bans.length) {
-                refData = { ...shapeReferenceData(parties.map(plain), goods.map(plain), bans.map(plain)), source: 'db' };
+    refLoading = (async () => {
+        let refData = datasetReferenceData();
+        try {
+            if (db.SanctionedParty && db.ControlledGood && db.TradeBan) {
+                const [parties, goods, bans] = await Promise.all([
+                    db.SanctionedParty.findAll({ where: { active: true } }),
+                    db.ControlledGood.findAll({ where: { active: true } }),
+                    db.TradeBan.findAll({ where: { active: true } }),
+                ]);
+                // Each component falls back to the built-in dataset on its own. Importing the
+                // sanctions lists fills only the parties table; adopting the DB wholesale
+                // would otherwise switch off the goods and trade-ban checks on a database
+                // where those tables were never seeded.
+                const fromDb = {
+                    parties: parties.length > 0,
+                    goods: goods.length > 0,
+                    bans: bans.length > 0,
+                };
+                if (fromDb.parties || fromDb.goods || fromDb.bans) {
+                    const plainParties = parties.map(plain);
+                    const dbCountries = plainParties.filter((p) => p.party_type === 'country');
+                    const dbNamed = plainParties.filter((p) => p.party_type !== 'country');
+                    const fallback = shapeReferenceData(dataset.sanctionedParties(), dataset.controlledGoods(), dataset.tradeBans());
+                    refData = {
+                        sanctionedCountries: dbCountries.length ? dbCountries : fallback.sanctionedCountries,
+                        namedParties: dbNamed.length ? new PartyIndex(dbNamed) : fallback.namedParties,
+                        controlledGoods: fromDb.goods ? goods.map(plain) : fallback.controlledGoods,
+                        tradeBans: fromDb.bans ? bans.map(plain) : fallback.tradeBans,
+                        source: fromDb.parties && fromDb.goods && fromDb.bans ? 'db' : 'db+dataset',
+                    };
+                }
             }
+        } catch {
+            // table missing / not migrated — keep the dataset fallback
+            refData = datasetReferenceData();
         }
-    } catch {
-        // table missing / not migrated — keep the dataset fallback
-        refData = datasetReferenceData();
+        refMemo = { at: Date.now(), data: refData };
+        return refData;
+    })();
+    try {
+        return await refLoading;
+    } finally {
+        refLoading = null;
     }
-
-    await cache.set(REF_CACHE_KEY, refData, REF_CACHE_TTL);
-    return refData;
 }
 
 /** Bust the reference-data cache (call after seeding / editing the lists). */
 async function invalidateReferenceData() {
-    await cache.del(REF_CACHE_KEY);
+    refMemo = null;
+    await cache.del(REF_CACHE_KEY); // legacy key from before the in-process cache
 }
 
 // ── Tenant blacklist / whitelist ─────────────────────────────────────────────
