@@ -9,7 +9,8 @@ const { slugify } = require('../utils/slug');
 const norm = (s) => String(s).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
 const CITY_ALIAS = { Gurugram: 'Gurgaon' };
 const STATE_OF = { Gurugram: 'Delhi NCR', Noida: 'Delhi NCR' };
-const rows = require('../seed/osm-clubs.json');
+// Pass another seed file to import it (e.g. seed/osm-clubs-uae.json for the Emirates).
+const rows = require(process.argv[2] ? require('path').resolve(process.argv[2]) : '../seed/osm-clubs.json');
 
 async function uniqueSlug(base) {
     let slug = base;
