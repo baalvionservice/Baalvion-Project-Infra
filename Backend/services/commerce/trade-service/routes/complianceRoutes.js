@@ -4,7 +4,10 @@ const { authMiddleware, requireOrgType } = require('../middleware/authMiddleware
 const {
     listCases, getCase, createCase, updateCase, clearCase, escalateCase,
 } = require('../controller/complianceController');
+const { listsStatus } = require('../controller/sanctionsListsController');
 
+// Static path first, so 'lists' is never read as a case :id.
+router.get('/lists/status',     authMiddleware, listsStatus);
 router.get('/',                 authMiddleware, listCases);
 router.get('/:id',              authMiddleware, getCase);
 router.post('/',                authMiddleware, createCase);

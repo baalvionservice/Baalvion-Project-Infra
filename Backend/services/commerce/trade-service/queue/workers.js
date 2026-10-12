@@ -104,12 +104,24 @@ const PROCESSORS = {
     // any list failed or was refused (truncated download, implausible shrink), so
     // the job fails visibly, retries, and dead-letters instead of leaving the list
     // quietly stale.
-    sanctions_list_refresh: async () => {
+    sanctions_list_refresh: async (job) => {
         const { refreshLists, isFailure } = require('../service/compliance/lists/refresh');
+        const alerts = require('../service/compliance/lists/alerts');
         const results = await refreshLists();
         const bad = results.filter(isFailure);
-        if (bad.length) throw new Error(`sanctions list refresh: ${bad.map((r) => `${r.source} ${r.status}: ${r.error}`).join(' | ')}`);
+        if (bad.length) {
+            // Page someone only when the job is out of retries: a retry that succeeds is not an incident.
+            const attempts = (job && job.opts && job.opts.attempts) || 1;
+            if (!job || (job.attemptsMade || 0) + 1 >= attempts) await alerts.alertRefreshFailure(results);
+            throw new Error(`sanctions list refresh: ${bad.map((r) => `${r.source} ${r.status}: ${r.error}`).join(' | ')}`);
+        }
         return results;
+    },
+
+    // Watchdog for the refresh above: catches the failure it cannot — the job not running at all.
+    sanctions_list_freshness: async () => {
+        const db = require('../models');
+        return require('../service/compliance/lists/alerts').checkFreshness(db.sequelize);
     },
 
     // Logistics Core Foundation (Phase 2) — async/bulk tracking-event ingestion.
@@ -238,6 +250,10 @@ function startWorkers() {
     // is recognised by its hash and costs one download, not an import.
     enqueue('sanctions_list_refresh', 'cycle', {}, { repeat: { every: 6 * 60 * 60 * 1000 }, jobId: 'sanctions-list-refresh-cycle' })
         .catch((err) => console.error('[queue] failed to register sanctions_list_refresh repeatable job:', err.message));
+    // Hourly: a refresh that never runs raises no failure of its own, so the age of each
+    // list is checked against the clock instead.
+    enqueue('sanctions_list_freshness', 'check', {}, { repeat: { every: 60 * 60 * 1000 }, jobId: 'sanctions-list-freshness-check' })
+        .catch((err) => console.error('[queue] failed to register sanctions_list_freshness repeatable job:', err.message));
     enqueue('insurance_expiry', 'boot', {}, { jobId: `insurance-expiry-boot-${Date.now()}` })
         .catch((err) => console.error('[queue] failed to enqueue insurance_expiry boot sweep:', err.message));
 

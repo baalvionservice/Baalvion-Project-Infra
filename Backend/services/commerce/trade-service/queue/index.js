@@ -23,6 +23,7 @@ const QUEUE_NAMES = [
     'notification_dispatch', // Shipment Tracking Platform — async retry of a failed alert-channel notification
     'insurance_expiry', // Insurance — daily cover-expiry sweep + lapse warnings (migration 066)
     'sanctions_list_refresh', // Compliance — re-import the official OFAC / UN / EU sanctions lists
+    'sanctions_list_freshness', // Compliance — hourly watchdog: alert if a list has not refreshed recently
 ];
 const DLQ = 'dead-letter';
 
