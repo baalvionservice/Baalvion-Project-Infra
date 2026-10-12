@@ -21,6 +21,7 @@ import { useUIStore } from '@/lib/store/uiStore';
 import { staffApi } from '@/lib/api/staff';
 import { formatRelative, formatDate } from '@/lib/utils/format';
 import InviteToWebsitesButton from '@/components/cms/InviteToWebsitesButton';
+import CreateDialog from '@/components/common/CreateDialog';
 import type { Employee, Department, Team, StaffInvitation, OnboardingChecklist } from '@/lib/types/staff.types';
 import { cn } from '@/lib/utils/cn';
 
@@ -370,9 +371,17 @@ export default function StaffPage() {
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Building2 className="h-4 w-4" /> Departments
                   </CardTitle>
-                  <Button size="sm" variant="outline" className="text-xs gap-1">
-                    <Layers className="h-3.5 w-3.5" /> Add
-                  </Button>
+                  <CreateDialog
+                    trigger={<><Layers className="h-3.5 w-3.5" /> Add</>}
+                    triggerProps={{ size: 'sm', variant: 'outline', className: 'text-xs gap-1' }}
+                    title="New department"
+                    successMessage="Department created"
+                    fields={[{ name: 'name', label: 'Department name', required: true, placeholder: 'Operations', maxLength: 120 }]}
+                    onSubmit={async (v) => {
+                      await staffApi.createDepartment({ name: v.name });
+                      await qc.invalidateQueries({ queryKey: ['departments'] });
+                    }}
+                  />
                 </div>
               </CardHeader>
               <CardContent>

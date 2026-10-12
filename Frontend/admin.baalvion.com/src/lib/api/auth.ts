@@ -171,6 +171,13 @@ export const authApi = {
 
   mfaEnable: () => authClient.post<ApiResponse<{ qrCode: string; secret: string }>>('/mfa/enable'),
 
+  /** Start authenticator-app setup. Nothing is enabled until `mfaConfirm` succeeds with a real code. */
+  mfaSetupStart: () =>
+    authClient.post<ApiResponse<{ qrCodeUrl: string; secret: string; recoveryCodes: string[] }>>('/mfa/enable'),
+
+  /** Finish setup by proving the authenticator works. Only then is two-step sign-in switched on. */
+  mfaConfirm: (code: string) => authClient.post<ApiResponse<{ message: string }>>('/mfa/verify', { code }),
+
   mfaDisable: (code: string) =>
     authClient.delete<ApiResponse<void>>('/mfa/disable', { data: { code } }),
 

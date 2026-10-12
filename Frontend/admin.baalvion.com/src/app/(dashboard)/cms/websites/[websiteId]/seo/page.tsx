@@ -256,8 +256,11 @@ export default function WebsiteSeoPage({
                   </div>
                 ))
               )}
+              <p className="rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                Redirect rules are not connected to the live website yet, so nothing entered here is saved or applied. This tab is a preview of the editor.
+              </p>
               {redirects.length > 0 && (
-                <Button size="sm" className="mt-2">
+                <Button size="sm" className="mt-2" disabled title="Not connected yet">
                   Save Redirects
                 </Button>
               )}

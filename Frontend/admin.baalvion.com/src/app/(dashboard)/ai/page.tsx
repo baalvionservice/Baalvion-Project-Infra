@@ -280,7 +280,7 @@ export default function AiPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium flex items-center gap-2"><Code2 className="h-4 w-4" /> Prompt Registry</CardTitle>
-                <Button size="sm" variant="outline" className="text-xs gap-1.5">New Prompt</Button>
+                <Button size="sm" variant="outline" className="text-xs gap-1.5" disabled title="Not connected yet">New Prompt</Button>
               </div>
             </CardHeader>
             <CardContent>

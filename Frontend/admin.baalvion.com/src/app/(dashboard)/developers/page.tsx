@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUIStore } from '@/lib/store/uiStore';
 import { developersApi } from '@/lib/api/developers';
+import CreateDialog from '@/components/common/CreateDialog';
 import { formatRelative, formatDateTime, formatNumber } from '@/lib/utils/format';
 import type {
   WebhookEndpoint, WebhookDelivery, ChangelogEntry,
@@ -326,9 +327,22 @@ export default function DevelopersPage() {
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <Webhook className="h-4 w-4" /> Endpoints
                     </CardTitle>
-                    <Button size="sm" variant="outline" className="text-xs gap-1">
-                      <Plus className="h-3.5 w-3.5" /> Add
-                    </Button>
+                    <CreateDialog
+                      trigger={<><Plus className="h-3.5 w-3.5" /> Add</>}
+                      triggerProps={{ size: 'sm', variant: 'outline', className: 'text-xs gap-1' }}
+                      title="New webhook endpoint"
+                      description="We send signed POST requests to this address when the events you list occur. A signing secret is generated for you."
+                      successMessage="Webhook endpoint created"
+                      fields={[
+                        { name: 'url', label: 'Endpoint URL', type: 'url', required: true, placeholder: 'https://example.com/webhooks/baalvion', validate: (v) => (/^https:\/\/[^\s]+$/i.test(v) ? null : 'Must be a secure https:// address') },
+                        { name: 'events', label: 'Events', required: true, placeholder: 'order.created, payment.recorded', help: 'Comma-separated event names.' },
+                        { name: 'description', label: 'Description', placeholder: 'Orders to our ERP', maxLength: 200 },
+                      ]}
+                      onSubmit={async (v) => {
+                        await developersApi.createWebhook({ url: v.url, description: v.description, events: v.events.split(',').map((e) => e.trim()).filter(Boolean) });
+                        await qc.invalidateQueries({ queryKey: ['webhooks'] });
+                      }}
+                    />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -394,7 +408,7 @@ export default function DevelopersPage() {
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <BookOpen className="h-4 w-4" /> API Changelog
                 </CardTitle>
-                <Button size="sm" variant="outline" className="text-xs gap-1">
+                <Button size="sm" variant="outline" className="text-xs gap-1" disabled title="Not connected yet">
                   <Plus className="h-3.5 w-3.5" /> New Entry
                 </Button>
               </div>
@@ -444,7 +458,7 @@ export default function DevelopersPage() {
                   </CardTitle>
                   <CardDescription>Isolated test environments with seeded data</CardDescription>
                 </div>
-                <Button size="sm" variant="outline" className="text-xs gap-1">
+                <Button size="sm" variant="outline" className="text-xs gap-1" disabled title="Not connected yet">
                   <Plus className="h-3.5 w-3.5" /> Create
                 </Button>
               </div>

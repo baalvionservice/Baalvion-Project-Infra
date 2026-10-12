@@ -71,7 +71,7 @@ export default function MediaPage() {
         description={`${data?.pagination.total ?? 0} files`}
         actions={
           <>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled title="Not connected yet">
               <FolderPlus className="mr-2 h-4 w-4" />
               New Folder
             </Button>

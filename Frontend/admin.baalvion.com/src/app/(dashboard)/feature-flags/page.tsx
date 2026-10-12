@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFeatureFlags, useToggleFlag } from '@/lib/queries/feature-flags.queries';
+import { useFeatureFlags, useToggleFlag, useCreateFlag } from '@/lib/queries/feature-flags.queries';
+import CreateDialog from '@/components/common/CreateDialog';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatDate } from '@/lib/utils/format';
 import type { FeatureFlag } from '@/lib/api/feature-flags';
@@ -58,6 +59,7 @@ function FlagCard({ flag }: { flag: FeatureFlag }) {
 export default function FeatureFlagsPage() {
   const { setBreadcrumbs } = useUIStore();
   const { data: flags, isLoading } = useFeatureFlags();
+  const createFlag = useCreateFlag();
 
   useEffect(() => {
     setBreadcrumbs([{ label: 'Feature Flags' }]);
@@ -69,10 +71,19 @@ export default function FeatureFlagsPage() {
         title="Feature Flags"
         description="Control feature rollouts and experiments"
         actions={
-          <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            New Flag
-          </Button>
+          <CreateDialog
+            trigger={<><Plus className="mr-2 h-4 w-4" />New Flag</>}
+            triggerProps={{ size: 'sm' }}
+            title="New feature flag"
+            description="Starts switched off. Turn it on from the list when you are ready to roll out."
+            successMessage="Feature flag created"
+            fields={[
+              { name: 'key', label: 'Key', required: true, placeholder: 'checkout.new_payment_flow', help: 'Lowercase letters, numbers, dots, dashes and underscores. Code refers to this key, so it cannot change later.', maxLength: 80, validate: (v) => (/^[a-z0-9][a-z0-9._-]*$/.test(v) ? null : 'Use lowercase letters, numbers, . - _ only') },
+              { name: 'name', label: 'Name', required: true, placeholder: 'New payment flow', maxLength: 120 },
+              { name: 'description', label: 'What it controls', type: 'textarea', maxLength: 500 },
+            ]}
+            onSubmit={(v) => createFlag.mutateAsync({ key: v.key, name: v.name, description: v.description || undefined, enabled: false, rolloutPercent: 0 })}
+          />
         }
       />
 

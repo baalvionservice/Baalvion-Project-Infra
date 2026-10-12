@@ -212,3 +212,13 @@ export const notificationsApi = {
   //   inapp?: { title?: string; body?: string; data?: Record<string, unknown>; type?: string };
   // }) => notifications.post<ApiResponse<void>>('/notifications/dispatch', payload),
 };
+
+// ── Per-user channel preferences (real: notification-service GET/PUT /v1/notifications/preferences,
+// stored in Redis). Body is { channel: boolean }; every channel is on until switched off.
+export type NotificationChannel = 'email' | 'sms' | 'push' | 'inapp' | 'webhook';
+export const notificationPrefsApi = {
+  get: () =>
+    notifications.get<ApiResponse<Record<NotificationChannel, boolean>>>('/notifications/preferences').then((r) => r.data.data),
+  set: (updates: Partial<Record<NotificationChannel, boolean>>) =>
+    notifications.put<ApiResponse<Record<NotificationChannel, boolean>>>('/notifications/preferences', updates).then((r) => r.data.data),
+};
