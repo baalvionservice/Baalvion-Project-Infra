@@ -27,6 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         notes: { type: DataTypes.TEXT },
         metadata: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         active: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        // Provenance for rows imported from the official lists (migration 088).
+        source_id: { type: DataTypes.TEXT },
+        source_list_date: { type: DataTypes.DATEONLY },
+        last_seen_at: { type: DataTypes.DATE },
+        delisted_at: { type: DataTypes.DATE },
     }, {
         schema: 'tradeops',
         tableName: 'compliance_sanctioned_parties',

@@ -22,6 +22,7 @@ const QUEUE_NAMES = [
     'delay_sweep',     // Shipment Tracking Platform — periodic delay-cause detection sweep
     'notification_dispatch', // Shipment Tracking Platform — async retry of a failed alert-channel notification
     'insurance_expiry', // Insurance — daily cover-expiry sweep + lapse warnings (migration 066)
+    'sanctions_list_refresh', // Compliance — re-import the official OFAC / UN / EU sanctions lists
 ];
 const DLQ = 'dead-letter';
 

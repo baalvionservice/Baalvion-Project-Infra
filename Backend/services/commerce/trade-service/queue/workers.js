@@ -100,6 +100,18 @@ const PROCESSORS = {
     // POST /v1/monitoring/run for the same underlying cycle.
     verification_monitor: async () => require('../service/verification/monitor').runCycle(),
 
+    // Compliance — re-import the official OFAC / UN / EU sanctions lists. Throws if
+    // any list failed or was refused (truncated download, implausible shrink), so
+    // the job fails visibly, retries, and dead-letters instead of leaving the list
+    // quietly stale.
+    sanctions_list_refresh: async () => {
+        const { refreshLists, isFailure } = require('../service/compliance/lists/refresh');
+        const results = await refreshLists();
+        const bad = results.filter(isFailure);
+        if (bad.length) throw new Error(`sanctions list refresh: ${bad.map((r) => `${r.source} ${r.status}: ${r.error}`).join(' | ')}`);
+        return results;
+    },
+
     // Logistics Core Foundation (Phase 2) — async/bulk tracking-event ingestion.
     // Same recordTrackingEvent() logic the synchronous POST /tracking_events uses
     // (service/tracking/trackingEngine.js); a thrown error here retries via BullMQ
@@ -221,6 +233,11 @@ function startWorkers() {
     // date would otherwise leave it reading 'active' until the next window.
     enqueue('insurance_expiry', 'sweep', {}, { repeat: { every: 24 * 60 * 60 * 1000 }, jobId: 'insurance-expiry-cycle' })
         .catch((err) => console.error('[queue] failed to register insurance_expiry repeatable job:', err.message));
+    // Sanctions lists: OFAC and the EU publish several times a week, the UN as
+    // designations change. Every six hours keeps the delay small; an unchanged file
+    // is recognised by its hash and costs one download, not an import.
+    enqueue('sanctions_list_refresh', 'cycle', {}, { repeat: { every: 6 * 60 * 60 * 1000 }, jobId: 'sanctions-list-refresh-cycle' })
+        .catch((err) => console.error('[queue] failed to register sanctions_list_refresh repeatable job:', err.message));
     enqueue('insurance_expiry', 'boot', {}, { jobId: `insurance-expiry-boot-${Date.now()}` })
         .catch((err) => console.error('[queue] failed to enqueue insurance_expiry boot sweep:', err.message));
 
