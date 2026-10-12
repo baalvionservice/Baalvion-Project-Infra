@@ -27,6 +27,7 @@ import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatMoney } from '@/lib/utils/format';
 import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
+import { placeholderReasons, splitList } from '@/lib/commerce/placeholders';
 
 // The storefront reads the price from customFields.basePrice, falling back to the default variant.
 // Amounts are whole currency units (USD), never cents.
@@ -87,7 +88,7 @@ export default function ProductEditorPage() {
 
   const [form, setForm] = useState({
     name: '', shortDescription: '', description: '', sku: '', basePrice: '', compareAtPrice: '',
-    categoryId: presetCategory, stockQuantity: '1', tags: '',
+    categoryId: presetCategory, stockQuantity: '1', tags: '', colors: '',
   });
   const [priceVisible, setPriceVisible] = useState(true);
   const [extras, setExtras] = useState({ collectorValue: '', marketRange: '', investmentInsight: '', scarcityTag: '' });
@@ -108,6 +109,7 @@ export default function ProductEditorPage() {
       categoryId: product.categoryId ?? '',
       stockQuantity: String((product as { stockQuantity?: number }).stockQuantity ?? 0),
       tags: (product.tags ?? []).join(', '),
+      colors: Array.isArray(product.customFields?.colors) ? (product.customFields!.colors as string[]).join(', ') : '',
     });
     const cf = product.customFields ?? {};
     const s = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -124,12 +126,16 @@ export default function ProductEditorPage() {
   }, [setBreadcrumbs, isNew, product?.name]);
 
   const priceNum = form.basePrice.trim() === '' ? null : Number(form.basePrice);
+  const placeholders = placeholderReasons({ description: form.description, colors: splitList(form.colors), listingStatus: product?.customFields?.listingStatus });
+  // The setup marker clears itself on save, so only real placeholder content blocks publishing.
+  const blockingPlaceholders = placeholders.filter((r) => !r.includes('Pending Real Details'));
   const photoCount = isNew ? pending.length : (media?.length ?? 0);
   const checklist = [
     { label: 'A name', ok: form.name.trim().length > 0 },
     { label: 'A category (where it appears in the shop)', ok: !!form.categoryId },
     { label: 'A price', ok: priceNum != null && priceNum > 0 },
     { label: 'At least one photo', ok: photoCount > 0 },
+    { label: 'No placeholder text left', ok: blockingPlaceholders.length === 0 },
   ];
   const ready = checklist.every((c) => c.ok);
   const status = product?.status ?? 'draft';
@@ -146,6 +152,9 @@ export default function ProductEditorPage() {
     investmentInsight: extras.investmentInsight.trim() || undefined,
     scarcityTag: extras.scarcityTag.trim() || undefined,
     priceVisible,
+    colors: splitList(form.colors),
+    // Once nothing placeholder-like is left, drop the setup marker so the product reads as finished.
+    ...(blockingPlaceholders.length === 0 ? { listingStatus: 'Ready' } : {}),
   });
 
   const validate = (): string | null => {
@@ -232,6 +241,16 @@ export default function ProductEditorPage() {
           </Button>
         }
       />
+
+      {placeholders.length > 0 && (
+        <Card className={live ? 'border-destructive/60 bg-destructive/5' : 'border-amber-400/60 bg-amber-50 dark:bg-amber-500/10'}>
+          <CardContent className="space-y-1.5 py-4 text-sm">
+            <p className="font-semibold">{live ? 'This product is LIVE on the website but still has setup placeholder text.' : 'This product still has setup placeholder text.'}</p>
+            <ul className="list-disc space-y-0.5 pl-5 text-muted-foreground">{placeholders.map((r) => <li key={r}>{r}</li>)}</ul>
+            {live && <p className="text-xs">Fix it below, or click <strong>Take off the website</strong> until the real details are ready.</p>}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* ── Steps ── */}
@@ -335,6 +354,11 @@ export default function ProductEditorPage() {
               <Label htmlFor="desc">Full description</Label>
               <textarea id="desc" rows={5} className={textareaClass} value={form.description} placeholder="Condition, materials, size, what is included…" onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               <p className="text-xs text-muted-foreground">Only write what is true. Customers read this before buying.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="colors">Colour</Label>
+              <Input id="colors" value={form.colors} placeholder="e.g. Gold, Etoupe" onChange={(e) => setForm((f) => ({ ...f, colors: e.target.value }))} />
+              <p className="text-xs text-muted-foreground">Shown on the product page. Separate several with commas. Leave empty if unsure. Never leave “TBD”.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="stock">How many do you have?</Label>

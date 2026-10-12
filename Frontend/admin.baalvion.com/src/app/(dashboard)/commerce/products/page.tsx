@@ -31,6 +31,7 @@ import { useCommerceCategories } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatMoney, formatDate } from '@/lib/utils/format';
+import { placeholderReasons } from '@/lib/commerce/placeholders';
 import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 import type { Product } from '@/lib/types/commerce.types';
 
@@ -233,6 +234,9 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={product.status} />
+                      {placeholderReasons({ description: product.description, colors: Array.isArray(product.customFields?.colors) ? (product.customFields!.colors as string[]) : [], listingStatus: product.customFields?.listingStatus }).length > 0 && (
+                        <Badge variant="destructive" className="ml-2 text-[10px]">Needs real details</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs capitalize">
