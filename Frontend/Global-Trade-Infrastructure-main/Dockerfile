@@ -45,6 +45,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.10.4 run build --filter=baalvion-eternal-absolute-singularity
 
 # 4) Minimal runner (Next standalone server). Prisma query engine (linux-musl) matches the
