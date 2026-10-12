@@ -23,24 +23,36 @@ def tidy(a):
     return a.strip() or None
 src=sys.argv[1] if len(sys.argv)>1 else '.'
 rows={}
+RAD={'Dubai':32,'Abu Dhabi':32,'Al Ain':14,'Sharjah':14,'Ajman':7,'Ras Al Khaimah':18}
+places=[]
+elements={}
 for f,city,emirate,clat,clon,rad in EMIRATES:
-    pv=os.path.join(src,f'v-{f}.json'); pp=os.path.join(src,f'p-{f}.json')
-    if not os.path.exists(pv): continue
-    places=[(en(e['tags']),e['lat'],e['lon']) for e in (json.load(open(pp))['elements'] if os.path.exists(pp) else []) if 'lat' in e and en(e['tags'])]
-    for e in json.load(open(pv))['elements']:
-        t=e.get('tags',{}); name=en(t)
-        if not name or t.get('amenity') not in ('nightclub','bar','pub'): continue
-        lat=e.get('lat') or (e.get('center') or {}).get('lat'); lon=e.get('lon') or (e.get('center') or {}).get('lon')
-        if lat is None or hav(lat,lon,clat,clon)>rad: continue
-        area=en({'name':t.get('addr:suburb') or t.get('addr:neighbourhood') or ''})
-        if not area and places:
-            best=min(((hav(lat,lon,la,lo),n) for n,la,lo in places),default=None)
-            if best and best[0]<=2.5: area=best[1]
-        addr=', '.join(x for x in [t.get('addr:housenumber'),t.get('addr:street'),area,t.get('addr:city')] if x) or None
-        key=(re.sub(r'[^a-z0-9]','',name.lower()),city,round(lat,3),round(lon,3))
-        rows[key]={'osm':f"{e['type'][0]}{e['id']}",'name':name,'type':t['amenity'],'city':city,'state':emirate,'area':tidy(area),'address':addr,
-          'lat':round(lat,6),'lon':round(lon,6),'website':t.get('website') or t.get('contact:website'),'phone':t.get('phone') or t.get('contact:phone'),'hours':t.get('opening_hours')}
-out=list(rows.values())
+    pp=os.path.join(src,f'p-{f}.json')
+    if os.path.exists(pp):
+        places+=[(en(e['tags']),e['lat'],e['lon']) for e in json.load(open(pp))['elements'] if 'lat' in e and en(e['tags'])]
+    pv=os.path.join(src,f'v-{f}.json')
+    if os.path.exists(pv):
+        for e in json.load(open(pv))['elements']: elements[(e['type'],e['id'])]=e
+for e in elements.values():
+    t=e.get('tags',{}); name=en(t)
+    if not name or t.get('amenity') not in ('nightclub','bar','pub'): continue
+    lat=e.get('lat') or (e.get('center') or {}).get('lat'); lon=e.get('lon') or (e.get('center') or {}).get('lon')
+    if lat is None: continue
+    near=min(((hav(lat,lon,clat,clon),city,emirate) for f,city,emirate,clat,clon,rad in EMIRATES),key=lambda x:x[0])
+    if near[0]>RAD[near[1]]: continue
+    _,city,emirate=near
+    area=en({'name':t.get('addr:suburb') or t.get('addr:neighbourhood') or ''})
+    if not area:
+        best=min(((hav(lat,lon,la,lo),n) for n,la,lo in places),default=None)
+        if best and best[0]<=2.5: area=best[1]
+    addr=', '.join(x for x in [t.get('addr:housenumber'),t.get('addr:street'),area,t.get('addr:city')] if x) or None
+    key=(re.sub(r'[^a-z0-9]','',name.lower()),city,round(lat,3),round(lon,3))
+    rows[key]={'osm':f"{e['type'][0]}{e['id']}",'name':name,'type':t['amenity'],'city':city,'state':emirate,'area':tidy(area),'address':addr,
+      'lat':round(lat,6),'lon':round(lon,6),'website':t.get('website') or t.get('contact:website'),'phone':t.get('phone') or t.get('contact:phone'),'hours':t.get('opening_hours')}
+seen=set(); out=[]
+for r in rows.values():
+    if r['osm'] in seen: continue  # bounding boxes overlap, so one venue can appear in two files
+    seen.add(r['osm']); out.append(r)
 json.dump(out,open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','seed','osm-clubs-uae.json'),'w'),ensure_ascii=False,indent=0)
 print(len(out), collections.Counter((r['state'],r['city']) for r in out))
 print('with area',sum(1 for r in out if r['area']),'website',sum(1 for r in out if r['website']),'hours',sum(1 for r in out if r['hours']))
