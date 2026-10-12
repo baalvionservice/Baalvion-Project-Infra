@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function CookieBanner() {
   const [show, setShow] = useState(false);
+  const path = usePathname();
 
   useEffect(() => {
     const consent = localStorage.getItem("mu_cookie_consent");
@@ -25,6 +27,9 @@ export function CookieBanner() {
     posthog.opt_out_capturing();
     setShow(false);
   };
+
+  // The admin console is not tracked, so it never asks.
+  if (path?.startsWith("/admin")) return null;
 
   return (
     <AnimatePresence>
