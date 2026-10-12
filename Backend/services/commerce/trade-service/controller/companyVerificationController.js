@@ -9,6 +9,45 @@ const { AppError } = require('../utils/errors');
 const { recordAudit } = require('../utils/audit');
 const { isAdmin, fetchOrgOwned, actorOf } = require('../service/verification/access');
 const companySvc = require('../service/verification/company');
+const gleif = require('../service/verification/registries/gleif');
+
+// Look-ups are answered from a short in-process cache: the same company is typed by
+// many people, and the public register is not ours to hammer.
+const LOOKUP_TTL_MS = 10 * 60 * 1000;
+const LOOKUP_MAX = 500;
+const lookupCache = new Map();
+async function cached(key, load) {
+    const hit = lookupCache.get(key);
+    if (hit && Date.now() - hit.at < LOOKUP_TTL_MS) return hit.value;
+    const value = await load();
+    if (value && value.ok) {
+        if (lookupCache.size >= LOOKUP_MAX) lookupCache.delete(lookupCache.keys().next().value);
+        lookupCache.set(key, { at: Date.now(), value });
+    }
+    return value;
+}
+
+// GET /v1/company_verifications/lookup/suggest?q=  — type-ahead so nobody types a full legal name.
+const suggestCompanies = async (req, res, next) => {
+    try {
+        const q = String(req.query.q || '').trim();
+        if (q.length < 3) return sendSuccess(req, res, { suggestions: [] });
+        const r = await cached(`s:${q.toLowerCase()}`, () => gleif.suggest(q));
+        // A register outage degrades to "no suggestions"; the customer just types it.
+        return sendSuccess(req, res, { suggestions: r.ok ? r.suggestions : [], available: r.ok });
+    } catch (err) { return next(err); }
+};
+
+// GET /v1/company_verifications/lookup/entity?lei=  — the details to pre-fill the form.
+const lookupCompany = async (req, res, next) => {
+    try {
+        const lei = String(req.query.lei || '').trim().toUpperCase();
+        if (!/^[A-Z0-9]{20}$/.test(lei)) throw new AppError('VALIDATION_ERROR', 'lei must be a 20-character LEI', 400);
+        const r = await cached(`e:${lei}`, () => gleif.byLei(lei));
+        if (!r.ok) return sendSuccess(req, res, { available: false, entity: null });
+        return sendSuccess(req, res, { available: true, entity: r.found ? r.entity : null });
+    } catch (err) { return next(err); }
+};
 
 const submitCompanyVerification = async (req, res, next) => {
     try {
@@ -90,6 +129,8 @@ const approveCompanyVerification = (req, res, next) => reviewDecision(req, res, 
 const rejectCompanyVerification = (req, res, next) => reviewDecision(req, res, next, 'rejected').catch(next);
 
 module.exports = {
+    suggestCompanies,
+    lookupCompany,
     submitCompanyVerification, getCompanyVerification, listCompanyVerifications,
     approveCompanyVerification, rejectCompanyVerification,
 };

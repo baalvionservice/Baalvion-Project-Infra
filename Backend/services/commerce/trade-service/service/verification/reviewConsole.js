@@ -116,8 +116,15 @@ async function getQueue({ orgId = null } = {}) {
         db.ProductCertificate.findAll({ where: scopedWhere() }),
     ]);
 
+    // A company case carries the outcome of its automatic registry / sanctions checks, so
+    // the queue can show reviewers which cases need real attention.
+    const autoCheck = (r) => {
+        const ev = r.metadata && r.metadata.auto_checks;
+        return ev && ev.summary ? ev.summary.outcome : null;
+    };
     const normalize = (type, rows) => rows.map((r) => ({
         reviewable_type: type, reviewable_id: r.id, org_id: r.org_id, status: r.status, submitted_at: r.createdAt,
+        ...(type === 'company' ? { auto_check: autoCheck(r) } : {}),
     }));
 
     return [

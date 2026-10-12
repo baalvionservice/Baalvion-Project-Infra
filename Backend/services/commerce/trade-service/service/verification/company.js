@@ -53,6 +53,18 @@ async function submitCompanyVerification({ orgId, tenantId, actor, ...fields }) 
     });
 
     await recomputeCompany(orgId, tenantId);
+
+    // Evidence from the public registers and the sanctions lists, attached to the record
+    // so the reviewer (and the customer's own screen) sees it with no one typing anything.
+    // Fire-and-forget: a slow register must never hold up a submission, and the checks
+    // never change the record's status.
+    const meta = record.metadata || {};
+    require('./companyChecks').runAndStore(record, {
+        legalName: record.legal_company_name,
+        registrationNumber: record.registration_number,
+        country: meta.country || meta.incorporation_country || null,
+        vatNumber: meta.vat_number || null,
+    });
     return record;
 }
 

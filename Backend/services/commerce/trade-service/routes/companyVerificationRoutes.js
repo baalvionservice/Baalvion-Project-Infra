@@ -5,6 +5,9 @@ const { authMiddleware, requireOrgType } = require('../middleware/authMiddleware
 const ctrl = require('../controller/companyVerificationController');
 
 router.get('/', authMiddleware, ctrl.listCompanyVerifications);
+// Look-ups first, so '/lookup/...' is never read as an :orgId.
+router.get('/lookup/suggest', authMiddleware, ctrl.suggestCompanies);
+router.get('/lookup/entity', authMiddleware, ctrl.lookupCompany);
 router.post('/:orgId', authMiddleware, ctrl.submitCompanyVerification);
 router.get('/:orgId', authMiddleware, ctrl.getCompanyVerification);
 // KYB decision — the compliance agency's review, never the applicant company approving itself.
