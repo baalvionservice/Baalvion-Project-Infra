@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/auth-context'
 import { listMyOrders, type Order } from '@/lib/api/orders'
 import { MARKET_UNDERWORLD_STORE_ID } from '@/lib/api/commerce'
+import { AccountSummary } from '@/components/dashboard/account-summary'
 
 const STATUS_VARIANT: Record<Order['paymentStatus'], 'success' | 'warning' | 'default'> = {
   paid: 'success',
@@ -78,33 +79,17 @@ export default function OrdersListPage() {
       <div className="max-w-7xl mx-auto px-6 space-y-12">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">My Orders</h1>
-            <p className="text-gray-500 font-medium text-lg">Your real order and payment history on Market Underworld.</p>
+            <h1 className="text-4xl font-bold tracking-tight mb-2">My money and orders</h1>
+            <p className="text-gray-500 font-medium text-lg">What you have spent and deposited, what is waiting, and every order.</p>
           </div>
           <Link href="/returns">
             <NexusButton variant="outline" className="border-white/10">Returns</NexusButton>
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { label: 'Total Spent', val: stats.totalSpent, icon: CreditCard, color: 'text-blue-400' },
-            { label: 'Orders', val: String(stats.count), icon: FileText, color: 'text-purple-400' },
-            { label: 'Avg Order', val: stats.avg, icon: TrendingUp, color: 'text-emerald-400' },
-            { label: 'Pending', val: String(stats.pending), icon: Clock, color: 'text-gray-500' },
-          ].map((stat, i) => (
-            <NexusCard key={i} className="p-6 bg-white/[0.02] border-white/5 space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                <div className="text-2xl font-bold">{stat.val}</div>
-              </div>
-            </NexusCard>
-          ))}
-        </div>
+        <AccountSummary orders={orders} />
 
+        <h2 className="text-xl font-bold -mb-6">Your orders</h2>
         <NexusCard className="p-6 bg-white/[0.02] border-white/5 flex items-center gap-4">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />

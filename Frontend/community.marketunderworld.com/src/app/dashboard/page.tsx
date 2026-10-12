@@ -30,6 +30,7 @@ import { getBuyerAccess, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
 import { ProfilePanel } from "@/components/dashboard/profile-panel"
+import { NextSteps } from "@/components/dashboard/next-steps"
 import { AccessRequestsPanel } from "@/components/dashboard/access-requests-panel"
 import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
@@ -147,6 +148,7 @@ export default function DashboardPage() {
           <p className="text-gray-500 font-medium text-lg">{member?.seller ? "Your store, your orders and your purchases in one place." : "Your orders, wishlist, and gift cards in one place."}</p>
         </header>
 
+        <NextSteps />
         {member && <MemberIdCard member={member} onChange={setMember} />}
         {member && <div id="profile" className="scroll-mt-32"><ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} /></div>}
 

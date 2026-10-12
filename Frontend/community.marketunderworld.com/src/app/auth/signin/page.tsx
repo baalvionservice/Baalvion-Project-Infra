@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/context/auth-context'
 import { isAdminIdentity } from '@/lib/auth/gateway-session'
 import { ApiError } from '@baalvion/auth-sdk'
+import { pathAfterLogin } from '@/lib/setup'
 
 // Allowlist for the post-login OAuth bounce-back. Two legitimate shapes reach here:
 //  1. oauth-service's own /oauth/authorize (cross-origin, absolute) — its interactive-login
@@ -76,7 +77,7 @@ export default function SignIn() {
         return
       }
 
-      router.push(isAdminIdentity(identity) ? '/admin' : '/dashboard')
+      router.push(await pathAfterLogin(redirect, isAdminIdentity(identity)))
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Invalid credentials. Try again.";
       toast({ variant: 'destructive', title: "Authentication Failed", description: message })

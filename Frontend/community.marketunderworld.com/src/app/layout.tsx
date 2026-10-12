@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { CartProvider } from "@/context/cart-context";
 import { NotificationProvider } from "@/context/notification-context";
 import { LanguageProvider } from "@/context/language-context";
+import { AuthFetchGuard } from "@/components/auth/auth-fetch-guard";
 import { ToastContainer } from "@/components/notifications/toast-container";
 import { Toaster } from "@/components/ui/toaster";
 import { GlobalSearch } from "@/components/layout/global-search";
@@ -85,6 +86,7 @@ export default function RootLayout({
         <LanguageProvider>
           <CSPostHogProvider>
             <AuthProvider>
+              <AuthFetchGuard />
               <CartProvider>
                 <NotificationProvider>
                   <IdentityProvider>

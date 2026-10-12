@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ChevronDown, Handshake, LayoutDashboard, LogOut, Settings, ShieldCheck, ShoppingBag, UserRound, Wallet } from "lucide-react"
+import { ChevronDown, Handshake, LifeBuoy, LayoutDashboard, LogOut, Settings, ShieldCheck, ShoppingBag, UserRound, Wallet } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { getMyProfile, photoUrl, type MyProfile } from "@/lib/api/profile"
+import { useSetup } from "@/lib/setup"
 
 // One profile fetch per page load, shared by every menu instance.
 let profileOnce: Promise<MyProfile | null> | null = null
@@ -17,6 +18,7 @@ const ITEMS = [
   { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/invoices", label: "My orders", icon: ShoppingBag },
   { href: "/escrow/my-trades", label: "My trades", icon: Handshake },
+  { href: "/support", label: "Talk to the team / report a problem", icon: LifeBuoy },
   { href: "/settings/notifications", label: "Settings", icon: Settings },
 ]
 
@@ -26,6 +28,7 @@ export function UserMenu() {
   const [open, setOpen] = useState(false)
   const [profile, setProfile] = useState<MyProfile | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const { setup } = useSetup()
 
   useEffect(() => { loadProfile().then(setProfile) }, [])
   useEffect(() => {
@@ -41,14 +44,16 @@ export function UserMenu() {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open} aria-label="Your account"
-        className="flex items-center gap-2 pl-1 pr-2 min-h-[40px] rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+        className="relative flex items-center gap-2 pl-1 pr-2 min-h-[40px] rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
         <span className="w-8 h-8 rounded-lg overflow-hidden bg-red-950 border border-red-800/60 flex items-center justify-center text-sm font-bold text-red-300">
           {photo
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={photo} alt="" className="w-full h-full object-cover" />
             : initial}
         </span>
+        {setup && !setup.complete && <span className="hidden sm:inline text-xs font-semibold text-amber-300 pr-1">Finish setup {setup.done}/{setup.total}</span>}
         <ChevronDown className="w-3.5 h-3.5 text-gray-400 hidden sm:block" />
+        {setup && !setup.complete && <span aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-[#0B0C0F]" />}
       </button>
       {open && (
         <div role="menu" className="absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-[#0B0C0F] shadow-2xl z-[1200] overflow-hidden">
@@ -56,6 +61,12 @@ export function UserMenu() {
             <p className="text-xs text-gray-500">Signed in as</p>
             <p className="text-sm text-white truncate">{user?.email}</p>
           </div>
+          {setup && !setup.complete && setup.next && (
+            <Link href={setup.next.href} onClick={() => setOpen(false)} className="block px-4 py-3 bg-amber-500/10 border-b border-amber-500/20 hover:bg-amber-500/15">
+              <span className="block text-sm font-semibold text-amber-200">Finish setting up: {setup.done} of {setup.total} done</span>
+              <span className="block text-xs text-amber-200/80 mt-0.5">Next: {setup.next.label}</span>
+            </Link>
+          )}
           <nav className="py-1">
             {ITEMS.map((i) => (
               <Link key={i.label} href={i.href} role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white">

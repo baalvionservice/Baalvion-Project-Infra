@@ -9,6 +9,7 @@ import { useAuth } from "@/context/auth-context"
 import { INTERESTS } from "@/lib/interests"
 import { getMyProfile, saveMyProfile, uploadProfilePhoto, photoUrl, type MyProfile } from "@/lib/api/profile"
 import { kyc, type KycCase } from "@/lib/api/kyc"
+import { resetSetup } from "@/lib/setup"
 
 const KYC_TEXT: Record<string, { label: string; tone: string }> = {
   approved: { label: "Verified", tone: "text-emerald-400" },
@@ -45,12 +46,12 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
 
   const save = async () => {
     setBusy(true)
-    try { setProfile(await saveMyProfile({ bio, city, interests, learnGoal: learn })); toast({ title: "Profile saved" }) } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
+    try { setProfile(await saveMyProfile({ bio, city, interests, learnGoal: learn })); resetSetup(); toast({ title: "Profile saved" }) } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
   }
   const pickPhoto = async (f: File | undefined) => {
     if (!f) return
     setPhotoBusy(true)
-    try { const id = await uploadProfilePhoto(f); setProfile(await saveMyProfile({ photoAssetId: id })); toast({ title: "Photo updated" }) } catch (e) { fail("Couldn't upload the photo", e) } finally { setPhotoBusy(false); if (fileRef.current) fileRef.current.value = "" }
+    try { const id = await uploadProfilePhoto(f); setProfile(await saveMyProfile({ photoAssetId: id })); resetSetup(); toast({ title: "Photo updated" }) } catch (e) { fail("Couldn't upload the photo", e) } finally { setPhotoBusy(false); if (fileRef.current) fileRef.current.value = "" }
   }
   const toggle = (id: string) => setInterests((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
 
