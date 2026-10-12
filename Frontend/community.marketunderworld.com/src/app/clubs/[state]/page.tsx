@@ -16,7 +16,8 @@ export default async function StateClubsPage({ params }: { params: Promise<{ sta
   const clubs = (await getClubs()).map((c) => ({
     id: c.id, name: c.name, state: c.state, city: c.city, suburb: c.suburb, address: c.address, image: c.image,
     musicType: c.musicType, daysOpen: c.daysOpen, description: (c.description || "").slice(0, 180), coverCharge: c.coverCharge,
-    rating: c.rating, venueType: c.venueType, openingHours: c.openingHours,
+    rating: c.rating, venueType: c.venueType, openingHours: c.openingHours, latitude: c.latitude, longitude: c.longitude,
+    website: c.website, phone: c.phone,
   }));
   const known = INDIAN_NIGHTLIFE_STATES.some((s) => toSlug(s) === state)
     || clubs.some((c) => toSlug(c.state) === state || toSlug(c.city ?? "") === state);
