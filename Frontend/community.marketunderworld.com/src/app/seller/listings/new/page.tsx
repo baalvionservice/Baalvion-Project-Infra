@@ -225,7 +225,7 @@ export default function NewListingPage() {
         {blocker && <p className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">{blocker}</p>}
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#050508]/95 backdrop-blur px-4 py-3">
+      <div className="fixed bottom-0 inset-x-0 z-[10001] border-t border-white/10 bg-[#050508]/95 backdrop-blur px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <p className="hidden sm:block flex-1 text-xs text-gray-500 min-w-0 truncate">{busy ? step : ready.ready ? "Ready to publish." : `Still needed: ${ready.missing.join(", ")}`}</p>
           <button onClick={() => save(false)} disabled={!!busy || !name.trim() || !categoryId} className="h-12 px-5 rounded-xl border border-white/15 font-semibold flex items-center gap-2 disabled:opacity-40"><Save className="w-4 h-4" /> <span className="hidden sm:inline">Save draft</span><span className="sm:hidden">Draft</span></button>

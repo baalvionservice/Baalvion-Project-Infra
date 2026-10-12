@@ -98,10 +98,10 @@ export default function SellerCategoriesPage() {
   };
 
   return (
-    <div className="p-10 space-y-8 max-w-[1000px] mx-auto">
+    <div className="p-4 sm:p-10 space-y-8 max-w-[1000px] mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Your Categories</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Your Categories</h1>
           <p className="text-gray-500 font-medium text-lg">Organize your store&apos;s catalog into categories and subcategories.</p>
         </div>
         <NexusButton onClick={startCreate} disabled={!storeId} className="gap-2">

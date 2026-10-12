@@ -103,11 +103,11 @@ export default function SellerListingsPage() {
   const shopName = member?.seller?.application.storeName ?? member?.displayName;
 
   return (
-    <div className="p-10 space-y-8 max-w-[1000px] mx-auto">
+    <div className="p-4 sm:p-10 space-y-8 max-w-[1000px] mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <p className="text-[11px] text-cyan-400 font-bold uppercase tracking-[0.2em] mb-2">My store</p>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">{shopName ?? "Your listings"}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">{shopName ?? "Your listings"}</h1>
           <p className="text-gray-500 font-medium">
             {member ? <><span className="font-mono text-gray-400">{member.memberNumber}</span> · <Link href={member.profilePath} className="text-cyan-400 hover:text-cyan-300">View your public shop</Link></> : "Everything you sell, in one place."}
           </p>

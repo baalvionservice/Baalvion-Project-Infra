@@ -17,9 +17,10 @@ const NAV = [
 // Full seller top-nav: back link + all seller sections
 export function SellerNav() {
   const pathname = usePathname();
+  // The site has a fixed 32px ticker at the very top, so this menu starts under it and sticks just below it.
   return (
-    <div className="border-b border-white/5 bg-[#050508]/90 backdrop-blur-md sticky top-0 z-40">
-      <div className="max-w-[1200px] mx-auto px-6 flex items-center gap-1 py-2">
+    <div className="mt-8 border-b border-white/5 bg-[#050508]/95 backdrop-blur-md sticky top-8 z-40">
+      <div className="max-w-[1200px] mx-auto px-3 sm:px-6 flex flex-nowrap items-center gap-1 py-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Back to dashboard */}
         <Link
           href="/dashboard"
@@ -37,7 +38,7 @@ export function SellerNav() {
               key={item.path}
               href={item.path}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap",
+                "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0",
                 active ? "bg-cyan-500/10 text-cyan-400" : "text-gray-500 hover:text-white hover:bg-white/5"
               )}
             >

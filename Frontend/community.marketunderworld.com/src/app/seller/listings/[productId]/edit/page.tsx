@@ -185,11 +185,11 @@ export default function EditListingPage() {
   };
 
   if (loading && !product) {
-    return <div className="p-10 text-gray-500 font-medium">Loading…</div>;
+    return <div className="p-4 sm:p-10 text-gray-500 font-medium">Loading…</div>;
   }
   if (!product) {
     return (
-      <div className="p-10 max-w-[900px] mx-auto space-y-3">
+      <div className="p-4 sm:p-10 max-w-[900px] mx-auto space-y-3">
         <p className="text-white font-bold text-lg">This listing isn&apos;t available</p>
         <p className="text-gray-500">It may not exist, or it belongs to another seller.</p>
         <Link href="/seller/listings" className="text-cyan-400 text-sm">← Back to my listings</Link>
@@ -204,19 +204,19 @@ export default function EditListingPage() {
   const shopName = member?.seller?.application.storeName ?? member?.displayName;
 
   return (
-    <div className="p-10 space-y-8 max-w-[900px] mx-auto">
+    <div className="p-4 sm:p-10 space-y-8 max-w-[900px] mx-auto">
       <header className="space-y-5">
         <Link href="/seller/listings" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-white"><ArrowLeft className="w-3.5 h-3.5" /> My listings{shopName ? ` · ${shopName}` : ""}</Link>
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="min-w-0">
-            <h1 className="text-4xl font-bold tracking-tight mb-2 break-words">{form.name || "Untitled listing"}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2 break-words">{form.name || "Untitled listing"}</h1>
             <p className="text-gray-500 font-medium">{copy.next}</p>
             {member && <p className="text-[11px] text-gray-600 mt-1">Your listing · <span className="font-mono">{member.memberNumber}</span></p>}
             {product.status === "rejected" && typeof product.customFields?.moderationRejectionReason === "string" && (
               <p className="text-sm text-red-400 mt-2 max-w-xl">Reason: {product.customFields.moderationRejectionReason}</p>
             )}
           </div>
-          <div className="flex gap-3 shrink-0">
+          <div className="flex flex-wrap gap-3 sm:shrink-0">
             {product.status === "published" && categorySlug && (
               <Link href={`/shop/${categorySlug}/${product.slug}`} target="_blank"><NexusButton variant="ghost" className="gap-2"><ExternalLink className="w-4 h-4" /> View live</NexusButton></Link>
             )}
