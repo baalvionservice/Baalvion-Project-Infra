@@ -141,6 +141,7 @@ export const NAVIGATION: NavGroup[] = [
         children: [
           { title: 'Overview',    href: '/cms',            iconName: 'LayoutDashboard' },
           { title: 'Websites',    href: '/cms/websites',   iconName: 'Globe'           },
+          { title: 'Access requests', href: '/cms/access-requests', iconName: 'KeyRound'   },
           { title: 'Workflows',   href: '/cms/workflows',  iconName: 'GitBranch'       },
           { title: 'Pages',       href: '/cms/pages',      iconName: 'File'            },
           { title: 'Posts',       href: '/cms/posts',      iconName: 'BookOpen'        },
