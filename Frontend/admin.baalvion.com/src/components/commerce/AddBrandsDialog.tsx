@@ -16,14 +16,14 @@ import { commerceStoresApi } from '@/lib/api/commerce-stores';
 import { useCommerceCategories, useCommerceStores } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { applyPlan } from '@/lib/commerce/applyPlan';
-import { buildBrandPlan, parseSections, type BrandInput } from '@/lib/commerce/newBrands';
+import { buildBrandPlan, parseSections, norm, SUGGESTED_BAG_BRANDS, SUGGESTED_JEWELRY_BRANDS, type BrandInput } from '@/lib/commerce/newBrands';
 import { cn } from '@/lib/utils/cn';
 
 const messageOf = (e: unknown) =>
   (e as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message
   ?? (e as { message?: string })?.message ?? 'Something went wrong';
 
-type Mode = 'under-other' | 'own';
+type Mode = 'under-other' | 'under-jewelry' | 'own';
 
 export default function AddBrandsDialog() {
   const qc = useQueryClient();
@@ -42,10 +42,17 @@ export default function AddBrandsDialog() {
   const [results, setResults] = useState<{ id: string; ok: boolean; message: string }[] | null>(null);
 
   const parsed = useMemo(() => parseSections(sectionsText), [sectionsText]);
+  const existingNames = useMemo(() => new Set(tree.flatMap((b) => [b, ...(b.children ?? [])]).map((c) => norm(c.name))), [tree]);
+  const typed = useMemo(() => new Set(names.split('\n').map((n) => norm(n)).filter(Boolean)), [names]);
+  const toggleName = (n: string) => setNames((cur) => {
+    const lines = cur.split('\n').filter((l) => l.trim());
+    return lines.some((l) => norm(l) === norm(n)) ? lines.filter((l) => norm(l) !== norm(n)).join('\n') : [...lines, n].join('\n');
+  });
+  const suggestions = mode === 'under-jewelry' ? SUGGESTED_JEWELRY_BRANDS : SUGGESTED_BAG_BRANDS;
   const input: BrandInput = useMemo(
-    () => (mode === 'under-other'
-      ? { mode, names: names.split('\n') }
-      : { mode, brand, sections: parsed.sections }),
+    () => (mode === 'own'
+      ? { mode, brand, sections: parsed.sections }
+      : { mode, names: names.split('\n') }),
     [mode, names, brand, parsed.sections],
   );
   const preview = useMemo(() => buildBrandPlan(tree, input), [tree, input]);
@@ -88,9 +95,10 @@ export default function AddBrandsDialog() {
           <DialogDescription>Nothing existing is changed or deleted. You see exactly what will be added before you confirm.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Where should the brand appear?">
+        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Where should the brand appear?">
           {([
-            { v: 'under-other', icon: ListPlus, title: 'Under “Other Brands”', text: 'For smaller brands, like Fendi or The Row. Add many at once.' },
+            { v: 'under-other', icon: ListPlus, title: 'Under “Other Brands”', text: 'Bag and fashion brands, like Fendi or The Row. Add many at once.' },
+            { v: 'under-jewelry', icon: ListPlus, title: 'Under “Jewelry”', text: 'Jewelry and watch brands, like Cartier. Add many at once.' },
             { v: 'own', icon: Layers, title: 'Its own menu', text: 'For a main brand with sections, like Hermès (Handbags, Accessories…).' },
           ] as const).map((o) => (
             <button key={o.v} type="button" role="radio" aria-checked={mode === o.v} onClick={() => setMode(o.v)}
@@ -101,11 +109,28 @@ export default function AddBrandsDialog() {
           ))}
         </div>
 
-        {mode === 'under-other' ? (
-          <div className="space-y-1.5">
-            <Label htmlFor="brand-names">Brand names, one per line</Label>
-            <Textarea id="brand-names" rows={6} value={names} onChange={(e) => setNames(e.target.value)} placeholder={'Prada\nBottega Veneta\nCéline'} />
-            <p className="text-xs text-muted-foreground">Paste as many as you like. Brands that already exist are skipped.</p>
+        {mode !== 'own' ? (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Quick pick <span className="font-normal text-muted-foreground">(suggestions only. Tick the ones you actually sell)</span></Label>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((n) => {
+                  const have = existingNames.has(norm(n));
+                  const on = typed.has(norm(n));
+                  return (
+                    <button key={n} type="button" disabled={have} onClick={() => toggleName(n)} aria-pressed={on}
+                      className={cn('rounded-full border px-3 py-1 text-xs transition-colors', have ? 'cursor-not-allowed opacity-40' : 'hover:bg-muted', on && 'border-primary bg-primary/10 font-medium')}>
+                      {on && <Check className="mr-1 inline h-3 w-3" />}{n}{have && ' · already added'}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="brand-names">Brand names, one per line</Label>
+              <Textarea id="brand-names" rows={5} value={names} onChange={(e) => setNames(e.target.value)} placeholder={'Type or paste your own brands here'} />
+              <p className="text-xs text-muted-foreground">Paste as many as you like. Brands that already exist are skipped.</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">

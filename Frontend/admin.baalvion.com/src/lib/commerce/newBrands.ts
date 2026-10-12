@@ -27,6 +27,7 @@ export function parseSections(text: string): { sections: SectionInput[]; errors:
 
 export type BrandInput =
   | { mode: 'under-other'; names: string[] }
+  | { mode: 'under-jewelry'; names: string[] }
   | { mode: 'own'; brand: string; sections: SectionInput[] };
 
 export interface BrandPlan {
@@ -49,11 +50,16 @@ export function buildBrandPlan(tree: CommerceCategory[], input: BrandInput): Bra
   const errors: string[] = [];
   let brands = 0, items = 0;
 
-  if (input.mode === 'under-other') {
-    const other = roots.find((r) => norm(r.name) === 'other brands');
-    if (!other) { errors.push('This store has no "Other Brands" group yet. Run "Set up standard structure" first.'); return { steps, summary: { brands, items }, warnings, errors }; }
-    const kids = other.children ?? [];
-    const allItem = kids.find((k) => k.slug === 'other-bags-1' || norm(k.name).startsWith('all '));
+  if (input.mode === 'under-other' || input.mode === 'under-jewelry') {
+    const jewelry = input.mode === 'under-jewelry';
+    const group = jewelry ? 'jewelry' : 'other brands';
+    const groupLabel = jewelry ? 'Jewelry' : 'Other Brands';
+    const section = jewelry ? 'By brand' : 'Brands';
+    const suffix = jewelry ? 'jewelry' : 'bags';
+    const rootCat = roots.find((r) => norm(r.name) === group);
+    if (!rootCat) { errors.push(`This store has no "${groupLabel}" group yet. Run "Set up standard structure" first.`); return { steps, summary: { brands, items }, warnings, errors }; }
+    const kids = rootCat.children ?? [];
+    const allItem = jewelry ? undefined : kids.find((k) => k.slug === 'other-bags-1' || norm(k.name).startsWith('all '));
     const others = kids.filter((k) => k !== allItem);
     let order = Math.max(-1, ...others.map((k) => k.sortOrder)) + 1;
     const seen = new Set(kids.map((k) => norm(k.name)));
@@ -61,7 +67,7 @@ export function buildBrandPlan(tree: CommerceCategory[], input: BrandInput): Bra
       if (raw.length > 200) { errors.push(`"${raw.slice(0, 30)}…" is too long for a brand name.`); continue; }
       if (seen.has(norm(raw))) { warnings.push(`${raw} is already listed, so it was skipped.`); continue; }
       seen.add(norm(raw));
-      steps.push({ kind: 'create', brandKey: other.slug, brandId: other.id, name: raw, slug: uniq(`${slugify(raw)}-bags`), section: 'Brands', sortOrder: order++ });
+      steps.push({ kind: 'create', brandKey: rootCat.slug, brandId: rootCat.id, name: raw, slug: uniq(`${slugify(raw)}-${suffix}`), section, sortOrder: order++ });
       brands++; items++;
     }
     if (steps.length && allItem) {
@@ -95,3 +101,13 @@ export function buildBrandPlan(tree: CommerceCategory[], input: BrandInput): Bra
   }
   return { steps, summary: { brands, items }, warnings, errors };
 }
+
+// Well-known luxury names offered as one-click suggestions in the Add brands tool. They are
+// suggestions to choose from, not a statement about what any store stocks.
+export const SUGGESTED_BAG_BRANDS = [
+  'Prada', 'Gucci', 'Bottega Veneta', 'Céline', 'Saint Laurent', 'Balenciaga', 'Valentino', 'Loewe',
+  'Givenchy', 'Burberry', 'Miu Miu', 'Bulgari', 'Berluti', 'Delvaux', 'Dolce & Gabbana', 'Alexander McQueen',
+];
+export const SUGGESTED_JEWELRY_BRANDS = [
+  'Cartier', 'Van Cleef & Arpels', 'Tiffany & Co.', 'Bulgari', 'Harry Winston', 'Graff', 'Chopard', 'David Yurman',
+];

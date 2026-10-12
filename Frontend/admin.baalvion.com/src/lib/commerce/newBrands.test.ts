@@ -47,6 +47,25 @@ describe('buildBrandPlan — under Other Brands', () => {
   });
 });
 
+describe('buildBrandPlan — under Jewelry', () => {
+  const withJewelry = () => {
+    const t = tree();
+    const j = cat('Jewelry', 'dept-jewelry', null, 5);
+    j.children = [cat('Hermès', 'hermes', j.id, 0), cat('Chanel Jewelry', 'chanel', j.id, 1)];
+    return [...t, j];
+  };
+  it('adds jewelry brands under Jewelry as "By brand" with jewelry slugs', () => {
+    const plan = buildBrandPlan(withJewelry(), { mode: 'under-jewelry', names: ['Cartier', 'Van Cleef & Arpels', 'hermès'] });
+    const creates = plan.steps.filter((s) => s.kind === 'create');
+    expect(creates.map((s) => s.kind === 'create' && s.slug)).toEqual(['cartier-jewelry', 'van-cleef-and-arpels-jewelry']);
+    expect(creates.every((s) => s.kind === 'create' && s.section === 'By brand')).toBe(true);
+    expect(plan.warnings.join(' ')).toMatch(/already listed/);
+  });
+  it('asks for the standard structure first when Jewelry is missing', () => {
+    expect(buildBrandPlan(tree(), { mode: 'under-jewelry', names: ['Cartier'] }).errors[0]).toMatch(/standard structure/);
+  });
+});
+
 describe('buildBrandPlan — a brand with its own menu', () => {
   it('creates the brand, its sections and items with unique slugs, in order', () => {
     const plan = buildBrandPlan(tree(), { mode: 'own', brand: 'Cartier', sections: [{ title: 'Jewelry', items: ['Love Bracelets', 'Rings'] }, { title: 'Watches', items: ['Tank'] }] });
