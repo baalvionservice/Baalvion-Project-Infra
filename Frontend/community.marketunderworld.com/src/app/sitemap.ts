@@ -101,7 +101,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const nightlifeRoutes: MetadataRoute.Sitemap = [
-    ...['clubs/lottery', 'clubs/events', 'clubs/events/submit', 'clubs/dj-demand', 'clubs/elite-host', 'dating', 'forum/join', 'locals', 'nightlife/employer'].map((slug) => ({
+    ...['services', 'clubs/lottery', 'clubs/events', 'clubs/events/submit', 'clubs/dj-demand', 'clubs/elite-host', 'dating', 'forum/join', 'locals', 'nightlife/employer'].map((slug) => ({
       url: `${SITE_URL}/${slug}`, priority: slug === 'clubs/lottery' || slug === 'clubs/events' ? 0.8 : 0.6, changeFrequency: 'weekly' as const,
     })),
     ...draws.filter((d) => d.status !== 'draft').map((d) => ({ url: `${SITE_URL}/clubs/lottery/${d.id}`, priority: 0.7, changeFrequency: 'daily' as const })),

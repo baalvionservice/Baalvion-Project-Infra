@@ -3,6 +3,7 @@
 export interface CmsPage { slug: string; label: string; hint: string }
 
 export const CMS_PAGES: CmsPage[] = [
+  { slug: "services", label: "Services (everything we offer)", hint: "A short intro for the services page: who Hell Road is for and what a member gets. The five chapters of services are built in." },
   { slug: "clubs", label: "Clubs directory", hint: "Say which cities you cover (India and Dubai), how guest lists and VIP tables work here, and why members should use the directory." },
   { slug: "clubs/events", label: "Events and DJ nights", hint: "Explain who lists events, how a member posts one, and how tickets work (organiser's own link)." },
   { slug: "clubs/events/submit", label: "Post your event", hint: "What organisers need to prepare (poster, date, ticket link) and how long review takes." },
