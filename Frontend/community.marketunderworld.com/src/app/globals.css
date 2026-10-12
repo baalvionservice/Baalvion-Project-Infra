@@ -101,3 +101,17 @@ h1, h2, h3, h4, .font-display { font-style: normal; letter-spacing: -0.01em; }
 [class*="text-[8px]"], [class*="text-[9px]"], [class*="text-[10px]"] { font-size: 0.75rem; line-height: 1.4; }
 [class*="text-[11px]"] { font-size: 0.8125rem; line-height: 1.45; }
 [class*="tracking-[0.3em]"], [class*="tracking-[0.25em]"], [class*="tracking-[0.2em]"], [class*="tracking-[0.15em]"], .tracking-widest, .tracking-wider { letter-spacing: 0.04em; }
+
+/* Admin console: several pages were built as white cards. Keep their text dark so it reads on the dark shell, and use one accent colour. */
+.admin-main .bg-white,
+.admin-main .bg-gray-50,
+.admin-main .bg-gray-100 { color: #111827; }
+.admin-main .bg-white input,
+.admin-main .bg-white select,
+.admin-main .bg-white textarea { color: #111827; }
+.admin-main .bg-fuchsia-600 { background-color: #dc2626; }
+.admin-main .hover\:bg-fuchsia-700:hover { background-color: #b91c1c; }
+.admin-main .bg-fuchsia-50 { background-color: #fef2f2; }
+.admin-main .text-fuchsia-800, .admin-main .text-fuchsia-600, .admin-main .text-fuchsia-700 { color: #b91c1c; }
+.admin-main .focus\:border-fuchsia-500:focus, .admin-main .focus\:border-fuchsia-500\/50:focus { border-color: #ef4444; }
+.admin-main .border-fuchsia-500 { border-color: #ef4444; }

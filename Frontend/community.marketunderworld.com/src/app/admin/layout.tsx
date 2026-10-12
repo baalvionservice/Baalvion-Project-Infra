@@ -55,7 +55,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           <AdminTopBar onOpenMenu={() => setIsSidebarOpen(true)} />
         </header>
         
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+        <main className="admin-main flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
           {children}
         </main>
       </div>
