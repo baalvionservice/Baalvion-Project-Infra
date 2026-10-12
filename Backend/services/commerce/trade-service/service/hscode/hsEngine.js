@@ -225,7 +225,13 @@ function lookup({ hsCode, country = null, customsValue = null, currency = null, 
         unit: entry.unit,
         country: iso,
         national_code: line ? line.national : null,
-        tariff: line ? { duty_rate: line.duty, vat_rate: line.vat, national_code: line.national } : null,
+        // Rates are withheld in production until a verified tariff source is loaded
+        // (hsDatabase.ratesAreVerified). The national code and restrictions remain.
+        tariff: line
+            ? (hsDatabase.ratesAreVerified()
+                ? { duty_rate: line.duty, vat_rate: line.vat, national_code: line.national, rates_verified: true }
+                : { duty_rate: null, vat_rate: null, national_code: line.national, rates_verified: false })
+            : null,
         available_countries: Object.keys(entry.tariffs),
         compliance_flags: complianceFlags,
         blocking: compliance.isBlocking(complianceFlags),

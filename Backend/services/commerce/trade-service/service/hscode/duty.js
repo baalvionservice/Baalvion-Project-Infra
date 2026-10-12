@@ -28,6 +28,8 @@ const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 const databaseRateProvider = Object.freeze({
     name: 'database',
     rateFor({ hsCode, country }) {
+        // Unverified sample rates are never turned into a landed-cost figure in production.
+        if (!db.ratesAreVerified()) return null;
         const entry = db.findByCode(hsCode);
         const iso = norm.normalizeCountry(country);
         if (!entry || !iso) return null;
@@ -95,7 +97,14 @@ function estimateDuty({ hsCode, country, originCountry = null, customsValue = nu
         return { ...base, available: false, reason: `rate provider failed: ${err.message}` };
     }
     if (!rate) {
-        return { ...base, available: false, reason: iso ? `no tariff rate on record for ${iso}` : 'destination country not specified' };
+        const unverified = !db.ratesAreVerified();
+        return {
+            ...base,
+            available: false,
+            reason: !iso
+                ? 'destination country not specified'
+                : (unverified ? 'verified tariff rates are not loaded yet, so no duty estimate is given' : `no tariff rate on record for ${iso}`),
+        };
     }
 
     const dutyRate = Number(rate.duty_rate) || 0;
