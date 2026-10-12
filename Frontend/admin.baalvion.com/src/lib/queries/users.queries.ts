@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usersApi } from '@/lib/api/users';
+import { websitesApi } from '@/lib/api/cms-websites';
 import type { PaginationParams } from '@/lib/types/common.types';
 import type { UpdateUserPayload } from '@/lib/types/user.types';
 
@@ -93,3 +94,49 @@ export const useChangeUserRole = () => {
   });
 };
 
+
+export const useRemovedUsers = (params?: { page?: number; limit?: number; search?: string }) =>
+  useQuery({
+    queryKey: [...userKeys.all, 'removed', params] as const,
+    queryFn: () => usersApi.listRemoved(params),
+    placeholderData: keepPreviousData,
+  });
+
+/**
+ * Remove someone from the panel. Order matters: the account is removed FIRST (that alone blocks
+ * sign-in and revokes sessions), then website access is stripped. If the second step fails the
+ * person is still locked out, and we say so rather than pretending the job is half-done.
+ */
+export const useRemoveUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: number; reason?: string }) => {
+      await usersApi.remove(id, reason);
+      try {
+        const r = await websitesApi.revokeAllAccess(id);
+        return { accessRevoked: true, result: r };
+      } catch {
+        return { accessRevoked: false, result: null };
+      }
+    },
+    onSuccess: ({ accessRevoked }, { id }) => {
+      qc.invalidateQueries({ queryKey: userKeys.all });
+      qc.invalidateQueries({ queryKey: userKeys.detail(id) });
+      if (accessRevoked) toast.success('User removed. They are signed out and have no website access.');
+      else toast.warning('User removed and signed out, but website access could not be cleared. Check Websites > People.');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useRestoreUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => usersApi.restore(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: userKeys.all });
+      toast.success('User restored. They have no website access yet — invite them to a site to give them some.');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};

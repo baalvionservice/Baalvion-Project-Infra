@@ -10,8 +10,9 @@ import { useWebsites } from '@/lib/queries/cms-websites.queries';
 // those sites after signing in; everything else stays hidden from them.
 export default function InviteToWebsitesButton({
   label = 'Invite',
+  defaultEmail,
   ...buttonProps
-}: { label?: string } & Omit<ComponentProps<typeof Button>, 'onClick' | 'children'>) {
+}: { label?: string; defaultEmail?: string } & Omit<ComponentProps<typeof Button>, 'onClick' | 'children'>) {
   const [open, setOpen] = useState(false);
   const { data } = useWebsites({ limit: 100 });
 
@@ -20,7 +21,7 @@ export default function InviteToWebsitesButton({
       <Button {...buttonProps} onClick={() => setOpen(true)}>
         <UserPlus className="mr-1.5 h-3.5 w-3.5" /> {label}
       </Button>
-      <GrantSiteAccessDialog open={open} onOpenChange={setOpen} websites={data?.data ?? []} />
+      <GrantSiteAccessDialog open={open} onOpenChange={setOpen} websites={data?.data ?? []} defaultEmail={defaultEmail} />
     </>
   );
 }

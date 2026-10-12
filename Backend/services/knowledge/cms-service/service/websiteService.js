@@ -390,6 +390,13 @@ async function addMember(websiteId, scope, body, inviterId = null, { notify = tr
     }
     if (userId == null) throw new AppError('VALIDATION', 'A userId or email is required', 422);
 
+    // A removed account cannot sign in, so granting it a seat would silently do nothing and
+    // send a misleading email. Make the admin restore the person first, on purpose.
+    const target = (await identityService.mapByIds([userId])).get(String(userId));
+    if (target && target.status === 'deleted') {
+        throw new AppError('CONFLICT', 'This person was removed from the platform. Restore them under Users > Removed users, then invite them again.', 409);
+    }
+
     const existing = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
     if (existing) throw new AppError('CONFLICT', 'This user is already a member of this website', 409);
 

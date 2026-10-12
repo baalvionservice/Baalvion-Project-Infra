@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, UserX, UserCheck, Mail } from 'lucide-react';
+import Link from 'next/link';
+import { MoreHorizontal, UserX, UserCheck, UserMinus, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import InviteToWebsitesButton from '@/components/cms/InviteToWebsitesButton';
 import PageHeader from '@/components/common/PageHeader';
@@ -24,6 +25,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUsers, useSuspendUser, useUnsuspendUser } from '@/lib/queries/users.queries';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useAuthStore } from '@/lib/store/authStore';
+import RemoveUserDialog from '@/components/users/RemoveUserDialog';
 import { ROLES } from '@/lib/constants/roles';
 import { initials } from '@/lib/utils/format';
 import type { AdminUser } from '@/lib/types/user.types';
@@ -36,6 +39,10 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [suspendTarget, setSuspendTarget] = useState<AdminUser | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<AdminUser | null>(null);
+  const me = useAuthStore((s) => s.user);
+  // Backend only lets a super admin remove people; hide the action from everyone else.
+  const canRemove = !!me?.roles?.includes('super_admin');
 
   const { data, isLoading } = useUsers({
     page,
@@ -143,6 +150,12 @@ export default function UsersPage() {
                   Unsuspend
                 </DropdownMenuItem>
               )}
+              {canRemove && Number(me?.id) !== user.id && (
+                <DropdownMenuItem className="text-destructive" onClick={() => setRemoveTarget(user)}>
+                  <UserMinus className="mr-2 h-4 w-4" />
+                  Remove user
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -156,7 +169,12 @@ export default function UsersPage() {
         title="Users"
         description={`${data?.pagination.total ?? 0} total users`}
         actions={
-          <InviteToWebsitesButton size="sm" label="Invite User" />
+          <>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/users/removed"><Archive className="mr-2 h-4 w-4" />Removed users</Link>
+            </Button>
+            <InviteToWebsitesButton size="sm" label="Invite User" />
+          </>
         }
       />
 
@@ -211,6 +229,8 @@ export default function UsersPage() {
           }
         }}
       />
+
+      <RemoveUserDialog user={removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)} />
     </div>
   );
 }
