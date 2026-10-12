@@ -13,6 +13,7 @@ import { DESTINATIONS, resetSetup } from "@/lib/setup"
 import { getMyMember, setMyDisplayName, type MyMember } from "@/lib/api/members"
 import { getMyProfile, saveMyProfile, uploadProfilePhoto, photoUrl, type MyProfile } from "@/lib/api/profile"
 import { kyc, type KycCase } from "@/lib/api/kyc"
+import { COUNTRIES, PLACES, OTHER_CITY, formatPlace, parsePlace, type Place } from "@/lib/locations"
 
 // What each choice means for a new member: what it gives you and what it takes.
 const NEEDS: Record<string, { what: string; needed: string; cta: string; href: string }> = {
@@ -39,7 +40,8 @@ function Wizard() {
   const [profile, setProfile] = useState<MyProfile | null>(null)
   const [kycCase, setKycCase] = useState<KycCase | null | undefined>(undefined)
   const [name, setName] = useState("")
-  const [city, setCity] = useState("")
+  const [place, setPlace] = useState<Place>({ country: "", state: "", city: "" })
+  const [otherCity, setOtherCity] = useState("")
   const [bio, setBio] = useState("")
   const [picked, setPicked] = useState<string[]>([])
   const [learn, setLearn] = useState("")
@@ -51,18 +53,19 @@ function Wizard() {
     Promise.all([getMyMember().catch(() => null), getMyProfile().catch(() => null), kyc.mine().catch(() => null)]).then(([m, p, k]) => {
       setMember(m); setProfile(p); setKycCase(k)
       if (m?.customName) setName(m.displayName)
-      if (p) { setCity(p.city); setBio(p.bio); setPicked(p.interests); setLearn(p.learnGoal) }
+      if (p) { const pp = parsePlace(p.city); if (pp.country && pp.state && !PLACES[pp.country][pp.state].includes(pp.city)) { setOtherCity(pp.city); pp.city = OTHER_CITY } setPlace(pp); setBio(p.bio); setPicked(p.interests); setLearn(p.learnGoal) }
     })
   }, [])
 
   const fail = (title: string, e: unknown) => toast({ variant: "destructive", title, description: e instanceof Error ? e.message : "Please try again." })
 
   const saveAbout = async () => {
+    if (!place.country || !place.state || !place.city || (place.city === OTHER_CITY && otherCity.trim().length < 2)) { toast({ variant: "destructive", title: "Pick where you are", description: "Choose your country, then your state, then your city." }); return }
     if (name.trim().length < 2) { toast({ variant: "destructive", title: "Pick a name", description: "Choose the name other members will see (at least 2 letters)." }); return }
     setBusy(true)
     try {
       setMember(await setMyDisplayName(name.trim()))
-      setProfile(await saveMyProfile({ city: city.trim(), bio: bio.trim() }))
+      setProfile(await saveMyProfile({ city: formatPlace({ ...place, city: place.city === OTHER_CITY ? otherCity.trim() : place.city }), bio: bio.trim() }))
       resetSetup(); setStep(1)
     } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
   }
@@ -113,7 +116,27 @@ function Wizard() {
             <input className={`${field} mt-1`} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul K." />
           </label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <label className="block text-sm text-gray-300">Your city<input className={`${field} mt-1`} value={city} maxLength={80} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Mumbai" /></label>
+            <div className="sm:col-span-2 grid sm:grid-cols-3 gap-3">
+              <label className="block text-sm text-gray-300">1. Country
+                <select className={`${field} mt-1`} value={place.country} onChange={(e) => setPlace({ country: e.target.value as Place["country"], state: "", city: "" })}>
+                  <option value="">Choose your country</option>
+                  {COUNTRIES.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm text-gray-300">2. {COUNTRIES.find((c) => c.name === place.country)?.stateLabel ?? "State or emirate"}
+                <select className={`${field} mt-1`} value={place.state} disabled={!place.country} onChange={(e) => setPlace({ ...place, state: e.target.value, city: "" })}>
+                  <option value="">{place.country ? "Choose one" : "Pick a country first"}</option>
+                  {place.country && Object.keys(PLACES[place.country]).map((st) => <option key={st} value={st}>{st}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm text-gray-300">3. City or area
+                <select className={`${field} mt-1`} value={place.city} disabled={!place.state} onChange={(e) => setPlace({ ...place, city: e.target.value })}>
+                  <option value="">{place.state ? "Choose one" : "Pick a state first"}</option>
+                  {place.country && place.state && [...PLACES[place.country][place.state], OTHER_CITY].map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </label>
+              {place.city === OTHER_CITY && <label className="block text-sm text-gray-300 sm:col-span-3">Type your city<input className={`${field} mt-1`} value={otherCity} maxLength={50} onChange={(e) => setOtherCity(e.target.value)} placeholder="Your city or town" /></label>}
+            </div>
             <label className="block text-sm text-gray-300">A line about you<input className={`${field} mt-1`} value={bio} maxLength={300} onChange={(e) => setBio(e.target.value)} placeholder="Optional" /></label>
           </div>
           <button onClick={saveAbout} disabled={busy} className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-lg">{busy ? "Saving…" : "Continue"}</button>

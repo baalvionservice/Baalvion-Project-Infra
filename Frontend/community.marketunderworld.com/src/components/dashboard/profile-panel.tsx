@@ -1,5 +1,6 @@
 "use client"
 
+import { PlacePicker } from "@/components/profile/place-picker"
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Camera, CheckCircle2, Circle, Loader2, ShieldCheck } from "lucide-react"
@@ -95,7 +96,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
             {kycCase?.status !== "approved" && kycCase !== undefined && <Link href="/kyc" className="text-cyan-400 font-bold uppercase tracking-widest">{kycCase ? "Open KYC" : "Start KYC"}</Link>}
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
-            <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} placeholder="Your city" aria-label="City" className="h-10 px-3 rounded-lg bg-black border border-white/10 text-sm text-white" />
+            <div className="sm:col-span-2"><PlacePicker value={city} onChange={setCity} /></div>
             <input value={bio} onChange={(e) => setBio(e.target.value)} maxLength={300} placeholder="A short line about you" aria-label="Bio" className="h-10 px-3 rounded-lg bg-black border border-white/10 text-sm text-white" />
           </div>
           <textarea value={learn} onChange={(e) => setLearn(e.target.value)} maxLength={500} rows={2} placeholder="What do you most want to learn or get from Hell Road?" aria-label="What you want to learn" className="w-full px-3 py-2 rounded-lg bg-black border border-white/10 text-sm text-white" />
