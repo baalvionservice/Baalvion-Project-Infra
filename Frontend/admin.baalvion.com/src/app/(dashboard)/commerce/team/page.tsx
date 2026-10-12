@@ -31,7 +31,7 @@ const CANNOT = [
 const helperMessage = (storeName: string) => `Hi! You now have access to add products for ${storeName}.
 
 On your phone:
-1. Open admin.baalvion.com and sign in (use the email you were invited with).
+1. Open admin.baalvion.com and sign in with your email and password. If you do not know the password, tap "Forgot password?" and a reset link is emailed to you.
 2. Tap the menu, then Commerce, then Products.
 3. Tap the blue "Quick add" button.
 4. Take or choose photos, type the name, pick the category, enter the price.
@@ -78,7 +78,7 @@ export default function ShopTeamGuidePage() {
           <CardDescription>If they already have an account on this platform, skip to step 2.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <p>Enter their email. They receive an invitation and create their sign-in from it. Choose <strong>only Amarisé Maison Avenue</strong> in the list so they cannot see any other website.</p>
+          <p>Only needed for a <strong>new</strong> person. Enter their email. They receive an invitation and create their sign-in from it. Choose <strong>only Amarisé Maison Avenue</strong> in the list so they cannot see any other website.</p>
           <InviteToWebsitesButton size="sm" label="Invite a helper" />
         </CardContent>
       </Card>
@@ -89,7 +89,8 @@ export default function ShopTeamGuidePage() {
           <CardDescription>This is what limits them to this one store.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
-          <p>In the panel below, click <strong>Assign role</strong>, find their name or email, and choose <strong>Product manager</strong>.</p>
+          <p>In the panel below, click <strong>Assign role</strong>, find their name or email, and choose <strong>Product manager</strong>. (<strong>Store admin</strong> also lets them manage who else works on the store, so give it only to someone you fully trust.)</p>
+          <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground"><strong className="text-foreground">Assigning a role does not send an email.</strong> It only records the permission. If they already have an account, send them the message in step 4. If they do not, use the invite in step 1.</p>
           {roleOptions.length > 0 && activeStore ? (
             <ScopeTeamPanel
               scopeId={activeStore.id}
