@@ -8,7 +8,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
-import { INTERESTS } from "@/lib/interests"
+import { INTERESTS, GROUPS } from "@/lib/interests"
 import { DESTINATIONS, resetSetup } from "@/lib/setup"
 import { getMyMember, setMyDisplayName, type MyMember } from "@/lib/api/members"
 import { getMyProfile, saveMyProfile, uploadProfilePhoto, photoUrl, type MyProfile } from "@/lib/api/profile"
@@ -16,15 +16,20 @@ import { kyc, type KycCase } from "@/lib/api/kyc"
 import { COUNTRIES, PLACES, OTHER_CITY, formatPlace, parsePlace, type Place } from "@/lib/locations"
 
 // What each choice means for a new member: what it gives you and what it takes.
-const NEEDS: Record<string, { what: string; needed: string; cta: string; href: string }> = {
-  clubs: { what: "Browse clubs, ask for the guest list or a VIP table, see DJ nights.", needed: "Just an account.", cta: "Open clubs", href: "/clubs" },
-  forum: { what: "Read and post in the forum communities.", needed: "Just an account. Some communities approve requests.", cta: "Join the forum", href: "/forum/join" },
-  locals: { what: "Find casting calls and local gigs, or post as an employer.", needed: "An account. Employers and candidates are reviewed.", cta: "Open locals", href: "/locals" },
-  buy: { what: "Buy from sellers and pay with your wallet points.", needed: "A buyer pass, then load your wallet (100 points = $1).", cta: "Get the buyer pass", href: "/buyer-pass" },
-  sell: { what: "Open a seller account and list products.", needed: "A seller application, reviewed by an admin, and a category payment.", cta: "Apply to sell", href: "/seller/onboarding" },
-  wallet: { what: "Enter the monthly ticket draw and pledge toward the DJs you want.", needed: "Wallet points. Load them with crypto and an admin confirms.", cta: "Load your wallet", href: "/wallet" },
-  trade: { what: "Pick a listed intermediary and trade with them directly.", needed: "An account. You pay the intermediary by scanning their QR.", cta: "See intermediaries", href: "/escrow/intermediaries" },
-  agent: { what: "Help members buy USDT and trade, and earn your own fee.", needed: "A refundable $1,000 deposit, confirmed by an admin, and your payment QR.", cta: "Apply as an intermediary", href: "/escrow/apply-agent" },
+const NEEDS: Record<string, { value?: string; what: string; needed: string; cta: string; href: string }> = {
+  clubs: { value: "Find the best venues in your city, get on guest lists and book VIP tables without calling around.", what: "Browse clubs, ask for the guest list or a VIP table, see DJ nights.", needed: "Just an account.", cta: "Open clubs", href: "/clubs" },
+  forum: { value: "Ask questions, get answers from members, and meet people who care about the same things. You choose the communities.", what: "Read and post in the forum communities.", needed: "Just an account. Some communities approve requests.", cta: "Join the forum", href: "/forum/join" },
+  locals: { value: "Casting calls and local gigs in one place, so you apply without searching group chats.", what: "Find casting calls and local gigs, or post as an employer.", needed: "An account. Employers and candidates are reviewed.", cta: "Open locals", href: "/locals" },
+  buy: { value: "Buy from sellers the team has reviewed, and pay with your wallet points.", what: "Buy from sellers and pay with your wallet points.", needed: "A buyer pass, then load your wallet (100 points = $1).", cta: "Get the buyer pass", href: "/buyer-pass" },
+  sell: { value: "A store on the marketplace with buyers already here and payments handled for you.", what: "Open a seller account and list products.", needed: "A seller application, reviewed by an admin, and a category payment.", cta: "Apply to sell", href: "/seller/onboarding" },
+  wallet: { value: "A real chance to win a ticket for $6 (600 points) and a say in which DJs come to your city.", what: "Enter the monthly ticket draw and pledge toward the DJs you want.", needed: "Wallet points. Load them with crypto and an admin confirms.", cta: "Load your wallet", href: "/wallet" },
+  trade: { value: "A listed intermediary guides your crypto trade so you are not alone.", what: "Pick a listed intermediary and trade with them directly.", needed: "An account. You pay the intermediary by scanning their QR.", cta: "See intermediaries", href: "/escrow/intermediaries" },
+  agent: { value: "Earn your own fee by helping members trade.", what: "Help members buy USDT and trade, and earn your own fee.", needed: "A refundable $1,000 deposit, confirmed by an admin, and your payment QR.", cta: "Apply as an intermediary", href: "/escrow/apply-agent" },
+  employer: { value: "Reach people looking for local work and manage who applies.", what: "Register your business or venue, then post local jobs and gigs and see who applies.", needed: "An account and a short business form. The team reviews it.", cta: "Register my business", href: "/nightlife/employer" },
+  ticketseller: { value: "Your club in front of members who book guest lists and tables. The clubs team lists it for you.", what: "Get your club, guest list or ticketed night in front of members. Listings are made by the clubs team, so you ask them.", needed: "An account. Open your dashboard, choose Clubs team in Ask to join a department and tell them about your club.", cta: "Go to my dashboard", href: "/dashboard" },
+  organiser: { value: "Your event in front of Hell Road members. The events team lists it for you.", what: "Get an event, party or poster in front of members. Events are listed by the events team, so you ask them.", needed: "An account. Open your dashboard, choose Events team in Ask to join a department and tell them about your event.", cta: "Go to my dashboard", href: "/dashboard" },
+  student: { value: "Courses and live sessions, with your progress kept in your own classroom.", what: "Courses, live sessions and your own classroom.", needed: "An account.", cta: "Open student dashboard", href: "/student-dashboard" },
+  teacher: { value: "A ready audience of students and tools to run live sessions.", what: "Run courses and live sessions for students.", needed: "An account. An admin approves teachers.", cta: "Open teacher dashboard", href: "/teacher-dashboard" },
   learn: { what: "Courses and live sessions.", needed: "An account. Teachers are approved by an admin.", cta: "Open education", href: "/education" },
 }
 const field = "w-full h-11 px-3 rounded-lg bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-red-500"
@@ -145,18 +150,26 @@ function Wizard() {
 
       {step === 1 && (
         <section className="mt-8">
-          <h2 className="text-xl font-bold">What do you want to do here?</h2>
+          <h2 className="text-xl font-bold">Who are you here, and what do you want?</h2>
           <p className="text-sm text-gray-400 mt-1">Tick everything that applies. We take you to the right place, and show exactly what each one needs.</p>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {INTERESTS.map((i) => {
-              const on = picked.includes(i.id)
-              return (
-                <button key={i.id} onClick={() => toggle(i.id)} aria-pressed={on} className={`text-left rounded-xl border p-4 ${on ? "border-red-500 bg-red-950/30" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
+          <div className="mt-4 space-y-6">
+            {GROUPS.map((g) => (
+              <div key={g.id}>
+                <h3 className="font-bold text-white">{g.title}</h3>
+                <p className="text-xs text-gray-500 mb-2">{g.text}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {INTERESTS.filter((i) => i.group === g.id).map((i) => {
+                    const on = picked.includes(i.id)
+                    return (
+                      <button key={i.id} onClick={() => toggle(i.id)} aria-pressed={on} className={`text-left rounded-xl border p-4 ${on ? "border-red-500 bg-red-950/30" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
                   <div className="flex items-start justify-between gap-3"><span className="font-semibold">{i.title}</span><span className={`w-5 h-5 shrink-0 rounded border flex items-center justify-center ${on ? "bg-red-600 border-red-600" : "border-white/30"}`}>{on && <Check className="w-3.5 h-3.5" />}</span></div>
-                  <p className="text-sm text-gray-400 mt-1">{NEEDS[i.id]?.what}</p>
+                  <p className="text-sm text-gray-400 mt-1">{NEEDS[i.id]?.what}</p>{NEEDS[i.id]?.value && <p className="text-sm text-emerald-300/90 mt-2"><b>What you get:</b> {NEEDS[i.id].value}</p>}
                 </button>
-              )
-            })}
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
           <label className="block mt-5 text-sm text-gray-300">What do you most want to learn or get from Hell Road? (optional)
             <textarea className="w-full px-3 py-2.5 mt-1 rounded-lg bg-black border border-white/10 text-white text-sm" rows={2} maxLength={500} value={learn} onChange={(e) => setLearn(e.target.value)} />

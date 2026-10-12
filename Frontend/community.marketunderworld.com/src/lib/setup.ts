@@ -55,6 +55,11 @@ export const DESTINATIONS: Record<string, { href: string; label: string }> = {
   trade: { href: "/escrow/intermediaries", label: "Find an intermediary" },
   agent: { href: "/escrow/apply-agent", label: "Apply as an intermediary" },
   learn: { href: "/education", label: "Open education" },
+  student: { href: "/student-dashboard", label: "Open your student dashboard" },
+  teacher: { href: "/teacher-dashboard", label: "Open your teacher dashboard" },
+  employer: { href: "/nightlife/employer", label: "Register your business to hire" },
+  ticketseller: { href: "/dashboard", label: "Ask the clubs team to list your club" },
+  organiser: { href: "/dashboard", label: "Ask the events team to list your event" },
 }
 export const interestTitle = (id: string) => INTERESTS.find((i) => i.id === id)?.title ?? id
 

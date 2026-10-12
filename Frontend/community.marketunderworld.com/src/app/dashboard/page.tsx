@@ -31,6 +31,8 @@ import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
 import { ProfilePanel } from "@/components/dashboard/profile-panel"
 import { NextSteps } from "@/components/dashboard/next-steps"
+import { useSetup } from "@/lib/setup"
+import { MySpaces } from "@/components/dashboard/my-spaces"
 import { MoreAccess } from "@/components/dashboard/more-access"
 import { AccessRequestsPanel } from "@/components/dashboard/access-requests-panel"
 import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
@@ -69,6 +71,7 @@ const SELLER_LINKS = [
 ]
 
 export default function DashboardPage() {
+  const { setup } = useSetup()
   const router = useRouter()
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
@@ -130,6 +133,9 @@ export default function DashboardPage() {
   )
 
   // Their chosen/derived name when they have one; otherwise their sign-in name (private page, so fine).
+  // Money and order panels lead only for people who shop, sell, trade or already have orders; others see their own spaces first.
+  const picked = setup?.interests ?? []
+  const showShop = picked.length === 0 || orders.length > 0 || !!member?.seller || picked.some((i) => ["buy", "sell", "wallet", "trade", "agent"].includes(i))
   const greetingName = member && !member.displayName.startsWith("Member HR-") ? member.displayName : user?.email ? user.email.split("@")[0] : ""
 
   if (authLoading || loading) {
@@ -150,6 +156,7 @@ export default function DashboardPage() {
         </header>
 
         <NextSteps />
+        <MySpaces />
         {member && <MemberIdCard member={member} onChange={setMember} />}
         {member && <div id="profile" className="scroll-mt-32"><ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} /></div>}
 
@@ -190,6 +197,7 @@ export default function DashboardPage() {
         {access?.hasAccess && access.reason === "paid" && (
           <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest">Marketplace access pass: active</p>
         )}
+        {showShop && (<>
         <Link href="/wallet" className="block max-w-sm">
           <NexusCard className="p-6 bg-white/[0.02] border-white/5 hover:border-amber-400/30 transition-colors space-y-3">
             <div className="flex items-center justify-between">
@@ -219,6 +227,8 @@ export default function DashboardPage() {
             </NexusCard>
           ))}
         </div>
+
+        </>)}
 
         {/* ── Seller Hub — only visible to approved sellers ────────────── */}
         {member?.isSeller && (

@@ -9,7 +9,7 @@ import { DESTINATIONS, interestTitle, useSetup } from "@/lib/setup"
 export function NextSteps() {
   const { setup } = useSetup()
   if (!setup) return null
-  const goals = setup.interests.filter((i) => DESTINATIONS[i])
+  const goals: string[] = []
   if (setup.complete && goals.length === 0) return null
   return (
     <NexusCard className="p-6 bg-white/[0.02] border-white/5 space-y-5">
