@@ -20,7 +20,7 @@ export function CelebrityEventsClient() {
       <main className="container max-w-[900px] mx-auto px-4 py-8 mt-20">
         <div className="mb-6"><Breadcrumbs items={[{ label: "Clubs", href: "/clubs" }, { label: "Events" }]} /></div>
         <h1 className="text-3xl font-bold mb-2">Club events and DJ nights</h1>
-        <p className="text-gray-600 mb-6">Every event here is entered by the Baalvion team. Want a particular DJ at a club? <Link className="underline" href="/clubs/dj-demand">Demand your DJ</Link>.</p>
+        <p className="text-gray-600 mb-6">Events are checked by the Baalvion team before they appear. Running an event? <Link className="underline font-semibold" href="/clubs/events/submit">Post your event</Link>. Want a particular DJ at a club? <Link className="underline" href="/clubs/dj-demand">Demand your DJ</Link>.</p>
         {events === null ? (
           <div className="flex items-center gap-2 text-gray-500"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
         ) : events.length === 0 ? (

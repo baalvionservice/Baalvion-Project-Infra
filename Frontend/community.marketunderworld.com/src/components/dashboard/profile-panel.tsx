@@ -1,5 +1,6 @@
 "use client"
 
+import { GenderPick } from "@/components/profile/gender-pick"
 import { PlacePicker } from "@/components/profile/place-picker"
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
@@ -26,6 +27,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
   const [kycCase, setKycCase] = useState<KycCase | null | undefined>(undefined)
   const [bio, setBio] = useState("")
   const [city, setCity] = useState("")
+  const [gender, setGender] = useState("")
   const [learn, setLearn] = useState("")
   const [interests, setInterests] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
@@ -36,10 +38,10 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
     getMyProfile().then((p) => {
       let local: string[] = []
       try { local = JSON.parse(localStorage.getItem("hr_access_needs") || "[]") } catch { /* ignore */ }
-      setProfile(p); setBio(p.bio); setCity(p.city); setLearn(p.learnGoal)
+      setProfile(p); setBio(p.bio); setCity(p.city); setGender(p.gender || ""); setLearn(p.learnGoal)
       // Choices made in the onboarding guide before signing in carry over once.
       setInterests(p.interests.length ? p.interests : local)
-    }).catch(() => setProfile({ photoPath: null, bio: "", city: "", interests: [], learnGoal: "" }))
+    }).catch(() => setProfile({ photoPath: null, bio: "", city: "", interests: [], learnGoal: "", gender: "" }))
     kyc.mine().then(setKycCase).catch(() => setKycCase(null))
   }, [])
 
@@ -47,7 +49,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
 
   const save = async () => {
     setBusy(true)
-    try { setProfile(await saveMyProfile({ bio, city, interests, learnGoal: learn })); resetSetup(); toast({ title: "Profile saved" }) } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
+    try { setProfile(await saveMyProfile({ gender, bio, city, interests, learnGoal: learn })); resetSetup(); toast({ title: "Profile saved" }) } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
   }
   const pickPhoto = async (f: File | undefined) => {
     if (!f) return
@@ -97,6 +99,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2"><PlacePicker value={city} onChange={setCity} /></div>
+            <div className="sm:col-span-2"><GenderPick value={gender} onChange={setGender} /></div>
             <input value={bio} onChange={(e) => setBio(e.target.value)} maxLength={300} placeholder="A short line about you" aria-label="Bio" className="h-10 px-3 rounded-lg bg-black border border-white/10 text-sm text-white" />
           </div>
           <textarea value={learn} onChange={(e) => setLearn(e.target.value)} maxLength={500} rows={2} placeholder="What do you most want to learn or get from Hell Road?" aria-label="What you want to learn" className="w-full px-3 py-2 rounded-lg bg-black border border-white/10 text-sm text-white" />

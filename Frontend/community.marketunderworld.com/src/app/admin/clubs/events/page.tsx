@@ -46,7 +46,7 @@ export default function AdminEventsPage() {
     }
   };
 
-  const setStatus = async (e: ApiEvent, status: "active" | "cancelled") => {
+  const setStatus = async (e: ApiEvent, status: "active" | "cancelled" | "rejected") => {
     try { await admin.updateEvent(e.id, { status }); await load(); } catch (err) { setError(err instanceof Error ? err.message : "Could not update event"); }
   };
 
@@ -84,8 +84,11 @@ export default function AdminEventsPage() {
               <div className="text-sm text-gray-500">{e.club?.name}, {e.club?.city} · {e.date} · {e.tag}</div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-2 py-1 rounded-md text-xs font-semibold uppercase ${e.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>{e.status}</span>
-              {e.status === "active"
+              <span className={`px-2 py-1 rounded-md text-xs font-semibold uppercase ${e.status === "active" ? "bg-green-100 text-green-800" : e.status === "pending_review" ? "bg-amber-100 text-amber-800" : "bg-gray-100 text-gray-600"}`}>{e.status === "pending_review" ? "needs review" : e.status}</span>
+              {e.status === "pending_review" ? (<>
+                <button onClick={() => setStatus(e, "active")} className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700">Approve</button>
+                <button onClick={() => setStatus(e, "rejected")} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium hover:bg-gray-50">Reject</button>
+              </>) : e.status === "active"
                 ? <button onClick={() => setStatus(e, "cancelled")} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium hover:bg-gray-50">Cancel</button>
                 : <button onClick={() => setStatus(e, "active")} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium hover:bg-gray-50">Restore</button>}
             </div>

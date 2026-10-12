@@ -14,7 +14,7 @@ const n = (v: unknown) => (Array.isArray(v) ? v.length : v && typeof v === "obje
 const plural = (c: number, one: string, many: string) => `${c} ${c === 1 ? one : many}`
 
 export async function fetchAdminNotices(): Promise<AdminNotice[]> {
-  const [payments, sellers, listings, intermediaries, disputes, djs, draws, overview, kyc, requests, elite, tickets, joins] = await Promise.all([
+  const [payments, sellers, listings, intermediaries, disputes, djs, draws, overview, kyc, requests, elite, tickets, joins, events] = await Promise.all([
     get<unknown>("commerce", "/seller-bonds?limit=100&status=payment_submitted"),
     get<unknown>("commerce", "/seller-applications?status=pending&limit=100"),
     get<unknown>("commerce", "/admin/products/pending?limit=100"),
@@ -28,10 +28,12 @@ export async function fetchAdminNotices(): Promise<AdminNotice[]> {
     get<unknown>("community", "/admin/nightlife/elite-host?status=pending"),
     get<{ counts?: Record<string, number> }>("community", "/admin/support/tickets?status=open"),
     get<unknown>("community", "/admin/join-requests"),
+    get<{ items: { status: string }[] }>("community", "/admin/nightlife/events?limit=200"),
   ])
   const q = overview?.queues ?? {}
   const waitingIntermediaries = (intermediaries ?? []).filter((i) => i.status === "applied" || i.status === "payment_submitted").length
   const drawsToRun = (draws?.items ?? []).filter((d) => d.status === "closed" || (d.status === "open" && new Date(d.closesAt).getTime() <= Date.now())).length
+  const eventsToReview = (events?.items ?? []).filter((e) => e.status === "pending_review").length
   const openTickets = tickets?.counts?.open ?? 0
 
   const all: (AdminNotice | null)[] = [
@@ -47,6 +49,7 @@ export async function fetchAdminNotices(): Promise<AdminNotice[]> {
     { key: "vetting", count: (q.pendingProfiles ?? 0) + (q.pendingEmployers ?? 0), text: "", href: "/nightlife/verify", cta: "Review" },
     { key: "djs", count: n(djs), text: "", href: "/admin/clubs/dj-demands", cta: "Approve or reject" },
     { key: "draws", count: drawsToRun, text: "", href: "/admin/clubs/lottery", cta: "Run the draw" },
+    { key: "events", count: eventsToReview, text: "", href: "/admin/clubs/events", cta: "Approve or reject" },
     { key: "elite", count: n(elite), text: "", href: "/admin/clubs/elite-host", cta: "Review" },
     { key: "requests", count: n(requests), text: "", href: "/admin/access-requests", cta: "Decide" },
     { key: "joins", count: n(joins), text: "", href: "/admin/forum", cta: "Approve or decline" },
@@ -54,6 +57,7 @@ export async function fetchAdminNotices(): Promise<AdminNotice[]> {
     { key: "bounty", count: q.unreadThreads ?? 0, text: "", href: "/admin/bounty", cta: "Read and reply" },
   ]
   const TEXT: Record<string, (c: number) => string> = {
+    events: (c) => `${plural(c, "event", "events")} posted by members, waiting for approval`,
     payments: (c) => `${plural(c, "payment", "payments")} waiting for you to confirm`,
     disputes: (c) => `${plural(c, "trade dispute", "trade disputes")} to decide`,
     sellers: (c) => `${plural(c, "seller application", "seller applications")} to review`,

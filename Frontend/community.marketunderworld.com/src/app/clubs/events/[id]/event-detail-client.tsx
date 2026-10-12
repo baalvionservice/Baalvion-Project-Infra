@@ -29,7 +29,7 @@ export function EventDetailClient({ id }: { id: string }) {
             <p className="text-gray-700 mt-1">{event.djName ? `${event.djName} · ` : ""}{event.venue}{event.city ? `, ${event.city}` : ""}</p>
             {event.description && <p className="mt-4 text-gray-700 whitespace-pre-line">{event.description}</p>}
             <div className="mt-6 flex flex-wrap gap-3">
-              {event.ticketUrl && <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white text-sm font-bold px-5 py-2.5">Tickets</a>}
+              {event.ticketPriceText && <span className="text-sm font-semibold mr-3">{event.ticketPriceText}</span>}{event.ticketUrl && <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white text-sm font-bold px-5 py-2.5">Tickets</a>}
               {event.clubId && <Link href={`/clubs/venue/${event.clubId}`} className="border border-gray-400 text-sm font-bold px-5 py-2.5">About the club</Link>}
             </div>
           </article>

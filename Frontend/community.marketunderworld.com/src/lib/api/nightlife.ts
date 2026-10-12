@@ -211,7 +211,8 @@ export interface ApiEvent {
   description: string | null;
   tag: EventTag;
   ticketUrl: string | null;
-  status: "active" | "cancelled";
+  status: "active" | "cancelled" | "pending_review" | "rejected";
+  ticketPriceText?: string | null;
   club?: { id: string; slug: string; name: string; city: string; state: string };
 }
 
@@ -228,6 +229,7 @@ export interface ClubEvent {
   image: string;
   tag: EventTag;
   ticketUrl?: string;
+  ticketPriceText?: string;
   clubId: string;
 }
 
@@ -242,6 +244,7 @@ const toEvent = (e: ApiEvent): ClubEvent => ({
   image: e.image ?? "",
   tag: e.tag,
   ticketUrl: e.ticketUrl ?? undefined,
+  ticketPriceText: e.ticketPriceText ?? undefined,
   clubId: e.club?.slug ?? "",
 });
 
@@ -406,7 +409,7 @@ export interface EventInput {
   description?: string;
   tag?: EventTag;
   ticketUrl?: string;
-  status?: "active" | "cancelled";
+  status?: "active" | "cancelled" | "rejected";
 }
 
 export const admin = {
@@ -441,7 +444,7 @@ export const admin = {
 };
 
 // ── Elite parties: asking to join one, and the host's view of those requests ──
-export interface EliteJoin { id: string; partyId: string; males: number; females: number; note: string | null; status: "pending" | "approved" | "declined" | "withdrawn"; createdAt: string }
+export interface EliteJoin { freeInvite?: boolean; id: string; partyId: string; males: number; females: number; note: string | null; status: "pending" | "approved" | "declined" | "withdrawn"; createdAt: string }
 export interface HostParty { id: string; clubName: string | null; city: string; date: string | null; guests: number | null; status: string; approvedGuests: number; pendingRequests: number }
 export const elite = {
   join: (partyId: string, d: { males: number; females: number; note?: string }) => send<EliteJoin>("POST", `/nightlife/elite-host/${partyId}/join`, d),
@@ -451,3 +454,14 @@ export const elite = {
   guests: (partyId: string) => send<{ capacity: number | null; approvedGuests: number; items: (EliteJoin & { requesterLabel: string | null })[] }>("GET", `/nightlife/elite-host/${partyId}/guests`),
   decide: (id: string, approve: boolean) => send<EliteJoin>("POST", `/nightlife/elite-host/guests/${id}/decide`, { approve }),
 };
+
+// ── Events a member posts themselves (shown after the events team approves) ──
+export interface EventSubmission { clubId: string; eventName: string; eventDate: string; djName?: string; description: string; image?: string; ticketUrl?: string; ticketPriceText?: string }
+export const myEvents = {
+  submit: (d: EventSubmission) => send<ApiEvent>("POST", "/nightlife/events/submit", d),
+  mine: () => send<{ items: ApiEvent[] }>("GET", "/nightlife/events/mine"),
+};
+
+// Search the venue directory by name, suburb or city (real ids, for forms that must attach to a club).
+export const searchClubs = (q: string) =>
+  call<{ items: ApiClub[]; total: number }>(`/nightlife/clubs?limit=15&q=${encodeURIComponent(q)}`).then((r) => r.items);

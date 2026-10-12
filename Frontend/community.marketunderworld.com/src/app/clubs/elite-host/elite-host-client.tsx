@@ -26,6 +26,7 @@ export function EliteHostClient() {
   const [partyDate, setPartyDate] = useState("");
   const [guests, setGuests] = useState(5);
   const [perks, setPerks] = useState<string[]>(PERKS);
+  const [ladiesFree, setLadiesFree] = useState(false);
   const [budget, setBudget] = useState("500000");
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [selectedState, setSelectedState] = useState("Maharashtra");
@@ -46,6 +47,7 @@ export function EliteHostClient() {
           slots: i.guests || null,
           slotsLeft: i.slotsLeft ?? null,
           perks: i.perks || [],
+          ladiesFree: !!i.ladiesFree,
         })));
       })
       .catch(() => {});
@@ -145,6 +147,7 @@ export function EliteHostClient() {
         partyDate: partyDate || undefined,
         guests,
         perks,
+        ladiesFree,
       };
       const result = await admin.createEliteHostApplication(application);
       setAppRef(result?.id ?? `EH-${Date.now()}`);
@@ -236,6 +239,7 @@ export function EliteHostClient() {
                       </div>
                     </div>
                     
+                    {party.ladiesFree && <div className="mb-3 inline-block text-xs font-bold text-pink-300 bg-pink-500/10 border border-pink-500/30 rounded-full px-3 py-1">Free invitations for women guests</div>}
                     <div className="space-y-2 mb-6">
                       {party.perks.map((perk: string) => (
                         <div key={perk} className="flex items-center gap-2 text-sm text-gray-300">
@@ -245,7 +249,7 @@ export function EliteHostClient() {
                     </div>
 
                     <button onClick={() => setJoinFor(party)} disabled={party.slotsLeft === 0} className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors disabled:opacity-50">
-                      {party.slotsLeft === 0 ? "Party is full" : "Ask to join (KYC required)"}
+                      {party.slotsLeft === 0 ? "Party is full" : "Ask to join (KYC and a membership, or a free invitation)"}
                     </button>
                   </div>
                 ))}
@@ -391,6 +395,8 @@ export function EliteHostClient() {
                       </div>
                     </div>
 
+                    <label className="flex items-start gap-2 text-sm text-gray-300"><input type="checkbox" className="accent-amber-500 mt-1" checked={ladiesFree} onChange={(e) => setLadiesFree(e.target.checked)} /> <span>Offer free invitations to women guests. You still read and decide every request. Other guests join as paying members.</span></label>
+
                     <div>
                       <label className="block text-sm font-semibold text-gray-300 mb-2">What you will cover</label>
                       <div className="space-y-2">
@@ -426,7 +432,7 @@ export function EliteHostClient() {
           {activeTab === "host" && <HostRequests />}
         </div>
       </main>
-      {joinFor && <JoinDialog party={{ id: joinFor.id, hostAlias: joinFor.hostAlias, clubName: joinFor.clubName, slotsLeft: joinFor.slotsLeft }} onClose={() => setJoinFor(null)} onDone={() => setJoinsKey((k) => k + 1)} />}
+      {joinFor && <JoinDialog party={{ id: joinFor.id, hostAlias: joinFor.hostAlias, clubName: joinFor.clubName, slotsLeft: joinFor.slotsLeft, ladiesFree: joinFor.ladiesFree }} onClose={() => setJoinFor(null)} onDone={() => setJoinsKey((k) => k + 1)} />}
       <Footer />
     </div>
   );

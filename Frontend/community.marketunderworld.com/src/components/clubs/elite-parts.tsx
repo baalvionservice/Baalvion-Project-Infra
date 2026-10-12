@@ -8,7 +8,7 @@ import { ApiError, elite, type EliteJoin, type HostParty } from "@/lib/api/night
 const input = "w-full bg-black border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-500"
 
 // Asking to come to a party: how many men and women you are bringing (yourself included).
-export function JoinDialog({ party, onClose, onDone }: { party: { id: string; hostAlias: string; clubName: string; slotsLeft: number | null }; onClose: () => void; onDone: () => void }) {
+export function JoinDialog({ party, onClose, onDone }: { party: { id: string; hostAlias: string; clubName: string; slotsLeft: number | null; ladiesFree?: boolean }; onClose: () => void; onDone: () => void }) {
   const { toast } = useToast()
   const [males, setMales] = useState(0)
   const [females, setFemales] = useState(1)
@@ -16,16 +16,18 @@ export function JoinDialog({ party, onClose, onDone }: { party: { id: string; ho
   const [busy, setBusy] = useState(false)
   const [kycNeeded, setKycNeeded] = useState(false)
   const [signIn, setSignIn] = useState(false)
+  const [tierMsg, setTierMsg] = useState("")
   const total = males + females
 
   const send = async () => {
-    setBusy(true); setKycNeeded(false); setSignIn(false)
+    setBusy(true); setKycNeeded(false); setSignIn(false); setTierMsg("")
     try {
       await elite.join(party.id, { males, females, note: note || undefined })
       toast({ title: "Request sent", description: "The host or an admin will review it. You can follow it under My requests." })
       onDone(); onClose()
     } catch (e) {
       if (e instanceof ApiError && e.code === "KYC_REQUIRED") setKycNeeded(true)
+      else if (e instanceof ApiError && e.code === "TIER_REQUIRED") setTierMsg(e.message)
       else if (e instanceof ApiError && e.status === 401) setSignIn(true)
       else toast({ variant: "destructive", title: "Couldn't send", description: e instanceof Error ? e.message : "Please try again." })
     } finally { setBusy(false) }
@@ -44,9 +46,11 @@ export function JoinDialog({ party, onClose, onDone }: { party: { id: string; ho
             <input type="number" min={0} max={10} value={males} onChange={(e) => setMales(Math.max(0, Math.min(10, Number(e.target.value) || 0)))} className={`${input} mt-1`} />
           </label>
         </div>
+        <p className="text-xs text-gray-400">{party.ladiesFree ? "This host offers free invitations to women guests (women only, set Woman in your profile). Everyone else joins as a paying member." : "Elite parties are for paying members."}</p>
         <p className="text-xs text-gray-500">Count yourself too. Total: {total}. Only verified (KYC) members can ask to join.</p>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={300} placeholder="A short note for the host (optional)" className={input} />
         {kycNeeded && <p className="text-sm text-amber-300">You need to verify your identity first. <Link className="underline" href="/kyc">Open KYC</Link></p>}
+        {tierMsg && <p className="text-sm text-amber-300">{tierMsg} <Link className="underline" href="/access">See membership tiers</Link> or <Link className="underline" href="/dashboard#profile">update your profile</Link>.</p>}
         {signIn && <p className="text-sm text-amber-300">Please <Link className="underline" href="/auth/signin?redirect=/clubs/elite-host">sign in</Link> first.</p>}
         <div className="flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>

@@ -13,6 +13,7 @@ import { DESTINATIONS, resetSetup } from "@/lib/setup"
 import { getMyMember, setMyDisplayName, type MyMember } from "@/lib/api/members"
 import { getMyProfile, saveMyProfile, uploadProfilePhoto, photoUrl, type MyProfile } from "@/lib/api/profile"
 import { kyc, type KycCase } from "@/lib/api/kyc"
+import { GenderPick } from "@/components/profile/gender-pick"
 import { COUNTRIES, PLACES, OTHER_CITY, formatPlace, parsePlace, type Place } from "@/lib/locations"
 
 // What each choice means for a new member: what it gives you and what it takes.
@@ -28,8 +29,8 @@ const NEEDS: Record<string, { value?: string; what: string; needed: string; cta:
   employer: { value: "Reach people looking for local work and manage who applies.", what: "Register your business or venue, then post local jobs and gigs and see who applies.", needed: "An account and a short business form. The team reviews it.", cta: "Register my business", href: "/nightlife/employer" },
   elite_paid: { value: "Priority entry to Elite (Millionaire) parties and VIP clubs, and your seat is not left to chance.", what: "Pay the platform for a membership tier and spend your time at Elite parties, VIP tables and invite-only nights.", needed: "A membership tier ($100, $250 or $1,000). Pay, send a screenshot, and an admin confirms within 5 to 30 minutes.", cta: "Choose my membership", href: "/access" },
   elite_invite: { value: "A free place at a host's party, with no platform fee.", what: "Women guests can ask Elite (Millionaire) party hosts for a free invitation. You pick a party and send a short request.", needed: "An account. The host reads every request and decides, so an invitation is never promised.", cta: "Find a party", href: "/clubs/elite-host" },
-  ticketseller: { value: "Your club in front of members who book guest lists and tables. The clubs team lists it for you.", what: "Get your club, guest list or ticketed night in front of members. Listings are made by the clubs team, so you ask them.", needed: "An account. Open your dashboard, choose Clubs team in Ask to join a department and tell them about your club.", cta: "Go to my dashboard", href: "/dashboard" },
-  organiser: { value: "Your event in front of Hell Road members. The events team lists it for you.", what: "Get an event, party or poster in front of members. Events are listed by the events team, so you ask them.", needed: "An account. Open your dashboard, choose Events team in Ask to join a department and tell them about your event.", cta: "Go to my dashboard", href: "/dashboard" },
+  ticketseller: { value: "Your club in front of members who book guest lists and tables. Posted by you, checked by the events team.", what: "Post your ticketed night with the ticket link and price. The events team checks it and it goes live on the events page.", needed: "An account. Your venue must be in the directory; if it is not, ask the clubs team to add it.", cta: "Post a ticketed event", href: "/clubs/events/submit" },
+  organiser: { value: "Your event in front of Hell Road members. Posted by you, checked by the events team.", what: "Post your event with its poster, date and ticket details. The events team checks it and it goes live on the events page.", needed: "An account. Fill in one short form; most events are reviewed within a day.", cta: "Post an event", href: "/clubs/events/submit" },
   student: { value: "Courses and live sessions, with your progress kept in your own classroom.", what: "Courses, live sessions and your own classroom.", needed: "An account.", cta: "Open student dashboard", href: "/student-dashboard" },
   teacher: { value: "A ready audience of students and tools to run live sessions.", what: "Run courses and live sessions for students.", needed: "An account. An admin approves teachers.", cta: "Open teacher dashboard", href: "/teacher-dashboard" },
   learn: { what: "Courses and live sessions.", needed: "An account. Teachers are approved by an admin.", cta: "Open education", href: "/education" },
@@ -49,6 +50,7 @@ function Wizard() {
   const [name, setName] = useState("")
   const [place, setPlace] = useState<Place>({ country: "", state: "", city: "" })
   const [otherCity, setOtherCity] = useState("")
+  const [gender, setGender] = useState("")
   const [bio, setBio] = useState("")
   const [picked, setPicked] = useState<string[]>([])
   const [learn, setLearn] = useState("")
@@ -60,7 +62,7 @@ function Wizard() {
     Promise.all([getMyMember().catch(() => null), getMyProfile().catch(() => null), kyc.mine().catch(() => null)]).then(([m, p, k]) => {
       setMember(m); setProfile(p); setKycCase(k)
       if (m?.customName) setName(m.displayName)
-      if (p) { const pp = parsePlace(p.city); if (pp.country && pp.state && !PLACES[pp.country][pp.state].includes(pp.city)) { setOtherCity(pp.city); pp.city = OTHER_CITY } setPlace(pp); setBio(p.bio); setPicked(p.interests); setLearn(p.learnGoal) }
+      if (p) { setGender(p.gender || ""); const pp = parsePlace(p.city); if (pp.country && pp.state && !PLACES[pp.country][pp.state].includes(pp.city)) { setOtherCity(pp.city); pp.city = OTHER_CITY } setPlace(pp); setBio(p.bio); setPicked(p.interests); setLearn(p.learnGoal) }
     })
   }, [])
 
@@ -72,7 +74,7 @@ function Wizard() {
     setBusy(true)
     try {
       setMember(await setMyDisplayName(name.trim()))
-      setProfile(await saveMyProfile({ city: formatPlace({ ...place, city: place.city === OTHER_CITY ? otherCity.trim() : place.city }), bio: bio.trim() }))
+      setProfile(await saveMyProfile({ gender, city: formatPlace({ ...place, city: place.city === OTHER_CITY ? otherCity.trim() : place.city }), bio: bio.trim() }))
       resetSetup(); setStep(1)
     } catch (e) { fail("Couldn't save", e) } finally { setBusy(false) }
   }
@@ -143,6 +145,7 @@ function Wizard() {
                 </select>
               </label>
               {place.city === OTHER_CITY && <label className="block text-sm text-gray-300 sm:col-span-3">Type your city<input className={`${field} mt-1`} value={otherCity} maxLength={50} onChange={(e) => setOtherCity(e.target.value)} placeholder="Your city or town" /></label>}
+              <div className="sm:col-span-3"><GenderPick value={gender} onChange={setGender} /></div>
             </div>
             <label className="block text-sm text-gray-300">A line about you<input className={`${field} mt-1`} value={bio} maxLength={300} onChange={(e) => setBio(e.target.value)} placeholder="Optional" /></label>
           </div>

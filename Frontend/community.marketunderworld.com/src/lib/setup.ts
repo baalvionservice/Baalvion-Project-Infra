@@ -60,8 +60,8 @@ export const DESTINATIONS: Record<string, { href: string; label: string }> = {
   employer: { href: "/nightlife/employer", label: "Register your business to hire" },
   elite_paid: { href: "/access", label: "Choose your membership" },
   elite_invite: { href: "/clubs/elite-host", label: "Ask hosts for an invitation" },
-  ticketseller: { href: "/dashboard", label: "Ask the clubs team to list your club" },
-  organiser: { href: "/dashboard", label: "Ask the events team to list your event" },
+  ticketseller: { href: "/clubs/events/submit", label: "Post your ticketed event" },
+  organiser: { href: "/clubs/events/submit", label: "Post your event" },
 }
 export const interestTitle = (id: string) => INTERESTS.find((i) => i.id === id)?.title ?? id
 
