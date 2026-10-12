@@ -165,13 +165,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
               <UserMenu />
             ) : (
               <button
-                onClick={() => {
-                  if (window.location.pathname === '/') {
-                    document.getElementById('terminal-auth')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  } else {
-                    window.location.href = '/';
-                  }
-                }}
+                onClick={() => { window.location.href = '/auth/signin'; }}
                 className="px-3 sm:px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all min-h-[40px] border"
                 style={{ background: 'rgba(180,0,0,0.15)', borderColor: 'rgba(180,0,0,0.4)', color: '#cc4444' }}
               >

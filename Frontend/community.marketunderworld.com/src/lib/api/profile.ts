@@ -15,6 +15,7 @@ export const DEPARTMENTS: { key: string; label: string; what: string }[] = [
   { key: "support_team", label: "Support team", what: "Answering members' questions and tickets." },
   { key: "forum_moderation", label: "Forum moderation", what: "Keeping the forum communities safe." },
   { key: "education_team", label: "Education team", what: "Courses, teachers and live sessions." },
+  { key: "account_access", label: "Account access", what: "Ask to get your account opened again." },
   { key: "other", label: "Something else", what: "Tell us what you would like to help with." },
 ];
 

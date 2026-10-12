@@ -34,7 +34,7 @@ export function AccessRequestsPanel() {
         <p className="text-sm text-gray-500 mt-1">Want to help run part of Hell Road? Pick a department and tell us why. An admin reads every request and answers it here.</p>
       </div>
       <div className="grid sm:grid-cols-2 gap-3">
-        {DEPARTMENTS.map((d) => (
+        {DEPARTMENTS.filter((d) => d.key !== "account_access").map((d) => (
           <button key={d.key} disabled={pendingDepts.has(d.key)} onClick={() => setDept(dept === d.key ? null : d.key)}
             className={`text-left rounded-xl border p-3 disabled:opacity-50 ${dept === d.key ? "border-red-500 bg-red-950/30" : "border-white/10 hover:border-white/25"}`}>
             <div className="font-semibold text-sm text-white">{d.label}</div>

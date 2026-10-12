@@ -152,8 +152,8 @@ function Wizard() {
           <ul className="mt-5 space-y-3">
             <li className="rounded-xl border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-3">{kycCase?.status === "approved" ? <CheckCircle2 className="w-5 h-5 text-emerald-400 mt-0.5" /> : <Circle className="w-5 h-5 text-gray-600 mt-0.5" />}
-                <div><div className="font-semibold">Verify your identity (KYC)</div><p className="text-sm text-gray-400">Needed for sellers, intermediaries, parties and larger payments. {kycCase?.status === "submitted" ? "Yours is under review." : ""}</p></div></div>
-              {kycCase?.status !== "approved" && <Link href="/kyc" className="self-start sm:self-center whitespace-nowrap border border-white/20 hover:border-white/40 text-sm font-semibold px-4 py-2 rounded-lg">{kycCase ? "Open KYC" : "Start KYC"}</Link>}
+                <div><div className="font-semibold">Verify your identity (KYC)</div><p className="text-sm text-gray-400">Needed for sellers, intermediaries, parties and larger payments. {kycCase?.status === "submitted" ? "Yours is under review." : kycCase?.status === "approved" ? "" : "You can do it now or skip for now, but you have 7 days. After 7 days your account locks until you verify or ask for access again."}</p></div></div>
+              {kycCase?.status !== "approved" && <div className="flex gap-2 self-start sm:self-center"><Link href="/kyc" className="whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">{kycCase ? "Open KYC" : "Verify now"}</Link><button onClick={finish} className="whitespace-nowrap border border-white/20 hover:border-white/40 text-sm font-semibold px-4 py-2 rounded-lg">Skip for now</button></div>}
             </li>
             {picked.filter((i) => NEEDS[i]).map((i) => (
               <li key={i} className="rounded-xl border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -162,6 +162,17 @@ function Wizard() {
               </li>
             ))}
           </ul>
+          <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+            <h3 className="font-bold">How to sign in next time</h3>
+            <p className="text-sm text-gray-400 mt-1">Same steps on a phone, an iPad or a computer. Save this page or screenshot it.</p>
+            <ol className="mt-4 space-y-3 text-sm text-gray-200 list-decimal pl-5">
+              <li>Open <b>community.marketunderworld.com</b> in your browser.</li>
+              <li>Tap <b>Sign in</b>. On a phone it is in the top bar or the menu.</li>
+              <li>Enter the access code if it asks. Your access code is <b className="font-mono tracking-widest text-red-300">UNDERGROUND</b> (capital letters do not matter). Your device remembers it for 30 days, a new device or browser asks again.</li>
+              <li>Type your email and password, then tap Sign in. If you forgot your password, tap <b>Forgot password</b> and we email you a link.</li>
+            </ol>
+            <p className="text-xs text-gray-500 mt-3">Keep the code private. It is for members only.</p>
+          </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <button onClick={() => setStep(1)} className="border border-white/20 px-5 py-2.5 rounded-lg">Back</button>
             <button onClick={finish} className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg">Take me there</button>

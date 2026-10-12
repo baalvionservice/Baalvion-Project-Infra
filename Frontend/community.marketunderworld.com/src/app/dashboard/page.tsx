@@ -31,6 +31,7 @@ import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
 import { ProfilePanel } from "@/components/dashboard/profile-panel"
 import { NextSteps } from "@/components/dashboard/next-steps"
+import { MoreAccess } from "@/components/dashboard/more-access"
 import { AccessRequestsPanel } from "@/components/dashboard/access-requests-panel"
 import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
@@ -171,6 +172,7 @@ export default function DashboardPage() {
           </NexusCard>
         ) : null}
 
+        {member && <MoreAccess />}
         {member && <AccessRequestsPanel />}
 
         {member?.seller && tab === "selling" && <SellerOverviewPanel seller={member.seller} sales={sales} />}

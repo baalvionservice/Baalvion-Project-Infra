@@ -847,7 +847,7 @@ function TerminalPanel({ identity }: { identity: any }) {
 
     if (code === SECRET_CODE) {
       // Set access cookie to allow navigating to /auth pages
-      document.cookie = 'underground_unlocked=1; path=/; max-age=86400';
+      document.cookie = 'underground_unlocked=1; path=/; max-age=2592000';
       
       await addLines([
         ['', undefined, 400],

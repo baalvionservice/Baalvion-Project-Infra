@@ -9,8 +9,10 @@ export function middleware(request: NextRequest) {
     const hasUnlocked = request.cookies.has('underground_unlocked');
     
     if (!hasUnlocked) {
-      // Redirect to home page with terminal-auth hash
-      return NextResponse.redirect(new URL('/#terminal-auth', request.url));
+      // The access code step is a normal page that works on every screen, then it sends the visitor on to where they were going.
+      const url = new URL('/access-code', request.url);
+      url.searchParams.set('next', pathname + request.nextUrl.search);
+      return NextResponse.redirect(url);
     }
   }
 

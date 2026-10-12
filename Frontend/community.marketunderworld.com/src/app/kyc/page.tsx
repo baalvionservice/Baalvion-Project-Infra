@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { SignInNotice } from "@/components/nightlife/sign-in-notice"
 import { ShieldCheck, AlertCircle } from "lucide-react"
+import { loadKycWindow, clearKycWindow, type KycWindow } from "@/lib/kyc-status"
 import { kyc, fileToDataUrl, ApiError, type IdType, type KycCase } from "@/lib/api/kyc"
 
 const field = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 outline-none focus:border-cyan-500/50 text-white"
@@ -25,6 +26,8 @@ function KycInner() {
   const [selfieFile, setSelfieFile] = useState<File | null>(null)
 
   const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const [win, setWin] = useState<KycWindow | null>(null)
+  useEffect(() => { if (isAuthenticated) loadKycWindow().then(setWin) }, [isAuthenticated])
 
   useEffect(() => {
     if (authLoading) return
@@ -46,6 +49,7 @@ function KycInner() {
     try {
       const [idDocument, selfie] = await Promise.all([fileToDataUrl(idFile), fileToDataUrl(selfieFile)])
       setCurrent(await kyc.submit({ ...form, idDocument, selfie }))
+      clearKycWindow()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit your verification")
     } finally {
@@ -58,14 +62,28 @@ function KycInner() {
   return (
     <div className="min-h-screen bg-brand-base text-text-primary">
       <Navbar />
-      <main className="container max-w-2xl mx-auto px-6 pt-40 pb-32 space-y-8">
+      <main className="container max-w-2xl mx-auto px-5 pt-28 sm:pt-40 pb-32 space-y-8">
         <header className="space-y-3">
           <h1 className="text-4xl font-bold flex items-center gap-3"><ShieldCheck className="w-8 h-8 text-brand-green" /> Verify your identity</h1>
           <p className="text-text-secondary">
             Some listings, such as investment opportunities, can only be bought by verified people. You verify once and it covers you for 24 months.
             An admin checks your ID against your selfie. Your documents are encrypted, only reviewers can open them, and they are deleted after the retention period.
           </p>
+          <ol className="grid grid-cols-3 gap-2 text-center text-xs text-gray-300">
+            <li className="rounded-lg border border-white/10 py-2"><b className="block text-white">1</b>Your details</li>
+            <li className="rounded-lg border border-white/10 py-2"><b className="block text-white">2</b>Photo of your ID</li>
+            <li className="rounded-lg border border-white/10 py-2"><b className="block text-white">3</b>Selfie with ID</li>
+          </ol>
         </header>
+
+        {win?.state === "open" && (
+          <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-100 text-sm">
+            You have <b>{win.daysLeft} {win.daysLeft === 1 ? "day" : "days"} left</b> to verify. You can skip for now and come back, but after the time ends your account locks until you verify or ask for access again. <Link href="/dashboard" className="underline">Skip for now</Link>
+          </div>
+        )}
+        {win?.state === "blocked" && (
+          <div className="p-4 rounded-xl border border-red-500/40 bg-red-950/40 text-red-100 text-sm">Your account is locked because the 7 days ended. Submit your documents below and it opens again while we review them.</div>
+        )}
 
         {loading && <p className="text-text-muted">Loading…</p>}
         {needsLogin && <SignInNotice next="/kyc" what="verify your identity" />}
@@ -87,7 +105,7 @@ function KycInner() {
         )}
 
         {!loading && !needsLogin && canSubmit && (
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-8 space-y-6">
+          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 sm:p-8 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div><label className={label}>Full name (as on ID)</label><input className={field} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></div>
               <div><label className={label}>Date of birth</label><input type="date" className={field} value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} /></div>
@@ -99,8 +117,8 @@ function KycInner() {
               <div><label className={label}>Last 4 characters of ID number</label><input className={field} maxLength={4} value={form.idNumberLast4} onChange={(e) => setForm({ ...form, idNumberLast4: e.target.value })} /></div>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div><label className={label}>Photo of your ID</label><input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => setIdFile(e.target.files?.[0] ?? null)} className="text-sm text-text-secondary" /></div>
-              <div><label className={label}>Selfie holding your ID</label><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setSelfieFile(e.target.files?.[0] ?? null)} className="text-sm text-text-secondary" /></div>
+              <div><label className={label}>Photo of your ID</label><input type="file" accept="image/*,application/pdf" onChange={(e) => setIdFile(e.target.files?.[0] ?? null)} className="block w-full text-base text-text-secondary file:mr-3 file:h-12 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:text-white" />{idFile && <p className="text-xs text-emerald-300 mt-1">Added: {idFile.name}</p>}</div>
+              <div><label className={label}>Selfie holding your ID</label><input type="file" accept="image/*" capture="user" onChange={(e) => setSelfieFile(e.target.files?.[0] ?? null)} className="block w-full text-base text-text-secondary file:mr-3 file:h-12 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:text-white" />{selfieFile && <p className="text-xs text-emerald-300 mt-1">Added: {selfieFile.name}</p>}</div>
             </div>
             {error && <p role="alert" className="text-sm text-red-400 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> {error}</p>}
             <button onClick={submit} disabled={sending} className="w-full h-14 rounded-xl bg-brand-green text-brand-void font-bold text-lg disabled:opacity-60">{sending ? "Encrypting and uploading…" : "Submit for verification"}</button>
