@@ -44,6 +44,7 @@ function tlsFor(cfg) {
         clientKeyPath: cfg.clientKeyPath,
         caBundlePath: cfg.caBundlePath,
         clientKeyPassphrase: cfg.clientKeyPassphrase || null,
+        allowPlainTls: !!cfg.allowPlainTls,
     };
 }
 

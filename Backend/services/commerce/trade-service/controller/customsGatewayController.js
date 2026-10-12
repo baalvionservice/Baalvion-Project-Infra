@@ -8,6 +8,9 @@ const customs = require('../service/customs');
 const connectorConfig = require('../service/customs/connectors/config');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const db = require('../models');
+const { CHANNEL } = require('../service/customs/schema');
+const { verifyWebhook } = require('../service/customs/connectors/brokerConnector');
 
 function isAdmin(req) {
     const role = req.auth && req.auth.role;
@@ -197,6 +200,34 @@ const pollSubmission = async (req, res, next) => {
     }
 };
 
+// ── POST /v1/customs_submissions/webhooks/broker ─────────────────────────────
+// The licensed broker tells us a filing changed. Unauthenticated by session — the
+// HMAC signature IS the authentication. The body is never trusted for the new
+// status: it only names a filing, and we re-read the authoritative status from the
+// broker by polling. An unknown reference is answered 202 so the broker does not
+// retry forever, and so the endpoint does not reveal which references exist.
+const brokerWebhook = async (req, res, next) => {
+    try {
+        const resolved = connectorConfig.resolve(CHANNEL.BROKER);
+        const secret = resolved.config && resolved.config.webhookSecret;
+        const check = verifyWebhook(req.rawBody || '', req.headers, secret);
+        if (!check.ok) throw new AppError('INVALID_SIGNATURE', `broker webhook rejected: ${check.reason}`, 401);
+
+        const reference = req.body && (req.body.reference || req.body.id);
+        if (!reference) throw new AppError('VALIDATION_ERROR', 'webhook body must carry the filing reference', 400);
+
+        const submission = await db.CustomsSubmission.findOne({
+            where: { channel: CHANNEL.BROKER, gateway_reference: String(reference) },
+        });
+        if (!submission) return res.status(202).json({ received: true });
+
+        const result = await gateway.pollSubmission(submission.id, { actor: 'broker_webhook' });
+        return res.status(200).json({ received: true, status: result.status });
+    } catch (err) {
+        return next(err);
+    }
+};
+
 // ── POST /v1/customs_gateway/poll ────────────────────────────────────────────
 // Sweep every in-flight filing that has a gateway handle.
 const pollPending = async (req, res, next) => {
@@ -217,6 +248,7 @@ module.exports = {
     getRequirements,
     pollSubmission,
     pollPending,
+    brokerWebhook,
     getChannels,
     createSubmission,
     listSubmissions,

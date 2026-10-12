@@ -56,6 +56,7 @@ const CHANNEL = Object.freeze({
     EU_CDS: 'eu_cds',     // European Union — UCC Customs Declaration System / ICS2
     UAE_MIRSAL: 'mirsal', // United Arab Emirates — Dubai Customs Mirsal 2
     CHINA_SINGLE_WINDOW: 'china_single_window', // China — GACC / International Trade Single Window
+    BROKER: 'broker',     // A licensed customs broker who files under their own rights
 });
 
 const VALID_CHANNELS = Object.freeze(Object.values(CHANNEL));
@@ -96,7 +97,17 @@ const COUNTRY_CHANNEL = Object.freeze({
 /** Resolve the gateway channel for an ISO-2 jurisdiction (null when unsupported). */
 function channelForCountry(iso2) {
     if (!iso2) return null;
-    return COUNTRY_CHANNEL[String(iso2).trim().toUpperCase()] || null;
+    const code = String(iso2).trim().toUpperCase();
+    // Countries we file through a licensed broker (their rights, not ours) win over
+    // the direct gateway. Read per call so an operator can move a country without a restart.
+    if (brokerCountries().has(code)) return CHANNEL.BROKER;
+    return COUNTRY_CHANNEL[code] || null;
+}
+
+/** ISO-2 countries routed to the broker channel: BROKER_COUNTRIES="IN,AE". */
+function brokerCountries(env = process.env) {
+    return new Set(String(env.BROKER_COUNTRIES || '')
+        .split(',').map((c) => c.trim().toUpperCase()).filter(Boolean));
 }
 
 // ── Engine version (stamped on every submission for audit / replay safety). ──
@@ -235,6 +246,7 @@ module.exports = {
     EU_MEMBER_STATES,
     COUNTRY_CHANNEL,
     channelForCountry,
+    brokerCountries,
     ENGINE_VERSION,
     DEFAULT_MAX_ATTEMPTS,
     DEFAULT_BACKOFF_MS,
