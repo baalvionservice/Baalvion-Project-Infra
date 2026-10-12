@@ -365,6 +365,20 @@ function findByChapter(chapter) {
  * @param {string} country ISO-2
  * @returns {object|null} { duty, vat, national, restrictions? }
  */
+/**
+ * Are the duty/VAT figures in this module safe to show to a user?
+ *
+ * They are NOT, by default in production: the figures are hand-entered samples for a
+ * handful of commodities (see the data disclaimer above), not a customs schedule. A
+ * landed-cost number built on them looks authoritative and can be wrong in either
+ * direction. Outside production they stay available so the engine can be developed
+ * and tested. In production they stay off until a verified tariff source replaces
+ * this table and the operator sets HS_TARIFF_DATA=verified.
+ */
+function ratesAreVerified(env = process.env) {
+    return env.NODE_ENV !== 'production' || env.HS_TARIFF_DATA === 'verified';
+}
+
 function tariffLine(entryOrCode, country) {
     const entry = typeof entryOrCode === 'string' ? findByCode(entryOrCode) : entryOrCode;
     if (!entry || !country) return null;
@@ -379,4 +393,5 @@ module.exports = {
     findByHeading,
     findByChapter,
     tariffLine,
+    ratesAreVerified,
 };
