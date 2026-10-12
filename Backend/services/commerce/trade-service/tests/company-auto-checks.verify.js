@@ -86,6 +86,20 @@ const codes = (ev) => ev.summary.signals.map((s) => s.code);
         assert.ok(!ev.summary.signals.some((s) => s.level === 'attention'));
     });
 
+    console.log('\nRegister queries');
+    await t('a country typed as a word is not sent as a filter (it would hide real matches)', async () => {
+        const gleif = require('../service/verification/registries/gleif');
+        const urls = [];
+        const orig = global.fetch;
+        global.fetch = async (url) => { urls.push(String(url)); return { ok: true, status: 200, text: async () => '{"data":[]}' }; };
+        try {
+            await gleif.searchByName('Acme Trading', { country: 'India' });
+            await gleif.searchByName('Acme Trading', { country: 'in' });
+        } finally { global.fetch = orig; }
+        assert.ok(!urls[0].includes('legalAddress.country'), urls[0]);
+        assert.ok(urls[1].includes('legalAddress.country') && urls[1].includes('=IN'), urls[1]);
+    });
+
     console.log('\nVAT');
     await t('splits EU VAT numbers and ignores non-EU ones', () => {
         assert.deepStrictEqual(splitVat('DE 811-128-135'), { country: 'DE', number: '811128135' });

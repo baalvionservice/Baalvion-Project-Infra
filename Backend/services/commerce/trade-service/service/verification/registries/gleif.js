@@ -12,6 +12,10 @@ const { getJson } = require('./http');
 const BASE = 'https://api.gleif.org/api/v1';
 const JSONAPI = { Accept: 'application/vnd.api+json' };
 
+// GLEIF filters on an ISO-2 code. A country typed as a word ("India") would match nothing
+// and wrongly read as "not in the register", so anything else is not sent as a filter.
+const iso2 = (c) => (/^[A-Za-z]{2}$/.test(String(c || '').trim()) ? String(c).trim().toUpperCase() : null);
+
 function normalize(record) {
     const a = (record && record.attributes) || {};
     const e = a.entity || {};
@@ -46,7 +50,7 @@ async function byLei(lei, opts = {}) {
 async function searchByName(name, { limit = 5, country = null, ...opts } = {}) {
     if (!name || String(name).trim().length < 3) return { ok: true, entities: [] };
     const qs = new URLSearchParams({ 'filter[entity.legalName]': String(name).trim(), 'page[size]': String(limit) });
-    if (country) qs.set('filter[entity.legalAddress.country]', String(country).toUpperCase());
+    if (iso2(country)) qs.set('filter[entity.legalAddress.country]', iso2(country));
     const r = await getJson(`${BASE}/lei-records?${qs}`, { headers: JSONAPI, ...opts });
     if (!r.ok || !r.body) return { ok: false, error: r.error || `HTTP ${r.status}` };
     return { ok: true, entities: (r.body.data || []).map(normalize) };
@@ -56,7 +60,7 @@ async function searchByName(name, { limit = 5, country = null, ...opts } = {}) {
 async function searchByRegistration(number, { country = null, limit = 5, ...opts } = {}) {
     if (!number) return { ok: true, entities: [] };
     const qs = new URLSearchParams({ 'filter[entity.registeredAs]': String(number).trim(), 'page[size]': String(limit) });
-    if (country) qs.set('filter[entity.legalAddress.country]', String(country).toUpperCase());
+    if (iso2(country)) qs.set('filter[entity.legalAddress.country]', iso2(country));
     const r = await getJson(`${BASE}/lei-records?${qs}`, { headers: JSONAPI, ...opts });
     if (!r.ok || !r.body) return { ok: false, error: r.error || `HTTP ${r.status}` };
     return { ok: true, entities: (r.body.data || []).map(normalize) };
