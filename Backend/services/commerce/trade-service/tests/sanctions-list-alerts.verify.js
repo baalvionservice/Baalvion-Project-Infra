@@ -11,6 +11,7 @@
  */
 const assert = require('assert');
 const alerts = require('../service/compliance/lists/alerts');
+const ntfy = require('../service/compliance/lists/ntfy');
 
 let pass = 0;
 let fail = 0;
@@ -54,6 +55,32 @@ const fake = () => {
     await t('an unavailable alert channel never throws', async () => {
         const r = await alerts.alertRefreshFailure([{ source: 'OFAC', status: 'failed', error: 'x' }], { ntfy: null });
         assert.strictEqual(r.sent, false);
+    });
+
+    console.log('\nntfy sender');
+    await t('does nothing, without error, when no topic is configured', async () => {
+        let called = false;
+        const r = await ntfy.sendNtfy({ title: 'x', body: 'y' }, { env: {}, fetchImpl: async () => { called = true; } });
+        assert.strictEqual(r.sent, false);
+        assert.strictEqual(called, false);
+    });
+    await t('posts to the topic with title, priority and token', async () => {
+        let seen;
+        const r = await ntfy.sendNtfy({ title: 'Stale', body: 'b', severity: 'critical', tags: ['warning'] },
+            { env: { NTFY_TOPIC: 'my topic', NTFY_SERVER: 'https://ntfy.example/', NTFY_TOKEN: 't0k' }, fetchImpl: async (u, o) => { seen = { u, o }; return { ok: true }; } });
+        assert.strictEqual(r.sent, true);
+        assert.strictEqual(seen.u, 'https://ntfy.example/my%20topic');
+        assert.strictEqual(seen.o.headers.Priority, '5');
+        assert.strictEqual(seen.o.headers.Title, 'Stale');
+        assert.strictEqual(seen.o.headers.Authorization, 'Bearer t0k');
+    });
+    await t('a network error or non-200 is reported, never thrown', async () => {
+        const down = await ntfy.sendNtfy({ title: 'x' }, { env: { NTFY_TOPIC: 'a' }, fetchImpl: async () => { throw new Error('ECONNRESET'); } });
+        assert.strictEqual(down.sent, false);
+        const bad = await ntfy.sendNtfy({ title: 'x' }, { env: { NTFY_TOPIC: 'a' }, fetchImpl: async () => ({ ok: false, status: 429 }) });
+        assert.match(bad.error, /429/);
+        assert.strictEqual((await ntfy.sendHeartbeat('https://hb', { fetchImpl: async () => ({ ok: true }) })).sent, true);
+        assert.strictEqual((await ntfy.sendHeartbeat(null)).sent, false);
     });
 
     console.log('\nDedupe');

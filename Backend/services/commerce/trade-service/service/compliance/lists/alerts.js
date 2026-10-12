@@ -13,7 +13,7 @@
  *             at all.
  *
  * Alerts go out over ntfy (the one channel that reaches a phone on this platform with no
- * credentials, see packages/notify-ntfy). The message says what broke, never why it is
+ * credentials; see ./ntfy.js for why this does not use the shared package). The message says what broke, never why it is
  * reachable. A heartbeat (SANCTIONS_HEARTBEAT_URL) is pinged only when every list is
  * fresh, so an external monitor turns the absence of pings into an alert even if this
  * whole service is down.
@@ -28,14 +28,7 @@ const REALERT_MS = 12 * HOUR_MS;
 
 const lastAlertAt = new Map();
 
-function ntfy() {
-    try {
-        // Resolved by path: the package is a workspace member, not a dependency of this service.
-        return require('../../../../../../packages/notify-ntfy');
-    } catch {
-        return null;
-    }
-}
+const ntfy = () => require('./ntfy');
 
 async function send(message, overrides = {}) {
     const lib = overrides.ntfy === undefined ? ntfy() : overrides.ntfy;
