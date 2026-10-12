@@ -11,6 +11,7 @@ export const INTERESTS: { id: string; title: string; group: string }[] = [
   { id: "clubs", title: "Night life: clubs, guest lists and events", group: "guest" },
   { id: "elite_paid", title: "Elite parties and VIP clubs as a paying member", group: "guest" },
   { id: "elite_invite", title: "Free party invitations from hosts (for women guests)", group: "guest" },
+  { id: "dating", title: "Meet people: dating and founders", group: "guest" },
   { id: "wallet", title: "Ticket draws and DJ demands", group: "guest" },
   { id: "forum", title: "Take part in forums", group: "guest" },
   { id: "buy", title: "Buy on the marketplace", group: "guest" },
