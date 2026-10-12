@@ -10,6 +10,7 @@ exports.profileSchema = z.object({
     city: z.string().trim().max(80).optional(),
     interests: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
     learnGoal: z.string().trim().max(500).optional(),
+    gender: z.enum(['woman', 'man', 'other', '']).optional(),
     photoAssetId: z.string().uuid().nullable().optional(),
 });
 exports.requestSchema = z.object({

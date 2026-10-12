@@ -13,6 +13,7 @@ module.exports = (sequelize) => sequelize.define('EliteHostApplication', {
     club_name: { type: DataTypes.STRING(160), allowNull: true },
     party_date: { type: DataTypes.DATEONLY, allowNull: true },
     guests: { type: DataTypes.INTEGER, allowNull: true },
+    ladies_free: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     perks: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
     status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), allowNull: false, defaultValue: 'pending' },
     reviewed_by: { type: DataTypes.STRING(64), allowNull: true },

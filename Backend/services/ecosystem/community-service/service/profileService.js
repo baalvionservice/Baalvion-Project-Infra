@@ -9,6 +9,7 @@ const present = (p) => ({
     city: (p && p.city) || '',
     interests: (p && p.interests) || [],
     learnGoal: (p && p.learn_goal) || '',
+    gender: (p && p.gender) || '',
 });
 
 async function getMine(userId) {
@@ -27,6 +28,7 @@ async function saveMine(userId, d) {
     if (d.bio !== undefined) patch.bio = d.bio || null;
     if (d.city !== undefined) patch.city = d.city || null;
     if (d.interests !== undefined) patch.interests = [...new Set(d.interests)];
+    if (d.gender !== undefined) patch.gender = d.gender || null;
     if (d.learnGoal !== undefined) patch.learn_goal = d.learnGoal || null;
     if (d.photoAssetId !== undefined) patch.photo_asset_id = d.photoAssetId;
     await row.update(patch);

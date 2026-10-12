@@ -30,6 +30,8 @@ module.exports = {
     adminListEvents: h(async (req, res) => sendSuccess(req, res, await svc.listEvents({
         city: req.query.city, from: req.query.from, to: req.query.to, clubId: req.query.clubId, includeAll: true, ...page(req),
     }))),
+    submitEvent: h(async (req, res) => sendSuccess(req, res, await svc.submitEvent(userId(req), parse(v.submitEventSchema, req.body)), 201)),
+    myEvents: h(async (req, res) => sendSuccess(req, res, await svc.myEvents(userId(req)))),
     adminCreateEvent: h(async (req, res) => sendSuccess(req, res, await svc.createEvent(parse(v.createEventSchema, req.body)), 201)),
     adminUpdateEvent: h(async (req, res) => sendSuccess(req, res, await svc.updateEvent(req.params.id, parse(v.updateEventSchema, req.body)))),
 

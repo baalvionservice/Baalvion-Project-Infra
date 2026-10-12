@@ -134,7 +134,18 @@ const eventFields = {
     ticketUrl: httpUrl(600).optional(),
 };
 const createEventSchema = z.object(eventFields);
-const updateEventSchema = z.object({ ...eventFields, status: z.enum(['active', 'cancelled']) }).partial()
+const submitEventSchema = z.object({
+    clubId: z.string().uuid(),
+    eventName: z.string().trim().min(3).max(200),
+    eventDate: isoDate,
+    djName: z.string().trim().max(160).optional(),
+    description: z.string().trim().min(10, 'Describe the event in a sentence or two').max(2000),
+    image: httpUrl(600).optional(),
+    ticketUrl: httpUrl(600).optional(),
+    ticketPriceText: z.string().trim().max(60).optional(),
+    freeGuestList: z.boolean().optional(),
+});
+const updateEventSchema = z.object({ ...eventFields, status: z.enum(['active', 'cancelled', 'pending_review', 'rejected']) }).partial()
     .refine((d) => Object.keys(d).length > 0, { message: 'No fields to update' });
 
 const eliteHostApplySchema = z.object({
@@ -148,12 +159,13 @@ const eliteHostApplySchema = z.object({
     guests: z.coerce.number().int().min(1).max(100).optional(),
     partyDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').optional(),
     perks: z.array(z.string().trim().min(1).max(80)).max(10).optional().default([]),
+    ladiesFree: z.boolean().optional(),
 });
 const eliteHostStatusSchema = z.object({ status: z.enum(['pending', 'approved', 'rejected']) });
 
 module.exports = {
     eliteHostApplySchema, eliteHostStatusSchema,
-    createEventSchema, updateEventSchema,
+    createEventSchema, updateEventSchema, submitEventSchema,
     createClubSchema, updateClubSchema, guestListSchema, vipTableSchema, bookingStatusSchema,
     createListingSchema, updateListingSchema, applyListingSchema, applicationStatusSchema,
 };

@@ -9,6 +9,7 @@ module.exports = (sequelize) => sequelize.define('EliteHostGuest', {
     requester_label: { type: DataTypes.STRING(120), allowNull: true },
     males: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     females: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    free_invite: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     note: { type: DataTypes.STRING(300), allowNull: true },
     status: { type: DataTypes.ENUM('pending', 'approved', 'declined', 'withdrawn'), allowNull: false, defaultValue: 'pending' },
     decided_by: { type: DataTypes.STRING(64), allowNull: true },

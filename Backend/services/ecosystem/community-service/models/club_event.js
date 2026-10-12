@@ -11,7 +11,9 @@ module.exports = (sequelize) => sequelize.define('ClubEvent', {
     description: { type: DataTypes.TEXT, allowNull: true },
     tag: { type: DataTypes.ENUM('FREE ON GUEST LIST', 'BUY TICKETS', 'VIP TABLE', 'SOLD OUT'), allowNull: false, defaultValue: 'FREE ON GUEST LIST' },
     ticket_url: { type: DataTypes.STRING(600), allowNull: true },
-    status: { type: DataTypes.ENUM('active', 'cancelled'), allowNull: false, defaultValue: 'active' },
+    submitted_by: { type: DataTypes.STRING(64), allowNull: true },
+    ticket_price_text: { type: DataTypes.STRING(60), allowNull: true },
+    status: { type: DataTypes.ENUM('active', 'cancelled', 'pending_review', 'rejected'), allowNull: false, defaultValue: 'active' },
 }, {
     tableName: 'club_events', schema: 'community', underscored: true, timestamps: true,
     indexes: [{ fields: ['event_date', 'status'] }, { fields: ['club_id'] }],

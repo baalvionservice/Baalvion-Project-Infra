@@ -23,6 +23,8 @@ router.get('/nightlife/stats', ctrl.stats);
 router.get('/nightlife/clubs', ctrl.listClubs);
 router.get('/nightlife/clubs/:id', ctrl.getClub);
 router.get('/nightlife/events', ctrl.listEvents);
+router.get('/nightlife/events/mine', authMw, ctrl.myEvents);
+router.post('/nightlife/events/submit', authMw, ctrl.submitEvent);
 router.get('/nightlife/events/:id', uuidParam, ctrl.getEvent);
 router.post('/nightlife/clubs/:id/guest-list', optionalAuthMiddleware, ctrl.createGuestList);
 router.post('/nightlife/clubs/:id/vip-tables', optionalAuthMiddleware, ctrl.createVipTable);

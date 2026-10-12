@@ -8,7 +8,7 @@ const PURPOSES = {
     profile_photo: { admin: false, visibility: 'restricted' }, // candidate photos: owner, admins, verified employers
     teacher_avatar: { admin: false, visibility: 'public' },
     club_image: { admin: true, visibility: 'public' },
-    event_poster: { admin: true, visibility: 'public' },
+    event_poster: { admin: false, visibility: 'public' }, // shown only once the events team approves the event
 };
 const MEMBER_QUOTA = 12;
 const ADMIN_QUOTA = 500;

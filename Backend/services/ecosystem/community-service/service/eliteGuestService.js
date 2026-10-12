@@ -4,12 +4,22 @@ const { AppError } = require('../utils/errors');
 const { Op } = require('sequelize');
 
 const today = () => new Date().toISOString().slice(0, 10);
-const present = (g) => ({ id: g.id, partyId: g.party_id, males: g.males, females: g.females, note: g.note, status: g.status, createdAt: g.createdAt });
+const present = (g) => ({ freeInvite: !!g.free_invite, id: g.id, partyId: g.party_id, males: g.males, females: g.females, note: g.note, status: g.status, createdAt: g.createdAt });
 
 // Approved guests already counted against a party's capacity.
 async function approvedCount(partyId) {
     const rows = await db.EliteHostGuest.findAll({ where: { party_id: partyId, status: 'approved' }, attributes: ['males', 'females'] });
     return rows.reduce((n, r) => n + r.males + r.females, 0);
+}
+
+// A paid platform tier is an approved or paid membership in a tier community that has not expired.
+async function hasPaidTier(uid) {
+    const rows = await db.CommunityMembership.findAll({
+        where: { user_id: uid, status: { [Op.in]: ['approved', 'paid'] } },
+        include: [{ model: db.Community, as: 'community', where: { is_platform_tier: true }, attributes: ['id'] }],
+        attributes: ['id', 'expires_at'],
+    });
+    return rows.some((r) => !r.expires_at || new Date(r.expires_at) > new Date());
 }
 
 async function join(userId, label, partyId, d) {
@@ -20,6 +30,17 @@ async function join(userId, label, partyId, d) {
     if (party.party_date && String(party.party_date) < today()) throw new AppError('CLOSED', 'This party has already taken place', 409);
     const kyc = await db.KycVerification.findOne({ where: { user_id: uid, status: 'approved' }, attributes: ['id'] });
     if (!kyc) throw new AppError('KYC_REQUIRED', 'Verify your identity (KYC) before you can ask to join a party', 403);
+    // Elite parties are for paying members. A woman guest can instead ask for a free invitation when the host offers one; the host still decides.
+    const paid = await hasPaidTier(uid);
+    let freeInvite = false;
+    if (!paid) {
+        const profile = await db.MemberProfile.findByPk(uid, { attributes: ['gender'] });
+        const woman = !!profile && profile.gender === 'woman';
+        if (!party.ladies_free) throw new AppError('TIER_REQUIRED', 'Elite parties are for paying members. Choose a membership tier to ask to join.', 403);
+        if (!woman) throw new AppError('TIER_REQUIRED', 'This host offers free invitations to women guests. Choose a membership tier to ask to join, or set "Woman" in your profile if that applies to you.', 403);
+        if (d.males > 0) throw new AppError('TIER_REQUIRED', 'A free invitation is for women guests only. Remove male guests, or choose a membership tier.', 403);
+        freeInvite = true;
+    }
     const total = d.males + d.females;
     if (party.guests) {
         const left = party.guests - (await approvedCount(partyId));
@@ -27,7 +48,7 @@ async function join(userId, label, partyId, d) {
     }
     const existing = await db.EliteHostGuest.findOne({ where: { party_id: partyId, user_id: uid, status: { [Op.in]: ['pending', 'approved'] } } });
     if (existing) throw new AppError('CONFLICT', 'You already asked to join this party', 409);
-    const row = await db.EliteHostGuest.create({ party_id: partyId, user_id: uid, requester_label: label || null, males: d.males, females: d.females, note: d.note || null });
+    const row = await db.EliteHostGuest.create({ party_id: partyId, user_id: uid, requester_label: label || null, males: d.males, females: d.females, note: d.note || null, free_invite: freeInvite });
     return present(row);
 }
 
