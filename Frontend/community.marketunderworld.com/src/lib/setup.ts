@@ -58,6 +58,8 @@ export const DESTINATIONS: Record<string, { href: string; label: string }> = {
   student: { href: "/student-dashboard", label: "Open your student dashboard" },
   teacher: { href: "/teacher-dashboard", label: "Open your teacher dashboard" },
   employer: { href: "/nightlife/employer", label: "Register your business to hire" },
+  elite_paid: { href: "/access", label: "Choose your membership" },
+  elite_invite: { href: "/clubs/elite-host", label: "Ask hosts for an invitation" },
   ticketseller: { href: "/dashboard", label: "Ask the clubs team to list your club" },
   organiser: { href: "/dashboard", label: "Ask the events team to list your event" },
 }
