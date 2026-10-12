@@ -167,7 +167,8 @@ try {
     t('readiness separates ready channels from blocked ones', () => {
         const r = config.readiness({ env: {} });
         assert.strictEqual(r.ready_channels.length, 0);
-        assert.strictEqual(r.blocked_channels.length, 5);
+        // five government gateways + the licensed-broker channel
+        assert.strictEqual(r.blocked_channels.length, 6);
         assert.ok(/no simulator fallback/i.test(r.note));
     });
 

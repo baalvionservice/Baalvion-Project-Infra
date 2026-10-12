@@ -16,6 +16,8 @@ router.get('/readiness', authMiddleware, ctrl.getReadiness);
 router.get('/requirements/:channel', ctrl.getRequirements);
 // These gateways decide asynchronously; polling is what turns a lodged filing
 // into a known outcome.
+// Signed by the broker, not by a user session: the HMAC is the credential.
+router.post('/webhooks/broker', ctrl.brokerWebhook);
 router.post('/poll', authMiddleware, ctrl.pollPending);
 router.post('/recover', authMiddleware, ctrl.recoverStalled); // admin recovery sweep
 

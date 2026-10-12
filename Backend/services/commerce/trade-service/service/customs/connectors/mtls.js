@@ -106,6 +106,24 @@ function getAgent(opts = {}) {
     const cached = agentCache.get(key);
     if (cached) return cached;
 
+    // A licensed broker authenticates us with a signed request rather than a client
+    // certificate, so its channel opts in to ordinary verified TLS. Government
+    // channels never set this: they still require the full enrolment material.
+    if (opts.allowPlainTls && !opts.clientCertPath) {
+        const brokerAgent = new https.Agent({
+            ca: opts.caBundlePath ? readPem(opts.caBundlePath, 'CA bundle') : undefined,
+            rejectUnauthorized: true,
+            minVersion: 'TLSv1.2',
+            keepAlive: true,
+            keepAliveMsecs: 30000,
+            maxSockets: Number(opts.maxSockets) || 16,
+            timeout: Number(opts.timeoutMs) || DEFAULT_TIMEOUT_MS,
+        });
+        const plain = { agent: brokerAgent, meta: null };
+        agentCache.set(key, plain);
+        return plain;
+    }
+
     const cert = readPem(opts.clientCertPath, 'client certificate');
     const clientKey = readPem(opts.clientKeyPath, 'client private key');
     const ca = readPem(opts.caBundlePath, 'CA bundle');

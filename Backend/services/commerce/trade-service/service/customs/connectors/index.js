@@ -17,6 +17,7 @@ const { USConnector } = require('./usConnector');
 const { EUConnector } = require('./euConnector');
 const { UAEConnector } = require('./uaeConnector');
 const { ChinaConnector } = require('./chinaConnector');
+const { BrokerConnector } = require('./brokerConnector');
 
 // channel → factory (lazy: construct once, on demand). Null-prototype on both maps:
 // the channel reaches here straight off a submission request, and on a plain object
@@ -28,6 +29,7 @@ const FACTORIES = Object.assign(Object.create(null), {
     [CHANNEL.EU_CDS]: () => new EUConnector(),
     [CHANNEL.UAE_MIRSAL]: () => new UAEConnector(),
     [CHANNEL.CHINA_SINGLE_WINDOW]: () => new ChinaConnector(),
+    [CHANNEL.BROKER]: () => new BrokerConnector(),
 });
 
 const instances = Object.create(null);
@@ -74,6 +76,7 @@ function resetConnectors() {
     FACTORIES[CHANNEL.EU_CDS] = () => new EUConnector();
     FACTORIES[CHANNEL.UAE_MIRSAL] = () => new UAEConnector();
     FACTORIES[CHANNEL.CHINA_SINGLE_WINDOW] = () => new ChinaConnector();
+    FACTORIES[CHANNEL.BROKER] = () => new BrokerConnector();
 }
 
 /** The channels the registry can currently serve. */
@@ -94,4 +97,5 @@ module.exports = {
     EUConnector,
     UAEConnector,
     ChinaConnector,
+    BrokerConnector,
 };

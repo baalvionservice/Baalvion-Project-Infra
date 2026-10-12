@@ -113,6 +113,22 @@ const CHANNEL_CONFIG = Object.freeze({
         ],
     },
 
+    [CHANNEL.BROKER]: {
+        label: 'Licensed customs broker',
+        authority: 'A customs broker licensed in the destination country, filing under its own rights',
+        enrolment: 'A signed agreement with the broker, an account at the broker, and the broker\'s API and webhook details. The broker, not Baalvion, is the declarant of record.',
+        message_format: 'JSON, HMAC-SHA256 signed',
+        fields: [
+            { key: 'endpoint', env: 'BROKER_ENDPOINT', kind: 'url', required: true, description: 'Broker submission endpoint (https)', obtained_from: 'Broker API documentation' },
+            { key: 'statusEndpoint', env: 'BROKER_STATUS_ENDPOINT', kind: 'url', required: false, description: 'Broker status endpoint; defaults to the submission endpoint', obtained_from: 'Broker API documentation' },
+            { key: 'brokerAccountId', env: 'BROKER_ACCOUNT_ID', kind: 'value', required: true, description: 'Our account / client id at the broker', obtained_from: 'Broker onboarding' },
+            { key: 'apiKey', env: 'BROKER_API_KEY', kind: 'value', required: true, secret: true, description: 'API key the broker issued to us', obtained_from: 'Broker onboarding' },
+            { key: 'signingSecret', env: 'BROKER_SIGNING_SECRET', kind: 'value', required: true, secret: true, description: 'Shared secret used to sign requests we send', obtained_from: 'Agreed with the broker' },
+            { key: 'webhookSecret', env: 'BROKER_WEBHOOK_SECRET', kind: 'value', required: true, secret: true, description: 'Shared secret used to verify status webhooks the broker sends', obtained_from: 'Agreed with the broker' },
+            { key: 'caBundlePath', env: 'BROKER_CA_BUNDLE', kind: 'file', required: false, description: 'Optional CA bundle if the broker uses a private CA', obtained_from: 'Broker' },
+        ],
+    },
+
     [CHANNEL.CHINA_SINGLE_WINDOW]: {
         label: 'China International Trade Single Window',
         authority: 'General Administration of Customs of China (GACC)',
