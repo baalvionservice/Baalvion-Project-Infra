@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getKYCDetail, submitKYC, KYCStatus, IdTypeOption, KYCDetail } from '@/services/compliance-service';
+import { getKYCDetail, submitKYC, KYCStatus, IdTypeOption, KYCDetail, type CompanyLookupEntity } from '@/services/compliance-service';
+import { CompanySearch } from './_components/company-search';
 import { documentsApi } from '@/api/documents';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ interface RepresentativeDetails {
 }
 
 interface CompanyCredentials {
+  legalName: string;
+  vatNumber: string;
   registrationNumber: string;
   incorporationDate: string;
   hqAddress: string;
@@ -48,8 +51,9 @@ export default function KYCPage() {
     fullName: '', dateOfBirth: '', nationality: '', officialEmail: '',
   });
   const [company, setCompany] = useState<CompanyCredentials>({
-    registrationNumber: '', incorporationDate: '', hqAddress: '', taxResidency: '',
+    legalName: '', vatNumber: '', registrationNumber: '', incorporationDate: '', hqAddress: '', taxResidency: '',
   });
+  const [pickedName, setPickedName] = useState<string | null>(null);
   const [uploads, setUploads] = useState<Record<UploadSlot, UploadState>>({
     governmentId: { ...EMPTY_UPLOAD },
     businessLicense: { ...EMPTY_UPLOAD },
@@ -71,12 +75,27 @@ export default function KYCPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // The customer picked their company from the public register, so its details replace
+  // what is in the form; a field the register does not have is left as the customer typed it.
+  function applyRegisterEntity(entity: CompanyLookupEntity) {
+    const a = entity.legal_address;
+    const address = [...(a.lines || []), a.city, a.region, a.postal_code].filter(Boolean).join(', ');
+    setPickedName(entity.legal_name);
+    setCompany(prev => ({
+      ...prev,
+      legalName: entity.legal_name || prev.legalName,
+      registrationNumber: entity.registered_as || prev.registrationNumber,
+      hqAddress: address || prev.hqAddress,
+      taxResidency: entity.country || prev.taxResidency,
+    }));
+  }
+
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => setStep(prev => prev - 1);
 
   const step1Valid = representative.fullName.trim() && representative.dateOfBirth
     && representative.nationality.trim() && representative.officialEmail.trim();
-  const step2Valid = company.registrationNumber.trim() && company.incorporationDate
+  const step2Valid = company.legalName.trim() && company.registrationNumber.trim() && company.incorporationDate
     && company.hqAddress.trim() && company.taxResidency.trim();
   const uploadsValid = uploads.governmentId.documentId && uploads.businessLicense.documentId;
 
@@ -288,6 +307,16 @@ export default function KYCPage() {
                 <CardDescription>Official business registration and jurisdictional details.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Company legal name</Label>
+                  <CompanySearch
+                    value={company.legalName}
+                    pickedName={pickedName}
+                    onChange={(name) => setCompany(prev => ({ ...prev, legalName: name }))}
+                    onPick={applyRegisterEntity}
+                  />
+                  <p className="text-xs text-muted-foreground">Pick your company from the list and we fill in the rest. Not listed? Type the details yourself.</p>
+                </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Company Registration Number (UEN)</Label>
@@ -314,11 +343,19 @@ export default function KYCPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Tax Residency</Label>
+                    <Label>Country (two-letter code)</Label>
                     <Input
-                      placeholder="Primary Jurisdiction"
+                      placeholder="e.g. IN, AE, DK"
                       value={company.taxResidency}
                       onChange={(e) => setCompany(prev => ({ ...prev, taxResidency: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>VAT / GST number <span className="text-muted-foreground font-normal">(optional — EU VAT numbers are checked instantly)</span></Label>
+                    <Input
+                      placeholder="e.g. DE811128135"
+                      value={company.vatNumber}
+                      onChange={(e) => setCompany(prev => ({ ...prev, vatNumber: e.target.value }))}
                     />
                   </div>
                 </div>

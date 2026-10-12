@@ -25,6 +25,30 @@ interface QueueRow {
   submittedAt: string;
   /** The uploaded evidence document, when the submission carried one. */
   documentId: string | null;
+  /** Result of the automatic register + sanctions checks (company rows only). */
+  checks: AutoChecks | null;
+}
+
+interface AutoChecks {
+  outcome: 'supported' | 'no_evidence' | 'attention';
+  signals: { code: string; level: 'positive' | 'info' | 'attention'; text: string }[];
+}
+
+const OUTCOME_LABEL: Record<AutoChecks['outcome'], string> = {
+  supported: 'Register confirms',
+  no_evidence: 'No register evidence',
+  attention: 'Needs attention',
+};
+const OUTCOME_STYLE: Record<AutoChecks['outcome'], string> = {
+  supported: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  no_evidence: 'border-slate-200 bg-slate-50 text-slate-600',
+  attention: 'border-red-200 bg-red-50 text-red-700',
+};
+
+/** The evidence attached when the company was submitted; absent on older records. */
+function autoChecksOf(metadata: any): AutoChecks | null {
+  const ev = metadata && metadata.auto_checks;
+  return ev && ev.summary && ev.summary.outcome ? { outcome: ev.summary.outcome, signals: ev.summary.signals || [] } : null;
 }
 
 export default function ComplianceAdminKYCPage() {
@@ -46,12 +70,14 @@ export default function ComplianceAdminKYCPage() {
         detail: `${r.id_type || 'ID'} · ${r.nationality || 'unknown nationality'}`,
         status: r.status, submittedAt: r.createdAt,
         documentId: r.id_document_id || null,
+        checks: null,
       }));
       const companyRows: QueueRow[] = toList<any>(companyRes).map((r) => ({
         id: String(r.org_id), kind: 'company', label: r.legal_company_name || `Org #${r.org_id}`,
         detail: r.registration_number ? `Reg. ${r.registration_number}` : 'No registration number on file',
         status: r.status, submittedAt: r.submitted_at || r.createdAt,
         documentId: (r.metadata && r.metadata.businessLicenseDocumentId) || null,
+        checks: autoChecksOf(r.metadata),
       }));
       setRows([...identityRows, ...companyRows].sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || '')));
     } finally {
@@ -155,6 +181,7 @@ export default function ComplianceAdminKYCPage() {
                 <TableHead>Type</TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead>Detail</TableHead>
+                <TableHead>Automatic checks</TableHead>
                 <TableHead>Submitted At</TableHead>
                 <TableHead className="text-right">Review</TableHead>
               </TableRow>
@@ -170,6 +197,20 @@ export default function ComplianceAdminKYCPage() {
                   </TableCell>
                   <TableCell className="text-xs font-bold">{row.label}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{row.detail}</TableCell>
+                  <TableCell className="text-xs">
+                    {row.checks ? (
+                      <div className="space-y-1">
+                        <Badge variant="outline" className={OUTCOME_STYLE[row.checks.outcome]}>{OUTCOME_LABEL[row.checks.outcome]}</Badge>
+                        <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                          {row.checks.signals.filter((sig) => sig.level !== 'info').map((sig) => (
+                            <li key={sig.code} className={sig.level === 'attention' ? 'font-semibold text-red-700' : undefined}>{sig.text}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">{row.kind === 'company' ? 'Not run yet' : '—'}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {row.submittedAt ? format(new Date(row.submittedAt), "MMM d, yyyy HH:mm") : '—'}
                   </TableCell>
