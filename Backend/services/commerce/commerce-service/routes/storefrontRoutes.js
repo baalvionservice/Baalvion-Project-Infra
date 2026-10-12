@@ -38,6 +38,8 @@ const presenceLimit = rateLimit({
     message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many presence pings' } },
 });
 
+// Product photos (UUID-only param so nothing else can ride this path).
+router.get('/media/:mediaId([0-9a-fA-F-]{36})', ctrl.serveMedia);
 router.get('/payment-settings', ctrl.getPaymentSettings);
 router.get('/products', ctrl.listProducts);
 router.get('/products/:idOrSlug/reviews', ctrl.listReviews);

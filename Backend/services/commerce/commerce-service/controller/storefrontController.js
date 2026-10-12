@@ -3,6 +3,7 @@ const { sendSuccess } = require('../utils/response');
 const storefront = require('../service/storefrontService');
 const reviewService = require('../service/reviewService');
 const presence = require('../service/presenceService');
+const mediaService = require('../service/productMediaService');
 
 const listProducts = async (req, res, next) => {
     try { return sendSuccess(req, res, await storefront.listProducts(req.params.storeId, req.query)); }
@@ -12,6 +13,20 @@ const listProducts = async (req, res, next) => {
 const getProduct = async (req, res, next) => {
     try { return sendSuccess(req, res, await storefront.getProduct(req.params.storeId, req.params.idOrSlug, req.query)); }
     catch (err) { return next(err); }
+};
+
+// Public product photo. Locked down for a route that anyone can hit: no sniffing, no scripts
+// (an SVG opened directly could otherwise run), cacheable at the edge.
+const serveMedia = async (req, res, next) => {
+    try {
+        const { buffer, contentType } = await mediaService.getPublicMediaForServe(req.params.storeId, req.params.mediaId);
+        res.setHeader('content-type', contentType);
+        res.setHeader('x-content-type-options', 'nosniff');
+        res.setHeader('content-security-policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+        res.setHeader('cross-origin-resource-policy', 'cross-origin');
+        res.setHeader('cache-control', 'public, max-age=3600');
+        return res.status(200).send(buffer);
+    } catch (err) { return next(err); }
 };
 
 const getPaymentSettings = async (req, res, next) => {
@@ -63,4 +78,4 @@ const presenceCount = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated, previewDiscount, presenceHeartbeat, presenceCount, getPaymentSettings };
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated, previewDiscount, presenceHeartbeat, presenceCount, getPaymentSettings, serveMedia };
