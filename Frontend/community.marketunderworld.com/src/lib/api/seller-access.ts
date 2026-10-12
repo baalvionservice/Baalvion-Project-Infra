@@ -128,6 +128,8 @@ export const sendAdminChatMessage = (id: string, body: string) => post<ChatMessa
 // Which ways to pay are switched on right now (no addresses: those are issued with a payment).
 export interface PaymentNetworkInfo { network: string; label: string; available: boolean }
 export interface PaymentMethodInfo { method: PaymentMethod; label: string; available: boolean; networks: PaymentNetworkInfo[] }
+// Switch the chain of an unpaid USDT payment; the address changes with it.
+export const changePaymentNetwork = (id: string, network: string) => post<CategoryPayment>(`/seller-bonds/${id}/network`, { network });
 export const listPaymentMethods = () => call<PaymentMethodInfo[]>('/payment-destinations/available');
 
 // Super admin: where sellers send payments. One entry per network (Binance Pay has a single entry with no network).

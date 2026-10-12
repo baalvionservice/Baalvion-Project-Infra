@@ -12,6 +12,7 @@ const proofSchema = z.object({
     data: z.string().min(100).max(4 * 1024 * 1024),
 });
 // A payer proves payment with a screenshot, a transaction reference, or both (at least one).
+exports.changeNetworkSchema = z.object({ network: z.enum(['TRC20', 'BEP20', 'ERC20', 'SOLANA']) });
 exports.submitPaymentSchema = z.object({
     txHash: z.string().trim().min(6).max(200).optional(),
     proofs: z.array(proofSchema).max(3).optional(),

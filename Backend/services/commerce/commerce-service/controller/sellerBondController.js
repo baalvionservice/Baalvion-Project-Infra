@@ -9,6 +9,7 @@ const wrap = (fn, status) => async (req, res, next) => {
 
 exports.create = wrap((req) => svc.createBond(authCtxOf(req), req.validated), 201);
 exports.mine = wrap((req) => svc.listMine(req.auth.userId));
+exports.changeNetwork = wrap((req) => svc.changeNetwork(authCtxOf(req), req.params.id, req.validated.network));
 exports.submitPayment = wrap((req) => svc.submitPayment(authCtxOf(req), req.params.id, req.validated));
 exports.list = async (req, res, next) => {
     try { return sendPaginated(req, res, await svc.listAll(req.query)); } catch (err) { return next(err); }

@@ -136,7 +136,7 @@ export default function SellerAccessPage() {
                 {n.label}
               </button>
             ))}
-            <span className="text-[11px] text-text-ghost">Pick the network you will send on. Sending on a different one loses the funds.</span>
+            <span className="text-[11px] text-text-ghost">Pick the network you will send on, then press Unlock. This only applies to a payment you have not started yet. Once a payment is open, change its network inside that payment's box, where the address changes with it. Sending on a different network loses the funds.</span>
           </div>
         )}
 

@@ -104,6 +104,21 @@ async function present(bond) {
     return json;
 }
 
+// While a USDT payment is still unpaid the payer may pick a different chain. The address and network are re-issued together
+// and frozen again, so what the payer sees is always the pair the admin will check. Once a screenshot is sent it cannot change.
+async function changeNetwork(authCtx, bondId, network) {
+    return sequelize.transaction(async (t) => {
+        const bond = await CommerceSellerCategoryBond.findByPk(bondId, { transaction: t, lock: t.LOCK.UPDATE });
+        if (!bond || String(bond.sellerUserId) !== String(authCtx.userId)) throw new AppError('NOT_FOUND', 'Payment not found', 404);
+        if (bond.status !== 'awaiting_payment') throw new AppError('CONFLICT', 'The network can only be changed before you send the payment for review', 409);
+        if (bond.currency !== 'USDT') throw new AppError('VALIDATION_ERROR', 'Only USDT payments have a network', 400);
+        const dest = await paymentDestinations.resolve('USDT', network);
+        if (!dest) throw new AppError('UNAVAILABLE', `USDT on ${network} is not available right now`, 503);
+        await bond.update({ payToAddress: dest.address, payToNetwork: dest.network, payToLabel: dest.label }, { transaction: t });
+        return present(bond);
+    });
+}
+
 async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
     const decoded = decodeProofs(proofs);
     const reference = txHash ? String(txHash).trim() : '';
@@ -265,4 +280,4 @@ async function assertCanSellInCategory(userId, categoryId) {
 
 const createCommunityTier = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'community_tier' });
 
-module.exports = { createCommunityTier, listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };
+module.exports = { changeNetwork, createCommunityTier, listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };

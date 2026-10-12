@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { Copy, ExternalLink, ImagePlus, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { AlertTriangle, Copy, ExternalLink, ImagePlus, X } from "lucide-react"
 import { AppButton } from "@/components/ui/AppButton"
-import type { CategoryPayment, ProofUpload } from "@/lib/api/seller-access"
+import { changePaymentNetwork, listPaymentMethods, type CategoryPayment, type PaymentNetworkInfo, type ProofUpload } from "@/lib/api/seller-access"
 import { fileToProof, type ProofWithPreview } from "@/lib/image-proof"
 
 const MAX_SHOTS = 3
@@ -22,8 +22,27 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
   const [shots, setShots] = useState<ProofWithPreview[]>([])
   const [shotError, setShotError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const pay = payment.payTo
+  // The address and network belong together. Changing the network here re-issues both, and what is shown is always that pair.
+  const [payTo, setPayTo] = useState(payment.payTo)
+  const [networks, setNetworks] = useState<PaymentNetworkInfo[]>([])
+  const [switching, setSwitching] = useState<string | null>(null)
+  const [netError, setNetError] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
+  useEffect(() => { setPayTo(payment.payTo); setConfirmed(false) }, [payment.id, payment.payTo?.address, payment.payTo?.network])
+  useEffect(() => {
+    if (payment.currency !== "USDT") return
+    listPaymentMethods().then((m) => setNetworks(m.find((x) => x.method === "USDT")?.networks.filter((n) => n.available) ?? [])).catch(() => setNetworks([]))
+  }, [payment.currency])
+  const pay = payTo
   if (!pay) return null
+  const isUsdt = payment.currency === "USDT"
+  const chooseNetwork = async (network: string) => {
+    if (network === pay.network || switching) return
+    setSwitching(network); setNetError(null)
+    try { const next = await changePaymentNetwork(payment.id, network); setPayTo(next.payTo); setConfirmed(false) }
+    catch (e) { setNetError(e instanceof Error ? e.message : "Could not change the network. Nothing was changed.") }
+    finally { setSwitching(null) }
+  }
   const isBinance = payment.currency === "BINANCE"
   const usd = `$${amountUsd.toLocaleString()}`
   const wait = payment.review?.waitMinutes
@@ -41,7 +60,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
     if (fileRef.current) fileRef.current.value = ""
   }
 
-  const ready = hash.trim().length >= 6 || shots.length > 0
+  const ready = (hash.trim().length >= 6 || shots.length > 0) && (!isUsdt || confirmed)
   return (
     <div className="space-y-4 p-4 rounded-lg bg-black/40 border border-white/10">
       <p className="text-xs text-gray-400">
@@ -49,6 +68,27 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
           ? <>Pay <strong className="text-white">{usd}</strong> in USDT with Binance Pay. Scan this QR in the Binance app — that is the safest way, because it goes straight to the right account:</>
           : <>Send exactly <strong className="text-white">{usd}</strong> worth of {pay.label}{pay.networkLabel && payment.currency === "USDT" ? <> on the <strong className="text-white">{pay.networkLabel}</strong> network</> : null} to:</>}
       </p>
+
+      {isUsdt && (
+        <div className="rounded-lg border-2 border-amber-500/60 bg-amber-500/5 p-3 space-y-3" role="group" aria-label="USDT network">
+          <p className="flex items-start gap-2 text-sm text-amber-100"><AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-400" />
+            <span>Send USDT <strong>only on the {pay.networkLabel || pay.network || "network shown"}</strong> network. If you send on any other network, the money is lost and cannot be recovered.</span></p>
+          {networks.length > 1 && (
+            <div>
+              <p className="text-[11px] text-gray-400 mb-2">Your wallet or exchange sends on a different network? Choose it here. The address below changes with it.</p>
+              <div className="flex flex-wrap gap-2">
+                {networks.map((n) => (
+                  <button key={n.network} type="button" onClick={() => chooseNetwork(n.network)} disabled={!!switching} aria-pressed={pay.network === n.network}
+                    className={`px-3 h-9 rounded-lg text-xs font-bold border ${pay.network === n.network ? "bg-white text-black border-white" : "border-white/20 text-gray-200 hover:border-white/50"} disabled:opacity-60`}>
+                    {switching === n.network ? "Changing…" : n.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {netError && <p role="alert" className="text-[11px] text-red-400">{netError}</p>}
+        </div>
+      )}
 
       {isBinance && pay.qrImageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -92,6 +132,12 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => void addFiles(e.target.files)} aria-label="Attach payment screenshot" />
         </div>
         {shotError && <p className="text-[11px] text-red-400">{shotError}</p>}
+        {isUsdt && (
+          <label className="flex items-start gap-2 text-[12px] text-gray-200">
+            <input type="checkbox" className="mt-0.5 accent-emerald-500" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+            <span>I sent it on the <strong>{pay.networkLabel || pay.network}</strong> network, to the address that ends in <strong className="font-mono">{(pay.address || "").slice(-6)}</strong>.</span>
+          </label>
+        )}
         <input value={hash} onChange={(e) => setHash(e.target.value)} aria-label="Transaction reference"
           placeholder={isBinance ? "Binance Pay order ID (optional)" : "Transaction hash (optional with a screenshot)"}
           className="w-full h-10 px-3 rounded-lg bg-black border border-white/10 text-sm text-white" />
