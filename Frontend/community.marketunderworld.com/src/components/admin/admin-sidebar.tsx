@@ -104,6 +104,7 @@ const ADMIN_NAV = [
     items: [
       { name: "Identity KYC", path: "/admin/kyc", icon: Fingerprint },
       { name: "Department Requests", path: "/admin/access-requests", icon: MessageSquare },
+      { name: "Page Content and SEO", path: "/admin/content", icon: Tag },
       { name: "Dating Profiles", path: "/admin/dating", icon: MessageSquare },
       { name: "Investment Listings", path: "/admin/investments", icon: Tag },
     ]

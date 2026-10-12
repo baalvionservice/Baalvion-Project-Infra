@@ -58,7 +58,7 @@ export function LotteryClient() {
       <main className="container max-w-[900px] mx-auto px-4 py-8 mt-20">
         <div className="mb-6"><Breadcrumbs items={[{ label: "Clubs", href: "/clubs" }, { label: "Ticket draw" }]} /></div>
         <h1 className="text-3xl font-bold mb-2">Club ticket draw</h1>
-        <p className="text-gray-600 mb-6">Pay $6 for an entry and you are in the monthly draw for your state. When the draw closes, 1,000 winners are picked at random and win a free VIP club ticket. Winners are listed here by member number. You pay with wallet points (100 points = $1), and if a draw is cancelled every entry is refunded. 18 and over only.</p>
+        <p className="text-gray-600 mb-6">Pay for an entry and you are in the monthly draw for your state or city. Each draw shows its own price, number of winners and closing time. When a draw closes, its winners are picked at random and win a free VIP club ticket. Winners are listed by member number. You pay with wallet points (100 points = $1), and if a draw is cancelled every entry is refunded. 18 and over only.</p>
 
         {signedIn ? (
           <p className="mb-6 text-sm text-gray-700">Your wallet: <b>{(balance ?? 0).toLocaleString()} points</b> · <Link className="underline" href="/payments">Load wallet</Link></p>
@@ -85,7 +85,7 @@ export function LotteryClient() {
                 <section key={d.id} className="bg-white border border-gray-200 p-6">
                   <div className="flex flex-wrap justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold">{d.title}{d.state ? <span className="ml-2 text-xs font-bold uppercase align-middle px-2 py-0.5 border border-gray-300">{d.state}</span> : null}</h2>
+                      <h2 className="text-xl font-bold"><Link href={`/clubs/lottery/${d.id}`} className="hover:underline">{d.title}</Link>{d.state ? <span className="ml-2 text-xs font-bold uppercase align-middle px-2 py-0.5 border border-gray-300">{d.state}</span> : null}</h2>
                       <p className="text-gray-700 mt-1">Prize: {d.prize}</p>
                       <p className="text-sm text-gray-500 mt-1">{d.winnersCount} winner{d.winnersCount > 1 ? "s" : ""} · {d.entries} entr{d.entries === 1 ? "y" : "ies"} from {d.members} member{d.members === 1 ? "" : "s"}</p>
                     </div>

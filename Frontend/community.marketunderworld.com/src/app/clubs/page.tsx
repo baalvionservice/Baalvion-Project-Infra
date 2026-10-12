@@ -1,8 +1,9 @@
+import { pageMetadata } from "@/lib/cms";
 import { Metadata } from "next";
 import { ClubsClient } from "./clubs-client";
 import { getClubs } from "@/lib/api/nightlife";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Best Nightclubs in India and Dubai | Guest Lists, Pubs & Bars",
   description: "Find nightclubs, pubs and bars across Mumbai, Delhi NCR, Bangalore, Pune and Dubai. Filter by country, city, area and type. Get on the free guest list, book premium VIP bottle service, check cover charges, and explore DJ lineups for 2026.",
   keywords: [
@@ -37,4 +38,10 @@ export default async function ClubsRootPage() {
     website: c.website, phone: c.phone,
   }));
   return <ClubsClient clubs={clubs} />;
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("clubs", { title, description: base.description ?? "" })) };
 }

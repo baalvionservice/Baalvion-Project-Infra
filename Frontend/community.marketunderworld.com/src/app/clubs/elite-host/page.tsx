@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/cms";
 import { Metadata } from "next";
 import { EliteHostClient } from "./elite-host-client";
 
@@ -5,7 +6,7 @@ const TITLE = "Elite Host Program — Invite Ladies to VIP Club Night | Baalvion
 const DESC =
   "India's first verified High-Net-Worth Individual party hosting platform. Sponsor an exclusive nightclub event — VIP table, premium cab service, food & drinks covered. Browse and apply for elite party invitations across Mumbai, Pune, Delhi, Bangalore and Goa.";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: TITLE,
   description: DESC,
   keywords: [
@@ -104,4 +105,10 @@ export default function EliteHostPage() {
       <EliteHostClient />
     </>
   );
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("clubs/elite-host", { title, description: base.description ?? "" })) };
 }

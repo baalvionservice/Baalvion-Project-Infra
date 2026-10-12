@@ -1,8 +1,9 @@
+import { pageMetadata } from "@/lib/cms";
 import { Metadata } from "next";
 import { LocalsClient } from "./locals-client";
 import { getListings } from "@/lib/api/nightlife";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Mumbai Locals Hub - Casting Calls, Events & Jobs | Market Underworld",
   description: "Find the latest casting calls, dance shows, acting jobs, and local events in Mumbai, Delhi, and Goa. Connect with directors, event managers, and match with verified locals.",
   keywords: ["Mumbai casting calls", "Dancer jobs Mumbai", "Acting auditions Delhi", "Clubbing events Mumbai", "Local dating Mumbai", "Goa shows", "UGC video shoot Mumbai"],
@@ -15,4 +16,10 @@ export const metadata: Metadata = {
 
 export default async function LocalsHubPage() {
   return <LocalsClient initialListings={await getListings()} />;
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("locals", { title, description: base.description ?? "" })) };
 }

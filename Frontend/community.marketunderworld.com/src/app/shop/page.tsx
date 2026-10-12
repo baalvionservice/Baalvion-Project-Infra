@@ -1,8 +1,9 @@
+import { pageMetadata } from "@/lib/cms";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getStorefrontDepartments, getStorefrontCategories } from "@/lib/api/commerce";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Shop | Market Underworld",
   description: "Browse verified sellers and real inventory on Market Underworld.",
   alternates: { canonical: "/shop" },
@@ -41,4 +42,10 @@ export default async function ShopIndexPage() {
       )}
     </div>
   );
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("shop", { title, description: base.description ?? "" })) };
 }

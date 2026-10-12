@@ -1,7 +1,8 @@
+import { pageMetadata } from "@/lib/cms";
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/footer';
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Contact Us",
   description: "Contact the Market Underworld Community team, operated by Baalvion Industries Private Limited.",
   alternates: { canonical: "/contact" },
@@ -47,4 +48,10 @@ export default function ContactPage() {
     <Footer />
     </>
   );
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("contact", { title, description: base.description ?? "" })) };
 }

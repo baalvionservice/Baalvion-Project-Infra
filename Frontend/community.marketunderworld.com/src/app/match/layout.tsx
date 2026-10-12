@@ -1,9 +1,13 @@
+import { PageContent } from "@/components/cms/page-content"
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/cms"
+export const generateMetadata = (): Promise<Metadata> => pageMetadata("match", { title: "Match quiz | Hell Road", description: "Take the Hell Road match quiz." })
 
 import { Navbar } from "@/components/layout/navbar"
 import { NeuralNetworkBg } from "@/components/match/neural-network-bg"
 import { AIChatWidget } from "@/components/match/ai-chat-widget"
 
-export default function AIMatchLayout({
+function AIMatchLayout({
   children,
 }: {
   children: React.ReactNode
@@ -18,4 +22,8 @@ export default function AIMatchLayout({
       <AIChatWidget />
     </div>
   )
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <AIMatchLayout>{children}<PageContent slug="match" tone="dark" /></AIMatchLayout>
 }

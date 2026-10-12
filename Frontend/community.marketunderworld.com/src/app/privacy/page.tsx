@@ -1,7 +1,8 @@
+import { pageMetadata } from "@/lib/cms";
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/footer';
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Privacy Policy",
   description: "Privacy Policy — Market Underworld Community, operated by Baalvion Industries Private Limited.",
   alternates: { canonical: "/privacy" },
@@ -82,4 +83,10 @@ export default function PrivacyPage() {
     <Footer />
     </>
   );
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("privacy", { title, description: base.description ?? "" })) };
 }

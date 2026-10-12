@@ -1,7 +1,8 @@
+import { pageMetadata } from "@/lib/cms";
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/footer';
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: 'About Us',
   description: 'The Market Underworld Community is an online community and marketplace operated by Baalvion Industries Private Limited.',
   alternates: { canonical: '/about' },
@@ -30,4 +31,10 @@ export default function AboutPage() {
     <Footer />
     </>
   );
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("about", { title, description: base.description ?? "" })) };
 }

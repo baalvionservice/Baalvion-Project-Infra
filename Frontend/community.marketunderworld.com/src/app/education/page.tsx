@@ -1,10 +1,11 @@
+import { pageMetadata } from "@/lib/cms";
 import type { Metadata } from "next"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { getTeachers, getUpcomingSessions } from "@/lib/api/education"
 import { EducationClient } from "./education-client"
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Education | Market Underworld",
   description: "Learn from approved teachers in live sessions. Browse teachers by subject and region and request a place.",
 }
@@ -28,4 +29,10 @@ export default async function EducationPage({ searchParams }: { searchParams: Pr
       <Footer />
     </div>
   )
+}
+
+export async function generateMetadata() {
+  const base = defaultMetadata as { title?: unknown; description?: string };
+  const title = typeof base.title === "string" ? base.title : (base.title as { default?: string } | undefined)?.default ?? "";
+  return { ...defaultMetadata, ...(await pageMetadata("education", { title, description: base.description ?? "" })) };
 }
