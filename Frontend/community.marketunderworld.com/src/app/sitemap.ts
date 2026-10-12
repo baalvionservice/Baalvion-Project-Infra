@@ -3,6 +3,7 @@ import { getStorefrontCategories, getStorefrontProducts } from '@/lib/api/commer
 import { getClubs, getEvents, getListings } from '@/lib/api/nightlife';
 import { getDraws } from '@/lib/api/draws-server';
 import { listWrittenPages } from '@/lib/cms';
+import { allIndexablePeople } from '@/lib/people';
 import { groupByCity } from '@/lib/clubs-seo';
 
 // Deliberately NOT process.env.NEXT_PUBLIC_APP_URL — that var exists purely for internal
@@ -40,7 +41,7 @@ async function getForumSlugs(): Promise<string[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [forumSlugs, categories, products, clubs, draws, events, listings, written] = await Promise.all([
+  const [forumSlugs, categories, products, clubs, draws, events, listings, written, people] = await Promise.all([
     getForumSlugs(),
     getStorefrontCategories(),
     // Backend caps page size at 200 (parsePagination) — plenty for the current catalog size.
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getEvents().catch(() => []),
     getListings().catch(() => []),
     listWrittenPages(),
+    allIndexablePeople(),
   ]);
   const hidden = new Set(written.filter((w) => w.noindex).map((w) => `${SITE_URL}/${w.slug}`));
 
@@ -106,6 +108,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...draws.filter((d) => d.status !== 'draft').map((d) => ({ url: `${SITE_URL}/clubs/lottery/${d.id}`, priority: 0.7, changeFrequency: 'daily' as const })),
     ...events.map((e) => ({ url: `${SITE_URL}/clubs/events/${e.id}`, priority: 0.6, changeFrequency: 'weekly' as const })),
+    ...['founders', 'people'].map((slug) => ({ url: `${SITE_URL}/${slug}`, priority: 0.7, changeFrequency: 'daily' as const })),
+    ...people.map((p) => ({ url: `${SITE_URL}/p/${p.handle}`, priority: p.isFounder ? 0.7 : 0.5, changeFrequency: 'weekly' as const, lastModified: p.updatedAt })),
     ...listings.map((l) => ({ url: `${SITE_URL}/locals/${l.slug}`, priority: 0.5, changeFrequency: 'weekly' as const })),
   ];
 

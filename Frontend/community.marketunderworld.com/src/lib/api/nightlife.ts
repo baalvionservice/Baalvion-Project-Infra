@@ -451,7 +451,7 @@ export const elite = {
   myJoins: () => send<{ items: EliteJoin[] }>("GET", "/nightlife/elite-host/mine/joins"),
   withdraw: (id: string) => send<EliteJoin>("POST", `/nightlife/elite-host/guests/${id}/withdraw`),
   myParties: () => send<{ items: HostParty[] }>("GET", "/nightlife/elite-host/mine/parties"),
-  guests: (partyId: string) => send<{ capacity: number | null; approvedGuests: number; items: (EliteJoin & { requesterLabel: string | null })[] }>("GET", `/nightlife/elite-host/${partyId}/guests`),
+  guests: (partyId: string) => send<{ capacity: number | null; approvedGuests: number; items: (EliteJoin & { requesterLabel: string | null; requesterProfile: { handle: string; name: string; headline: string; city: string; links: Record<string, string>; photoPath: string | null } | null })[] }>("GET", `/nightlife/elite-host/${partyId}/guests`),
   decide: (id: string, approve: boolean) => send<EliteJoin>("POST", `/nightlife/elite-host/guests/${id}/decide`, { approve }),
 };
 

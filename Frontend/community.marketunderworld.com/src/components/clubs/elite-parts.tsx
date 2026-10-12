@@ -113,7 +113,16 @@ export function HostRequests() {
               <ul className="mt-3 divide-y divide-white/10 text-sm">
                 {guests === null ? <li className="py-2 text-gray-500">Loading…</li> : guests.items.length === 0 ? <li className="py-2 text-gray-500">No requests yet.</li> : guests.items.map((g) => (
                   <li key={g.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
-                    <span>{g.requesterLabel || "Member"}: {g.females} women, {g.males} men{g.note ? ` · ${g.note}` : ""} · <span className="text-gray-400">{g.status}</span></span>
+                    <span className="flex items-start gap-3">
+                      {g.requesterProfile?.photoPath ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/api/community-proxy${g.requesterProfile.photoPath}`} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" /> : null}
+                      <span>
+                        {g.requesterProfile ? <a href={`/p/${g.requesterProfile.handle}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{g.requesterProfile.name}</a> : <span className="font-semibold">{g.requesterLabel || "Member"}</span>}
+                        {g.requesterProfile?.headline ? <span className="text-gray-400"> · {g.requesterProfile.headline}</span> : null}
+                        {g.freeInvite ? <span className="ml-2 text-xs text-pink-300 border border-pink-500/30 rounded-full px-2 py-0.5">free invitation</span> : null}
+                        <br /><span className="text-gray-300">{g.females} women, {g.males} men{g.note ? ` · ${g.note}` : ""} · <span className="text-gray-400">{g.status}</span></span>
+                        {g.requesterProfile && Object.keys(g.requesterProfile.links).length > 0 ? <span className="block mt-1 text-xs">{Object.entries(g.requesterProfile.links).map(([k, u]) => <a key={k} href={u} target="_blank" rel="noopener noreferrer nofollow" className="mr-3 underline text-amber-400">{k}</a>)}</span> : null}
+                      </span>
+                    </span>
                     {g.status === "pending" && (
                       <span className="flex gap-2">
                         <button onClick={() => decide(g.id, true)} className="bg-amber-500 text-black font-bold px-3 py-1 rounded">Approve</button>

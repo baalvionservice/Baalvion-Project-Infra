@@ -10,6 +10,8 @@ export const CMS_PAGES: CmsPage[] = [
   { slug: "clubs/lottery", label: "Ticket draw (all draws)", hint: "How the draw works in plain words: points, one entry per ticket, recorded random draw, how winners are shown, 18+ only." },
   { slug: "clubs/dj-demand", label: "Demand your DJ", hint: "How members pledge points, what happens when a target is reached, and what happens to points if it is not." },
   { slug: "clubs/elite-host", label: "Elite (Millionaire) parties", hint: "Who can host, paid membership versus free invitations for women guests, and that every host approves each request." },
+  { slug: "founders", label: "Founders directory", hint: "Who the founders here are and why a founder would list their page. Shown above the list of founders." },
+  { slug: "people", label: "People directory", hint: "What a public page is and how members get one." },
   { slug: "dating", label: "Dating and founders", hint: "Verified adults only, mutual likes, no paid dates, how to report someone." },
   { slug: "forum", label: "Forum", hint: "What the communities are for, who can join, and the rules." },
   { slug: "forum/join", label: "Forum onboarding", hint: "How to join open communities and ask to join private ones." },

@@ -3,7 +3,7 @@ import { prepareImage } from "./media";
 
 const BASE = "/api/community-proxy";
 
-export interface MyProfile { photoPath: string | null; bio: string; city: string; interests: string[]; learnGoal: string; gender: string }
+export interface MyProfile { photoPath: string | null; bio: string; city: string; interests: string[]; learnGoal: string; gender: string; handle: string; publicProfile: boolean; searchIndex: boolean; isFounder: boolean; companyName: string; roleTitle: string; publicName: string; headline: string; knownFor: string; socialLinks: Record<string, string> }
 export type RequestStatus = "pending" | "approved" | "declined" | "withdrawn";
 export interface AccessRequest { id: string; department: string; message: string; status: RequestStatus; decisionNote: string | null; createdAt: string; decidedAt: string | null }
 export interface AdminAccessRequest extends AccessRequest { userId: string; requesterLabel: string | null; requesterCity: string | null; requesterBio: string | null; requesterInterests: string[] }
@@ -27,7 +27,7 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const getMyProfile = () => call<MyProfile>("/me/profile");
-export const saveMyProfile = (d: Partial<{ gender: string; bio: string; city: string; interests: string[]; learnGoal: string; photoAssetId: string | null }>) =>
+export const saveMyProfile = (d: Partial<{ handle: string; publicProfile: boolean; searchIndex: boolean; isFounder: boolean; companyName: string; roleTitle: string; publicName: string; headline: string; knownFor: string; socialLinks: Record<string, string>; gender: string; bio: string; city: string; interests: string[]; learnGoal: string; photoAssetId: string | null }>) =>
   call<MyProfile>("/me/profile", { method: "PUT", body: JSON.stringify(d) });
 
 // Uploads the photo (re-encoded, metadata stripped) and returns the stored asset id.

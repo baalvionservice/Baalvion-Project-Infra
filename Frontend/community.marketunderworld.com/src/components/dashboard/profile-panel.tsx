@@ -1,5 +1,6 @@
 "use client"
 
+import { PublicPageEditor } from "@/components/profile/public-page-editor"
 import { GenderPick } from "@/components/profile/gender-pick"
 import { PlacePicker } from "@/components/profile/place-picker"
 import { useEffect, useRef, useState } from "react"
@@ -41,7 +42,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
       setProfile(p); setBio(p.bio); setCity(p.city); setGender(p.gender || ""); setLearn(p.learnGoal)
       // Choices made in the onboarding guide before signing in carry over once.
       setInterests(p.interests.length ? p.interests : local)
-    }).catch(() => setProfile({ photoPath: null, bio: "", city: "", interests: [], learnGoal: "", gender: "" }))
+    }).catch(() => setProfile({ photoPath: null, bio: "", city: "", interests: [], learnGoal: "", gender: "", handle: "", publicProfile: false, searchIndex: true, isFounder: false, companyName: "", roleTitle: "", publicName: "", headline: "", knownFor: "", socialLinks: {} }))
     kyc.mine().then(setKycCase).catch(() => setKycCase(null))
   }, [])
 
@@ -131,6 +132,7 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
         </div>
         <button onClick={save} disabled={busy} className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold px-6 py-2.5 rounded-lg">{busy ? "Saving…" : "Save profile"}</button>
       </div>
+      <PublicPageEditor />
     </NexusCard>
   )
 }

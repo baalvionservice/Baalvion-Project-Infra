@@ -10,6 +10,8 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
     title: 'Explore',
     links: [
       ['Everything we offer', '/services'],
+      ['Founders', '/founders'],
+      ['People', '/people'],
       ['Marketplace', '/marketplace'],
       ['Clubs', '/clubs'],
       ['Events and DJ nights', '/clubs/events'],
