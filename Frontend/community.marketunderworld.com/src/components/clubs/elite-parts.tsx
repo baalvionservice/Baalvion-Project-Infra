@@ -34,7 +34,7 @@ export function JoinDialog({ party, onClose, onDone }: { party: { id: string; ho
   }
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-black/80 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Ask to join this party">
+    <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Ask to join this party">
       <div className="bg-[#111] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 text-white">
         <h2 className="text-xl font-bold">Ask to join {party.hostAlias}&apos;s party</h2>
         <p className="text-sm text-gray-400">{party.clubName}{party.slotsLeft !== null ? ` · ${party.slotsLeft} place${party.slotsLeft === 1 ? "" : "s"} left` : ""}</p>

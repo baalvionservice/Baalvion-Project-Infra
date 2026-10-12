@@ -252,7 +252,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
       </main>
 
       {open && (
-        <div className="lg:hidden fixed inset-0 z-[3000] bg-black/60 flex items-end" role="dialog" aria-modal="true" aria-label="Filters">
+        <div className="lg:hidden fixed inset-0 z-[10001] bg-black/60 flex items-end" role="dialog" aria-modal="true" aria-label="Filters">
           <div className="bg-white w-full max-h-[85dvh] overflow-auto rounded-t-2xl p-5">
             <div className="flex items-center justify-between mb-4"><h2 className="font-bold text-lg">Filters</h2><button onClick={() => setOpen(false)} aria-label="Close" className="p-2"><X className="w-5 h-5" /></button></div>
             {filters}
