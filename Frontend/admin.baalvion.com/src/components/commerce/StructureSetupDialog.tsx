@@ -12,7 +12,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { commerceStoresApi } from '@/lib/api/commerce-stores';
 import { commerceKeys, useCommerceStores } from '@/lib/queries/commerce-stores.queries';
 import { buildPlan, type Plan } from '@/lib/commerce/amariseStructure';
-import type { CommerceCategory, CommerceStore } from '@/lib/types/commerce.types';
+import { applyPlan } from '@/lib/commerce/applyPlan';
+import type { CommerceStore } from '@/lib/types/commerce.types';
 
 type Loaded = { store: CommerceStore; plan: Plan | null; error?: string };
 type Result = { storeId: string; ok: boolean; message: string };
@@ -22,29 +23,6 @@ const messageOf = (e: unknown) =>
   ?? (e as { message?: string })?.message ?? 'Something went wrong';
 
 const needsWork = (p: Plan | null) => !!p && p.steps.length > 0;
-
-async function applyPlan(storeId: string, plan: Plan): Promise<void> {
-  const api = commerceStoresApi.categories;
-  const rootIds = new Map<string, string>();
-  // Brands first, so every new item has a parent to attach to.
-  for (const s of plan.steps) {
-    if (s.kind === 'create-root') {
-      const res = await api.create(storeId, { name: s.name, slug: s.slug, sortOrder: s.sortOrder, seoMetadata: { brand: true } });
-      rootIds.set(s.key, res.data.data.id);
-    } else if (s.kind === 'update-root') {
-      await api.update(storeId, s.id, { sortOrder: s.sortOrder });
-    }
-  }
-  for (const s of plan.steps) {
-    if (s.kind === 'create') {
-      const parentId = s.brandId ?? rootIds.get(s.brandKey);
-      if (!parentId) throw new Error(`No brand found for ${s.name}`);
-      await api.create(storeId, { name: s.name, slug: s.slug, parentId, sortOrder: s.sortOrder, seoMetadata: { section: s.section } });
-    } else if (s.kind === 'update') {
-      await api.update(storeId, s.id, s.patch as Partial<CommerceCategory>);
-    }
-  }
-}
 
 export default function StructureSetupDialog() {
   const qc = useQueryClient();

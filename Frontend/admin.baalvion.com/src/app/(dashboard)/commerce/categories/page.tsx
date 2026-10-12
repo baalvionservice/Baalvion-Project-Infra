@@ -23,6 +23,7 @@ import { useUIStore } from '@/lib/store/uiStore';
 import type { CommerceCategory } from '@/lib/types/commerce.types';
 import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 import StructureSetupDialog from '@/components/commerce/StructureSetupDialog';
+import AddBrandsDialog from '@/components/commerce/AddBrandsDialog';
 import { sectionOf } from '@/lib/commerce/amariseStructure';
 
 interface CategoryFormState {
@@ -179,6 +180,7 @@ export default function CategoriesPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <StructureSetupDialog />
+            <AddBrandsDialog />
           <Button size="sm" onClick={() => openCreate()} disabled={!storeId}>
             <Plus className="mr-2 h-4 w-4" />
             New brand / category
