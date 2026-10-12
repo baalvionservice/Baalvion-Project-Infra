@@ -30,6 +30,7 @@ db.LocalListing = require('./local_listing')(sequelize);
 db.LocalApplication = require('./local_application')(sequelize);
 db.EliteHostApplication = require('./elite_host_application')(sequelize);
 db.EliteHostGuest = require('./elite_host_guest')(sequelize);
+db.KycGrace = require('./kyc_grace')(sequelize);
 db.MemberProfile = require('./member_profile')(sequelize);
 db.AccessRequest = require('./access_request')(sequelize);
 db.NightProfile = require('./night_profile')(sequelize);

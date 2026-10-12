@@ -30,6 +30,12 @@ const label = (req) => { const e = decodeEmailFromRequest(req); return e ? e.sli
 router.get('/me/profile', authMw, h((req) => svc.getMine(uid(req))));
 router.put('/me/profile', authMw, h((req) => svc.saveMine(uid(req), parse(v.profileSchema, req.body))));
 
+router.get('/me/kyc-status', authMw, h(async (req) => {
+    const { resolveTier } = require('../middleware/staffAccess');
+    const exempt = !!(await resolveTier(req));
+    return require('../service/kycGraceService').statusFor(uid(req), exempt);
+}));
+
 router.get('/access-requests/mine', authMw, h((req) => svc.myRequests(uid(req))));
 router.post('/access-requests', authMw, h((req) => svc.createRequest(uid(req), label(req), parse(v.requestSchema, req.body)), 201));
 router.post('/access-requests/:id/withdraw', authMw, h((req) => svc.withdraw(uid(req), req.params.id)));

@@ -83,6 +83,8 @@ async function decide(adminId, id, { approve, note }) {
     if (row.status !== 'pending') throw new AppError('CONFLICT', `This request is already ${row.status}`, 409);
     if (String(adminId) === row.user_id) throw new AppError('FORBIDDEN', 'You cannot decide your own request', 403);
     await row.update({ status: approve ? 'approved' : 'declined', decided_by: String(adminId), decided_at: new Date(), decision_note: note || null });
+    // Approving a request to get back in starts a fresh verification window.
+    if (approve && row.department === 'account_access') await require('./kycGraceService').reopen(row.user_id);
     notifyEvents.accessDecided(row);
     return presentRequest(row);
 }

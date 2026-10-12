@@ -2,7 +2,7 @@
 const { z } = require('zod');
 
 // Only departments that exist; the labels live with the frontend.
-const DEPARTMENTS = ['clubs_team', 'marketplace_team', 'support_team', 'forum_moderation', 'education_team', 'events_team', 'other'];
+const DEPARTMENTS = ['clubs_team', 'marketplace_team', 'support_team', 'forum_moderation', 'education_team', 'events_team', 'account_access', 'other'];
 
 exports.DEPARTMENTS = DEPARTMENTS;
 exports.profileSchema = z.object({

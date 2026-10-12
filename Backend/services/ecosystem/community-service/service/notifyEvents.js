@@ -6,7 +6,7 @@ const { notify, alertAdmins, fire } = require('./notify');
 const date = (d) => (d ? String(d).slice(0, 10) : '');
 const who = (r) => `${r.first_name || ''} ${r.last_name || ''}`.trim() || 'A guest';
 
-const DEPT = { clubs_team: 'Clubs team', marketplace_team: 'Marketplace team', support_team: 'Support team', forum_moderation: 'Forum moderation', education_team: 'Education team', events_team: 'Events team', other: 'the team' };
+const DEPT = { clubs_team: 'Clubs team', marketplace_team: 'Marketplace team', support_team: 'Support team', forum_moderation: 'Forum moderation', education_team: 'Education team', events_team: 'Events team', account_access: 'Account access', other: 'the team' };
 
 module.exports = {
     // ── Access requests ──────────────────────────────────────────────────────
