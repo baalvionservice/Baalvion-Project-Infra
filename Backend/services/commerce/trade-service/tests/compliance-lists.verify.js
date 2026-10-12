@@ -246,6 +246,10 @@ const EU_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     await t('every listed name finds itself (a listed party is never silently passed)', () => {
         for (const p of listed) assert.ok(idx.match(p.name, { country: p.country }).length > 0, p.name);
     });
+    await t('letters like Ø and Æ match their plain spelling', () => {
+        const nordic = new PartyIndex([{ name: 'MOLLER MAERSK TRADING', party_type: 'entity', aliases: [], metadata: {} }]);
+        assert.strictEqual((nordic.match('Møller Mærsk Trading')[0] || {}).quality, 'exact');
+    });
     await t('Jaro-Winkler basics', () => {
         assert.strictEqual(jaroWinkler('abc', 'abc'), 1);
         assert.ok(jaroWinkler('martha', 'marhta') > 0.96);

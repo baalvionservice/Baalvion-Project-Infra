@@ -70,16 +70,20 @@ function formsConflict(a, b) {
 
 /** Canonical legal-form words in a name, as a sorted string ('' when it has none). */
 function legalForms(name) {
-    const folded = String(name || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const folded = foldLetters(String(name || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase());
     const forms = new Set();
     for (const t of folded.split(/[^\p{L}\p{N}]+/u)) if (FORM_CANON.has(t)) forms.add(FORM_CANON.get(t));
     return [...forms].sort().join(' ');
 }
 
+// Letters Unicode normalisation does not split into base + accent. Without this a
+// listed "MOLLER" and a customer's "Møller" are different words to the matcher.
+const LETTER_FOLD = { 'ø': 'o', 'æ': 'ae', 'œ': 'oe', 'ß': 'ss', 'ł': 'l', 'đ': 'd', 'ð': 'd', 'þ': 'th', 'ı': 'i' };
+const foldLetters = (s) => s.replace(/[øæœßłđðþı]/g, (c) => LETTER_FOLD[c]);
+
 function tokens(name) {
-    const folded = String(name || '')
-        .normalize('NFKD').replace(/[̀-ͯ]/g, '')
-        .toLowerCase().replace(/&/g, ' and ');
+    const folded = foldLetters(String(name || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase())
+        .replace(/&/g, ' and ');
     const all = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
     const core = all.filter((t) => !FILLER.has(t));
     return core.length ? core : all;
