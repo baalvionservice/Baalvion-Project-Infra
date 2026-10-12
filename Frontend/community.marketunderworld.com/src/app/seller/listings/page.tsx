@@ -14,6 +14,8 @@ import { getMyMember, type MyMember } from "@/lib/api/members"
 import { STATUS_COPY, defaultVariantPrice, money } from "@/lib/seller-listing"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
+import { pickMarketStore, publicListingPath } from "@/lib/seller-store"
+import { Copy, Check } from "lucide-react"
 
 const STATUS_BADGE: Record<CommerceProduct["status"], "default" | "success" | "warning" | "info"> = {
   draft: "default",
@@ -48,7 +50,8 @@ export default function SellerListingsPage() {
     getMyMember().then(setMember).catch(() => {});
     listMyStores().then((s) => {
       setStores(s);
-      if (s.length > 0) { setStoreId(s[0].id); return; }
+      const mine = pickMarketStore(s);
+      if (mine) { setStoreId(mine.id); return; }
       setLoading(false);
       listMySellerApplications().then((apps) => setPendingApplication(apps.find((a) => a.status === "pending") ?? null)).catch(() => {});
     });
@@ -87,6 +90,12 @@ export default function SellerListingsPage() {
     fix: products.filter((p) => p.status === "rejected").length,
   }), [products]);
 
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copyLink = async (id: string, path: string) => {
+    try { await navigator.clipboard.writeText(`${window.location.origin}${path}`); setCopiedId(id); setTimeout(() => setCopiedId(null), 2000); } catch { /* ignore */ }
+  };
+  void publicListingPath;
+
   const handleCreate = async () => {
     router.push(`/seller/listings/new`);
   };
@@ -104,7 +113,7 @@ export default function SellerListingsPage() {
           </p>
         </div>
         <NexusButton onClick={handleCreate} isLoading={creating} disabled={!storeId} className="gap-2">
-          <Plus className="w-4 h-4" /> New Listing
+          <Plus className="w-4 h-4" /> Add product
         </NexusButton>
       </header>
 
@@ -159,8 +168,8 @@ export default function SellerListingsPage() {
         <NexusCard className="p-14 text-center border-white/5 bg-white/[0.01] space-y-3">
           <Package className="w-10 h-10 text-gray-700 mx-auto" />
           <p className="text-white font-bold text-lg">You haven&apos;t listed anything yet</p>
-          <p className="text-gray-500 font-medium max-w-md mx-auto">Create a listing, add photos and a price, then submit it. Once an admin approves it, it appears in the marketplace for members.</p>
-          <NexusButton onClick={handleCreate} isLoading={creating} className="gap-2"><Plus className="w-4 h-4" /> Create your first listing</NexusButton>
+          <p className="text-gray-500 font-medium max-w-md mx-auto">Add a product with photos and a price on one page, then publish it. You get a public link to share. Approved sellers can go live straight away, otherwise an admin approves it first and it appears in the marketplace for members.</p>
+          <NexusButton onClick={handleCreate} isLoading={creating} className="gap-2"><Plus className="w-4 h-4" /> Add your first product</NexusButton>
         </NexusCard>
       ) : (
         <div className="space-y-3">
@@ -171,7 +180,7 @@ export default function SellerListingsPage() {
             const slug = categorySlug(p.categoryId);
             return (
               <NexusCard key={p.id} className="p-4 border-white/5 bg-white/[0.01]">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
                   <div className="w-20 h-20 rounded-xl bg-white/5 border border-white/5 overflow-hidden shrink-0 flex items-center justify-center">
                     {thumb ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={thumb} alt="" className="w-full h-full object-cover" /> : <ImageOff className="w-5 h-5 text-gray-700" />}
                   </div>
@@ -183,7 +192,13 @@ export default function SellerListingsPage() {
                     <p className="text-xs text-gray-400">{money(price, p.variants?.[0]?.currencyCode)} · {p.stockQuantity} in stock{typeof p.viewCount === "number" ? ` · ${p.viewCount} views` : ""}</p>
                     <p className="text-[11px] text-gray-600">{copy.next}</p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                    {slug && (
+                      <button type="button" onClick={() => copyLink(p.id, `/shop/${slug}/${p.slug}`)} title={p.status === "published" ? "Copy the public link" : "Copy the link. It works once the product is live."}
+                        className="h-8 px-3 rounded-lg border border-white/10 text-[10px] font-bold uppercase tracking-wider text-gray-300 hover:text-white flex items-center gap-1.5">
+                        {copiedId === p.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />} {copiedId === p.id ? "Copied" : "Copy link"}
+                      </button>
+                    )}
                     {p.status === "published" && slug && (
                       <Link href={`/shop/${slug}/${p.slug}`} target="_blank">
                         <NexusButton size="sm" variant="ghost" className="gap-2 text-[10px] h-8"><ExternalLink className="w-3 h-3" /> View live</NexusButton>

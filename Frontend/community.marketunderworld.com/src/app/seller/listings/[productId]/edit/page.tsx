@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useParams, useSearchParams } from "next/navigation"
-import { ArrowLeft, Check, Circle, ExternalLink, Lock, Rocket, Save } from "lucide-react"
+import { ArrowLeft, Check, Circle, Copy, ExternalLink, Lock, Rocket, Save } from "lucide-react"
 import { NexusCard } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useToast } from "@/hooks/use-toast"
@@ -20,6 +20,7 @@ import {
   type CommerceProductMedia,
 } from "@/lib/api/commerce-admin"
 import { getMyMember, type MyMember } from "@/lib/api/members"
+import { pickMarketStore } from "@/lib/seller-store"
 import { STATUS_COPY, defaultVariantPrice, listingReadiness } from "@/lib/seller-listing"
 
 interface FormState {
@@ -79,7 +80,7 @@ export default function EditListingPage() {
   useEffect(() => { getMyMember().then(setMember).catch(() => {}); }, []);
   useEffect(() => {
     if (storeId) return;
-    listMyStores().then((s) => { if (s.length > 0) setStoreId(s[0].id); });
+    listMyStores().then((s) => { const mine = pickMarketStore(s); if (mine) setStoreId(mine.id); });
   }, [storeId]);
 
   const load = useCallback(() => {
@@ -228,6 +229,15 @@ export default function EditListingPage() {
           </div>
         </div>
 
+        {categorySlug && product.slug && (
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 flex flex-wrap items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{product.status === "published" ? "Your public link" : "Your public link (works once it is live)"}</p>
+              <p className="font-mono text-xs sm:text-sm text-cyan-300 break-all">{typeof window !== "undefined" ? window.location.origin : ""}/shop/{categorySlug}/{product.slug}</p>
+            </div>
+            <button type="button" onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/shop/${categorySlug}/${product.slug}`).then(() => toast({ title: "Link copied" }))} className="h-10 px-4 rounded-lg border border-white/15 text-sm font-semibold flex items-center gap-2"><Copy className="w-4 h-4" /> Copy</button>
+          </div>
+        )}
         <ol className="flex items-center gap-2 flex-wrap" aria-label="Listing progress">
           {STEPS.map((s, i) => (
             <li key={s.key} className="flex items-center gap-2">
