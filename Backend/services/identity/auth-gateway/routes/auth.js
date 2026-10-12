@@ -67,7 +67,13 @@ async function establish(req, res, accessToken, refreshToken) {
     geo: { country: geo.country, source: geo.source },
   });
   res.cookie(config.cookie.accessName, accessToken, cookieOpts(config.cookie.accessMaxAge));
-  if (refreshToken) res.cookie(config.cookie.refreshName, refreshToken, cookieOpts(config.cookie.refreshMaxAge));
+  if (refreshToken) {
+    // The cookie lives as long as the token it carries (members 7 days, staff a year), never shorter than the default.
+    const exp = decode(refreshToken).exp;
+    const own = exp ? Math.floor(exp - Date.now() / 1000) : 0;
+    const maxAge = Math.min(Math.max(own, config.cookie.refreshMaxAge), 400 * 24 * 3600);
+    res.cookie(config.cookie.refreshName, refreshToken, cookieOpts(maxAge));
+  }
   res.cookie(config.cookie.csrfName, csrfToken, cookieOpts(config.cookie.accessMaxAge, false)); // NON-HttpOnly → JS sends x-csrf-token
   return { c, csrfToken };
 }

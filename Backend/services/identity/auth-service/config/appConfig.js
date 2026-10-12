@@ -52,6 +52,8 @@ module.exports = {
         refreshSecret:     process.env.JWT_REFRESH_SECRET || null,
         accessExpiresIn:   process.env.JWT_ACCESS_EXPIRES_IN  || '15m',
         refreshExpiresIn:  process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+        // Staff accounts stay signed in until they sign out themselves; the lifetime is long, not unlimited, so a lost laptop is not a permanent key.
+        adminRefreshExpiresIn: process.env.ADMIN_REFRESH_EXPIRES_IN || '365d',
         issuer:            process.env.JWT_ISSUER   || 'baalvion-auth',
         audience:          process.env.JWT_AUDIENCE || 'baalvion-platform',
     },

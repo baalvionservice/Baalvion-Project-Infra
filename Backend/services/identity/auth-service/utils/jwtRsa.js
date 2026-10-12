@@ -59,7 +59,7 @@ function signAccessToken(payload) {
  * Signs an RS256 refresh token.
  * Payload must include: { sub, sid, familyId }
  */
-function signRefreshToken(payload) {
+function signRefreshToken(payload, opts = {}) {
     const { privateKey, kid } = loadKeys();
     const { sub, sid, familyId, ...rest } = payload;
     return jwt.sign(
@@ -73,7 +73,7 @@ function signRefreshToken(payload) {
         privateKey,
         {
             algorithm: 'RS256',
-            expiresIn: config.jwt.refreshExpiresIn,
+            expiresIn: opts.expiresIn || config.jwt.refreshExpiresIn,
             issuer:    config.jwt.issuer,
             keyid:     kid,
         }

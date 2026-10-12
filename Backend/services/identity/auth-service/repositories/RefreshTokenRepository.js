@@ -22,13 +22,13 @@ const RT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 class RefreshTokenRepository {
     /** Creates a new refresh token record (after signing the JWT). */
-    async create({ userId, sessionId, familyId, tokenHash }) {
+    async create({ userId, sessionId, familyId, tokenHash, expiresAt }) {
         return db.RefreshToken.create({
             user_id:    userId,
             session_id: sessionId,
             family_id:  familyId,
             token_hash: tokenHash,
-            expires_at: new Date(Date.now() + RT_TTL_MS),
+            expires_at: expiresAt || new Date(Date.now() + RT_TTL_MS),
         });
     }
 

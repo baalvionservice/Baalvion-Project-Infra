@@ -64,6 +64,9 @@ function presentUser(user, extras = {}) {
 // Role → permission grants embedded in the access token. Hierarchical roles still
 // drive most checks, but populating permissions[] makes fine-grained
 // requirePermission() gates meaningful (the claim used to ship empty).
+// Accounts that run the platform. They get the long refresh lifetime (see issueTokenPair).
+const ADMIN_ROLES = new Set(['super_admin', 'platform_admin']);
+
 const ROLE_PERMISSIONS = {
     super_admin: ['users:read', 'users:write', 'users:delete', 'orgs:read', 'orgs:write', 'billing:manage',
                   'staff:read', 'staff:write', 'staff:manage', 'cms:read', 'cms:write', 'cms:manage',
@@ -176,19 +179,24 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
         email_verified: emailVerified,
     });
 
+    // Members refresh for 7 days at a time (each refresh starts the 7 days again). Platform staff get a year, so the
+    // admin console never signs the owner out on its own.
+    const isStaff = [role, ...(Array.isArray(roles) ? roles : [])].some((r) => ADMIN_ROLES.has(r));
     const rawRefresh   = jwt.signRefreshToken({
         sub:      userId,
         sid:      sessionId,
         familyId: familyId,
-    });
+    }, isStaff ? { expiresIn: config.jwt.adminRefreshExpiresIn } : {});
 
     const refreshHash  = jwt.hashToken(rawRefresh);
+    const refreshExp   = (require('jsonwebtoken').decode(rawRefresh) || {}).exp;
 
     await rtRepo.create({
         userId,
         sessionId,
         familyId,
         tokenHash: refreshHash,
+        expiresAt: isStaff && refreshExp ? new Date(refreshExp * 1000) : undefined,
     });
 
     return {
