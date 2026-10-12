@@ -13,7 +13,11 @@ export function flattenCategoryPaths(tree: CommerceCategory[] = [], trail: strin
   const out: CategoryOption[] = [];
   for (const c of tree) {
     const path = [...trail, c.name];
-    out.push({ id: c.id, label: path.join(' › '), depth: trail.length, name: c.name });
+    // A category's section (Handbags, Accessories…) is shown between brand and item so the
+    // picker reads "Hermès › Handbags › Birkin Bags".
+    const section = typeof (c.seoMetadata as { section?: unknown } | undefined)?.section === 'string' ? (c.seoMetadata as { section: string }).section : '';
+    const label = trail.length === 1 && section ? [trail[0], section, c.name].join(' › ') : path.join(' › ');
+    out.push({ id: c.id, label, depth: trail.length, name: c.name });
     if (c.children?.length) out.push(...flattenCategoryPaths(c.children, path));
   }
   return out;

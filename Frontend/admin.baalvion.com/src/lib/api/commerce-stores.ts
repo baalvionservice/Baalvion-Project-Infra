@@ -21,7 +21,7 @@ export const commerceStoresApi = {
   categories: {
     list: (storeId: string) =>
       client.get<ApiResponse<CommerceCategory[]>>(`/commerce/stores/${storeId}/categories`),
-    create: (storeId: string, payload: { name: string; parentId?: string; description?: string; sortOrder?: number }) =>
+    create: (storeId: string, payload: { name: string; slug?: string; parentId?: string; description?: string; sortOrder?: number; seoMetadata?: Record<string, unknown> }) =>
       client.post<ApiResponse<CommerceCategory>>(`/commerce/stores/${storeId}/categories`, payload),
     update: (storeId: string, categoryId: string, payload: Partial<CommerceCategory>) =>
       client.patch<ApiResponse<CommerceCategory>>(`/commerce/stores/${storeId}/categories/${categoryId}`, payload),

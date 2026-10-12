@@ -22,14 +22,17 @@ import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import type { CommerceCategory } from '@/lib/types/commerce.types';
 import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
+import StructureSetupDialog from '@/components/commerce/StructureSetupDialog';
+import { sectionOf } from '@/lib/commerce/amariseStructure';
 
 interface CategoryFormState {
   name: string;
   description: string;
   parentId: string;
+  section: string;
 }
 
-const defaultForm: CategoryFormState = { name: '', description: '', parentId: '' };
+const defaultForm: CategoryFormState = { name: '', description: '', parentId: '', section: '' };
 
 // Total products at or below a node, so a brand row shows everything under it.
 function totalProducts(c: CommerceCategory): number {
@@ -38,6 +41,16 @@ function totalProducts(c: CommerceCategory): number {
 
 function matches(c: CommerceCategory, q: string): boolean {
   return c.name.toLowerCase().includes(q) || (c.children ?? []).some((k) => matches(k, q));
+}
+
+// A brand's items grouped under their section, sections ordered by where their first item sits.
+function sectionGroups(kids: CommerceCategory[]) {
+  const groups = new Map<string, CommerceCategory[]>();
+  for (const k of kids.slice().sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))) {
+    const t = sectionOf(k) || 'Other';
+    groups.set(t, [...(groups.get(t) ?? []), k]);
+  }
+  return Array.from(groups, ([title, items]) => ({ title, items }));
 }
 
 export default function CategoriesPage() {
@@ -67,15 +80,18 @@ export default function CategoriesPage() {
 
   const openEdit = (cat: CommerceCategory) => {
     setEditing(cat);
-    setForm({ name: cat.name, description: cat.description ?? '', parentId: cat.parentId ?? '' });
+    setForm({ name: cat.name, description: cat.description ?? '', parentId: cat.parentId ?? '', section: sectionOf(cat) });
     setDialogOpen(true);
   };
 
   const handleSubmit = () => {
+    const section = form.section.trim();
     const payload = {
       name: form.name,
       description: form.description || undefined,
       parentId: form.parentId || undefined,
+      // Merge so nothing else stored on the category is lost when only the section changes.
+      seoMetadata: { ...(editing?.seoMetadata ?? {}), ...(section ? { section } : {}) },
     };
     if (editing) {
       updateCategory.mutate({ categoryId: editing.id, payload }, { onSuccess: () => setDialogOpen(false) });
@@ -85,6 +101,7 @@ export default function CategoriesPage() {
   };
 
   const tree = categories ?? [];
+  const knownSections = Array.from(new Set(tree.flatMap((b) => (b.children ?? []).map((c) => sectionOf(c)).filter(Boolean))));
   const options = flattenCategoryPaths(tree);
   const q = query.trim().toLowerCase();
   const visibleTree = q ? tree.filter((c) => matches(c, q)) : tree;
@@ -118,7 +135,7 @@ export default function CategoriesPage() {
             <div className="min-w-0">
               <p className={`truncate text-sm ${depth === 0 ? 'font-semibold' : 'font-medium'}`}>{cat.name}</p>
               <p className="truncate text-[11px] text-muted-foreground">
-                {depth === 0 ? 'Brand' : depth === 1 ? 'Category' : 'Subcategory'}
+                {depth === 0 ? 'Brand' : depth === 1 ? (sectionOf(cat) || 'Category') : 'Subcategory'}
                 {cat.children?.length ? ` · ${cat.children.length} inside` : ''}
               </p>
             </div>
@@ -140,7 +157,16 @@ export default function CategoriesPage() {
             </Button>
           </div>
         </div>
-        {!isClosed && kids.map((k) => renderNode(k, depth + 1))}
+        {!isClosed && (depth === 0 && kids.some((k) => sectionOf(k))
+          ? sectionGroups(kids).map((g) => (
+              <div key={g.title}>
+                <div className="border-b bg-muted/40 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ paddingLeft: `${12 + 20}px` }}>
+                  {g.title} <span className="font-normal normal-case tracking-normal">· {g.items.length}</span>
+                </div>
+                {g.items.map((k) => renderNode(k, depth + 1))}
+              </div>
+            ))
+          : kids.map((k) => renderNode(k, depth + 1)))}
       </div>
     );
   };
@@ -151,10 +177,13 @@ export default function CategoriesPage() {
         title="Brands & categories"
         description={`${brands} brands · ${subs} categories and subcategories. Open any row to add a product straight into it.`}
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <StructureSetupDialog />
           <Button size="sm" onClick={() => openCreate()} disabled={!storeId}>
             <Plus className="mr-2 h-4 w-4" />
             New brand / category
           </Button>
+          </div>
         }
       />
 
@@ -206,6 +235,19 @@ export default function CategoriesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="Optional description"
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Section <span className="font-normal text-muted-foreground">(optional)</span></Label>
+              <Input
+                list="section-suggestions"
+                value={form.section}
+                onChange={(e) => setForm((f) => ({ ...f, section: e.target.value }))}
+                placeholder="e.g. Handbags, Accessories, Curations"
+              />
+              <datalist id="section-suggestions">
+                {knownSections.map((t) => <option key={t} value={t} />)}
+              </datalist>
+              <p className="text-xs text-muted-foreground">Groups this item under a heading inside its brand. Leave empty for a brand.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Parent Category</Label>
