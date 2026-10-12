@@ -61,7 +61,7 @@ export default function SellerSalesPage() {
   }
 
   return (
-    <div className="max-w-[1000px] mx-auto px-10 py-10 space-y-8">
+    <div className="w-full max-w-[1000px] mx-auto px-4 sm:px-10 py-6 sm:py-10 space-y-8">
       <header>
         <h1 className="text-3xl font-bold text-white mb-2">Buyers &amp; Sales</h1>
         <p className="text-text-muted text-sm max-w-2xl">

@@ -154,7 +154,7 @@ export default function SellerPayoutsPage() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white pb-32">
-      <div className="max-w-[1200px] mx-auto px-6 pt-10 space-y-10">
+      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 pt-10 space-y-10">
 
         {/* Header */}
         <header>

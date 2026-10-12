@@ -103,7 +103,7 @@ export default function SellerListingsPage() {
   const shopName = member?.seller?.application.storeName ?? member?.displayName;
 
   return (
-    <div className="p-4 sm:p-10 space-y-8 max-w-[1000px] mx-auto">
+    <div className="p-4 sm:p-10 space-y-8 w-full max-w-[1000px] mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <p className="text-[11px] text-cyan-400 font-bold uppercase tracking-[0.2em] mb-2">My store</p>

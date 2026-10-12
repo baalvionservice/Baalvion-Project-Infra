@@ -204,7 +204,7 @@ export default function EditListingPage() {
   const shopName = member?.seller?.application.storeName ?? member?.displayName;
 
   return (
-    <div className="p-4 sm:p-10 space-y-8 max-w-[900px] mx-auto">
+    <div className="p-4 sm:p-10 space-y-8 w-full max-w-[900px] mx-auto">
       <header className="space-y-5">
         <Link href="/seller/listings" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-white"><ArrowLeft className="w-3.5 h-3.5" /> My listings{shopName ? ` · ${shopName}` : ""}</Link>
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
