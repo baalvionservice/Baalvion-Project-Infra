@@ -70,12 +70,15 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
   // Each filter row counts what is left after the filters above it, so a choice never leads to an empty page.
   const inCountry = clubs.filter((c) => !f.country || countryOf(c.state) === f.country);
   const inState = inCountry.filter((c) => !f.state || c.state === f.state);
-  const inCity = inState.filter((c) => !f.city || c.city === f.city);
+  // An emirate or state with a single city goes straight to that city's areas.
+  const cities = counts(inState, (c) => c.city);
+  const city = f.city || (f.state && cities.length === 1 ? cities[0][0] : "");
+  const inCity = inState.filter((c) => !city || c.city === city);
   const inArea = inCity.filter((c) => !f.area || (c.suburb || c.city) === f.area);
   const countryCounts = counts(clubs, (c) => countryOf(c.state));
   const stateCounts = counts(inCountry, (c) => c.state);
-  const cityCounts = counts(inState, (c) => c.city);
-  const areaCounts = f.city ? counts(inCity, (c) => c.suburb) : [];
+  const cityCounts = cities;
+  const areaCounts = city ? counts(inCity, (c) => c.suburb) : [];
   const typeCounts = counts(inArea, (c) => c.venueType);
 
   const results = useMemo(() => {
@@ -133,7 +136,7 @@ export function ClubsClient({ clubs, preselectedState }: { clubs: Club[]; presel
       )}
       {areaCounts.length > 1 && (
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Area in {f.city}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Area in {city}</p>
           <div className="flex flex-wrap gap-2">
             <Chip on={!f.area} onClick={() => set({ area: "" })}>All areas</Chip>
             {areaCounts.slice(0, 20).map(([a, n]) => <Chip key={a} on={f.area === a} onClick={() => set({ area: a })} n={n}>{a}</Chip>)}
