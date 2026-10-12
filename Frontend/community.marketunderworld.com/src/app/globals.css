@@ -115,3 +115,5 @@ h1, h2, h3, h4, .font-display { font-style: normal; letter-spacing: -0.01em; }
 .admin-main .text-fuchsia-800, .admin-main .text-fuchsia-600, .admin-main .text-fuchsia-700 { color: #b91c1c; }
 .admin-main .focus\:border-fuchsia-500:focus, .admin-main .focus\:border-fuchsia-500\/50:focus { border-color: #ef4444; }
 .admin-main .border-fuchsia-500 { border-color: #ef4444; }
+.admin-main .text-text-ghost { color: #8a93a3; }
+.admin-main .bg-white .text-gray-300, .admin-main .bg-white .text-gray-200 { color: #9ca3af; }
