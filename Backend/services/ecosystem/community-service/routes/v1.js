@@ -18,6 +18,7 @@ const consoleRoutes = require('./consoleRoutes');
 const profileRoutes = require('./profileRoutes');
 const eliteGuestRoutes = require('./eliteGuestRoutes');
 const datingRoutes = require('./datingRoutes');
+const sitePageRoutes = require('./sitePageRoutes');
 
 const { auditAdmin } = require('../middleware/auditAdmin');
 
@@ -37,6 +38,7 @@ router.use('/community', chatRoutes);
 router.use('/community', directMessageRoutes);
 router.use('/community', eliteGuestRoutes);
 router.use('/community', datingRoutes);
+router.use('/community', sitePageRoutes);
 router.use('/community', nightlifeRoutes);
 router.use('/community', gigsRoutes);
 router.use('/community', bountyRoutes);

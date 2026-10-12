@@ -25,6 +25,7 @@ db.CommunityThread = require('./community_thread')(sequelize);
 db.DirectConversation = require('./direct_conversation')(sequelize);
 db.DirectMessage = require('./direct_message')(sequelize);
 db.NightClub = require('./night_club')(sequelize);
+db.SitePage = require('./site_page')(sequelize);
 db.DatingProfile = require('./dating_profile')(sequelize);
 db.DatingAction = require('./dating_action')(sequelize);
 db.ClubBooking = require('./club_booking')(sequelize);
