@@ -33,6 +33,10 @@ async function loadForViewer(id, viewer) {
     const row = await db.MediaAsset.findByPk(id);
     if (!row) throw new AppError('NOT_FOUND', 'Not found', 404);
     if (row.visibility === 'public') return row;
+    if (row.purpose === 'profile_photo') {
+        const pub = await db.MemberProfile.findOne({ where: { photo_asset_id: row.id, public_profile: true }, attributes: ['user_id'] });
+        if (pub) return row;
+    }
     if (viewer.userId && (row.owner_id === viewer.userId || viewer.isAdmin)) return row;
     if (viewer.userId && row.purpose === 'dating_photo') {
         const live = await db.DatingProfile.findOne({ where: { photo_asset_id: row.id, status: 'active' }, attributes: ['id'] });

@@ -71,9 +71,17 @@ async function listForParty(viewerId, isStaff, partyId) {
     if (!party) throw new AppError('NOT_FOUND', 'Party not found', 404);
     if (!isStaff && party.user_id !== String(viewerId)) throw new AppError('NOT_FOUND', 'Party not found', 404);
     const rows = await db.EliteHostGuest.findAll({ where: { party_id: partyId }, order: [['created_at', 'ASC']] });
+    // The host sees who is asking through the guest's public page, never their email. A guest with no public page shows as "Member".
+    const profiles = await db.MemberProfile.findAll({ where: { user_id: { [Op.in]: rows.map((g) => g.user_id) }, public_profile: true } });
+    const byUser = new Map(profiles.map((p) => [p.user_id, p]));
     return {
         capacity: party.guests, approvedGuests: await approvedCount(partyId),
-        items: rows.map((g) => ({ ...present(g), requesterLabel: g.requester_label })),
+        items: rows.map((g) => {
+            const p = byUser.get(g.user_id);
+            return { ...present(g), requesterLabel: p ? p.public_name : 'Member', requesterProfile: p ? {
+                handle: p.handle, name: p.public_name, headline: p.headline || '', city: p.city || '', links: p.social_links || {}, photoPath: p.photo_asset_id ? `/media/${p.photo_asset_id}` : null,
+            } : null };
+        }),
     };
 }
 

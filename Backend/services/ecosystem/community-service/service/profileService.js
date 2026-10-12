@@ -2,6 +2,10 @@
 const db = require('../models');
 const { AppError } = require('../utils/errors');
 const notifyEvents = require('./notifyEvents');
+const { Op } = require('sequelize');
+const social = require('../utils/social');
+
+const RESERVED = new Set(['admin', 'administrator', 'support', 'help', 'staff', 'team', 'official', 'hellroad', 'baalvion', 'moderator', 'system', 'root', 'null', 'undefined', 'me', 'new', 'edit']);
 
 const present = (p) => ({
     photoPath: p && p.photo_asset_id ? `/media/${p.photo_asset_id}` : null,
@@ -10,6 +14,16 @@ const present = (p) => ({
     interests: (p && p.interests) || [],
     learnGoal: (p && p.learn_goal) || '',
     gender: (p && p.gender) || '',
+    handle: (p && p.handle) || '',
+    publicProfile: !!(p && p.public_profile),
+    searchIndex: p ? p.search_index !== false : true,
+    isFounder: !!(p && p.is_founder),
+    companyName: (p && p.company_name) || '',
+    roleTitle: (p && p.role_title) || '',
+    publicName: (p && p.public_name) || '',
+    headline: (p && p.headline) || '',
+    knownFor: (p && p.known_for) || '',
+    socialLinks: (p && p.social_links) || {},
 });
 
 async function getMine(userId) {
@@ -28,6 +42,31 @@ async function saveMine(userId, d) {
     if (d.bio !== undefined) patch.bio = d.bio || null;
     if (d.city !== undefined) patch.city = d.city || null;
     if (d.interests !== undefined) patch.interests = [...new Set(d.interests)];
+    if (d.handle !== undefined) {
+        const handle = d.handle || null;
+        if (handle) {
+            if (RESERVED.has(handle)) throw new AppError('VALIDATION_ERROR', 'handle: that name is reserved', 422);
+            const taken = await db.MemberProfile.findOne({ where: { user_id: { [Op.ne]: uid }, [Op.and]: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('handle')), handle) }, attributes: ['user_id'] });
+            if (taken) throw new AppError('CONFLICT', 'That handle is taken. Try another.', 409);
+        }
+        patch.handle = handle;
+    }
+    if (d.searchIndex !== undefined) patch.search_index = d.searchIndex;
+    if (d.isFounder !== undefined) patch.is_founder = d.isFounder;
+    if (d.companyName !== undefined) patch.company_name = d.companyName || null;
+    if (d.roleTitle !== undefined) patch.role_title = d.roleTitle || null;
+    if (d.publicName !== undefined) patch.public_name = d.publicName || null;
+    if (d.headline !== undefined) patch.headline = d.headline || null;
+    if (d.knownFor !== undefined) patch.known_for = d.knownFor || null;
+    if (d.socialLinks !== undefined) {
+        try { patch.social_links = social.normalizeAll(d.socialLinks); } catch (e) { throw new AppError('VALIDATION_ERROR', `socialLinks: ${e.message}`, 422); }
+    }
+    if (d.publicProfile !== undefined) {
+        const handle = patch.handle !== undefined ? patch.handle : row.handle;
+        const name = patch.public_name !== undefined ? patch.public_name : row.public_name;
+        if (d.publicProfile && (!handle || !name)) throw new AppError('VALIDATION_ERROR', 'publicProfile: add a handle and the name to show before turning your public page on', 422);
+        patch.public_profile = d.publicProfile;
+    }
     if (d.gender !== undefined) patch.gender = d.gender || null;
     if (d.learnGoal !== undefined) patch.learn_goal = d.learnGoal || null;
     if (d.photoAssetId !== undefined) patch.photo_asset_id = d.photoAssetId;
@@ -91,4 +130,39 @@ async function decide(adminId, id, { approve, note }) {
     return presentRequest(row);
 }
 
-module.exports = { getMine, saveMine, myRequests, createRequest, withdraw, adminList, decide };
+// What anyone with the link may see. Only for members who switched their public page on; never the user id, email, gender or contact details.
+async function publicByHandle(handle) {
+    const p = await db.MemberProfile.findOne({ where: { public_profile: true, [Op.and]: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('handle')), String(handle || '').toLowerCase()) } });
+    if (!p) throw new AppError('NOT_FOUND', 'Profile not found', 404);
+    const kyc = await db.KycVerification.findOne({ where: { user_id: p.user_id, status: 'approved' }, attributes: ['id'] });
+    return {
+        handle: p.handle, name: p.public_name, headline: p.headline || '', bio: p.bio || '', knownFor: p.known_for || '', city: p.city || '',
+        isFounder: !!p.is_founder, company: p.company_name || '', role: p.role_title || '', searchIndex: p.search_index !== false,
+        interests: p.interests || [], links: p.social_links || {}, photoPath: p.photo_asset_id ? `/media/${p.photo_asset_id}` : null,
+        verified: !!kyc, since: p.createdAt,
+    };
+}
+
+// The directory of public pages: founders and everyone else who switched theirs on. Cards only; the full page has the rest.
+async function publicDirectory({ founders, city, q, limit, offset } = {}) {
+    const where = { public_profile: true };
+    if (founders) where.is_founder = true;
+    if (city) where.city = { [Op.iLike]: `%${String(city).replace(/[%_\\]/g, '\\$&')}%` };
+    if (q) {
+        const like = `%${String(q).replace(/[%_\\]/g, '\\$&')}%`;
+        where[Op.or] = [{ public_name: { [Op.iLike]: like } }, { company_name: { [Op.iLike]: like } }, { headline: { [Op.iLike]: like } }];
+    }
+    const { rows, count } = await db.MemberProfile.findAndCountAll({
+        where, order: [['updated_at', 'DESC']], limit: Math.min(Number(limit) || 48, 5000), offset: Number(offset) || 0,
+    });
+    return {
+        total: count,
+        items: rows.map((p) => ({
+            handle: p.handle, name: p.public_name, headline: p.headline || '', city: p.city || '', isFounder: !!p.is_founder, company: p.company_name || '',
+            role: p.role_title || '', photoPath: p.photo_asset_id ? `/media/${p.photo_asset_id}` : null, searchIndex: p.search_index !== false,
+            updatedAt: p.get('updated_at'),
+        })),
+    };
+}
+
+module.exports = { publicDirectory, publicByHandle, getMine, saveMine, myRequests, createRequest, withdraw, adminList, decide };

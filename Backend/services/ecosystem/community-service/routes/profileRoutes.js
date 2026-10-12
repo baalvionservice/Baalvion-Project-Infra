@@ -30,6 +30,10 @@ const label = (req) => { const e = decodeEmailFromRequest(req); return e ? e.sli
 router.get('/me/profile', authMw, h((req) => svc.getMine(uid(req))));
 router.put('/me/profile', authMw, h((req) => svc.saveMine(uid(req), parse(v.profileSchema, req.body))));
 
+// Public: a member's own page, when they switched it on.
+router.get('/p', h((req) => svc.publicDirectory({ founders: req.query.founders === '1', city: req.query.city, q: req.query.q, limit: req.query.limit, offset: req.query.offset })));
+router.get('/p/:handle', h((req) => svc.publicByHandle(req.params.handle)));
+
 router.get('/me/kyc-status', authMw, h(async (req) => {
     const { resolveTier } = require('../middleware/staffAccess');
     const exempt = !!(await resolveTier(req));
