@@ -95,9 +95,51 @@ export type IdTypeOption = 'passport' | 'driving_license' | 'government_id';
 
 export interface KYCSubmission {
   representative: { fullName: string; dateOfBirth: string; nationality: string; officialEmail: string };
-  company: { registrationNumber: string; incorporationDate: string; hqAddress: string; taxResidency: string };
+  company: {
+    legalName: string;
+    registrationNumber: string;
+    incorporationDate: string;
+    hqAddress: string;
+    taxResidency: string;
+    vatNumber: string;
+  };
   documentIds: { governmentId: string | null; businessLicense: string | null };
   idType: IdTypeOption;
+}
+
+/** A company found in the public LEI register — what pre-fills the form. */
+export interface CompanyLookupEntity {
+  lei: string;
+  legal_name: string | null;
+  registered_as: string | null;
+  country: string | null;
+  legal_address: { lines: string[]; city: string | null; region: string | null; postal_code: string | null; country: string | null };
+}
+
+export interface CompanySuggestion { name: string; lei: string }
+
+/**
+ * Type-ahead for the company name. Never throws: if the register or the endpoint is
+ * unavailable the customer simply types their details, which still works.
+ */
+export async function suggestCompanies(query: string): Promise<CompanySuggestion[]> {
+  if (query.trim().length < 3) return [];
+  try {
+    const res = await apiClient.get<{ suggestions?: CompanySuggestion[] }>('/company_verifications/lookup/suggest', { q: query.trim() });
+    return res.success ? res.data?.suggestions ?? [] : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Full details for one picked suggestion, or null when unavailable. */
+export async function getCompanyEntity(lei: string): Promise<CompanyLookupEntity | null> {
+  try {
+    const res = await apiClient.get<{ entity?: CompanyLookupEntity | null }>('/company_verifications/lookup/entity', { lei });
+    return res.success ? res.data?.entity ?? null : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -115,7 +157,7 @@ async function resolveOrCreateMyOrgId(company: KYCSubmission['company']): Promis
 
   const createRes = await apiClient.post<any>('/organizations', {
     code: `ORG-${Date.now()}`,
-    name: company.registrationNumber ? `Org ${company.registrationNumber}` : 'New Organization',
+    name: company.legalName.trim() || (company.registrationNumber ? `Org ${company.registrationNumber}` : 'New Organization'),
     type: orgType,
     registration_number: company.registrationNumber,
     country: company.taxResidency,
@@ -145,7 +187,9 @@ export async function submitKYC(payload: KYCSubmission): Promise<void> {
 
   // 2. Institutional (company) verification — resolve/provision the org, then submit.
   const orgId = await resolveOrCreateMyOrgId(payload.company);
+  const country = payload.company.taxResidency.trim();
   const companyRes = await apiClient.post<any>(`/company_verifications/${orgId}`, {
+    legal_company_name: payload.company.legalName.trim(),
     registration_number: payload.company.registrationNumber,
     incorporation_date: payload.company.incorporationDate || null,
     // HQ address / tax residency aren't first-class columns on company_verifications yet —
@@ -153,6 +197,9 @@ export async function submitKYC(payload: KYCSubmission): Promise<void> {
     metadata: {
       hqAddress: payload.company.hqAddress,
       taxResidency: payload.company.taxResidency,
+      // Used by the automatic register checks; only a two-letter code is usable as a filter.
+      ...(/^[A-Za-z]{2}$/.test(country) ? { country: country.toUpperCase() } : {}),
+      ...(payload.company.vatNumber.trim() ? { vat_number: payload.company.vatNumber.trim() } : {}),
       businessLicenseDocumentId: payload.documentIds.businessLicense,
     },
   });
