@@ -58,6 +58,10 @@ until real API credentials are set. No live rates, space confirmation or bill of
 
 Done when: a real quote and a real booking confirmation come back for one lane.
 
+## Progress log
+- 2026-10-13 — Item 3: the maritime screens already read the real tracking API (the Sept note about hard-coded vessels is out of date). Only the AIS feed is missing.
+- 2026-10-13 — Item 4: audited. HS/duty data is 38 codes x 5 countries and says itself it is illustrative; sanctions data was 13 rows. Sanctions replaced with the real OFAC + UN + EU lists (26,659 parties) on branch `feat/trade-service-real-sanctions-lists`, local only. Tariffs/duties and per-country import requirements are NOT done.
+
 ## Item 3 — Live ship tracking
 
 Problem: backend tracking exists, but the maritime screens read hard-coded arrays (verify
