@@ -184,6 +184,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Markets',     href: '/commerce/markets',     iconName: 'Globe2'          },
           { title: 'Reviews',     href: '/commerce/reviews',     iconName: 'Star'            },
           { title: 'Settings',    href: '/commerce/settings',    iconName: 'Settings'        },
+          { title: 'Hand over work', href: '/commerce/team',    iconName: 'UserCog'         },
         ],
       },
     ],

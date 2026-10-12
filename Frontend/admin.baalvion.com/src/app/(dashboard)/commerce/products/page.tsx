@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye, Upload } from 'lucide-react';
+import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye, Upload, Zap } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -32,6 +32,8 @@ import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatMoney, formatDate } from '@/lib/utils/format';
 import { placeholderReasons } from '@/lib/commerce/placeholders';
+import { priceOf } from '@/lib/commerce/priceOf';
+import MobileProductCard from '@/components/commerce/MobileProductCard';
 import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 import type { Product } from '@/lib/types/commerce.types';
 
@@ -92,11 +94,17 @@ export default function ProductsPage() {
         title="Products"
         description={`${total} products across your store`}
         actions={
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" asChild>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" asChild className="hidden sm:inline-flex">
               <Link href="/commerce/products/import">
                 <Upload className="mr-2 h-4 w-4" />
                 Import
+              </Link>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/commerce/products/quick">
+                <Zap className="mr-2 h-4 w-4" />
+                Quick add
               </Link>
             </Button>
             <Button size="sm" asChild>
@@ -188,6 +196,13 @@ export default function ProductsPage() {
               </Button>
             </div>
           ) : (
+            <>
+            <ul className="space-y-3 p-3 md:hidden">
+              {products.map((product: Product) => (
+                <MobileProductCard key={product.id} product={product} storeId={storeId} currency={product.currencyCode ?? 'USD'} />
+              ))}
+            </ul>
+            <div className="hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -244,9 +259,7 @@ export default function ProductsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {product.customFields?.basePrice != null && product.customFields.basePrice !== ''
-                        ? formatMoney(Number(product.customFields.basePrice), product.currencyCode ?? 'USD')
-                        : '—'}
+                      {priceOf(product) != null ? formatMoney(priceOf(product)!, product.currencyCode ?? 'USD') : '—'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground font-mono">
                       {product.sku ?? '—'}
@@ -293,6 +306,8 @@ export default function ProductsPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
+            </>
           )}
         </CardContent>
 
@@ -322,6 +337,15 @@ export default function ProductsPage() {
           </div>
         )}
       </Card>
+
+      {/* One-thumb shortcut on phones and tablets */}
+      <Link
+        href="/commerce/products/quick"
+        className="fixed bottom-5 right-5 z-30 flex h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg md:hidden"
+        aria-label="Quick add a product"
+      >
+        <Zap className="h-5 w-5" />Quick add
+      </Link>
     </div>
   );
 }

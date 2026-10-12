@@ -230,7 +230,7 @@ export default function ProductEditorPage() {
   const busy = saving || createProduct.isPending || updateProduct.isPending || bulkUpdate.isPending;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 lg:pb-0">
       <PageHeader
         title={isNew ? 'Add a product' : (product?.name ?? '')}
         description={isNew ? `Adding to ${activeStore?.name ?? 'your store'}. Follow the steps below.` : undefined}
@@ -453,6 +453,15 @@ export default function ProductEditorPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </div>
+
+      {/* Phones: Save / Publish stay under the thumb instead of at the bottom of a long page */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-xl items-center gap-2">
+          <span className="shrink-0 text-xs text-muted-foreground">{checklist.filter((c) => c.ok).length}/{checklist.length} ready</span>
+          <Button className="h-11 flex-1" variant={live || !ready ? 'default' : 'outline'} onClick={() => save(false)} disabled={busy}>{busy ? 'Saving…' : isNew ? 'Create (draft)' : 'Save'}</Button>
+          {!live && <Button className="h-11 flex-1" onClick={() => save(true)} disabled={busy || !ready}>{isNew ? 'Create & publish' : 'Save & publish'}</Button>}
         </div>
       </div>
     </div>

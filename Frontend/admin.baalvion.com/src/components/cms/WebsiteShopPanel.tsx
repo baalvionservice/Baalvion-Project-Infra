@@ -43,7 +43,7 @@ export default function WebsiteShopPanel({ websiteSlug }: { websiteSlug: string 
     { title: 'Products', text: 'Add products with photos, price, description and stock.', icon: Package, href: '/commerce/products', highlight: true },
     { title: 'Brands, categories & subcategories', text: `${total} in the shop menu. Add, rename, reorder.`, icon: FolderTree, href: '/commerce/categories' },
     { title: 'Orders', text: 'Customer orders and fulfilment.', icon: ShoppingCart, href: '/commerce/orders' },
-    { title: 'Shop team', text: 'Give people product, SEO, operations or admin access to this shop only.', icon: UserCog, href: `/rbac/${encodeURIComponent(store.countryCode)}/${store.id}` },
+    { title: 'Shop team', text: 'Give people product, SEO, operations or admin access to this shop only.', icon: UserCog, href: '/commerce/team' },
   ];
 
   return (
