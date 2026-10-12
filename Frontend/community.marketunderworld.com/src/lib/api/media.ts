@@ -4,7 +4,7 @@
 
 import { ApiError } from "./nightlife";
 
-export type UploadPurpose = "profile_photo" | "teacher_avatar" | "club_image" | "event_poster";
+export type UploadPurpose = "profile_photo" | "teacher_avatar" | "club_image" | "event_poster" | "dating_photo";
 
 const MAX_DATA_URL = 1_300_000; // ~950 KB of image after base64
 

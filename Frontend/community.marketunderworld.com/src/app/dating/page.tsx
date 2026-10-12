@@ -1,657 +1,171 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { 
-  Heart, 
-  X, 
-  Sparkles, 
-  ShieldCheck, 
-  MapPin, 
-  Search, 
-  Filter, 
-  CheckCircle, 
-  Flame,
-  Star,
-  Building,
-  DollarSign,
-  Calendar,
-  Clock,
-  Briefcase,
-  SlidersHorizontal,
-  Grid,
-  Layers,
-  Award,
-  TrendingUp,
-  UserPlus,
-  Zap,
-  Globe,
-  Plus
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { Camera, Heart, Loader2, MessageCircle, ShieldCheck, X, Flag } from "lucide-react"
+import { useAuth } from "@/context/auth-context"
+import { SignInNotice } from "@/components/nightlife/sign-in-notice"
+import { PlacePicker } from "@/components/profile/place-picker"
+import { uploadImage } from "@/lib/api/media"
+import { dating, datingPhoto, DatingError, type DatingProfile, type MyDating } from "@/lib/api/dating"
 
-interface FounderProfile {
-  id: string;
-  name: string;
-  age: number;
-  companyName: string;
-  sector: "AI" | "Web3" | "FinTech" | "SaaS" | "Biotech" | "Consumer";
-  role: string;
-  valuation: string;
-  hourlyRateUsdt: number;
-  hourlyRateInr: number;
-  location: string;
-  bio: string;
-  interests: string[];
-  verifiedFounder: boolean;
-  avatarUrl: string;
-  availability: string;
-  rating: number;
-  completedDates: number;
-  upiId: string;
+const field = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 outline-none focus:border-pink-500/60 text-white text-base"
+const label = "block text-xs font-bold text-gray-400 uppercase mb-2"
+const LOOKING: Record<string, string> = { dating: "Dating", relationship: "A relationship", friendship: "Friendship", networking: "Founder networking" }
+const uuidIn = (url: string) => /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.exec(url)?.[1] ?? null
+
+function Photo({ path, name, className }: { path: string | null; name: string; className: string }) {
+  const src = datingPhoto(path)
+  // eslint-disable-next-line @next/next/no-img-element
+  return src ? <img src={src} alt={name} className={`${className} object-cover`} /> : <div className={`${className} bg-white/5 flex items-center justify-center text-4xl font-bold text-gray-600`}>{name.slice(0, 1)}</div>
 }
 
-const FOUNDERS_DATABASE: FounderProfile[] = [
-  {
-    id: "fnd-1",
-    name: "Vikram Singhania",
-    age: 29,
-    companyName: "Nexus AI Protocol",
-    sector: "AI",
-    role: "Founder & CEO",
-    valuation: "$25M",
-    hourlyRateUsdt: 200,
-    hourlyRateInr: 18000,
-    location: "Mumbai / BKC VIP Node",
-    bio: "AI Researcher & Founder. Looking for intelligent date companions for high-end networking dinners, rooftop sessions, and tech Galas.",
-    interests: ["Artificial Intelligence", "Yachting", "Luxury Dining", "Venture Capital"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Weekend Evenings",
-    rating: 4.9,
-    completedDates: 38,
-    upiId: "vikram.nexus@icici"
-  },
-  {
-    id: "fnd-2",
-    name: "Marcus Vance",
-    age: 31,
-    companyName: "Underworld Pay",
-    sector: "FinTech",
-    role: "Co-Founder & CTO",
-    valuation: "$18M",
-    hourlyRateUsdt: 150,
-    hourlyRateInr: 13500,
-    location: "Bangalore / Indiranagar",
-    bio: "FinTech founder building decentralized payments. Rent me for casual coffee dates, startup feedback, or VIP nightlife events.",
-    interests: ["FinTech", "EDM Festivals", "Cocktail Mixology", "Fast Cars"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Weekday Nights",
-    rating: 5.0,
-    completedDates: 54,
-    upiId: "marcus.pay@okaxis"
-  },
-  {
-    id: "fnd-3",
-    name: "Rahul Kapoor",
-    age: 28,
-    companyName: "Aether Web3 Labs",
-    sector: "Web3",
-    role: "Founder & Managing Director",
-    valuation: "$40M",
-    hourlyRateUsdt: 300,
-    hourlyRateInr: 27000,
-    location: "Delhi NCR / Aerocity VIP",
-    bio: "Web3 ecosystem architect & angel investor. Available to be rented for exclusive 5-star dinner dates and private lounge sessions.",
-    interests: ["Web3 Architecture", "Angel Investing", "Fine Wines", "Golf"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Any Evening",
-    rating: 4.9,
-    completedDates: 42,
-    upiId: "rahul.aether@paytm"
-  },
-  {
-    id: "fnd-4",
-    name: "Devina Roy",
-    age: 27,
-    companyName: "BioGen HealthTech",
-    sector: "Biotech",
-    role: "Founder & Lead Geneticist",
-    valuation: "$15M",
-    hourlyRateUsdt: 180,
-    hourlyRateInr: 16200,
-    location: "Hyderabad Hub",
-    bio: "Biotech founder pioneering longevity science. Looking to connect for dinner discussions on longevity, healthtech, and art.",
-    interests: ["Longevity Science", "HealthTech", "Modern Art", "Violin"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Weekends",
-    rating: 4.8,
-    completedDates: 29,
-    upiId: "devina.biogen@icici"
-  },
-  {
-    id: "fnd-5",
-    name: "Karan Mehta",
-    age: 32,
-    companyName: "CloudScale SaaS",
-    sector: "SaaS",
-    role: "Founder & CEO",
-    valuation: "$60M",
-    hourlyRateUsdt: 250,
-    hourlyRateInr: 22500,
-    location: "Bangalore / Koramangala",
-    bio: "B2B SaaS founder with 3 successful exits. Rent me for pitch feedback, luxury dining, or private club networking.",
-    interests: ["SaaS Growth", "Exits", "Private Aviation", "Polo"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Late Nights",
-    rating: 5.0,
-    completedDates: 67,
-    upiId: "karan.cloudscale@hdfc"
-  },
-  {
-    id: "fnd-6",
-    name: "Natasha Malhotra",
-    age: 26,
-    companyName: "Vogue Consumer Labs",
-    sector: "Consumer",
-    role: "Founder & Creative Director",
-    valuation: "$12M",
-    hourlyRateUsdt: 140,
-    hourlyRateInr: 12600,
-    location: "Mumbai / Bandra VIP",
-    bio: "D2C luxury brand founder. Available for high-fashion Gala dates, launch parties, and creative brand strategy sessions.",
-    interests: ["Fashion Tech", "Luxury Brands", "Photography", "Champagne"],
-    verifiedFounder: true,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80",
-    availability: "Available Weekend Evenings",
-    rating: 4.9,
-    completedDates: 31,
-    upiId: "natasha.vogue@axis"
+function ProfileForm({ mine, onSaved }: { mine: MyDating; onSaved: (m: MyDating) => void }) {
+  const p = mine.profile
+  const [f, setF] = useState({ displayName: p?.name ?? "", headline: p?.headline ?? "", bio: p?.bio ?? "", city: p?.city ?? "", isFounder: p?.isFounder ?? false, companyName: p?.company ?? "", roleTitle: p?.role ?? "", lookingFor: p?.lookingFor ?? "dating" })
+  const [photoUrl, setPhotoUrl] = useState<string | null | undefined>(undefined)
+  const [busy, setBusy] = useState(false)
+  const [photoBusy, setPhotoBusy] = useState(false)
+  const [error, setError] = useState("")
+  const file = useRef<HTMLInputElement>(null)
+
+  const pickPhoto = async (fl: File | undefined) => {
+    if (!fl) return
+    setPhotoBusy(true); setError("")
+    try { setPhotoUrl(await uploadImage(fl, "dating_photo")) } catch (e) { setError(e instanceof Error ? e.message : "Photo upload failed") } finally { setPhotoBusy(false); if (file.current) file.current.value = "" }
   }
-];
-
-export default function ScalingDatingPlatformPage() {
-  const [viewMode, setViewMode] = useState<"deck" | "grid" | "leaderboard">("grid");
-  const [selectedSector, setSelectedSector] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  
-  // Swipe Deck State
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Booking Modal State
-  const [selectedFounder, setSelectedFounder] = useState<FounderProfile | null>(null);
-  const [sessionType, setSessionType] = useState<"dinner" | "coffee" | "vip_party" | "advisory">("dinner");
-  const [hours, setHours] = useState<number>(2);
-  const [paymentMethod, setPaymentMethod] = useState<"phonepe" | "gpay" | "usdt">("phonepe");
-  const [rentedFounders, setRentedFounders] = useState<FounderProfile[]>([]);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-
-  // Apply as Founder Modal
-  const [showApplyModal, setShowApplyModal] = useState(false);
-  const [applyForm, setApplyForm] = useState({ name: "", company: "", valuation: "", hourlyRate: 200, bio: "" });
-
-  const filteredFounders = FOUNDERS_DATABASE.filter((f) => {
-    const matchesSector = selectedSector === "all" || f.sector === selectedSector;
-    const matchesSearch = 
-      f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      f.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      f.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSector && matchesSearch;
-  });
-
-  const currentDeckFounder = filteredFounders[currentIndex] || filteredFounders[0];
-
-  const handleNextDeck = () => {
-    if (currentIndex < filteredFounders.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setCurrentIndex(0);
-    }
-  };
-
-  const handleConfirmRental = () => {
-    if (!selectedFounder) return;
-
-    const totalUsdt = selectedFounder.hourlyRateUsdt * hours;
-    setRentedFounders((prev) => [...prev, selectedFounder]);
-    setBookingSuccess(true);
-  };
+  const save = async () => {
+    setError("")
+    if (f.displayName.trim().length < 2) return setError("Add the first name you want others to see.")
+    if (f.bio.trim().length < 20) return setError("Write a few lines about yourself (at least 20 characters).")
+    setBusy(true)
+    try {
+      const photoAssetId = photoUrl === undefined ? undefined : photoUrl ? uuidIn(photoUrl) : null
+      onSaved(await dating.save({ displayName: f.displayName.trim(), headline: f.headline.trim() || undefined, bio: f.bio.trim(), city: f.city || undefined, isFounder: f.isFounder, companyName: f.companyName.trim() || undefined, roleTitle: f.roleTitle.trim() || undefined, lookingFor: f.lookingFor, photoAssetId, active: true }))
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not save") } finally { setBusy(false) }
+  }
+  const shownPhoto = photoUrl === undefined ? datingPhoto(p?.photoPath ?? null) : photoUrl
 
   return (
-    <div className="max-w-7xl mx-auto p-6 text-white min-h-screen space-y-8">
-      
-      {/* Platform Banner Header */}
-      <div className="bg-gradient-to-r from-red-950 via-zinc-900 to-zinc-950 border border-zinc-800 rounded-3xl p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 relative z-10">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="bg-rose-950 text-rose-400 border border-rose-800/80 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> Rent A Founder • 100+ Verified CEOs & Co-Founders
-              </span>
-              <span className="bg-amber-950 text-amber-400 border border-amber-800/80 text-xs px-2.5 py-1 rounded-full font-mono font-bold">
-                $10M - $60M Valuations
-              </span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Founder Dating & Executive Escort Marketplace
-            </h1>
-            <p className="text-zinc-400 text-sm mt-2 max-w-2xl leading-relaxed">
-              Browse 100+ verified startup founders, AI researchers, and Web3 CEOs. Book 1-on-1 dinner dates, VIP club tables, or advisory sessions backed by <strong>$1,000 USDT Escrow Protection</strong>.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setShowApplyModal(true)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-5 py-3 rounded-xl transition-colors text-xs flex items-center justify-center gap-2 border border-zinc-700"
-            >
-              <UserPlus className="w-4 h-4 text-amber-400" /> Apply to List as Founder
-            </button>
-
-            <Link
-              href="/escrow/my-trades"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition-all text-xs flex items-center justify-center gap-2 shadow-xl shadow-red-950/40"
-            >
-              <Calendar className="w-4 h-4" /> My Bookings ({rentedFounders.length})
-            </Link>
-          </div>
+    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 sm:p-7 space-y-5">
+      <div className="flex items-center gap-4">
+        {shownPhoto ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={shownPhoto} alt="Your photo" className="w-24 h-24 rounded-2xl object-cover" /> : <div className="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center text-gray-600"><Camera className="w-7 h-7" /></div>}
+        <div>
+          <button type="button" onClick={() => file.current?.click()} disabled={photoBusy} className="h-11 px-4 rounded-lg border border-white/15 text-sm font-semibold">{photoBusy ? "Uploading…" : shownPhoto ? "Change photo" : "Add a clear photo"}</button>
+          <p className="text-xs text-gray-500 mt-1">Only signed-in members with a profile can see it.</p>
+          <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => pickPhoto(e.target.files?.[0])} />
         </div>
       </div>
-
-      {/* Control Bar: Search, Sector Filters, and View Switcher */}
-      <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-col lg:flex-row justify-between items-center gap-4">
-        
-        {/* Search */}
-        <div className="relative w-full lg:w-72">
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search 100+ founders by name or startup..." 
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-red-500 font-sans"
-          />
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
-        </div>
-
-        {/* Sector Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto no-scrollbar py-1">
-          {["all", "AI", "Web3", "FinTech", "SaaS", "Biotech", "Consumer"].map((sec) => (
-            <button
-              key={sec}
-              onClick={() => setSelectedSector(sec)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider ${
-                selectedSector === sec 
-                  ? "bg-red-600 text-white shadow-lg shadow-red-950/50" 
-                  : "bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-white"
-              }`}
-            >
-              {sec === "all" ? "All 100+ Founders" : sec}
-            </button>
-          ))}
-        </div>
-
-        {/* View Switcher Buttons */}
-        <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              viewMode === "grid" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
-            }`}
-            title="Grid View Directory"
-          >
-            <Grid className="w-4 h-4" /> Grid
-          </button>
-          <button
-            onClick={() => setViewMode("deck")}
-            className={`p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              viewMode === "deck" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
-            }`}
-            title="Tinder Swipe Deck"
-          >
-            <Layers className="w-4 h-4" /> Swipe Deck
-          </button>
-          <button
-            onClick={() => setViewMode("leaderboard")}
-            className={`p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              viewMode === "leaderboard" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
-            }`}
-            title="Top Rated Founders Leaderboard"
-          >
-            <Award className="w-4 h-4 text-amber-400" /> Leaderboard
-          </button>
-        </div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div><label className={label}>Name others see</label><input className={field} value={f.displayName} maxLength={80} onChange={(e) => setF({ ...f, displayName: e.target.value })} placeholder="First name" /></div>
+        <div><label className={label}>I am looking for</label>
+          <select className={field} value={f.lookingFor} onChange={(e) => setF({ ...f, lookingFor: e.target.value })}>{Object.entries(LOOKING).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
       </div>
+      <div><label className={label}>Where you live</label><PlacePicker value={f.city} onChange={(v) => setF({ ...f, city: v })} /></div>
+      <div><label className={label}>One line about you</label><input className={field} value={f.headline} maxLength={120} onChange={(e) => setF({ ...f, headline: e.target.value })} /></div>
+      <div><label className={label}>About you</label><textarea className={`${field} h-28 py-3`} value={f.bio} maxLength={600} onChange={(e) => setF({ ...f, bio: e.target.value })} /></div>
+      <label className="flex items-start gap-3 text-sm text-gray-200"><input type="checkbox" className="mt-1 accent-pink-500" checked={f.isFounder} onChange={(e) => setF({ ...f, isFounder: e.target.checked })} /> <span>I am a founder. Show my company and role, and list me under Founders.</span></label>
+      {f.isFounder && <div className="grid sm:grid-cols-2 gap-4"><div><label className={label}>Company</label><input className={field} value={f.companyName} maxLength={120} onChange={(e) => setF({ ...f, companyName: e.target.value })} /></div><div><label className={label}>Your role</label><input className={field} value={f.roleTitle} maxLength={80} onChange={(e) => setF({ ...f, roleTitle: e.target.value })} placeholder="Founder and CEO" /></div></div>}
+      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      <button onClick={save} disabled={busy} className="w-full h-14 rounded-xl bg-pink-600 hover:bg-pink-500 disabled:opacity-60 font-bold text-lg">{busy ? "Saving…" : p ? "Save my profile" : "Create my profile"}</button>
+    </div>
+  )
+}
 
-      {/* VIEW 1: DIRECTORY GRID MODE (100+ Founders Scalable Grid) */}
-      {viewMode === "grid" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFounders.map((founder) => (
-            <div key={founder.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-red-500/50 transition-all flex flex-col justify-between group shadow-xl">
-              
-              {/* Photo & Valuation Overlay */}
-              <div className="relative h-64 w-full bg-zinc-950 overflow-hidden">
-                <img 
-                  src={founder.avatarUrl} 
-                  alt={founder.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-black/30"></div>
-
-                <div className="absolute top-3 left-3 bg-amber-950/90 backdrop-blur-md border border-amber-500/60 text-amber-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  {founder.sector} • {founder.valuation}
-                </div>
-
-                <div className="absolute top-3 right-3 bg-emerald-950/90 backdrop-blur-md border border-emerald-500/60 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-400" /> VERIFIED
-                </div>
-
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h3 className="text-xl font-bold text-white drop-shadow">{founder.name}, {founder.age}</h3>
-                  <p className="text-xs text-rose-400 font-semibold">{founder.role} @ {founder.companyName}</p>
-                </div>
-              </div>
-
-              {/* Bio & Details */}
-              <div className="p-5 space-y-4">
-                <p className="text-xs text-zinc-300 line-clamp-2 italic bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
-                  "{founder.bio}"
-                </p>
-
-                <div className="flex justify-between items-center text-xs pt-2 border-t border-zinc-800/60 font-mono">
-                  <div>
-                    <div className="text-[10px] text-zinc-500 uppercase">Hourly Rate</div>
-                    <div className="text-sm font-bold text-emerald-400">${founder.hourlyRateUsdt} USDT <span className="text-xs text-zinc-400 font-normal">/ hr</span></div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-[10px] text-zinc-500 uppercase">Rating</div>
-                    <div className="text-sm font-bold text-white flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {founder.rating} ({founder.completedDates})
-                    </div>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => { setSelectedFounder(founder); setBookingSuccess(false); }}
-                  className="w-full bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-950/30"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Rent Founder for Date
-                </button>
-              </div>
-            </div>
-          ))}
+function Card({ p, onAct, onReport }: { p: DatingProfile; onAct: (a: "like" | "pass") => void; onReport: () => void }) {
+  return (
+    <div className="rounded-3xl overflow-hidden bg-white/[0.04] border border-white/10 max-w-md mx-auto">
+      <Photo path={p.photoPath} name={p.name} className="w-full aspect-[4/5]" />
+      <div className="p-5 space-y-2">
+        <div className="flex items-baseline justify-between gap-3"><h3 className="text-2xl font-bold">{p.name}, {p.age}</h3>{p.isFounder && <span className="text-xs font-bold text-pink-300 bg-pink-500/10 border border-pink-500/30 rounded-full px-3 py-1">Founder</span>}</div>
+        {p.isFounder && (p.company || p.role) && <p className="text-sm text-gray-300">{[p.role, p.company].filter(Boolean).join(" at ")}</p>}
+        <p className="text-sm text-gray-400">{p.city || "Location not shared"} · {LOOKING[p.lookingFor] ?? p.lookingFor}</p>
+        {p.headline && <p className="font-medium">{p.headline}</p>}
+        <p className="text-sm text-gray-300 whitespace-pre-line">{p.bio}</p>
+        <div className="flex gap-3 pt-3">
+          <button onClick={() => onAct("pass")} className="flex-1 h-14 rounded-xl border border-white/15 flex items-center justify-center gap-2 font-semibold hover:bg-white/5"><X className="w-5 h-5" /> Pass</button>
+          <button onClick={() => onAct("like")} className="flex-1 h-14 rounded-xl bg-pink-600 hover:bg-pink-500 flex items-center justify-center gap-2 font-semibold"><Heart className="w-5 h-5" /> Like</button>
         </div>
-      )}
+        <button onClick={onReport} className="text-xs text-gray-500 underline flex items-center gap-1 mx-auto pt-1"><Flag className="w-3 h-3" /> Report this profile</button>
+      </div>
+    </div>
+  )
+}
 
-      {/* VIEW 2: SWIPE DECK MODE */}
-      {viewMode === "deck" && (
-        <div className="flex flex-col items-center justify-center py-6">
-          {currentDeckFounder ? (
-            <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl relative">
-              <div className="relative h-96 w-full bg-zinc-950">
-                <img src={currentDeckFounder.avatarUrl} alt={currentDeckFounder.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-black/40"></div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h2 className="text-2xl font-bold text-white">{currentDeckFounder.name}, {currentDeckFounder.age}</h2>
-                  <p className="text-sm font-semibold text-rose-400">{currentDeckFounder.role} @ {currentDeckFounder.companyName}</p>
-                </div>
-              </div>
+export default function DatingPage() {
+  const { isAuthenticated, isLoading } = useAuth()
+  const [tab, setTab] = useState<"discover" | "matches" | "profile">("discover")
+  const [mine, setMine] = useState<MyDating | null>(null)
+  const [queue, setQueue] = useState<DatingProfile[] | null>(null)
+  const [matches, setMatches] = useState<(DatingProfile & { conversationId: string })[]>([])
+  const [founders, setFounders] = useState(false)
+  const [note, setNote] = useState("")
+  const [error, setError] = useState("")
 
-              <div className="p-6 space-y-4">
-                <p className="text-xs text-zinc-300 italic">"{currentDeckFounder.bio}"</p>
-                <div className="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs font-mono">
-                  <span className="text-zinc-400">Rate: <strong className="text-emerald-400">${currentDeckFounder.hourlyRateUsdt} USDT/hr</strong></span>
-                  <span className="text-zinc-400">Rating: <strong className="text-amber-400">★ {currentDeckFounder.rating}</strong></span>
-                </div>
+  const loadQueue = useCallback(() => { setQueue(null); dating.discover({ founders }).then(setQueue).catch((e) => { setQueue([]); if (e instanceof DatingError && e.code !== "PROFILE_REQUIRED") setError(e.message) }) }, [founders])
+  useEffect(() => { if (isAuthenticated) dating.mine().then(setMine).catch((e) => setError(e instanceof Error ? e.message : "Could not load")) }, [isAuthenticated])
+  useEffect(() => { if (mine?.profile?.active) loadQueue() }, [mine, loadQueue])
+  useEffect(() => { if (tab === "matches" && mine?.profile) dating.matches().then(setMatches).catch(() => {}) }, [tab, mine])
 
-                <div className="flex gap-3 pt-2">
-                  <button onClick={handleNextDeck} className="bg-zinc-800 text-zinc-300 font-bold px-4 py-3 rounded-xl text-xs flex-1">Next</button>
-                  <button onClick={() => { setSelectedFounder(currentDeckFounder); setBookingSuccess(false); }} className="bg-rose-600 text-white font-bold px-4 py-3 rounded-xl text-xs flex-1">Rent Now</button>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      )}
+  const act = async (p: DatingProfile, a: "like" | "pass") => {
+    setNote("")
+    try { const r = await dating.act(p.id, a); if (r.matched) setNote(`It's a match with ${p.name}. Open Matches to message them.`) } catch (e) { setError(e instanceof Error ? e.message : "Could not save") }
+    setQueue((q) => (q ? q.filter((x) => x.id !== p.id) : q))
+  }
+  const report = async (p: DatingProfile) => {
+    const reason = window.prompt("What is wrong with this profile? Tell us in a sentence or two.")
+    if (!reason) return
+    try { await dating.report(p.id, reason); setNote("Thanks. The team will look at it."); setQueue((q) => (q ? q.filter((x) => x.id !== p.id) : q)) } catch (e) { setError(e instanceof Error ? e.message : "Could not send the report") }
+  }
 
-      {/* VIEW 3: LEADERBOARD MODE */}
-      {viewMode === "leaderboard" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-zinc-800">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-400" /> Top Rated Founders Leaderboard
-            </h2>
-            <p className="text-xs text-zinc-400">Ranked by completed date sessions & client satisfaction rating.</p>
-          </div>
-
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-zinc-950 text-zinc-400 text-xs uppercase font-mono border-b border-zinc-800">
-                <th className="p-4">Rank</th>
-                <th className="p-4">Founder</th>
-                <th className="p-4">Company & Sector</th>
-                <th className="p-4">Hourly Rate</th>
-                <th className="p-4">Dates Completed</th>
-                <th className="p-4">Rating</th>
-                <th className="p-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FOUNDERS_DATABASE.map((f, i) => (
-                <tr key={f.id} className="border-b border-zinc-800/60 hover:bg-zinc-800/40 text-xs">
-                  <td className="p-4 font-bold text-amber-400 font-mono">#{i + 1}</td>
-                  <td className="p-4 font-bold text-white flex items-center gap-3">
-                    <img src={f.avatarUrl} alt={f.name} className="w-8 h-8 rounded-full object-cover border border-zinc-700" />
-                    {f.name}
-                  </td>
-                  <td className="p-4 text-zinc-300">{f.companyName} <span className="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 font-mono ml-1">{f.sector}</span></td>
-                  <td className="p-4 font-bold text-emerald-400 font-mono">${f.hourlyRateUsdt} USDT</td>
-                  <td className="p-4 font-mono text-zinc-300">{f.completedDates} sessions</td>
-                  <td className="p-4 font-bold text-amber-400 font-mono">★ {f.rating}</td>
-                  <td className="p-4 text-right">
-                    <button 
-                      onClick={() => { setSelectedFounder(f); setBookingSuccess(false); }}
-                      className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors text-xs"
-                    >
-                      Rent Founder
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Booking Modal */}
-      {selectedFounder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 text-white relative">
-            <button onClick={() => setSelectedFounder(null)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-
-            {!bookingSuccess ? (
-              <>
-                <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-rose-500" /> Rent {selectedFounder.name}
-                </h2>
-                <p className="text-xs text-zinc-400 mb-6">
-                  {selectedFounder.role} at <strong className="text-white">{selectedFounder.companyName}</strong>
-                </p>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs text-zinc-400 font-semibold mb-1">Select Date Session Type</label>
-                    <select 
-                      value={sessionType}
-                      onChange={(e: any) => setSessionType(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-rose-500"
-                    >
-                      <option value="dinner">VIP 5-Star Dinner Date & Conversation</option>
-                      <option value="coffee">Coffee & Startup Pitch Mentorship</option>
-                      <option value="vip_party">VIP Nightclub Lounge Escort & Party</option>
-                      <option value="advisory">1-on-1 Advisory Board Session</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-zinc-400 font-semibold mb-1">Select Duration (Hours)</label>
-                    <input 
-                      type="number" 
-                      min={1} 
-                      max={8}
-                      value={hours}
-                      onChange={(e) => setHours(Number(e.target.value))}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white font-bold focus:outline-none focus:border-rose-500"
-                    />
-                  </div>
-
-                  <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-zinc-400">Hourly Rate</span>
-                      <span className="font-mono text-white">${selectedFounder.hourlyRateUsdt} USDT / hr</span>
-                    </div>
-                    <div className="flex justify-between text-sm font-bold border-t border-zinc-800 pt-2">
-                      <span className="text-zinc-300">Total Escrow Booking Fee ({hours} hrs)</span>
-                      <span className="font-mono text-emerald-400">${selectedFounder.hourlyRateUsdt * hours} USDT (≈ ₹{(selectedFounder.hourlyRateInr * hours).toLocaleString()} INR)</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-zinc-400 font-semibold mb-1">Payment Channel (Escrow Protected)</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("phonepe")}
-                        className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                          paymentMethod === "phonepe" ? "bg-purple-950 border-purple-500 text-purple-300" : "bg-zinc-950 border-zinc-800 text-zinc-400"
-                        }`}
-                      >
-                        PhonePe
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("gpay")}
-                        className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                          paymentMethod === "gpay" ? "bg-blue-950 border-blue-500 text-blue-300" : "bg-zinc-950 border-zinc-800 text-zinc-400"
-                        }`}
-                      >
-                        GPay
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("usdt")}
-                        className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                          paymentMethod === "usdt" ? "bg-emerald-950 border-emerald-500 text-emerald-300" : "bg-zinc-950 border-zinc-800 text-zinc-400"
-                        }`}
-                      >
-                        USDT Direct
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleConfirmRental}
-                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 shadow-xl shadow-rose-950/40"
-                  >
-                    <CheckCircle className="w-4 h-4" /> Confirm Escrow Booking
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-6 space-y-4">
-                <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto animate-bounce" />
-                <h3 className="text-xl font-bold text-white">Date Session Booked & Escrow Secured!</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Your booking request for <strong className="text-white">{selectedFounder.name}</strong> has been created. Total fee of <strong className="text-emerald-400">${selectedFounder.hourlyRateUsdt * hours} USDT</strong> is safely locked in platform Escrow.
-                </p>
-                <Link
-                  href="/escrow/my-trades"
-                  className="inline-block bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-6 rounded-xl transition-colors text-xs"
-                >
-                  View Booking in Workspace
-                </Link>
+  if (isLoading || (isAuthenticated && !mine && !error)) return <div className="min-h-screen bg-[#0a0a0a] pt-40 flex justify-center text-gray-500"><Loader2 className="w-5 h-5 animate-spin" /></div>
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <main className="max-w-2xl mx-auto px-5 pt-28 pb-24 space-y-6">
+        <header>
+          <h1 className="text-3xl font-bold">Dating and founders</h1>
+          <p className="text-gray-400 mt-2">Real members only. Everyone here is a verified adult (18+). You see people who joined, and you can only message someone when you both like each other. Nobody pays for a date.</p>
+        </header>
+        {!isAuthenticated ? <SignInNotice next="/dating" what="meet people" /> : (
+          <>
+            {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+            {mine && !mine.verified && (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-3">
+                <div className="flex items-center gap-2 font-semibold"><ShieldCheck className="w-5 h-5" /> Verify first</div>
+                <p className="text-sm text-amber-100">Dating is for verified adults. Send your ID and selfie once, and you can create your profile as soon as it is approved.</p>
+                <Link href="/kyc?next=/dating" className="inline-block h-11 leading-[2.75rem] px-6 rounded-lg bg-amber-500 text-black font-bold">Verify now</Link>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Apply to be Listed as Founder Modal */}
-      {showApplyModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 text-white relative">
-            <button onClick={() => setShowApplyModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-amber-400" /> Founder Listing Application
-            </h3>
-            <p className="text-xs text-zinc-400 mb-4">Are you a startup CEO / Web3 Founder? Apply to list yourself on the 100+ Founder Marketplace.</p>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1">Full Name</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Alex Mercer" 
-                  value={applyForm.name}
-                  onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1">Company / Startup Name & Valuation</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. CyberNode ($15M Valuation)" 
-                  value={applyForm.company}
-                  onChange={(e) => setApplyForm({ ...applyForm, company: e.target.value })}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1">Hourly Rental Rate (USDT)</label>
-                <input 
-                  type="number" 
-                  placeholder="e.g. 200" 
-                  value={applyForm.hourlyRate}
-                  onChange={(e) => setApplyForm({ ...applyForm, hourlyRate: Number(e.target.value) })}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1">Short Founder Bio</label>
-                <textarea 
-                  rows={2} 
-                  placeholder="Tell clients about your startup, achievements & dating interests..." 
-                  value={applyForm.bio}
-                  onChange={(e) => setApplyForm({ ...applyForm, bio: e.target.value })}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-white"
-                />
-              </div>
-
-              <button
-                onClick={() => { alert("Application submitted! Admin will verify your $1,000 deposit & startup credentials."); setShowApplyModal(false); }}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition-colors text-xs"
-              >
-                Submit Founder Application
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+            {mine?.verified && (
+              <>
+                <div className="grid grid-cols-3 gap-2" role="tablist">
+                  {([["discover", "Discover"], ["matches", "Matches"], ["profile", mine.profile ? "My profile" : "Create profile"]] as const).map(([k, t]) => (
+                    <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`h-11 rounded-lg text-sm font-semibold border ${tab === k ? "bg-white text-black border-white" : "border-white/15 text-gray-300"}`}>{t}</button>
+                  ))}
+                </div>
+                {note && <div className="p-4 rounded-xl border border-pink-500/30 bg-pink-500/10 text-pink-100 text-sm">{note}</div>}
+                {mine.profile?.hidden && <p className="text-sm text-red-300">Your profile was hidden by the team. Contact support.</p>}
+                {tab === "profile" && <ProfileForm mine={mine} onSaved={(m) => { setMine(m); setTab("discover") }} />}
+                {tab === "discover" && (!mine.profile ? <p className="text-gray-400">Create your profile first. It takes a minute, and then you can see others.</p> : (
+                  <>
+                    <label className="flex items-center gap-2 text-sm text-gray-300"><input type="checkbox" className="accent-pink-500" checked={founders} onChange={(e) => setFounders(e.target.checked)} /> Show founders only</label>
+                    {queue === null ? <Loader2 className="w-5 h-5 animate-spin text-gray-500" /> : queue.length === 0 ? <p className="text-gray-400 py-10 text-center">No new profiles right now. Check back soon, new members join every day.</p> : <Card key={queue[0].id} p={queue[0]} onAct={(a) => act(queue[0], a)} onReport={() => report(queue[0])} />}
+                  </>
+                ))}
+                {tab === "matches" && (matches.length === 0 ? <p className="text-gray-400 py-10 text-center">No matches yet. When you and someone else like each other, they show up here.</p> : (
+                  <ul className="space-y-3">{matches.map((m) => (
+                    <li key={m.id} className="flex items-center gap-4 rounded-2xl border border-white/10 p-3">
+                      <Photo path={m.photoPath} name={m.name} className="w-16 h-16 rounded-xl" />
+                      <div className="flex-1 min-w-0"><div className="font-semibold">{m.name}, {m.age}</div><div className="text-sm text-gray-400 truncate">{m.isFounder && m.company ? `${m.role || "Founder"} at ${m.company}` : m.city}</div></div>
+                      <Link href="/messages" className="h-11 px-4 rounded-lg bg-pink-600 flex items-center gap-2 text-sm font-semibold"><MessageCircle className="w-4 h-4" /> Message</Link>
+                    </li>
+                  ))}</ul>
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </main>
     </div>
-  );
+  )
 }

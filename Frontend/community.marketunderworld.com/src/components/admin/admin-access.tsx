@@ -12,6 +12,7 @@ export const PAGE_REQUIREMENTS: [string, Permission | "platform"][] = [
   ["/admin/staff", "staff.manage"],
   ["/admin/access-requests", "staff.manage"],
   ["/admin/kyc", "kyc.review"],
+  ["/admin/dating", "content.handle"],
   ["/admin/bounty", "bounty.manage"],
   ["/admin/investments", "content.manage"],
   ["/admin/clubs/bookings", "content.handle"],
