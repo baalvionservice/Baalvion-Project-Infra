@@ -6,6 +6,7 @@ import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { ClipboardCheck, Check, X, Loader2, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getAutoPublish, setAutoPublish } from '@/lib/api/seller-access';
 import {
   listSellerApplications,
   approveSellerApplication,
@@ -27,6 +28,13 @@ export default function SellerApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actingOn, setActingOn] = useState<string | null>(null);
+  const [autoPublish, setAuto] = useState<boolean | null>(null);
+  useEffect(() => { getAutoPublish().then(setAuto).catch(() => setAuto(null)); }, []);
+  const toggleAuto = async () => {
+    if (autoPublish === null) return;
+    try { await setAutoPublish(!autoPublish); setAuto(!autoPublish); toast({ title: !autoPublish ? 'Listings now go live automatically' : 'Listings now wait for your approval' }); }
+    catch (e) { toast({ variant: 'destructive', title: 'Could not change the setting', description: e instanceof Error ? e.message : 'Please try again.' }); }
+  };
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
 
@@ -92,6 +100,18 @@ export default function SellerApplicationsPage() {
         <p className="text-text-muted font-medium">Review and approve requests to open a new store on the platform.</p>
       </header>
 
+      {autoPublish !== null && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="max-w-2xl">
+            <p className="font-semibold text-white">Publish approved sellers&apos; listings automatically</p>
+            <p className="text-sm text-text-muted">{autoPublish ? 'On: once you approve a seller and they have paid for a category, each product they publish goes straight into the marketplace. You can still unpublish anything from Listing Moderation.' : 'Off: every product a seller publishes waits in Listing Moderation until you approve it.'}</p>
+          </div>
+          <button onClick={toggleAuto} role="switch" aria-checked={autoPublish} className={`relative w-14 h-8 rounded-full transition-colors ${autoPublish ? 'bg-emerald-600' : 'bg-white/15'}`}>
+            <span className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white transition-transform ${autoPublish ? 'translate-x-6' : ''}`} />
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-2">
         {STATUS_TABS.map((tab) => (
           <button
@@ -153,6 +173,17 @@ export default function SellerApplicationsPage() {
                     <p className="text-[10px] text-text-ghost font-mono">
                       Payout: {app.payoutCurrency} → {app.payoutWalletAddress}
                     </p>
+                  )}
+                  {app.details && Object.keys(app.details).length > 0 && (
+                    <div className="mt-3 rounded-lg border border-white/10 p-3 text-[12px] text-gray-300 space-y-1.5">
+                      <p><span className="text-gray-500">Sells as</span> {app.details.businessType === 'business' ? 'a registered business' : 'a person'}{app.details.city ? ` in ${app.details.city}` : ''}{app.details.yearsSelling ? ` · ${({ new: 'just starting', under_1: 'under a year', '1_to_3': '1 to 3 years', over_3: 'over 3 years' } as Record<string, string>)[app.details.yearsSelling]}` : ''}{app.details.stockLevel ? ` · stock ${({ under_20: 'under 20', '20_to_100': '20 to 100', over_100: 'over 100' } as Record<string, string>)[app.details.stockLevel]}` : ''}</p>
+                      {app.details.productTypes && app.details.productTypes.length > 0 && <p><span className="text-gray-500">Types</span> {app.details.productTypes.join(', ')}</p>}
+                      {app.details.sampleProducts && app.details.sampleProducts.map((p, i) => <p key={i}><span className="text-gray-500">Sample {i + 1}</span> {p.name}{p.price ? ` · ${p.price}` : ''}{p.note ? ` · ${p.note}` : ''}</p>)}
+                      <p><span className="text-gray-500">Delivery</span> {app.details.shippingMethod ?? '—'}, {app.details.handlingDays ?? '—'} days to prepare{app.details.shipsTo ? `, ships to ${app.details.shipsTo}` : ''} · returns {app.details.returns?.replace('_', ' ') ?? '—'}</p>
+                      <p><span className="text-gray-500">Contact</span> {[app.details.whatsapp, app.details.contactEmail, app.details.website, app.details.instagram].filter(Boolean).join(' · ') || '—'}</p>
+                      {app.details.address && <p><span className="text-gray-500">Address</span> {app.details.address}</p>}
+                      {app.details.idNumberLast4 && <p><span className="text-gray-500">ID ends</span> {app.details.idNumberLast4}</p>}
+                    </div>
                   )}
                   {app.status === 'rejected' && app.rejectionReason && (
                     <p className="text-[11px] text-semantic-error">Reason: {app.rejectionReason}</p>

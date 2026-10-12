@@ -100,6 +100,9 @@ export const submitPayment = (id: string, body: { txHash?: string; proofs?: Proo
   post<CategoryPayment>(`/seller-bonds/${id}/payment`, body);
 export const submitPaymentHash = (id: string, txHash: string) => submitPayment(id, { txHash });
 export const listPaymentProofs = (id: string) => call<PaymentProof[]>(`/seller-bonds/${id}/proofs`);
+export const getAutoPublish = () => call<{ autoPublishListings?: boolean }>('/payment-settings').then((r) => r.autoPublishListings !== false);
+export const setAutoPublish = (autoPublishListings: boolean) =>
+  call<{ autoPublishListings: boolean }>('/payment-settings/auto-publish', { method: 'PUT', body: JSON.stringify({ autoPublishListings }) });
 export const getReviewWait = () => call<{ reviewWaitMinutes: number; min: number; max: number }>('/payment-settings');
 export const setReviewWait = (reviewWaitMinutes: number) =>
   call<{ reviewWaitMinutes: number }>('/payment-settings', { method: 'PUT', body: JSON.stringify({ reviewWaitMinutes }) });

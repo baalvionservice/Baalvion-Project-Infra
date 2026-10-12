@@ -176,9 +176,22 @@ export interface SellerApplication {
   identityVerified: boolean;
   payoutCurrency: string | null;
   payoutWalletAddress: string | null;
+  details?: SellerDetails;
+}
+
+// What the applicant told us about the business, products and shipping.
+export interface SellerDetails {
+  businessType?: 'individual' | 'business';
+  city?: string; address?: string; contactEmail?: string; whatsapp?: string; website?: string; instagram?: string;
+  yearsSelling?: 'new' | 'under_1' | '1_to_3' | 'over_3';
+  sellsWhat?: string; productTypes?: string[]; stockLevel?: 'under_20' | '20_to_100' | 'over_100';
+  sampleProducts?: { name: string; price?: string; note?: string }[];
+  shippingMethod?: 'self' | 'courier' | 'pickup'; handlingDays?: number; shipsTo?: string; returns?: '7_days' | '14_days' | '30_days' | 'none';
+  idNumberLast4?: string;
 }
 
 export interface SellerApplicationInput {
+  details?: SellerDetails;
   storeName: string;
   storeCode: string;
   countryCode: string;

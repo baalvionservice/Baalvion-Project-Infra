@@ -54,7 +54,7 @@ const ADMIN_NAV = [
   {
     group: "MANAGEMENT",
     items: [
-      { name: "User Registry", path: "/admin/users", icon: Users },
+      { name: "People (buyers, sellers, staff)", path: "/admin/users", icon: Users },
       { name: "Seller Marketplace", path: "/admin/sellers", icon: ShieldCheck },
       { name: "Seller Applications", path: "/admin/seller-applications", icon: ClipboardCheck },
       { name: "Seller Payments", path: "/admin/seller-payments", icon: Wallet },
