@@ -7,6 +7,7 @@ const { parseImageDataUrl } = require('../utils/imageSafety');
 const PURPOSES = {
     profile_photo: { admin: false, visibility: 'restricted' }, // candidate photos: owner, admins, verified employers
     teacher_avatar: { admin: false, visibility: 'public' },
+    dating_photo: { admin: false, visibility: 'restricted' }, // seen by signed-in members only while the dating profile is active
     club_image: { admin: true, visibility: 'public' },
     event_poster: { admin: false, visibility: 'public' }, // shown only once the events team approves the event
 };
@@ -33,6 +34,10 @@ async function loadForViewer(id, viewer) {
     if (!row) throw new AppError('NOT_FOUND', 'Not found', 404);
     if (row.visibility === 'public') return row;
     if (viewer.userId && (row.owner_id === viewer.userId || viewer.isAdmin)) return row;
+    if (viewer.userId && row.purpose === 'dating_photo') {
+        const live = await db.DatingProfile.findOne({ where: { photo_asset_id: row.id, status: 'active' }, attributes: ['id'] });
+        if (live) return row;
+    }
     if (viewer.userId) {
         const employer = await db.NightEmployer.findOne({ where: { user_id: viewer.userId, status: 'verified' }, attributes: ['id'] });
         if (employer) return row;
