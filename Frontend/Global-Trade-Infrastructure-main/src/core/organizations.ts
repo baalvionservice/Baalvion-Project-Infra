@@ -70,6 +70,8 @@ const ORG_SELF_ADMIN_NAV: string[] = [
   '/organization/settings',
   '/organization/users',
   '/organization/audit',
+  // Every party to an order, whatever its organisation type, can open the orders it is party to.
+  '/journeys',
 ];
 
 // ── Org type → dashboard surface ────────────────────────────────────────────────

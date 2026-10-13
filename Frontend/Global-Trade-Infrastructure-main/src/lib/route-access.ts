@@ -27,6 +27,7 @@ export const AUTH_REQUIRED_PREFIXES: readonly string[] = [
   '/marketplace',
   '/deals',
   '/orders',
+  '/journeys',
   '/logistics-shipment',
   '/payments',
   '/finance-settlement',

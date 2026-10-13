@@ -91,6 +91,7 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   { path: '/messages', label: 'Messages', icon: Inbox, roles: [...TRADE, ...ADMIN], category: 'NEGOTIATIONS' },
 
   // ── EXECUTION ──
+  { path: '/journeys', label: 'Order journeys', icon: Workflow, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },
   { path: '/orders', label: 'Order Pipeline', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },
   { path: '/trade-management', label: 'Trade Management', icon: Workflow, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },
   { path: '/trade-ops', label: 'Trade Operations', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },

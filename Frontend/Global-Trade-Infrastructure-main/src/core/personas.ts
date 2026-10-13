@@ -49,7 +49,7 @@ export interface PersonaDef {
 
 const NAV_TRADE_CORE = [
   '/marketplace', '/discovery', '/sourcing', '/suppliers', '/deals',
-  '/negotiations', '/messages', '/orders', '/trade-management', '/trade-ops',
+  '/negotiations', '/messages', '/orders', '/journeys', '/trade-management', '/trade-ops',
   '/logistics-shipment', '/shipments', '/sailing-schedules', '/carriers', '/customs',
   '/payments', '/escrow', '/financials/invoices', '/insurance',
   '/compliance', '/documents', '/intelligence-hub', '/profile',
