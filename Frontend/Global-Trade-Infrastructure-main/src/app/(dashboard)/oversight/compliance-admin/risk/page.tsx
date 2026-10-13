@@ -93,7 +93,7 @@ export default function RiskDashboardPage() {
                     <TableHeader className="bg-muted/30">
                        <TableRow>
                           <TableHead className="text-[10px] font-black uppercase pl-6">Reference</TableHead>
-                          <TableHead className="text-[10px] font-black uppercase">Contract Value</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase">Type</TableHead>
                           <TableHead className="text-[10px] font-black uppercase text-right pr-6">Status</TableHead>
                        </TableRow>
                     </TableHeader>
@@ -106,16 +106,19 @@ export default function RiskDashboardPage() {
                               <TableCell className="pl-6">
                                  <div className="flex flex-col">
                                     <span className="font-mono text-[11px] font-bold text-primary">{dispute.id}</span>
-                                    <span className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter">Order: {dispute.orderId}</span>
+                                    <span className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter">{dispute.orderId ? `Order: ${dispute.orderId}` : 'No order linked'}</span>
                                  </div>
                               </TableCell>
-                              <TableCell className="text-sm font-black text-foreground">${dispute.amount.toLocaleString()}</TableCell>
+                              <TableCell className="text-xs font-bold text-foreground">
+                                 <span className="capitalize">{dispute.disputeType}</span>
+                                 <span className="block text-[9px] font-normal text-muted-foreground">{dispute.claimantOrgId ?? '—'} vs {dispute.respondentOrgId ?? '—'}</span>
+                              </TableCell>
                               <TableCell className="text-right pr-6">
                                  <Badge variant="outline" className={cn(
                                    "uppercase text-[9px] font-black border-2",
                                    dispute.status === 'open' ? "text-orange-600 border-orange-200 bg-orange-50" : "text-green-600 border-green-200 bg-green-50"
                                  )}>
-                                   {dispute.status}
+                                   {dispute.stage.replace(/_/g, ' ')}
                                  </Badge>
                               </TableCell>
                            </TableRow>
