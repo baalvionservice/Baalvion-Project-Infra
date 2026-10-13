@@ -4,10 +4,13 @@ const { sendSuccess } = require('../utils/response');
 const { joinCommunitySchema } = require('../validators/schemas');
 const { decodeEmailFromRequest } = require('../middleware/authMiddleware');
 const { AppError } = require('../utils/errors');
+const forum = require('../service/forumService');
 
 const listPublicCommunities = async (req, res, next) => {
     try {
         const communities = await membershipService.listCommunities();
+        const stats = await forum.boardStats(communities.filter((c) => !c.is_platform_tier).map((c) => c.id));
+        communities.sort((a, b) => (a.forum_sort ?? 1000) - (b.forum_sort ?? 1000) || String(a.name).localeCompare(String(b.name)));
         return sendSuccess(req, res, communities.map((c) => ({
             slug: c.slug,
             name: c.name,
@@ -17,6 +20,11 @@ const listPublicCommunities = async (req, res, next) => {
             // as communities for shared membership/billing plumbing but aren't discussion forums.
             // Frontend uses this to keep the forum hub from listing them as browsable communities.
             isForum: !c.is_platform_tier,
+            group: c.forum_group || null,
+            icon: c.icon || null,
+            topicCount: (stats[c.id] && stats[c.id].topicCount) || 0,
+            postCount: (stats[c.id] && stats[c.id].postCount) || 0,
+            latest: (stats[c.id] && stats[c.id].latest) || null,
         })));
     } catch (err) { return next(err); }
 };

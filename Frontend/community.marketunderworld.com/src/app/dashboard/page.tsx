@@ -30,6 +30,7 @@ import { getBuyerAccess, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
 import { ProfilePanel } from "@/components/dashboard/profile-panel"
+import { ForumPanel } from "@/components/dashboard/forum-panel"
 import { NextSteps } from "@/components/dashboard/next-steps"
 import { useSetup } from "@/lib/setup"
 import { MySpaces } from "@/components/dashboard/my-spaces"
@@ -159,6 +160,7 @@ export default function DashboardPage() {
         <MySpaces />
         {member && <MemberIdCard member={member} onChange={setMember} />}
         {member && <div id="profile" className="scroll-mt-32"><ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} /></div>}
+        {member && <div id="forum" className="scroll-mt-32"><ForumPanel /></div>}
 
         {member?.seller ? (
           <div className="inline-flex p-1 rounded-xl bg-white/5 border border-white/5" role="tablist">

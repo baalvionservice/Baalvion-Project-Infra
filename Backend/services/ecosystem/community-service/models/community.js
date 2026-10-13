@@ -17,6 +17,9 @@ module.exports = (sequelize) => sequelize.define('Community', {
     nodebb_group_mod: { type: DataTypes.STRING(160), allowNull: true },
     is_active: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     price_usd_cents: { type: DataTypes.INTEGER, allowNull: true },
+    forum_group: { type: DataTypes.STRING(80), allowNull: true },
+    forum_sort: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1000 },
+    icon: { type: DataTypes.STRING(24), allowNull: true },
     is_platform_tier: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 }, {
     tableName: 'communities',

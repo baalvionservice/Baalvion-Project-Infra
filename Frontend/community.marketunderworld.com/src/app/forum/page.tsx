@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getCommunities, getCommunity, type CommunityDetail } from "@/lib/api/community";
-import { CommunityCard } from "@/components/forums/community-card";
+import { getCommunities } from "@/lib/api/community";
+import { XenCategoryTable } from "@/components/forums/xen-category-table";
+import { groupBoards } from "@/lib/forum-groups";
 
 export default async function ForumHubPage() {
   const allCommunities = await getCommunities();
-  const forumCommunities = allCommunities.filter((c) => c.isForum);
-
-  // Enrich each community with the current user's membership status (returns null on 401/error)
-  const enriched: CommunityDetail[] = await Promise.all(
-    forumCommunities.map((c) => getCommunity(c.slug).then((d) => d ?? { ...c, membership: null }))
-  );
+  const groups = groupBoards(allCommunities);
+  const recent = allCommunities
+    .filter((c) => c.isForum && c.latest)
+    .sort((x, y) => (y.latest!.at - x.latest!.at))
+    .slice(0, 8);
 
   return (
     <div className="baal-page">
@@ -146,15 +146,28 @@ export default async function ForumHubPage() {
             investors, traders, and builders.
           </p>
 
-          {enriched.length > 0 && (
-            <div className="mt-8">
-              <div className="baal-grid">
-                {enriched.map((community) => (
-                  <CommunityCard key={community.slug} community={community} />
-                ))}
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
+            <div className="lg:col-span-3">
+              {groups.map((g) => <XenCategoryTable key={g.slug} category={g} />)}
             </div>
-          )}
+            <aside className="lg:col-span-1">
+              <div className="rounded-lg border border-[#2b2b36] bg-[#121217] overflow-hidden sticky top-36">
+                <div className="px-4 py-3 bg-[#1c1824] border-b border-[#2e293a] text-sm font-bold text-[#e6d8c8]">Latest discussions</div>
+                {recent.length === 0 ? (
+                  <p className="p-4 text-xs text-gray-400">Nothing posted yet. Pick a board and start the first thread.</p>
+                ) : (
+                  <ul className="divide-y divide-[#202029]">
+                    {recent.map((c) => (
+                      <li key={c.slug} className="p-3">
+                        <Link href={`/forum/thread/${c.latest!.tid}?c=${c.slug}`} className="block text-xs font-semibold text-[#cfcfdc] hover:text-red-400 truncate" title={c.latest!.title}>{c.latest!.title}</Link>
+                        <p className="text-[11px] text-gray-400 mt-0.5 truncate">{c.name} · {c.latest!.by}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </aside>
+          </div>
 
           <p className="mt-8 text-sm text-gray-400">New here? <Link href="/forum/join" className="underline text-red-300">Start with the guide</Link>: what you want to learn, the rules, and how access and payment work.</p>
 

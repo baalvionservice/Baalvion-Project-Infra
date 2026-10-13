@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LogIn, UserPlus, KeyRound, Compass } from "lucide-react";
 import { getCommunities, type Community } from "@/lib/api/community";
+import { groupBoards } from "@/lib/forum-groups";
 
 // The forum's own navigation, shown under the site menu: the real communities, getting started, and access.
 export function BaalHeader() {
@@ -26,8 +27,8 @@ export function BaalHeader() {
             <Home className="w-4 h-4" />
           </Link>
           <Link href="/forum/join" className={tab(pathname === "/forum/join")}><Compass className="w-3.5 h-3.5" /> Get started</Link>
-          {communities.map((c) => (
-            <Link key={c.slug} href={`/forum/${c.slug}`} className={tab(pathname.startsWith(`/forum/${c.slug}`))}>{c.name}</Link>
+          {groupBoards(communities).map((g) => (
+            <Link key={g.slug} href={`/forum/category/${g.slug}`} className={tab(pathname === `/forum/category/${g.slug}` || g.boards.some((b) => pathname.startsWith(`/forum/${b.slug}`)))}>{g.title}</Link>
           ))}
           <Link href="/access" className={tab(pathname === "/access")}><KeyRound className="w-3.5 h-3.5 text-amber-500" /> Access</Link>
         </nav>

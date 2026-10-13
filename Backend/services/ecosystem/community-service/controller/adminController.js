@@ -2,7 +2,6 @@
 const db = require('../models');
 const membershipService = require('../service/membershipService');
 const identityClient = require('../service/identityClient');
-const nodebb = require('../service/nodebbClient');
 const moderation = require('../service/moderationService');
 const { sendSuccess } = require('../utils/response');
 const { adminSetMemberSchema, decideJoinRequestSchema, resolveFlagSchema } = require('../validators/schemas');
@@ -92,68 +91,47 @@ const allModerationLogs = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-// Reported-content queue (admin.baalvion.com's central "Reports Queue" — see
-// forum-sidebar.tsx's note that this was pulled from nav until a real backend existed).
-// Flags live in NodeBB, not community-service's own DB, so this reads through nodebbClient
-// and enriches each row with the owning community via its nodebb_cid, purely for display —
-// unmapped flags (community not found, or NodeBB omitted the category) still show up with
-// community: null rather than being dropped.
+// Reported-content queue: every post a member reported, with the reason, the author and the board.
 const listFlags = async (req, res, next) => {
     try {
-        const flags = await nodebb.getFlags();
-        const communities = await db.Community.findAll({ where: { is_active: true }, attributes: ['slug', 'name', 'nodebb_cid'] });
-        const byCid = new Map(communities.filter((c) => c.nodebb_cid != null).map((c) => [c.nodebb_cid, c]));
-        const enriched = flags.map((flag) => {
-            const cid = flag.target?.category?.cid ?? flag.target?.cid ?? null;
-            const community = cid != null ? byCid.get(Number(cid)) : null;
-            return {
-                flagId: String(flag.flagId ?? flag.id),
-                type: flag.type || 'post',
-                state: flag.state || 'open',
-                reasons: flag.reasons || (flag.description ? [flag.description] : []),
-                reporter: flag.reporter ? { username: flag.reporter.username, uid: flag.reporter.uid } : null,
-                target: {
-                    id: String(flag.targetId ?? flag.target?.pid ?? flag.target?.tid ?? ''),
-                    content: flag.target?.content ?? null,
-                    title: flag.target?.title ?? flag.target?.topic?.title ?? null,
-                    author: flag.target?.user?.username ?? null,
-                },
-                community: community ? { slug: community.slug, name: community.name } : null,
-                createdAt: flag.datetime ? new Date(flag.datetime).toISOString() : null,
-            };
+        const rows = await db.ForumFlag.findAll({
+            order: [['created_at', 'DESC']], limit: 300,
+            include: [{ model: db.ForumPost, as: 'post', include: [{ model: db.ForumTopic, as: 'topic', include: [{ model: db.Community, as: 'community', attributes: ['slug', 'name'] }] }] }],
         });
-        return sendSuccess(req, res, enriched);
+        const flags = rows.filter((f) => f.post && f.post.topic).map((f) => ({
+            flagId: String(f.id),
+            type: 'post',
+            state: f.state,
+            reasons: [f.reason],
+            reporter: { username: null, uid: f.reporter_user_id },
+            target: { id: String(f.post.id), content: f.post.removed ? '[removed]' : f.post.content, title: f.post.topic.title, author: f.post.author_name },
+            community: f.post.topic.community ? { slug: f.post.topic.community.slug, name: f.post.topic.community.name } : null,
+            createdAt: f.created_at ? new Date(f.created_at).toISOString() : null,
+        }));
+        return sendSuccess(req, res, flags);
     } catch (err) { return next(err); }
 };
 
-// 'dismiss' resolves the flag without touching the reported content (false report / no action
-// warranted). 'remove' purges the reported post from NodeBB first, then resolves the flag —
-// content deletion always implies the flag is handled, never the other way around.
+// 'dismiss' closes the report and leaves the post. 'remove' hides the post's text first, then closes the report.
 const resolveFlag = async (req, res, next) => {
     try {
         const parsed = resolveFlagSchema.safeParse(req.body || {});
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', parsed.error.issues[0].message, 422);
         const { flagId } = req.params;
         const { action } = parsed.data;
-        const { pid, communitySlug } = req.body || {};
+        const flag = await db.ForumFlag.findByPk(Number(flagId) || 0);
+        if (!flag) throw new AppError('NOT_FOUND', 'Report not found', 404);
+        const pid = flag.post_id;
+        if (action === 'remove') await db.ForumPost.update({ removed: true }, { where: { id: pid } });
+        await db.ForumFlag.update({ state: 'resolved' }, { where: { post_id: pid } });
 
-        if (action === 'remove') {
-            if (!pid) throw new AppError('VALIDATION_ERROR', 'pid is required to remove flagged content', 422);
-            await nodebb.deletePost(pid);
-        }
-        await nodebb.updateFlagState(flagId, 'resolved');
-
-        let communityId = null;
-        if (communitySlug) {
-            const community = await db.Community.findOne({ where: { slug: communitySlug } });
-            communityId = community ? community.id : null;
-        }
+        const post = await db.ForumPost.findByPk(pid, { include: [{ model: db.ForumTopic, as: 'topic', attributes: ['community_id'] }] });
         await moderation.log({
-            communityId,
+            communityId: post && post.topic ? post.topic.community_id : null,
             actorUserId: req.auth.userId,
             action: action === 'remove' ? 'content.removed' : 'flag.dismissed',
             targetEntityType: 'post',
-            targetEntityId: pid ? String(pid) : null,
+            targetEntityId: String(pid),
             details: { flagId },
         });
 

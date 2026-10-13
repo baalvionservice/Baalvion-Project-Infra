@@ -22,6 +22,9 @@ db.CommunityModerationLog = require('./community_moderation_log')(sequelize);
 db.CommunityBillingWebhookEvent = require('./community_billing_webhook_event')(sequelize);
 db.CommunityChatMessage = require('./community_chat_message')(sequelize);
 db.CommunityThread = require('./community_thread')(sequelize);
+db.ForumTopic = require('./forum_topic')(sequelize);
+db.ForumPost = require('./forum_post')(sequelize);
+db.ForumFlag = require('./forum_flag')(sequelize);
 db.DirectConversation = require('./direct_conversation')(sequelize);
 db.DirectMessage = require('./direct_message')(sequelize);
 db.NightClub = require('./night_club')(sequelize);
@@ -65,6 +68,10 @@ db.BountyMessage = require('./bounty_message')(sequelize);
 // Associations
 db.Community.hasMany(db.CommunityMembership, { foreignKey: 'community_id', as: 'memberships' });
 db.CommunityMembership.belongsTo(db.Community, { foreignKey: 'community_id', as: 'community' });
+db.ForumTopic.belongsTo(db.Community, { foreignKey: 'community_id', as: 'community' });
+db.ForumTopic.hasMany(db.ForumPost, { foreignKey: 'topic_id', as: 'posts' });
+db.ForumPost.belongsTo(db.ForumTopic, { foreignKey: 'topic_id', as: 'topic' });
+db.ForumFlag.belongsTo(db.ForumPost, { foreignKey: 'post_id', as: 'post' });
 
 db.Community.hasMany(db.CommunityInvite, { foreignKey: 'community_id', as: 'invites' });
 db.CommunityInvite.belongsTo(db.Community, { foreignKey: 'community_id', as: 'community' });

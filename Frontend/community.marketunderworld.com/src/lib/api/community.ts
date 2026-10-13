@@ -20,9 +20,14 @@ export interface Community {
     description: string | null;
     accessModel: CommunityAccessModel;
     // False for the platform-wide access tiers (marketplace-access/global-elite/vip-access) —
-    // they're modeled as communities for shared membership/billing plumbing but have no NodeBB
-    // category and aren't discussion forums. Used to keep the forum hub from listing them.
+    // they are modeled as communities for shared membership/billing plumbing but are not
+    // discussion forums. Used to keep the forum hub from listing them.
     isForum: boolean;
+    group?: string | null;
+    icon?: string | null;
+    topicCount: number;
+    postCount: number;
+    latest?: { tid: string; title: string; by: string; at: number } | null;
 }
 
 export interface CommunityDetail extends Community {
@@ -62,8 +67,20 @@ async function communityFetchNow<T>(path: string, init: RequestInit = {}, revali
     return body.data;
 }
 
+// The server render reads the public API directly: a Worker cannot fetch its own domain, and the
+// board list has to be in the HTML for search engines.
+const DIRECT_BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? 'https://api.baalvion.com/api/v1/community';
+
 export async function getCommunities(): Promise<Community[]> {
     try {
+        if (typeof window === 'undefined') {
+            return await memo('community:public-list', 30_000, async () => {
+                const res = await fetch(`${DIRECT_BASE}/public/communities`, { cache: 'no-store' });
+                const body = (await res.json()) as ApiEnvelope<Community[]>;
+                if (!res.ok || body.success === false) throw new Error(`communities ${res.status}`);
+                return body.data;
+            });
+        }
         return await communityFetch<Community[]>('/public/communities', {}, 60);
     } catch {
         return [];
