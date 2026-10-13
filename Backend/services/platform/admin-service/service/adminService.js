@@ -79,6 +79,9 @@ async function listUsers({ page = 1, limit = 50, search, status }) {
     if (status) {
         where.push(`status = $${replacements.length + 1}`);
         replacements.push(status);
+    } else {
+        // Removed accounts live on the "Removed users" screen, not in the everyday list.
+        where.push("status <> 'deleted'");
     }
 
     const [users, [{ count }]] = await Promise.all([
@@ -388,7 +391,7 @@ async function updateUser(userId, patch, adminUserId, ipAddress) {
 // SOFT delete: auth.users HAS a status column, so we mark the account 'deleted' rather
 // than physically removing the row (which would cascade-destroy sessions, memberships and
 // orphan audit history). Also revokes active sessions/refresh tokens.
-async function deleteUser(userId, adminUserId, ipAddress) {
+async function deleteUser(userId, adminUserId, ipAddress, reason = null) {
     const db = getDb();
     const ip = ipAddress || '0.0.0.0';
 
@@ -397,10 +400,26 @@ async function deleteUser(userId, adminUserId, ipAddress) {
     }
 
     const [user] = await db.sequelize.query(
-        'SELECT id, status FROM auth.users WHERE id = $1',
+        'SELECT id, email, status FROM auth.users WHERE id = $1',
         { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
     );
     if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+    if (user.status === 'deleted') throw new AppError('CONFLICT', 'This user has already been removed', 409);
+
+    // Guard: never remove the last super admin — nobody could ever manage the platform again.
+    const [{ is_super }] = await db.sequelize.query(
+        "SELECT EXISTS (SELECT 1 FROM auth.team_members WHERE user_id = $1 AND role = 'super_admin' AND status = 'active') AS is_super",
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (is_super) {
+        const [{ n }] = await db.sequelize.query(
+            `SELECT COUNT(DISTINCT tm.user_id)::int AS n
+               FROM auth.team_members tm JOIN auth.users u ON u.id = tm.user_id
+              WHERE tm.role = 'super_admin' AND tm.status = 'active' AND u.status = 'active'`,
+            { type: db.Sequelize.QueryTypes.SELECT }
+        );
+        if (n <= 1) throw new AppError('CONFLICT', 'This is the last super admin and cannot be removed', 409);
+    }
 
     // Guard: an org owner cannot be deleted while still owning organizations (FK is
     // NOT NULL on organizations.owner_id; reassign/delete the org first).
@@ -425,14 +444,81 @@ async function deleteUser(userId, adminUserId, ipAddress) {
         { bind: [userId] }
     );
 
+    // Business access (trade / jobs / ir …) is revoked too — rows are kept, never deleted, so
+    // "who had access in March" stays answerable.
+    await db.sequelize.query(
+        "UPDATE auth.business_grants SET revoked_at = NOW(), updated_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+        { bind: [userId] }
+    );
+
     await db.sequelize.query(
         `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
          VALUES ($1, 'user.deleted', 'user', $2, $3, $4)`,
-        { bind: [userId, String(userId), JSON.stringify({ softDelete: true, deletedBy: adminUserId }), ip] }
+        { bind: [userId, String(userId), JSON.stringify({ softDelete: true, deletedBy: adminUserId, reason: reason ? String(reason).slice(0, 500) : null, email: user.email }), ip] }
     );
 
     logger.warn({ userId, adminUserId, event: 'admin.user_deleted' }, 'User soft-deleted by admin');
     return { id: String(userId), deleted: true, soft: true };
+}
+
+// People removed from the panel, newest first, with who removed them and why. Reads the audit
+// trail written by deleteUser, so nothing is stored twice.
+async function listRemovedUsers({ page = 1, limit = 50, search } = {}) {
+    const db = getDb();
+    const offset = (page - 1) * limit;
+    const binds = [];
+    let searchSql = '';
+    if (search) {
+        binds.push(`%${search}%`);
+        searchSql = `AND (u.email ILIKE $${binds.length} OR u.full_name ILIKE $${binds.length})`;
+    }
+    const items = await db.sequelize.query(
+        `SELECT u.id, u.email, u.full_name, u.created_at,
+                a.created_at AS removed_at,
+                a.metadata->>'reason' AS reason,
+                a.metadata->>'deletedBy' AS removed_by_id,
+                COALESCE(rb.full_name, rb.email) AS removed_by
+           FROM auth.users u
+           LEFT JOIN LATERAL (
+                SELECT created_at, metadata FROM auth.audit_logs
+                 WHERE user_id = u.id AND action = 'user.deleted'
+                 ORDER BY created_at DESC LIMIT 1) a ON true
+           LEFT JOIN auth.users rb ON rb.id::text = a.metadata->>'deletedBy'
+          WHERE u.status = 'deleted' ${searchSql}
+          ORDER BY a.created_at DESC NULLS LAST, u.id DESC
+          LIMIT $${binds.length + 1} OFFSET $${binds.length + 2}`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [...binds, limit, offset] }
+    );
+    const [{ count }] = await db.sequelize.query(
+        `SELECT COUNT(*)::int AS count FROM auth.users u WHERE u.status = 'deleted' ${searchSql}`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind: binds }
+    );
+    return { items, total: count, page, limit, hasMore: offset + limit < count };
+}
+
+// Undo a removal. The account returns to 'active' but with NO site or business access — those
+// were revoked on removal and must be granted again (which emails them the new invitation).
+async function restoreUser(userId, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+    const [user] = await db.sequelize.query(
+        'SELECT id, status FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+    if (user.status !== 'deleted') throw new AppError('CONFLICT', 'This user has not been removed', 409);
+
+    await db.sequelize.query(
+        "UPDATE auth.users SET status = 'active', updated_at = NOW() WHERE id = $1",
+        { bind: [userId] }
+    );
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, 'user.restored', 'user', $2, $3, $4)`,
+        { bind: [userId, String(userId), JSON.stringify({ restoredBy: adminUserId }), ip] }
+    );
+    logger.warn({ userId, adminUserId, event: 'admin.user_restored' }, 'Removed user restored by admin');
+    return { id: String(userId), restored: true };
 }
 
 // Re-issue email verification. auth-service owns the email_verifications table + token
@@ -1106,7 +1192,7 @@ module.exports = {
     changeUserRole, checkRoleChange, ORG_ROLE_RANK,
     getPlatformStats,
     listUsers, getUserDetail, suspendUser, unsuspendUser,
-    updateUser, deleteUser, sendVerification, revokeUserSessions,
+    updateUser, deleteUser, listRemovedUsers, restoreUser, sendVerification, revokeUserSessions,
     listOrgs, getOrgById, createOrg, updateOrg, deleteOrg, suspendOrg,
     createImpersonationToken,
     listAllSessions, revokeSessionAdmin,

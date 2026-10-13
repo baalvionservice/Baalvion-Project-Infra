@@ -16,12 +16,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function TopBar() {
-  const { toggleSidebar, setCommandPaletteOpen } = useUIStore();
+  const { toggleSidebar, mobileNavOpen, setMobileNavOpen, setCommandPaletteOpen } = useUIStore();
   const { setTheme } = useTheme();
 
   return (
     <header className="flex h-14 items-center gap-2 border-b border-border bg-background px-4">
-      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="shrink-0">
+      <Button variant="ghost" size="icon" onClick={() => (window.matchMedia('(min-width: 1024px)').matches ? toggleSidebar() : setMobileNavOpen(!mobileNavOpen))} className="shrink-0">
         <PanelLeft className="h-4 w-4" />
         <span className="sr-only">Toggle sidebar</span>
       </Button>

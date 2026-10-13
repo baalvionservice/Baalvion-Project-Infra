@@ -125,4 +125,69 @@ function baseLayout({ content, preview = '', appUrl = 'https://baalvion.com', fo
 </html>`;
 }
 
-module.exports = { baseLayout, escapeHtml, BRAND };
+/**
+ * Premium shell for invitation / access emails. Opt-in per template (`layout: 'premium'`), so
+ * every other email (OTP, billing, security) keeps the standard shell untouched.
+ * Restrained and institutional: ink wordmark band, serif headline, hairline rules, one button.
+ */
+function premiumLayout({ content, preview = '', appUrl = 'https://baalvion.com', footerNote = '' }) {
+    const year = new Date().getFullYear();
+    const host = String(appUrl).replace(/^https?:\/\//, '');
+    const serif = "Georgia,'Times New Roman',Times,serif";
+    const sans = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+    return `<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>${escapeHtml(BRAND.name)}</title>
+  <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+    body { margin:0; padding:0; width:100%!important; background:#eceae6; -webkit-text-size-adjust:100%; }
+    a { color:inherit; }
+    .p-btn { display:inline-block; background:#09090b; color:#ffffff!important; text-decoration:none; padding:15px 38px; border-radius:2px; font-size:13px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; }
+    @media (max-width:480px) {
+      .p-pad { padding:32px 24px!important; }
+      .p-head { padding:24px 24px!important; }
+      .p-foot { padding:20px 24px!important; }
+      .p-title { font-size:26px!important; }
+      .p-row { display:block!important; width:auto!important; }
+      .p-btn { display:block!important; text-align:center!important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, .p-wrap { background:#0b0b0e!important; }
+      .p-card { background:#141417!important; border-color:#26262b!important; }
+      .p-title, .p-strong { color:#f4f4f5!important; }
+      .p-text { color:#a1a1aa!important; }
+      .p-rule { border-color:#26262b!important; }
+      .p-detail { background:#1b1b1f!important; border-color:#26262b!important; }
+      .p-btn { background:#f4f4f5!important; color:#09090b!important; }
+      .p-foot { background:#101013!important; border-color:#26262b!important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#eceae6;">
+  ${preview ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(preview)}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>` : ''}
+  <div class="p-wrap" style="background:#eceae6;padding:32px 12px;font-family:${sans};">
+    <div class="p-card" style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #dcd9d3;">
+      <div class="p-head" style="background:#09090b;padding:30px 44px;">
+        <a href="${escapeHtml(appUrl)}" style="color:#ffffff;text-decoration:none;font-family:${serif};font-size:20px;letter-spacing:0.38em;text-transform:uppercase;">${escapeHtml(BRAND.name)}</a>
+        <div style="color:#8b8b93;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;margin-top:8px;">Trade &middot; Commerce &middot; Intelligence</div>
+      </div>
+      <div class="p-pad" style="padding:46px 44px 40px;">${content}</div>
+      <div class="p-foot" style="background:#f7f6f3;padding:24px 44px;border-top:1px solid #e6e3dd;">
+        <p style="font-size:12px;color:#8b8b93;line-height:1.7;margin:0;">
+          ${footerNote ? `${footerNote}<br />` : ''}
+          &copy; ${year} Baalvion. All rights reserved. &nbsp;&middot;&nbsp; <a href="${escapeHtml(appUrl)}" style="color:#6b6b73;">${escapeHtml(host)}</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+module.exports = { baseLayout, premiumLayout, escapeHtml, BRAND };

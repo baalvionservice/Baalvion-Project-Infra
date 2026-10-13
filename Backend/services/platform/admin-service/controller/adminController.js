@@ -82,7 +82,26 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        const result = await adminService.deleteUser(req.params.userId, req.auth.userId, req.ip);
+        const result = await adminService.deleteUser(req.params.userId, req.auth.userId, req.ip, req.body?.reason);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.listRemovedUsers = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 50, search } = req.query;
+        const result = await adminService.listRemovedUsers({
+            page:  Math.max(1, parseInt(page, 10)),
+            limit: Math.min(200, Math.max(1, parseInt(limit, 10))),
+            search: search || undefined,
+        });
+        sendPaginated(req, res, result.items, result.total, result.page, result.limit);
+    } catch (err) { next(err); }
+};
+
+exports.restoreUser = async (req, res, next) => {
+    try {
+        const result = await adminService.restoreUser(req.params.userId, req.auth.userId, req.ip);
         sendSuccess(req, res, result);
     } catch (err) { next(err); }
 };

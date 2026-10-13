@@ -341,7 +341,7 @@ export default function IdentityPage() {
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Shield className="h-4 w-4" /> Roles & Permissions
                 </CardTitle>
-                <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                <Button size="sm" variant="outline" className="gap-1.5 text-xs" disabled title="Not connected yet">
                   <Plus className="h-3.5 w-3.5" /> Create Role
                 </Button>
               </div>
@@ -426,7 +426,7 @@ export default function IdentityPage() {
                     onChange={(e) => setSearchKey(e.target.value)}
                     className="h-7 text-xs w-40"
                   />
-                  <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                  <Button size="sm" variant="outline" className="gap-1.5 text-xs" disabled title="Not connected yet">
                     <Plus className="h-3.5 w-3.5" /> Issue Key
                   </Button>
                 </div>

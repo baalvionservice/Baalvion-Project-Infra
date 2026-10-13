@@ -1,5 +1,5 @@
 import { adminApiClient } from './client';
-import type { AdminUser, UserDetail, UpdateUserPayload, SuspendUserPayload } from '@/lib/types/user.types';
+import type { AdminUser, UserDetail, UpdateUserPayload, SuspendUserPayload, RemovedUser } from '@/lib/types/user.types';
 import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/lib/types/common.types';
 import type { UserRole } from '@/lib/types/auth.types';
 
@@ -105,6 +105,30 @@ export const usersApi = {
     adminApiClient.post<ApiResponse<{ message: string }>>(`/admin/users/${id}/unsuspend`),
 
   delete: (id: number) => adminApiClient.delete<ApiResponse<void>>(`/admin/users/${id}`),
+
+  /** Soft-remove: blocks sign-in, signs them out, revokes business access. History is kept. */
+  remove: (id: number, reason?: string) =>
+    adminApiClient.post<ApiResponse<{ id: string; deleted: boolean }>>(`/admin/users/${id}/remove`, { reason }),
+
+  restore: (id: number) =>
+    adminApiClient.post<ApiResponse<{ id: string; restored: boolean }>>(`/admin/users/${id}/restore`),
+
+  listRemoved: async (params?: { page?: number; limit?: number; search?: string }) => {
+    const res = await adminApiClient.get<ApiResponse<RawPage<{
+      id: string | number; email: string; full_name?: string | null;
+      removed_at?: string | null; removed_by?: string | null; reason?: string | null;
+    }>>>('/admin/users/removed', { params });
+    const d = res.data.data;
+    const items: RemovedUser[] = (d.items ?? []).map((u) => ({
+      id: Number(u.id),
+      email: u.email,
+      fullName: u.full_name ?? '',
+      removedAt: u.removed_at ?? null,
+      removedBy: u.removed_by ?? null,
+      reason: u.reason ?? null,
+    }));
+    return { items, total: d.total ?? items.length, page: d.page ?? 1, limit: d.limit ?? items.length };
+  },
 
   sendVerification: (id: number) =>
     adminApiClient.post<ApiResponse<void>>(`/admin/users/${id}/send-verification`),
