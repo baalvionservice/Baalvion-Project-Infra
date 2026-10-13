@@ -8,11 +8,18 @@ import { getMemberListings, getPublicMember } from "@/lib/api/members"
 
 type Props = { params: Promise<{ memberNumber: string; slug?: string[] }> }
 
-// Member profiles are for people already on the platform, not for search engines.
+// Seller profiles are public storefronts and are indexed. Buyer profiles stay out of search results.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { memberNumber } = await params
   const m = await getPublicMember(memberNumber)
-  return { title: m ? `${m.displayName} · ${m.memberNumber}` : "Member not found", robots: { index: false, follow: false } }
+  if (!m) return { title: "Member not found", robots: { index: false, follow: false } }
+  const title = m.seller ? `${m.seller.storeName} · ${m.displayName} (${m.memberNumber})` : `${m.displayName} · ${m.memberNumber}`
+  return {
+    title,
+    description: m.seller ? `${m.seller.storeName} on Hell Road: ${m.seller.liveListings} live listing${m.seller.liveListings === 1 ? "" : "s"}, ${m.seller.completedSales} completed sale${m.seller.completedSales === 1 ? "" : "s"}.` : undefined,
+    alternates: { canonical: m.profilePath },
+    robots: m.seller ? { index: true, follow: true } : { index: false, follow: false },
+  }
 }
 
 export default async function MemberProfilePage({ params }: Props) {
