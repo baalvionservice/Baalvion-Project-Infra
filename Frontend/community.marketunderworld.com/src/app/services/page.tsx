@@ -68,50 +68,50 @@ export default async function ServicesPage() {
     [String(listings.length), "local jobs"],
   ]
   return (
-    <div className="min-h-screen text-[#d9cfc0]" style={{ background: "radial-gradient(1200px 600px at 50% -10%, #2a0d10 0%, #0b0709 55%, #060405 100%)", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+    <div className="min-h-screen bg-[#050508] text-gray-300 font-sans">
       <Navbar />
       <main className="max-w-5xl mx-auto px-5 pt-32 pb-24">
         {/* The seal */}
         <header className="text-center">
           <svg viewBox="0 0 120 120" className="w-28 h-28 mx-auto" role="img" aria-label="Hell Road seal">
-            <g fill="none" stroke="#b08d57" strokeWidth="1.2">
+            <g fill="none" stroke="#ef4444" strokeWidth="1.2">
               <circle cx="60" cy="60" r="56" /><circle cx="60" cy="60" r="50" strokeDasharray="2 4" /><circle cx="60" cy="60" r="34" />
               <path d="M60 14 L66 54 L106 60 L66 66 L60 106 L54 66 L14 60 L54 54 Z" />
-              <circle cx="60" cy="60" r="8" fill="#7a1f26" stroke="#b08d57" />
+              <circle cx="60" cy="60" r="8" fill="#991b1b" stroke="#ef4444" />
             </g>
           </svg>
-          <p className="mt-8 text-xs tracking-[0.5em] text-[#b08d57] uppercase">By code, by invitation, by trust</p>
-          <h1 className="mt-4 text-4xl sm:text-6xl tracking-[0.12em] uppercase text-[#f1e6d3]">What the Road holds</h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg leading-relaxed text-[#b9ad9a]">Everything behind the door, written down plainly. Five chapters, every service we actually run, and what it takes to open each one. Members are verified adults, eighteen and over.</p>
-          <div className="mt-8 flex items-center justify-center gap-4 text-[#b08d57]" aria-hidden><span className="h-px w-16 bg-[#b08d57]/50" />◆<span className="h-px w-16 bg-[#b08d57]/50" /></div>
+          <p className="mt-8 text-xs tracking-widest text-[#ef4444] uppercase">By code, by invitation, by trust</p>
+          <h1 className="font-display font-bold mt-4 text-4xl sm:text-6xl tracking-tight uppercase text-[#ffffff]">What the Road holds</h1>
+          <p className="mt-6 max-w-2xl mx-auto text-lg leading-relaxed text-[#9ca3af]">Everything behind the door, written down plainly. Five chapters, every service we actually run, and what it takes to open each one. Members are verified adults, eighteen and over.</p>
+          <div className="mt-8 flex items-center justify-center gap-4 text-[#ef4444]" aria-hidden><span className="h-px w-16 bg-[#ef4444]/50" />◆<span className="h-px w-16 bg-[#ef4444]/50" /></div>
         </header>
 
-        <dl className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-[#b08d57]/25 border border-[#b08d57]/25">
+        <dl className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-[#ef4444]/25 border border-[#ef4444]/25">
           {stats.map(([n, l]) => (
-            <div key={l} className="bg-[#0b0709] py-5 text-center"><dt className="sr-only">{l}</dt><dd className="text-3xl text-[#f1e6d3]">{n}</dd><dd className="text-[10px] tracking-[0.25em] uppercase text-[#8d826f] mt-1">{l}</dd></div>
+            <div key={l} className="bg-[#0a0a0f] py-5 text-center"><dt className="sr-only">{l}</dt><dd className="text-3xl text-[#ffffff]">{n}</dd><dd className="text-[10px] tracking-widest uppercase text-[#6b7280] mt-1">{l}</dd></div>
           ))}
         </dl>
 
-        <nav aria-label="Chapters" className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs tracking-[0.3em] uppercase">
-          {CHAPTERS.map((c) => <a key={c.id} href={`#${c.id}`} className="text-[#b08d57] hover:text-[#f1e6d3]">{c.numeral}. {c.name}</a>)}
+        <nav aria-label="Chapters" className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs tracking-widest uppercase">
+          {CHAPTERS.map((c) => <a key={c.id} href={`#${c.id}`} className="text-[#ef4444] hover:text-[#ffffff]">{c.numeral}. {c.name}</a>)}
         </nav>
 
         {CHAPTERS.map((c) => (
           <section key={c.id} id={c.id} className="mt-20 scroll-mt-28">
             <div className="text-center">
-              <div className="text-[#b08d57] text-sm tracking-[0.4em]">CHAPTER {c.numeral}</div>
-              <h2 className="mt-2 text-3xl sm:text-4xl tracking-[0.15em] uppercase text-[#f1e6d3]">{c.name}</h2>
-              <p className="mt-2 italic text-[#8d826f]">{c.line}</p>
+              <div className="text-[#ef4444] text-sm tracking-widest">CHAPTER {c.numeral}</div>
+              <h2 className="font-display font-bold mt-2 text-3xl sm:text-4xl tracking-tight uppercase text-[#ffffff]">{c.name}</h2>
+              <p className="mt-2 italic text-[#6b7280]">{c.line}</p>
             </div>
             <ul className="mt-8 grid md:grid-cols-2 gap-5">
               {c.doors.map((d) => (
-                <li key={d.title} className="group relative border border-[#b08d57]/30 bg-gradient-to-b from-[#140b0d] to-[#0a0607] p-6 transition-colors hover:border-[#b08d57]/70">
-                  <span aria-hidden className="absolute top-3 right-4 text-[#b08d57]/40 text-3xl">{d.numeral}</span>
-                  <h3 className="text-xl tracking-wide text-[#f1e6d3]">{d.title}</h3>
-                  <p className="mt-3 text-[15px] leading-relaxed text-[#b9ad9a]">{d.text}</p>
+                <li key={d.title} className="group relative border border-[#ef4444]/30 bg-gradient-to-b from-[#111118] to-[#0a0a0f] p-6 transition-colors hover:border-[#ef4444]/70">
+                  <span aria-hidden className="absolute top-3 right-4 text-[#ef4444]/40 text-3xl">{d.numeral}</span>
+                  <h3 className="text-xl tracking-wide text-[#ffffff]">{d.title}</h3>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#9ca3af]">{d.text}</p>
                   <div className="mt-5 flex items-center justify-between gap-3">
-                    <span className="text-[10px] tracking-[0.25em] uppercase text-[#b08d57]">{d.access}</span>
-                    <Link href={d.href} className="text-sm tracking-widest uppercase text-[#f1e6d3] border-b border-[#b08d57] hover:text-[#b08d57]">{d.cta} →</Link>
+                    <span className="text-[10px] tracking-widest uppercase text-[#ef4444]">{d.access}</span>
+                    <Link href={d.href} className="text-sm tracking-widest uppercase text-[#ffffff] border-b border-[#ef4444] hover:text-[#ef4444]">{d.cta} →</Link>
                   </div>
                 </li>
               ))}
@@ -119,8 +119,8 @@ export default async function ServicesPage() {
           </section>
         ))}
 
-        <section className="mt-24 border border-[#b08d57]/30 p-8 sm:p-12 text-center bg-[#0a0607]">
-          <h2 className="text-2xl sm:text-3xl tracking-[0.15em] uppercase text-[#f1e6d3]">How you come in</h2>
+        <section className="mt-24 border border-[#ef4444]/30 p-8 sm:p-12 text-center bg-[#0a0a0f]">
+          <h2 className="font-display font-bold text-2xl sm:text-3xl tracking-tight uppercase text-[#ffffff]">How you come in</h2>
           <ol className="mt-8 grid sm:grid-cols-4 gap-6 text-left">
             {[
               ["I", "Find the code", "It is written on the home page, in the big headline."],
@@ -128,12 +128,12 @@ export default async function ServicesPage() {
               ["III", "Be verified", "ID and selfie within 7 days, or you ask for access again."],
               ["IV", "Open your doors", "Tell us who you are on the profile, and the dashboard shows your spaces."],
             ].map(([n, t, x]) => (
-              <li key={n}><div className="text-[#b08d57] tracking-[0.3em] text-sm">{n}</div><div className="mt-2 text-lg text-[#f1e6d3]">{t}</div><p className="mt-1 text-sm text-[#b9ad9a]">{x}</p></li>
+              <li key={n}><div className="text-[#ef4444] tracking-widest text-sm">{n}</div><div className="mt-2 text-lg text-[#ffffff]">{t}</div><p className="mt-1 text-sm text-[#9ca3af]">{x}</p></li>
             ))}
           </ol>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link href="/auth/registration" className="px-8 py-3 bg-[#7a1f26] hover:bg-[#962a32] text-[#f1e6d3] tracking-[0.25em] uppercase text-sm">Request entry</Link>
-            <Link href="/auth/signin" className="px-8 py-3 border border-[#b08d57]/60 text-[#f1e6d3] tracking-[0.25em] uppercase text-sm hover:border-[#b08d57]">I have a key</Link>
+            <Link href="/auth/registration" className="px-8 py-3 bg-[#991b1b] hover:bg-[#dc2626] text-[#ffffff] tracking-widest uppercase text-sm">Request entry</Link>
+            <Link href="/auth/signin" className="px-8 py-3 border border-[#ef4444]/60 text-[#ffffff] tracking-widest uppercase text-sm hover:border-[#ef4444]">I have a key</Link>
           </div>
         </section>
 
