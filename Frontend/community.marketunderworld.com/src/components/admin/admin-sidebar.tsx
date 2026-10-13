@@ -41,7 +41,8 @@ import {
   Star,
   Crown,
   Search,
-  ChevronDown
+  ChevronDown,
+  PlusCircle
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -57,6 +58,7 @@ const ADMIN_NAV = [
   {
     group: "SELLERS & LISTINGS",
     items: [
+      { name: "Add a Listing", path: "/seller/listings/new", icon: PlusCircle },
       { name: "Seller Applications", path: "/admin/seller-applications", icon: ClipboardCheck },
       { name: "Listing Moderation", path: "/admin/moderation", icon: FileCheck },
       { name: "Seller Marketplace", path: "/admin/sellers", icon: ShieldCheck },
