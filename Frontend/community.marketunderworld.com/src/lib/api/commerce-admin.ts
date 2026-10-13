@@ -506,3 +506,24 @@ export async function updateDiscount(storeId: string, discountId: string, body: 
 export async function deleteDiscount(storeId: string, discountId: string): Promise<void> {
   await commerceFetch<null>(`/stores/${storeId}/discounts/${discountId}`, { method: 'DELETE' });
 }
+
+// ── Listing oversight (admin): every product across stores, and a live/hidden switch ────────────
+// Hidden = archived (leaves the storefront, keeps all its data). Live again = published, which the
+// backend still checks against the seller's category access.
+
+export async function listAllProducts(opts: { page?: number; limit?: number; status?: string; search?: string } = {}): Promise<PaginatedResult<AdminProductQueueItem>> {
+  const params = new URLSearchParams();
+  if (opts.page) params.set('page', String(opts.page));
+  if (opts.limit) params.set('limit', String(opts.limit));
+  if (opts.status) params.set('status', opts.status);
+  if (opts.search) params.set('search', opts.search);
+  const qs = params.toString();
+  return commerceFetchPaginated<AdminProductQueueItem>(`/admin/products${qs ? `?${qs}` : ''}`);
+}
+
+export async function setProductLive(storeId: string, productId: string, live: boolean): Promise<{ updated: number }> {
+  return commerceFetch<{ updated: number }>(`/stores/${storeId}/products/bulk`, {
+    method: 'POST',
+    body: JSON.stringify({ ids: [productId], action: live ? 'publish' : 'archive' }),
+  });
+}

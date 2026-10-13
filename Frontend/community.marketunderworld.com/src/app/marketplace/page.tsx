@@ -71,9 +71,10 @@ export default function MarketplacePage() {
   }, [brands, search]);
 
   const filteredProducts = useMemo(() => {
-    if (storeCategory === "All") return products;
-    return products.filter((p) => p.categoryId === storeCategory);
-  }, [products, storeCategory]);
+    const visible = storeCategories.length > 0 ? products.filter((p) => storeCategories.some((c) => c.id === p.categoryId)) : products;
+    if (storeCategory === "All") return visible;
+    return visible.filter((p) => p.categoryId === storeCategory);
+  }, [products, storeCategories, storeCategory]);
 
   const handleApplyPromo = () => {
     if (promoCode.trim().length >= 3) {
