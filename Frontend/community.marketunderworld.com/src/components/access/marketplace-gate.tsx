@@ -1,81 +1,47 @@
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Lock } from "lucide-react"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 
 /**
- * Wraps the marketplace pages. Signed-out visitors are sent to sign in; signed-in people without an
- * access pass (and who are not a seller or admin) see the paywall. The check happens on the server
- * against the commerce service, so the page content is never sent to someone without access.
+ * Wraps the marketplace pages. Anyone can browse the marketplace, signed in or not, so listings can be seen and found.
+ * Buying is what needs the one-time access pass (a seller with an active category or an admin also qualifies). That rule
+ * is enforced on the server when an order is placed, so it holds whatever this page shows; this wrapper only tells a
+ * visitor what they need in order to buy.
  */
-export async function MarketplaceGate({ children, returnTo }: { children: React.ReactNode; returnTo: string }) {
-  const token = (await cookies()).get("access_token")?.value;
-  if (!token) {
-    return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-[#050508] text-white pt-32 pb-32">
-          <div className="max-w-xl mx-auto px-6 text-center space-y-6">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-              <Lock className="w-7 h-7 text-gray-400" />
-            </div>
-            <h1 className="text-3xl font-bold">Login to browse</h1>
-            <p className="text-gray-400">The marketplace is reserved for members. Please sign in to browse and access premium products.</p>
-            <Link href={`/auth/signin?redirect=${encodeURIComponent(returnTo)}`} className="inline-flex items-center justify-center h-12 px-8 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors">Sign in</Link>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
+export async function MarketplaceGate({ children, returnTo, withNav = false }: { children: React.ReactNode; returnTo: string; withNav?: boolean }) {
+  const token = (await cookies()).get("access_token")?.value
   let hasAccess = false
   let price = 50
-  let unavailable = false
-  try {
-    const res = await fetch(`${process.env.COMMERCE_UPSTREAM_URL ?? ""}/buyer-access/me`, {
-      headers: { authorization: `Bearer ${token}` },
-      cache: "no-store",
-    })
-    if (res.status === 401) redirect(`/auth/signin?redirect=${encodeURIComponent(returnTo)}`)
-    if (res.ok) {
-      const body = await res.json()
-      hasAccess = !!body.data?.hasAccess
-      price = body.data?.priceUsd ?? price
-    } else {
-      unavailable = true
-    }
-  } catch (err) {
-    // redirect() throws a special error that must pass through.
-    if (err && typeof err === "object" && "digest" in err) throw err
-    unavailable = true
+  if (token) {
+    try {
+      const res = await fetch(`${process.env.COMMERCE_UPSTREAM_URL ?? ""}/buyer-access/me`, { headers: { authorization: `Bearer ${token}` }, cache: "no-store" })
+      if (res.ok) {
+        const body = await res.json()
+        hasAccess = !!body.data?.hasAccess
+        price = body.data?.priceUsd ?? price
+      }
+    } catch { /* browsing still works; the notice below just stays generic */ }
   }
-
-  if (hasAccess) return <>{children}</>
+  // The shop pages carry no site menu or footer of their own, so they get them here; the marketplace pages bring theirs.
+  if (hasAccess) return withNav ? <><Navbar /><div className="pt-24">{children}</div><Footer /></> : <>{children}</>
 
   return (
     <>
-    <Navbar />
-    <div className="min-h-screen bg-[#050508] text-white pt-32 pb-32">
-      <div className="max-w-xl mx-auto px-6 text-center space-y-6">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"><Lock className="w-7 h-7 text-gray-400" /></div>
-        {unavailable ? (
-          <>
-            <h1 className="text-3xl font-bold">We can&apos;t check your access right now</h1>
-            <p className="text-gray-400">Please try again in a moment.</p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold">Members only</h1>
-            <p className="text-gray-400">The marketplace is open to members. A one-time ${price} access pass lets you browse every category and buy anything listed by our sellers.</p>
-            <Link href="/buyer-pass" className="inline-flex items-center justify-center h-12 px-8 rounded-xl bg-[#39FF14] text-black font-bold hover:bg-[#2BE010] transition-colors">Get my access pass — ${price}</Link>
-          </>
-        )}
+      {withNav && <Navbar />}
+      {/* Sits under the fixed ticker and top menu, above the page. */}
+      <div className="bg-[#0b0b10] border-b border-white/10 text-gray-200 pt-24 sm:pt-28 pb-3 px-4">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <Lock className="w-4 h-4 text-gray-400 shrink-0" />
+          <span className="flex-1 min-w-[16rem]">You are browsing as a visitor. Anyone can look around. To <strong>buy</strong>, you need a Hell Road account and the one-time ${price} access pass.</span>
+          {token
+            ? <Link href="/buyer-pass" className="shrink-0 h-9 px-4 rounded-lg bg-[#39FF14] text-black font-bold inline-flex items-center hover:bg-[#2BE010]">Get my access pass</Link>
+            : <Link href={`/auth/signin?redirect=${encodeURIComponent(returnTo)}`} className="shrink-0 h-9 px-4 rounded-lg bg-white text-black font-bold inline-flex items-center hover:bg-gray-200">Sign in to buy</Link>}
+        </div>
       </div>
-    </div>
-    <Footer />
+      {children}
+      {withNav && <Footer />}
     </>
   )
 }
