@@ -77,7 +77,7 @@ export function QuotePanel({ d, isCustomer, isInt, run, busy }: { d: TradeDetail
   if (showsScanner && q) return (
     <div className="space-y-4 rounded-lg border-2 border-emerald-500/40 bg-emerald-500/[0.04] p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-bold text-emerald-300 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Price locked. Pay exactly this.</p>
+        <p className="text-sm font-bold text-emerald-300 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Step 3. Price locked. Pay exactly this.</p>
         {d.quoteRequired && <p className="text-xs text-zinc-300 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Valid for {mm}:{ss}</p>}
       </div>
       <p className="text-3xl font-black">{money(q.totalLocal, q.currency)}</p>

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { HowItWorks } from "@/components/payments/how-it-works";
 import { TradeGuide } from "@/components/payments/trade-guide";
 import { SERVICE_LABEL, createTrade, getIntermediary, type Intermediary, type QuoteCurrency, type ServiceType } from "@/lib/api/intermediaries";
 
@@ -83,16 +82,14 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
             {item.services.map((s) => <span key={s} className="bg-zinc-950 text-zinc-300 border border-zinc-800 text-xs px-2 py-0.5 rounded">{SERVICE_LABEL[s]}</span>)}
           </div>
         </div>
-        <button onClick={() => (isAuthenticated ? setOpen(true) : router.push(`/auth/signin?redirect=/escrow/intermediaries/${slug}`))}
-          className="self-start bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm">Request a trade</button>
+        {item.services.some((x) => x !== "buy_usdt") && <button onClick={() => (isAuthenticated ? setOpen(true) : router.push(`/auth/signin?redirect=/escrow/intermediaries/${slug}`))}
+          className="self-start bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm">Other services</button>}
       </div>
 
       <TradeGuide item={item} locking={busy} onLock={lock} />
 
-      <HowItWorks />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="max-w-2xl">
+        <div className="space-y-6">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h2 className="text-lg font-bold mb-3">About</h2>
             <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{item.bio || "This intermediary has not added a description."}</p>
@@ -104,19 +101,10 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h3 className="font-bold mb-1">Before you pay</h3>
-            <p className="text-xs text-zinc-400 leading-normal">
-              You pay the intermediary directly; Baalvion does not hold your money. Work out your price above and lock it, then scan the scanner that appears, pay exactly the locked total and attach your screenshot.
-              {item.depositUsd > 0 ? <> This intermediary has a refundable deposit of <strong className="text-white">${item.depositUsd.toLocaleString()}</strong> held by the platform. If you raise a dispute and an admin decides in your favour, your refund is taken from that deposit, up to the amount it still holds.</> : <> This intermediary has no deposit held, so a dispute cannot be refunded from one.</>}
-              Disputes are reviewed by an admin who reads the chat and screenshots.
-            </p>
+            <p className="text-xs text-zinc-400 leading-normal">You pay {item.displayName} directly; Baalvion does not hold your money. Only pay the locked total, and check the name in your payment app is {item.displayName}.{item.depositUsd > 0 ? <> Their refundable deposit of ${item.depositUsd.toLocaleString()} is held by the platform, so if an admin rules for you in a dispute, your refund comes from it.</> : <> They have no deposit held, so a dispute cannot be refunded from one.</>}</p>
           </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-3 h-fit">
-          <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Pay by scanning</h3>
-          <p className="text-sm text-zinc-300">The scanner is not shown here on purpose. Work out your price above and lock it first. The scanner then appears on your trade page next to the exact amount to pay, so you cannot pay the wrong amount.</p>
-          <p className="text-[11px] text-zinc-500">The name shown in your payment app must be <strong className="text-zinc-300">{item.displayName}</strong>. If it is different, do not pay.</p>
-        </div>
       </div>
 
       {open && (

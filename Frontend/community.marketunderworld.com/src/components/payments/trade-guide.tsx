@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { CheckCircle2, Circle } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import type { Intermediary, QuoteCurrency } from "@/lib/api/intermediaries"
 
@@ -29,15 +29,32 @@ export function TradeGuide({ item, onLock, locking }: { item: Intermediary; onLo
   const value = per ? usdt * per : null
   const fee = value !== null && pct !== null ? (value * pct) / 100 : null
 
+  const steps = [
+    ["Choose the amount", "Type how many USDT you want."],
+    ["Lock the price", "You see the full total. It is fixed for 30 minutes."],
+    ["Scan and pay", `The scanner appears next to the exact amount. Pay only that.`],
+    ["Get your USDT", `Send your wallet address in the chat. ${item.displayName} sends the USDT.`],
+  ]
+
   return (
-    <section aria-label="Know before you start" className="grid lg:grid-cols-2 gap-6 mb-8">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-bold">What it will cost</h2>
+    <section aria-label="How buying USDT works" className="mb-8 space-y-6">
+      <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {steps.map(([t, d], i) => (
+          <li key={t} className={`rounded-xl border p-4 ${i === 0 ? "border-emerald-500/50 bg-emerald-500/5" : "border-zinc-800 bg-zinc-900"}`}>
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-xs font-bold mb-2">{i + 1}</span>
+            <p className="font-bold text-sm">{t}</p>
+            <p className="text-xs text-zinc-400 mt-1 leading-snug">{d}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4 max-w-2xl">
+        <h2 className="text-lg font-bold">Step 1. Choose the amount</h2>
         <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
-          <label className="text-sm"><span className="text-zinc-400">How much USDT do you need?</span>
+          <label className="text-sm"><span className="text-zinc-400">How many USDT do you want?</span>
             <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} inputMode="decimal" aria-label="Amount in USDT" className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-base" />
           </label>
-          <div className="flex rounded-lg overflow-hidden border border-zinc-800" role="group" aria-label="Show the price in">
+          <div className="flex rounded-lg overflow-hidden border border-zinc-800" role="group" aria-label="Pay in">
             {(["INR", "AED", "USD"] as const).map((c) => (
               <button key={c} type="button" onClick={() => setCurrency(c)} aria-pressed={currency === c} className={`px-3 h-11 text-xs font-bold ${currency === c ? "bg-white text-black" : "bg-zinc-950 text-zinc-300"}`}>{c}</button>
             ))}
@@ -45,40 +62,31 @@ export function TradeGuide({ item, onLock, locking }: { item: Intermediary; onLo
         </div>
 
         {rate === null ? <p className="text-sm text-zinc-500">Getting today&apos;s USDT price…</p> : !rate.ok || !per ? (
-          <p className="text-sm text-amber-300">Today&apos;s USDT price could not be loaded right now. The intermediary will tell you the exact price in the trade chat before you pay.</p>
-        ) : (
+          <p className="text-sm text-amber-300">Today&apos;s USDT price could not be loaded right now. Ask for a price below and {item.displayName} will send you the exact total.</p>
+        ) : pct !== null ? (
           <dl className="space-y-2 text-sm">
-            <div className="flex justify-between gap-4"><dt className="text-zinc-400">Today&apos;s price of 1 USDT</dt><dd className="font-semibold">{fmt(per, currency)}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-zinc-400">{usdt || 0} USDT is about</dt><dd className="font-semibold">{value !== null ? fmt(value, currency) : "—"}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-zinc-400">Their fee</dt><dd className="text-right font-semibold">{pct !== null ? `${pct}%` : "Not published"}{fee !== null ? <span className="block text-xs font-normal text-zinc-400">about {fmt(fee, currency)}</span> : null}</dd></div>
-            {fee !== null && value !== null && <div className="flex justify-between gap-4 border-t border-zinc-800 pt-2"><dt className="text-zinc-300">You would pay about</dt><dd className="text-lg font-bold text-emerald-300">{fmt(value + fee, currency)}</dd></div>}
+            <div className="flex justify-between gap-4"><dt className="text-zinc-400">{usdt || 0} USDT at today&apos;s price ({fmt(per, currency)} each)</dt><dd className="font-semibold">{value !== null ? fmt(value, currency) : "—"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-zinc-400">{item.displayName}&apos;s fee ({pct}%)</dt><dd className="font-semibold">{fee !== null ? fmt(fee, currency) : "—"}</dd></div>
+            {fee !== null && value !== null && <div className="flex justify-between gap-4 border-t border-zinc-800 pt-2"><dt className="text-zinc-200 font-semibold">You pay in total</dt><dd className="text-xl font-bold text-emerald-300">{fmt(value + fee, currency)}</dd></div>}
           </dl>
-        )}
-        {overLimit && <p role="alert" className="text-sm text-red-300">This intermediary takes trades up to ${limit!.toLocaleString()}. Lower the amount or choose another intermediary.</p>}
+        ) : null}
+        {overLimit && <p role="alert" className="text-sm text-red-300">{item.displayName} takes trades up to ${limit!.toLocaleString()}. Lower the amount or choose another intermediary.</p>}
+
         {pct !== null ? (
-          <button type="button" disabled={locking || !usdt || !per || overLimit} onClick={() => onLock(usdt, currency)} className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-bold text-sm">{locking ? "Locking…" : "Lock this price and show the scanner"}</button>
+          <button type="button" disabled={locking || !usdt || !per || overLimit} onClick={() => onLock(usdt, currency)} className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-bold text-sm">{locking ? "Locking…" : "Step 2. Lock this price"}</button>
         ) : (
           <div className="space-y-2">
-            <p className="text-sm text-amber-200">{item.displayName} has not published a fee. Ask for a price: they send you the final total in the trade chat, you check every line, and the scanner appears only after you accept it.</p>
+            <p className="text-sm text-amber-200">{item.displayName} has not set a fee yet. Ask for a price: they send you the final total, you accept it, and then the scanner appears.</p>
             <button type="button" disabled={locking || !usdt || overLimit} onClick={() => onLock(usdt, currency)} className="w-full h-12 rounded-xl bg-white text-black hover:bg-zinc-200 disabled:opacity-50 font-bold text-sm">{locking ? "Sending…" : "Ask for a price"}</button>
           </div>
         )}
-        <p className="text-[11px] text-zinc-500 leading-snug">A guide only{rate?.ok && rate.at ? `, price from ${rate.source} at ${new Date(rate.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}${rate.exact === false ? " (a general exchange rate, not the USDT market price)" : ""}` : ""}. When you lock it, the server fixes today&apos;s price, the fee and the total for <strong className="text-zinc-300">30 minutes</strong>, so the amount you pay cannot change. The scanner shows only after that. Never pay before you have locked a price.</p>
+        <p className="text-xs text-zinc-500 leading-snug">Nothing is paid yet. Locking only fixes the price{rate?.ok && rate.at ? ` (rate from ${rate.source}${rate.exact === false ? ", a general exchange rate" : ""})` : ""}.</p>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-3">
-        <h2 className="text-lg font-bold">What you need</h2>
-        <ul className="space-y-2.5 text-sm">
-          <Need done={isAuthenticated} text={<>A Hell Road account. {isAuthenticated ? "You are signed in." : <><Link href={`/auth/signin?redirect=/escrow/intermediaries/${item.slug}`} className="underline text-red-300">Sign in</Link> or create one first.</>}</>} />
-          <Need done text={<>Nothing else to start. <strong className="text-white">No access pass and no deposit</strong> is needed to request a trade. (Your account still has to be verified within 7 days of joining, like every member.)</>} />
-          {item.qrs.length > 0 && <Need text={<>A way to pay them. They take payment by QR: open any UPI app and scan, and check the name shown is <strong className="text-white">{item.displayName}</strong>.</>} />}
-          <Need text={<>Where the USDT should go. For your own wallet, give them your wallet address and network. To pay Hell Road (a membership, the wallet or a category), ask them to send it to the address shown on that payment page.</>} />
-          <Need text={<>A screenshot of your payment. You attach it in the trade chat so the intermediary and the admin can see it.</>} />
-          {limit !== null && <Need text={<>Stay within <strong className="text-white">${limit.toLocaleString()}</strong> for one trade.</>} />}
-          <Need text={<>You can have up to <strong className="text-white">{OPEN_TRADES}</strong> trades open at a time.</>} />
-        </ul>
-        {item.depositUsd > 0 && <p className="text-xs text-emerald-300/90">This intermediary has a refundable deposit of ${item.depositUsd.toLocaleString()} held by the platform. If a trade is disputed and the admin decides for you, a refund can come from it.</p>}
-      </div>
+      <ul className="space-y-2 text-sm max-w-2xl">
+        <Need done={isAuthenticated} text={isAuthenticated ? "You are signed in." : <><Link href={`/auth/signin?redirect=/escrow/intermediaries/${item.slug}`} className="underline text-red-300">Sign in</Link> first so we can save your trade.</>} />
+        <Need done text={<>No access pass or deposit is needed. Up to {OPEN_TRADES} trades can be open at once.{limit !== null ? <> One trade can be up to ${limit.toLocaleString()}.</> : null}</>} />
+      </ul>
     </section>
   )
 }
@@ -86,7 +94,7 @@ export function TradeGuide({ item, onLock, locking }: { item: Intermediary; onLo
 function Need({ done = false, text }: { done?: boolean; text: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      {done ? <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-400 shrink-0" /> : <Circle className="w-4 h-4 mt-0.5 text-zinc-600 shrink-0" />}
+      <CheckCircle2 className={`w-4 h-4 mt-0.5 shrink-0 ${done ? "text-emerald-400" : "text-zinc-600"}`} />
       <span className="text-zinc-300 leading-snug">{text}</span>
     </li>
   )
