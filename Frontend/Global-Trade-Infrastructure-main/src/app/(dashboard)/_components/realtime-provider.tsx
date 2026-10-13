@@ -9,8 +9,7 @@ import { realtime } from '@/lib/realtime';
 import { getAccessToken } from '@/lib/api-client';
 import { useRealtimeStatus, useRoom } from '@/hooks/use-realtime';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { WifiOff, Loader2 } from 'lucide-react';
 
 function readOrgCode(): string | null {
   try {
@@ -34,18 +33,27 @@ export function RealtimeProvider() {
     }
   });
 
-  const cfg = status === 'open'
-    ? { Icon: Wifi, label: 'Live', cls: 'text-emerald-600 border-emerald-200 bg-emerald-50' }
-    : status === 'connecting'
-      ? { Icon: Loader2, label: 'Reconnecting', cls: 'text-amber-600 border-amber-200 bg-amber-50' }
-      : { Icon: WifiOff, label: 'Offline', cls: 'text-muted-foreground border-border bg-background' };
+  // Only speak up when live updates are not flowing, and only after a few seconds, so a normal
+  // page load (which connects a moment after the page appears) never flashes a warning.
+  const [notConnectedFor5s, setNotConnectedFor5s] = useState(false);
+  useEffect(() => {
+    if (status === 'open') { setNotConnectedFor5s(false); return undefined; }
+    const t = setTimeout(() => setNotConnectedFor5s(true), 5000);
+    return () => clearTimeout(t);
+  }, [status]);
+
+  if (status === 'open' || !notConnectedFor5s) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 pointer-events-none">
-      <div className={cn('flex items-center gap-2 px-3 h-7 rounded-full border-2 shadow-sm text-[9px] font-black uppercase tracking-widest', cfg.cls)}>
-        <cfg.Icon className={cn('h-3 w-3', status === 'connecting' && 'animate-spin')} />
-        {cfg.label}
-      </div>
+    <div className="pointer-events-none fixed inset-x-0 top-16 z-40 flex justify-center px-4">
+      <p
+        role="status"
+        className="pointer-events-auto flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm text-muted-foreground shadow-md"
+      >
+        {status === 'connecting'
+          ? <><Loader2 aria-hidden className="h-4 w-4 animate-spin" /> Reconnecting for live updates…</>
+          : <><WifiOff aria-hidden className="h-4 w-4" /> Live updates are paused. The page still works; refresh to see the latest.</>}
+      </p>
     </div>
   );
 }

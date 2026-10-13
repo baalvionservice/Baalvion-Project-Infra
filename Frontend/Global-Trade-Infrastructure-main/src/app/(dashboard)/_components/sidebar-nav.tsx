@@ -1,6 +1,7 @@
 /**
  * @file sidebar-nav.tsx
- * @description The global navigation rail. Comprehensive, role-aware, grouped for clean UX.
+ * @description The main menu. Role-aware and grouped. Full labels on desktops and in the phone menu;
+ * icons only in the slim rail used on tablets.
  */
 'use client';
 
@@ -51,53 +52,76 @@ export function SidebarNav({ collapsed }: SidebarNavProps) {
     .map((c) => ({ ...c, items: byCategory(c.key) }))
     .filter((s) => s.items.length > 0);
 
+  // Slim rail (tablets, or when the user collapsed the menu): icons only. Each one keeps its name
+  // for screen readers and for a hover/long-press hint, and sections become thin dividers.
+  if (collapsed) {
+    return (
+      <nav aria-label="Main menu" className="flex h-full flex-col items-center gap-1 overflow-y-auto px-2 py-4">
+        {sections.map((section, i) => (
+          <div key={section.key} className={cn('flex w-full flex-col items-center gap-1', i > 0 && 'mt-2 border-t pt-2')}>
+            {section.items.map((route) => {
+              const isActive = pathname === route.path;
+              return (
+                <Link
+                  key={route.path}
+                  href={route.path || '#'}
+                  onClick={() => handleNavClick(route)}
+                  aria-label={route.label}
+                  aria-current={isActive ? 'page' : undefined}
+                  title={route.label}
+                  className={cn(
+                    'flex h-11 w-11 items-center justify-center rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring',
+                    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                  )}
+                >
+                  <route.icon aria-hidden className="h-5 w-5" />
+                </Link>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-background/50">
-      <div className="flex-1 px-3 py-5 overflow-y-auto custom-scrollbar">
+    <nav aria-label="Main menu" className="flex h-full flex-col">
+      <div className="flex-1 overflow-y-auto px-3 py-4">
         <Accordion type="multiple" defaultValue={DEFAULT_OPEN} className="w-full space-y-1">
           {sections.map((section) => (
             <AccordionItem value={section.key} key={section.key} className="border-none">
-              <AccordionTrigger className="py-2 px-3 rounded-lg hover:no-underline hover:bg-primary/5 transition-all">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
-                  {section.label}
-                </span>
+              <AccordionTrigger className="min-h-11 rounded-lg px-3 py-2 hover:bg-accent hover:no-underline">
+                <span className="text-sm font-semibold text-foreground">{section.label}</span>
               </AccordionTrigger>
-              <AccordionContent className="pt-1 pb-1 pl-1">
-                <nav className="grid gap-0.5">
+              <AccordionContent className="pb-1 pt-0.5">
+                <ul className="grid gap-0.5">
                   {section.items.map((route) => {
                     const isActive = pathname === route.path;
                     return (
-                      <Link
-                        key={route.path}
-                        href={route.path || '#'}
-                        onClick={() => handleNavClick(route)}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] transition-all duration-150',
-                          isActive
-                            ? 'bg-primary text-primary-foreground font-bold shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-primary/5 font-medium'
-                        )}
-                      >
-                        <route.icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-primary-foreground' : 'opacity-50')} />
-                        <span className="truncate">{route.label}</span>
-                      </Link>
+                      <li key={route.path}>
+                        <Link
+                          href={route.path || '#'}
+                          onClick={() => handleNavClick(route)}
+                          aria-current={isActive ? 'page' : undefined}
+                          className={cn(
+                            'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring',
+                            isActive
+                              ? 'bg-primary font-medium text-primary-foreground'
+                              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                          )}
+                        >
+                          <route.icon aria-hidden className="h-5 w-5 shrink-0" />
+                          <span className="truncate">{route.label}</span>
+                        </Link>
+                      </li>
                     );
                   })}
-                </nav>
+                </ul>
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       </div>
-
-      {!collapsed && (
-        <div className="p-4 border-t bg-muted/20">
-          <div className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            {sections.reduce((n, s) => n + s.items.length, 0)} modules · {sections.length} sections
-          </div>
-        </div>
-      )}
-    </div>
+    </nav>
   );
 }

@@ -72,16 +72,16 @@ export function RouteGuard({ children }: { children: ReactNode }) {
 function GuardCurtain({ decision }: { decision: Exclude<Decision, 'allow'> }) {
   const message =
     decision === 'pending'
-      ? 'Verifying authority…'
+      ? 'Checking your access…'
       : decision === 'unauth'
-        ? 'Session required — redirecting to sign in…'
-        : 'Access restricted — returning you to your console…';
+        ? 'Please sign in to continue. Taking you to the sign-in page…'
+        : 'You do not have access to that page. Taking you back to your dashboard…';
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background">
+    <div className="min-h-dvh w-full flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4 text-center px-6">
         <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">{message}</p>
+        <p role="status" className="text-base text-muted-foreground">{message}</p>
       </div>
     </div>
   );

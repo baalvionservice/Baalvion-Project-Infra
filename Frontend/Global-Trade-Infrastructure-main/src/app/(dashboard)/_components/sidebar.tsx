@@ -12,26 +12,28 @@ interface SidebarProps {
 
 /**
  * @file sidebar.tsx
- * @description Adaptive sidebar supporting full (desktop) and icon-only (tablet) modes.
+ * @description The side menu for screens 1024px wide and up: full labels, or a slim icon rail when
+ * the user collapses it. Narrower screens use the drawer menu in the top bar.
  */
 export function DashboardSidebar({ collapsed }: SidebarProps) {
-  const { isMobile } = useDeviceClass();
+  const { isHandheld } = useDeviceClass();
 
-  if (isMobile) return null;
+  // Phones and iPad portrait open the menu from the top bar instead.
+  if (isHandheld) return null;
 
   return (
     <aside className={cn(
-      "hidden md:flex flex-col border-r bg-muted/40 transition-all duration-300 overflow-hidden",
+      "hidden lg:flex flex-col sticky top-0 h-dvh border-r bg-muted/40 transition-all duration-300 overflow-hidden",
       collapsed ? "w-20" : "w-full"
     )}>
       <div className={cn(
         "flex h-14 items-center border-b transition-all",
         collapsed ? "px-0 justify-center" : "px-6 lg:px-8"
       )}>
-        <Link href={PATHS.DASHBOARD} className="flex items-center gap-3">
+        <Link href={PATHS.DASHBOARD} className={cn("flex min-h-11 items-center gap-3", collapsed && "min-w-11 justify-center")} aria-label="Baalvion home">
           <BaalvionLogo className="h-7 w-7 text-primary" />
           {!collapsed && (
-            <span className="font-black uppercase tracking-tighter text-foreground text-lg">Baalvion</span>
+            <span className="font-semibold tracking-tight text-foreground text-lg">Baalvion</span>
           )}
         </Link>
       </div>
