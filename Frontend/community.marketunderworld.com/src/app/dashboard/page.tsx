@@ -40,7 +40,6 @@ import { AccessRequestsPanel } from "@/components/dashboard/access-requests-pane
 import { SellerOverviewPanel } from "@/components/dashboard/seller-overview"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
 import { getMyOrders as getMyGiftCardOrders, type GiftCardOrder } from "@/lib/api/giftcards"
-import { getMyWallet, usdAvailable, type Wallet as WalletAccount } from "@/lib/api/wallet"
 import { DashboardGiftCardGrid } from "@/components/marketplace/dashboard-giftcard-grid"
 
 const STATUS_VARIANT: Record<Order["paymentStatus"], "success" | "warning" | "default"> = {
@@ -79,7 +78,6 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [wishlistCount, setWishlistCount] = useState(0)
   const [giftCardOrders, setGiftCardOrders] = useState<GiftCardOrder[]>([])
-  const [wallet, setWallet] = useState<WalletAccount | null>(null)
   const [loading, setLoading] = useState(true)
   const [member, setMember] = useState<MyMember | null>(null)
   const [access, setAccess] = useState<BuyerAccessStatus | null>(null)
@@ -97,17 +95,15 @@ export default function DashboardPage() {
       listMyOrders(MARKET_UNDERWORLD_STORE_ID).catch(() => []),
       getMyWishlist(MARKET_UNDERWORLD_STORE_ID).catch(() => ({ items: [] as { id: string }[] })),
       getMyGiftCardOrders().catch(() => []),
-      getMyWallet(),
       getMyMember().catch(() => null),
       getBuyerAccess().catch(() => null),
       getPointsWallet().catch(() => null),
-    ]).then(async ([o, w, g, wal, m, acc, pts]) => {
+    ]).then(async ([o, w, g, m, acc, pts]) => {
       setAccess(acc)
       setPoints(pts)
       setOrders(o)
       setWishlistCount(w.items.length)
       setGiftCardOrders(g)
-      setWallet(wal)
       setMember(m)
       if (m?.seller) {
         setTab("selling")
@@ -288,7 +284,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <DashboardGiftCardGrid walletBalance={usdAvailable(wallet)} />
+        <DashboardGiftCardGrid walletBalance={points?.usdValue ?? 0} />
 
         <section className="space-y-6">
           <div className="flex items-center justify-between">
