@@ -18,7 +18,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useOrganizations } from '@/lib/queries/organizations.queries';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOrganizations, orgKeys } from '@/lib/queries/organizations.queries';
+import { organizationsApi } from '@/lib/api/organizations';
+import CreateDialog from '@/components/common/CreateDialog';
 import { useUIStore } from '@/lib/store/uiStore';
 import { initials, formatDate, formatNumber } from '@/lib/utils/format';
 import type { OrgSummary } from '@/lib/types/organization.types';
@@ -36,6 +39,7 @@ export default function OrganizationsPage() {
   const [page, setPage] = useState(1);
   const [planFilter, setPlanFilter] = useState('');
 
+  const qc = useQueryClient();
   const { data, isLoading } = useOrganizations({ page, limit: 20, plan: planFilter || undefined });
 
   useEffect(() => {
@@ -136,10 +140,23 @@ export default function OrganizationsPage() {
         title="Organizations"
         description={`${data?.pagination.total ?? 0} organizations`}
         actions={
-          <Button size="sm" onClick={() => router.push('/organizations/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Organization
-          </Button>
+          <CreateDialog
+            trigger={<><Plus className="mr-2 h-4 w-4" />New Organization</>}
+            triggerProps={{ size: 'sm' }}
+            title="New organization"
+            description="A company or team that owns users, sites and billing on the platform."
+            successMessage="Organization created"
+            fields={[
+              { name: 'name', label: 'Name', required: true, placeholder: 'Acme Holdings', maxLength: 120 },
+              { name: 'slug', label: 'Short name (URL)', required: true, placeholder: 'acme-holdings', maxLength: 60, help: 'Lowercase letters, numbers and dashes.', validate: (v) => (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(v) ? null : 'Use lowercase letters, numbers and single dashes') },
+              { name: 'website', label: 'Website', type: 'url', placeholder: 'https://acme.com' },
+              { name: 'description', label: 'Description', type: 'textarea', maxLength: 500 },
+            ]}
+            onSubmit={async (v) => {
+              await organizationsApi.create({ name: v.name, slug: v.slug, website: v.website || undefined, description: v.description || undefined });
+              await qc.invalidateQueries({ queryKey: orgKeys.all });
+            }}
+          />
         }
       />
       <DataTable

@@ -9,6 +9,7 @@ const { parsePagination, buildPaginated } = require('../utils/pagination');
 const identityService = require('./identityService');
 const invitationService = require('./invitationService');
 const { emitSafe, CmsEvents } = require('../platform/events');
+const mailer = require('./mailer');
 const { logger } = require('../platform/logger');
 const db = require('../models');
 
@@ -300,6 +301,40 @@ async function revokeAllAccess(scope, userId, actorId = null) {
     return { revoked, failed };
 }
 
+/**
+ * Email an EXISTING account that it was given access. One email covers every site in `sites`.
+ * Best-effort and never throws: a mail failure must not undo or fail the grant itself.
+ */
+async function notifyAccessGranted({ sites, member, role, inviterId, personalNote, expiresAt }) {
+    try {
+        const email = member?.user?.email;
+        if (!email || !sites?.length) return false;
+        let inviterName = null;
+        if (inviterId != null) {
+            const inviter = (await identityService.mapByIds([inviterId])).get(String(inviterId));
+            inviterName = inviter ? (inviter.fullName || inviter.email) : null;
+        }
+        const res = await mailer.sendSiteAccessGranted({
+            to: email,
+            sites: sites.map((w) => ({ name: w.name, slug: w.slug })),
+            roleName: ROLE_LABELS[role] || role,
+            roleDescription: mailer.roleDescriptionOf(role),
+            inviterName,
+            personalNote,
+            expiresAt,
+        });
+        return !!res.sent;
+    } catch {
+        return false;
+    }
+}
+
+const ROLE_LABELS = {
+    cms_admin: 'Admin', cms_editor: 'Editor', cms_publisher: 'Publisher', cms_reviewer: 'Reviewer',
+    cms_compliance: 'Compliance', cms_seo_manager: 'SEO Manager', cms_author: 'Writer',
+    cms_contributor: 'Contributor', cms_viewer: 'Viewer',
+};
+
 async function grantAccess(scope, body, inviterId = null) {
     const { websiteIds, role } = body;
     const granted = [];
@@ -313,6 +348,7 @@ async function grantAccess(scope, body, inviterId = null) {
                 scope,
                 { userId: body.userId, email: body.email, role, personalNote: body.personalNote, expiresAt: body.expiresAt },
                 inviterId,
+                { notify: false },
             );
             (result.kind === 'invitation' ? invited : granted).push({ websiteId, ...result });
         } catch (err) {
@@ -324,10 +360,19 @@ async function grantAccess(scope, body, inviterId = null) {
         }
     }
 
+    // One email for the whole batch rather than one per site.
+    if (granted.length > 0) {
+        const sites = await CmsWebsite.findAll({ where: { id: granted.map((g) => g.websiteId) }, attributes: ['id', 'slug', 'name'] });
+        const notified = await notifyAccessGranted({
+            sites, member: granted[0], role, inviterId, personalNote: body.personalNote, expiresAt: body.expiresAt,
+        });
+        granted.forEach((g) => { g.notified = notified; });
+    }
+
     return { granted, invited, skipped, role };
 }
 
-async function addMember(websiteId, scope, body, inviterId = null) {
+async function addMember(websiteId, scope, body, inviterId = null, { notify = true } = {}) {
     const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
@@ -344,6 +389,13 @@ async function addMember(websiteId, scope, body, inviterId = null) {
         userId = Number(user.id);
     }
     if (userId == null) throw new AppError('VALIDATION', 'A userId or email is required', 422);
+
+    // A removed account cannot sign in, so granting it a seat would silently do nothing and
+    // send a misleading email. Make the admin restore the person first, on purpose.
+    const target = (await identityService.mapByIds([userId])).get(String(userId));
+    if (target && target.status === 'deleted') {
+        throw new AppError('CONFLICT', 'This person was removed from the platform. Restore them under Users > Removed users, then invite them again.', 409);
+    }
 
     const existing = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
     if (existing) throw new AppError('CONFLICT', 'This user is already a member of this website', 409);
@@ -372,7 +424,12 @@ async function addMember(websiteId, scope, body, inviterId = null) {
         invitedBy: inviterId,
     }, { tenantId: website.slug });
 
-    return { kind: 'member', ...enriched };
+    // An existing account is added instantly, so there is no invite link — without this the person
+    // would never learn they had been given access. Best-effort: mail failure never fails the grant.
+    let notified = false;
+    if (notify) notified = await notifyAccessGranted({ sites: [website], member: enriched, role: body.role, inviterId, personalNote: body.personalNote, expiresAt: body.expiresAt });
+
+    return { kind: 'member', ...enriched, notified };
 }
 
 /**

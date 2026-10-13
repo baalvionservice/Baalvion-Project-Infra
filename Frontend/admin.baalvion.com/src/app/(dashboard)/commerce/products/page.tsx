@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye, Upload } from 'lucide-react';
+import { Plus, Search, Package, Filter, MoreHorizontal, Pencil, Trash2, Copy, Eye, Upload, Zap } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -26,11 +26,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useProducts, useDeleteProduct, usePublishProduct, useDuplicateProduct, useBulkUpdateProducts } from '@/lib/queries/commerce-products.queries';
+import { useProducts, useDeleteProduct, useDuplicateProduct, useBulkUpdateProducts } from '@/lib/queries/commerce-products.queries';
 import { useCommerceCategories } from '@/lib/queries/commerce-stores.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
-import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { formatMoney, formatDate } from '@/lib/utils/format';
+import { placeholderReasons } from '@/lib/commerce/placeholders';
+import { priceOf } from '@/lib/commerce/priceOf';
+import MobileProductCard from '@/components/commerce/MobileProductCard';
+import { flattenCategoryPaths } from '@/lib/utils/categoryPaths';
 import type { Product } from '@/lib/types/commerce.types';
 
 export default function ProductsPage() {
@@ -53,7 +57,6 @@ export default function ProductsPage() {
 
   const { data: categoriesData } = useCommerceCategories(storeId);
   const deleteProduct = useDeleteProduct(storeId);
-  const publishProduct = usePublishProduct(storeId);
   const duplicateProduct = useDuplicateProduct(storeId);
   const bulkUpdate = useBulkUpdateProducts(storeId);
 
@@ -91,11 +94,17 @@ export default function ProductsPage() {
         title="Products"
         description={`${total} products across your store`}
         actions={
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" asChild>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" asChild className="hidden sm:inline-flex">
               <Link href="/commerce/products/import">
                 <Upload className="mr-2 h-4 w-4" />
                 Import
+              </Link>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/commerce/products/quick">
+                <Zap className="mr-2 h-4 w-4" />
+                Quick add
               </Link>
             </Button>
             <Button size="sm" asChild>
@@ -126,7 +135,7 @@ export default function ProductsPage() {
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="published">Live on site</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
@@ -136,8 +145,8 @@ export default function ProductsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            {flattenCategoryPaths(categories).map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -187,6 +196,13 @@ export default function ProductsPage() {
               </Button>
             </div>
           ) : (
+            <>
+            <ul className="space-y-3 p-3 md:hidden">
+              {products.map((product: Product) => (
+                <MobileProductCard key={product.id} product={product} storeId={storeId} currency={product.currencyCode ?? 'USD'} />
+              ))}
+            </ul>
+            <div className="hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -233,6 +249,9 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={product.status} />
+                      {placeholderReasons({ description: product.description, colors: Array.isArray(product.customFields?.colors) ? (product.customFields!.colors as string[]) : [], listingStatus: product.customFields?.listingStatus }).length > 0 && (
+                        <Badge variant="destructive" className="ml-2 text-[10px]">Needs real details</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs capitalize">
@@ -240,9 +259,7 @@ export default function ProductsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {product.basePrice != null
-                        ? formatCurrency(product.basePrice, product.currencyCode)
-                        : '—'}
+                      {priceOf(product) != null ? formatMoney(priceOf(product)!, product.currencyCode ?? 'USD') : '—'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground font-mono">
                       {product.sku ?? '—'}
@@ -265,7 +282,7 @@ export default function ProductsPage() {
                             </Link>
                           </DropdownMenuItem>
                           {product.status === 'draft' && (
-                            <DropdownMenuItem onClick={() => publishProduct.mutate(product.id)}>
+                            <DropdownMenuItem onClick={() => bulkUpdate.mutate({ ids: [product.id], action: 'publish' })}>
                               <Eye className="mr-2 h-4 w-4" />
                               Publish
                             </DropdownMenuItem>
@@ -289,6 +306,8 @@ export default function ProductsPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
+            </>
           )}
         </CardContent>
 
@@ -318,6 +337,15 @@ export default function ProductsPage() {
           </div>
         )}
       </Card>
+
+      {/* One-thumb shortcut on phones and tablets */}
+      <Link
+        href="/commerce/products/quick"
+        className="fixed bottom-5 right-5 z-30 flex h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg md:hidden"
+        aria-label="Quick add a product"
+      >
+        <Zap className="h-5 w-5" />Quick add
+      </Link>
     </div>
   );
 }

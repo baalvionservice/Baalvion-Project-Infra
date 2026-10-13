@@ -40,6 +40,7 @@ router.get('/system/readiness', systemController.readiness);
 
 // Internal service-to-service ingress (HMAC-authenticated). Java→Node finance event bridge.
 router.use('/internal', require('./internalRoutes'));
+router.use('/order_journeys', require('./orderJourneyRoutes'));
 
 // Logistics — Freight Booking: carrier marketplace + quote engine + selection (typed; shadow the store).
 const freightController = require('../controller/freightController');

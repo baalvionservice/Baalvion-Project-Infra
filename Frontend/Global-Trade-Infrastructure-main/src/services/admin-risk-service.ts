@@ -28,14 +28,19 @@ export interface RiskUser {
 
 export interface AdminDispute {
   id: string;
-  escrowId: string;
-  orderId: string;
-  buyerName: string;
-  sellerName: string;
-  amount: number;
+  orderId: string | null;
+  /** quality | delivery | payment | documentation | other */
+  disputeType: string;
+  claimantOrgId: string | null;
+  respondentOrgId: string | null;
+  /** The backend's own stage: open, evidence_collection, mediation, arbitration, resolved, closed. */
+  stage: string;
   status: 'open' | 'resolved';
   createdAt: string;
 }
+
+// Stages in which a dispute still needs someone. The backend stores them lowercase.
+const FINISHED_DISPUTE_STAGES = new Set(['resolved', 'closed']);
 
 export interface RiskAlert {
   id: string;
@@ -103,17 +108,24 @@ class AdminRiskService {
   }
 
   async getAdminDisputes(): Promise<AdminDispute[]> {
-    const res = await apiClient.get<any[]>('/disputes', { status: 'OPEN' });
-    return toList<any>(res).map(d => ({
-      id: d.id,
-      escrowId: d.referenceId,
-      orderId: d.referenceId,
-      buyerName: 'Institutional Buyer',
-      sellerName: 'Institutional Seller',
-      amount: 350000,
-      status: d.status === 'RESOLVED' ? 'resolved' : 'open',
-      createdAt: d.createdAt
-    }));
+    // No status filter: a dispute is "active" in four stages, and the backend rejects any
+    // status value that is not its own lowercase enum (it answered 400 to 'OPEN').
+    const res = await apiClient.get<any[]>('/disputes', { limit: 100 });
+    return toList<any>(res)
+      .map((d): AdminDispute => {
+        const stage = String(d.status || 'open').toLowerCase();
+        return {
+          id: String(d.id),
+          orderId: d.order_id != null ? String(d.order_id) : null,
+          disputeType: d.dispute_type || 'other',
+          claimantOrgId: d.claimant_org_id ?? null,
+          respondentOrgId: d.respondent_org_id ?? null,
+          stage,
+          status: FINISHED_DISPUTE_STAGES.has(stage) ? 'resolved' : 'open',
+          createdAt: d.createdAt || d.created_at,
+        };
+      })
+      .filter((d) => d.status === 'open');
   }
 
   async getRiskAlerts(): Promise<RiskAlert[]> {

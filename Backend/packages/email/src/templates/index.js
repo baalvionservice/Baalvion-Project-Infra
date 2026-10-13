@@ -12,7 +12,7 @@
  * can pick the correct verified From address automatically.
  */
 
-const { baseLayout, escapeHtml: e } = require('./base');
+const { baseLayout, premiumLayout, escapeHtml: e } = require('./base');
 
 const btn = (href, label, danger = false) =>
     `<a href="${e(href)}" class="btn${danger ? ' btn-danger' : ''}" style="display:inline-block;background:${danger ? '#dc2626' : '#09090b'};color:#ffffff;text-decoration:none;padding:13px 30px;border-radius:8px;font-size:15px;font-weight:600;margin:18px 0;">${e(label)}</a>`;
@@ -27,6 +27,25 @@ const fmtDate = (d) => {
     if (Number.isNaN(date.getTime())) return String(d);
     return date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC';
 };
+
+
+// ── Premium (invitation / access) building blocks ────────────────────────────
+const SERIF = "Georgia,'Times New Roman',Times,serif";
+const pEyebrow = (t) => `<div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8b8b93;margin:0 0 14px;">${e(t)}</div>`;
+const pTitle = (t) => `<h1 class="p-title" style="font-family:${SERIF};font-size:32px;line-height:1.2;font-weight:400;color:#09090b;margin:0 0 22px;">${e(t)}</h1>`;
+const pText = (html) => `<p class="p-text" style="font-size:15px;line-height:1.75;color:#52525b;margin:0 0 18px;">${html}</p>`;
+const pRule = () => `<hr class="p-rule" style="border:none;border-top:1px solid #e6e3dd;margin:32px 0;" />`;
+const pButton = (href, label) => `<div style="margin:28px 0 8px;"><a href="${e(href)}" class="p-btn" style="display:inline-block;background:#09090b;color:#ffffff;text-decoration:none;padding:15px 38px;border-radius:2px;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;">${e(label)}</a></div>`;
+const pDetail = (rows) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="p-detail" style="background:#f7f6f3;border:1px solid #e6e3dd;margin:26px 0;"><tbody>${rows
+    .filter(([, v]) => v)
+    .map(([k, v], i, a) => `<tr><td class="p-row" style="padding:14px 20px;width:34%;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8b8b93;${i < a.length - 1 ? 'border-bottom:1px solid #e6e3dd;' : ''}">${e(k)}</td><td class="p-row p-strong" style="padding:14px 20px;font-size:15px;color:#09090b;${i < a.length - 1 ? 'border-bottom:1px solid #e6e3dd;' : ''}">${v}</td></tr>`)
+    .join('')}</tbody></table>`;
+const pNote = (note) => note
+    ? `<div style="border-left:2px solid #09090b;padding:4px 0 4px 18px;margin:26px 0;"><p class="p-text" style="font-family:${SERIF};font-style:italic;font-size:16px;line-height:1.7;color:#3f3f46;margin:0;">&ldquo;${e(note).replace(/\n/g, '<br />')}&rdquo;</p></div>`
+    : '';
+const pSteps = (steps) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 0;"><tbody>${steps
+    .map((t, i) => `<tr><td style="vertical-align:top;width:34px;padding:7px 0;font-family:${SERIF};font-size:18px;color:#8b8b93;">${i + 1}</td><td class="p-text" style="padding:9px 0;font-size:14px;line-height:1.65;color:#52525b;">${e(t)}</td></tr>`)
+    .join('')}</tbody></table>`;
 
 // ── Templates ─────────────────────────────────────────────────────────────────
 
@@ -254,17 +273,69 @@ ${d.ctaUrl ? btn(d.ctaUrl, d.ctaLabel || 'Read More') : ''}`,
     // 11. Contributor / member invitation (cms-service: invite someone without an account)
     contributorInvitation: {
         category: 'notifications',
-        render: (d, ctx) => ({
-            subject: `You're invited to join ${d.publication || 'a Baalvion publication'} as ${d.roleName || 'a contributor'}`,
-            preview: `${d.inviterName ? `${d.inviterName} invited you` : 'You have been invited'} to ${d.publication || 'Baalvion'}`,
-            text: `${d.inviterName || 'A Baalvion editor'} invited you to join ${d.publication || 'a Baalvion publication'} as ${d.roleName || 'a contributor'}.${d.personalNote ? `\n\n"${d.personalNote}"` : ''}\n\nAccept the invitation: ${d.acceptUrl}\nThis link expires in ${d.expiresHours || 72} hours. If you were not expecting this, ignore this email.`,
-            body: `
-<h1 class="h1">You're invited to ${e(d.publication || 'Baalvion')}</h1>
-<p class="text">${e(d.inviterName || 'A Baalvion editor')} invited <strong>${e(d.email || 'you')}</strong> to join <strong>${e(d.publication || 'a Baalvion publication')}</strong> as <strong>${e(d.roleName || 'a contributor')}</strong>.</p>
-${d.personalNote ? `<div class="panel" style="background:#f4f5f7;border-radius:10px;padding:16px 20px;margin:16px 0;"><p class="text" style="margin:0;">${e(d.personalNote).replace(/\n/g, '<br />')}</p></div>` : ''}
-${btn(d.acceptUrl, 'Accept Invitation')}
-<p class="muted">This invitation expires in ${e(d.expiresHours || 72)} hours. Or paste this link into your browser:<br /><a href="${e(d.acceptUrl)}" style="color:#6b7280;word-break:break-all">${e(d.acceptUrl)}</a></p>`,
-        }),
+        render: (d) => {
+            const pub = d.publication || 'a Baalvion publication';
+            const who = d.inviterName || 'The Baalvion team';
+            return {
+                layout: 'premium',
+                subject: `${who} has invited you to ${pub}`,
+                preview: `Your seat at ${pub} is reserved. Accept within ${d.expiresHours || 72} hours.`,
+                footerNote: 'This invitation was sent to you by name. Please do not forward it &mdash; the link is personal to you.',
+                text: `${who} has invited you to ${pub} as ${d.roleName || 'a contributor'}.\n${d.roleDescription ? `\n${d.roleDescription}\n` : ''}${d.personalNote ? `\n"${d.personalNote}"\n` : ''}\nAccept your invitation: ${d.acceptUrl}\n\nThe link is personal to you and expires in ${d.expiresHours || 72} hours. If you were not expecting this, you can safely ignore this email.\n\nBaalvion`,
+                body:
+                    pEyebrow('Invitation') +
+                    pTitle(`You have been invited to ${d.publication || 'Baalvion'}.`) +
+                    pText(`${e(who)} has reserved a seat for you on <strong class="p-strong" style="color:#09090b;">${e(pub)}</strong>. Accept below to create your account and begin.`) +
+                    pDetail([
+                        ['Publication', e(d.publication || '')],
+                        ['Your role', e(d.roleName || '')],
+                        ['Invited by', e(d.inviterName || '')],
+                        ['Invited as', e(d.email || '')],
+                    ]) +
+                    (d.roleDescription ? pText(e(d.roleDescription)) : '') +
+                    pNote(d.personalNote) +
+                    pButton(d.acceptUrl, 'Accept invitation') +
+                    pText(`<span style="font-size:13px;color:#8b8b93;">This invitation expires in ${e(d.expiresHours || 72)} hours.</span>`) +
+                    pRule() +
+                    pEyebrow('What happens next') +
+                    pSteps(['Accept the invitation and set up your secure sign-in.', 'You land directly on your workspace for this publication.', 'You see only the sites you have been assigned &mdash; nothing else.'].map((t) => t.replace(/&mdash;/g, '—'))) +
+                    pRule() +
+                    pText(`<span style="font-size:12px;color:#8b8b93;">Button not working? Paste this link into your browser:<br /><a href="${e(d.acceptUrl)}" style="color:#6b6b73;word-break:break-all;">${e(d.acceptUrl)}</a></span>`),
+            };
+        },
+    },
+    // 12. Access granted (cms-service: an EXISTING account was given access to one or more sites)
+    siteAccessGranted: {
+        category: 'notifications',
+        render: (d) => {
+            const sites = Array.isArray(d.sites) && d.sites.length ? d.sites : [{ name: d.publication || 'a Baalvion site', url: d.openUrl }];
+            const many = sites.length > 1;
+            const first = sites[0];
+            const who = d.inviterName || 'A Baalvion administrator';
+            const names = sites.map((s) => s.name).join(', ');
+            return {
+                layout: 'premium',
+                subject: many ? `You now have access to ${sites.length} Baalvion sites` : `You now have access to ${first.name}`,
+                preview: `${who} gave you ${d.roleName || 'access'} on ${names}. Sign in to start.`,
+                footerNote: 'You are receiving this because an administrator changed your access. If this was unexpected, contact your administrator.',
+                text: `${who} gave you ${d.roleName || 'access'} on ${names}.\n${d.roleDescription ? `\n${d.roleDescription}\n` : ''}${d.personalNote ? `\n"${d.personalNote}"\n` : ''}\n${sites.map((s) => `${s.name}: ${s.url}`).join('\n')}\n\nSign in with your existing Baalvion account. You will only see the sites you are assigned.\n\nBaalvion`,
+                body:
+                    pEyebrow('Access granted') +
+                    pTitle(many ? `You now have access to ${sites.length} sites.` : `You now have access to ${first.name}.`) +
+                    pText(`${e(who)} has added you as <strong class="p-strong" style="color:#09090b;">${e(d.roleName || 'a member')}</strong>. Sign in with your existing account &mdash; there is nothing to set up.`.replace(/&mdash;/g, '—')) +
+                    pDetail([
+                        [many ? 'Sites' : 'Site', sites.map((s) => `<a href="${e(s.url)}" style="color:#09090b;">${e(s.name)}</a>`).join('<br />')],
+                        ['Your role', e(d.roleName || '')],
+                        ['Granted by', e(d.inviterName || '')],
+                        ['Expires', d.expiresAt ? e(fmtDate(d.expiresAt)) : ''],
+                    ]) +
+                    (d.roleDescription ? pText(e(d.roleDescription)) : '') +
+                    pNote(d.personalNote) +
+                    pButton(first.url, many ? 'Open my workspace' : `Open ${first.name}`) +
+                    pRule() +
+                    pText(`<span style="font-size:12px;color:#8b8b93;">You will only see the sites you are assigned. Need access to another one? Use <strong>Access requests</strong> inside the admin console.</span>`),
+            };
+        },
     },
 };
 
@@ -278,7 +349,8 @@ function render(name, data = {}, ctx) {
     const tmpl = TEMPLATES[name];
     if (!tmpl) throw new Error(`Unknown email template: "${name}"`);
     const r = tmpl.render(data, ctx);
-    const html = baseLayout({
+    const layoutFn = r.layout === 'premium' ? premiumLayout : baseLayout;
+    const html = layoutFn({
         content: r.body,
         preview: r.preview,
         appUrl: ctx.appUrl,
