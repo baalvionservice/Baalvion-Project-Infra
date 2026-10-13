@@ -26,6 +26,8 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   websites: Website[];
+  /** Prefills the email, e.g. when opened from a person's profile. */
+  defaultEmail?: string;
 }
 
 /**
@@ -35,8 +37,8 @@ interface Props {
  * those two and nothing else. Granting them one at a time meant walking three separate member
  * screens, which is how people end up over-granting to save time.
  */
-export default function GrantSiteAccessDialog({ open, onOpenChange, websites }: Props) {
-  const [email, setEmail] = useState('');
+export default function GrantSiteAccessDialog({ open, onOpenChange, websites, defaultEmail = '' }: Props) {
+  const [email, setEmail] = useState(defaultEmail);
   const [role, setRole] = useState<CmsRole>('cms_author');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [note, setNote] = useState('');
@@ -62,7 +64,7 @@ export default function GrantSiteAccessDialog({ open, onOpenChange, websites }: 
     setSelectedIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   const reset = () => {
-    setEmail('');
+    setEmail(defaultEmail);
     setRole('cms_author');
     setSelectedIds([]);
     setNote('');

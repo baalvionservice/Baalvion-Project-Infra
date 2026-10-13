@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Plus, Search, KeyRound } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
@@ -46,6 +47,14 @@ export default function WebsitesPage() {
         description={`${data?.pagination.total ?? 0} managed websites`}
         actions={
           <div className="flex items-center gap-2">
+            {!canGrantAccess && (
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/cms/access-requests">
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Request access
+                </Link>
+              </Button>
+            )}
             {canGrantAccess && (
               <Button size="sm" variant="outline" onClick={() => setGrantOpen(true)}>
                 <KeyRound className="mr-2 h-4 w-4" />

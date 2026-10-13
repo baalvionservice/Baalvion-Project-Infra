@@ -1,7 +1,7 @@
 /**
  * @file workspace-shell.tsx
- * @description THE SUPREME TACTICAL SHELL. 
- * Orchestrates multi-pane finality, resizable workspaces, and intelligence overlays.
+ * @description The content area of every signed-in page: open-page tabs, the page itself, and an
+ * optional insights panel on wide screens.
  */
 'use client';
 
@@ -10,16 +10,9 @@ import { useWorkspaceStore } from '@/modules/workspace/store/workspace-store';
 import { WorkspaceTabs } from './workspace-tabs';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChevronRight, 
-  BrainCircuit, 
-  Activity, 
-  Lock,
-  Workflow,
-  Command,
-  ShieldCheck
-} from 'lucide-react';
+import { ChevronRight, BrainCircuit } from 'lucide-react';
 import { InsightsPanel } from './insights-panel';
+import { PageHeadingFallback } from '@/components/dashboard/page-heading-fallback';
 
 export function WorkspaceShell({ children }: { children: React.ReactNode }) {
   const { 
@@ -54,103 +47,83 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={cn(
-      "flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden",
+      "flex-1 flex flex-col min-w-0 bg-background relative",
       (mode as any) === 'compact' ? "density-compact" : "density-standard"
     )}>
-      {/* SESSION MANAGEMENT BAR */}
+      {/* Open pages, as tabs. Hidden on phones, where there is no room for them. */}
       <WorkspaceTabs />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* PRIMARY EXECUTION PLANE */}
-        <div className="flex-1 min-w-0 flex flex-col relative h-full">
-           <div className="flex-1 overflow-y-auto terminal-scroll p-6 md:p-6">
-              {children}
-           </div>
-           
-           {/* TACTICAL FEED OVERLAY (Bottom) */}
-           <div className="h-10 border-t bg-slate-950/80 backdrop-blur-md flex items-center px-6 justify-between text-[9px] font-black uppercase tracking-wide text-slate-500 z-30">
-              <div className="flex items-center gap-6">
-                 <span className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 
-                    NODE_SYNC: OPTIMAL
-                 </span>
-                 <span className="flex items-center gap-2 border-l border-white/5 pl-6">
-                    <Activity className="h-3 w-3" /> LATENCY: 140ms
-                 </span>
-                 <span className="flex items-center gap-2 border-l border-white/5 pl-6">
-                    <ShieldCheck className="h-3 w-3 text-emerald-500" /> IDENTITY_LOCKED
-                 </span>
-              </div>
-              <div className="flex items-center gap-6">
-                 <span className="flex items-center gap-2"><Lock className="h-3 w-3 text-indigo-500" /> E2E_AUTH_V4_SECURE</span>
-                 <span className="opacity-40">OS_KERNEL_v4.2.0_STABLE</span>
-              </div>
-           </div>
+      <div className="flex-1 flex min-h-0">
+        {/* The page itself: one scroll area and the target of the "skip to main content" link. Each page
+            supplies its own <main> landmark. */}
+        <div
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 min-w-0 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-24 focus:outline-none"
+        >
+          <PageHeadingFallback containerId="main-content" />
+          {children}
         </div>
 
-        {/* TACTICAL RESIZER */}
+        {/* Drag handle for the side panel (desktops with a mouse only). */}
         {rightPanelOpen && (
-          <div 
+          <div
             className={cn(
-              "w-1 group cursor-col-resize relative z-30 bg-white/5 hover:bg-primary/40 transition-colors",
+              "hidden xl:block w-1 group cursor-col-resize relative z-30 bg-border hover:bg-primary/40 transition-colors",
               isResizing && "bg-primary"
             )}
             onMouseDown={() => setIsResizing(true)}
-          >
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-4 bg-background border border-white/10 rounded-full shadow-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="h-4 w-0.5 bg-primary/40 rounded-full" />
-             </div>
-          </div>
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize the insights panel"
+          />
         )}
 
-        {/* STRATEGIC INTELLIGENCE SIDEBAR (Sovereign Oracle) */}
+        {/* Insights: a side panel on wide screens only. Smaller screens have no room for it, so
+            nothing is shown there (an earlier version showed a button that opened nothing). */}
         <AnimatePresence>
           {rightPanelOpen && (
             <motion.aside
+              aria-label="Insights"
               initial={{ x: 420, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 420, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               style={{ width: rightPanelWidth }}
-              className="hidden xl:flex flex-col bg-slate-900/60 border-l border-white/5 backdrop-blur-3xl shrink-0 overflow-hidden relative shadow-lg"
+              className="hidden xl:flex flex-col bg-card border-l shrink-0 overflow-hidden relative"
             >
-               <header className="h-12 border-b border-white/5 bg-white/5 flex items-center justify-between px-8 shrink-0">
-                  <div className="flex items-center gap-4">
-                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                        <BrainCircuit className="h-5 w-5 text-primary" />
-                     </div>
-                     <div className="space-y-0.5">
-                        <span className="text-[10px] font-black uppercase tracking-wide text-white">Sovereign Oracle</span>
-                        <p className="text-[8px] font-bold text-slate-500 uppercase">REASONING_CORE: ACTIVE</p>
-                     </div>
+               <header className="h-14 border-b flex items-center justify-between px-5 shrink-0">
+                  <div className="flex items-center gap-3">
+                     <BrainCircuit aria-hidden className="h-5 w-5 text-primary" />
+                     <span className="text-base font-semibold">Insights</span>
                   </div>
-                  <button className="h-8 w-8 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors" onClick={() => toggleRightPanel(false)}>
-                    <ChevronRight className="h-5 w-5 text-slate-500" />
+                  <button
+                    type="button"
+                    aria-label="Close insights"
+                    className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-accent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                    onClick={() => toggleRightPanel(false)}
+                  >
+                    <ChevronRight aria-hidden className="h-5 w-5 text-muted-foreground" />
                   </button>
                </header>
-               <div className="flex-1 overflow-y-auto terminal-scroll">
+               <div className="flex-1 overflow-y-auto">
                   <InsightsPanel />
                </div>
-               <footer className="p-6 border-t border-white/5 bg-white/5">
-                  <button className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 group hover:bg-white/10 transition-all">
-                     <Command className="h-4 w-4 text-primary" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white">Launch Strategy Lab</span>
-                  </button>
-               </footer>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* FLOATING COGNITION TRIGGER */}
+        {/* Button that opens the side panel: only where the panel can actually appear, and set
+            above the assistant button so the two never overlap. */}
         {!rightPanelOpen && (
-           <motion.button 
-             initial={{ scale: 0 }}
-             animate={{ scale: 1 }}
-             className="absolute right-10 bottom-20 h-12 w-16 rounded-2xl shadow-lg z-40 bg-primary flex items-center justify-center border-4 border-background transition-transform hover:scale-110 active:scale-95 shadow-primary/20"
-             onClick={() => toggleRightPanel(true)}
-           >
-              <BrainCircuit className="h-8 w-8 text-white fill-white/10" />
-           </motion.button>
+          <button
+            type="button"
+            aria-label="Open insights"
+            className="hidden xl:flex fixed right-8 bottom-28 h-12 w-12 rounded-full shadow-lg z-40 bg-card border items-center justify-center hover:bg-accent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+            onClick={() => toggleRightPanel(true)}
+          >
+            <BrainCircuit aria-hidden className="h-6 w-6 text-primary" />
+          </button>
         )}
       </div>
     </div>

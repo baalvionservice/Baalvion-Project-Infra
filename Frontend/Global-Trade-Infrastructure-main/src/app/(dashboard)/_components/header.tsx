@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Link from 'next/link';
-import { Menu, UserCircle, ShieldCheck, Zap, Activity, Globe, Landmark, ChevronDown, Command } from 'lucide-react';
+import { Menu, Landmark, ChevronDown, Search, LogOut, User, FileText } from 'lucide-react';
 import { useAppState } from './app-state';
 import { SidebarNav } from './sidebar-nav';
 import { getPersona, getPersonaHome } from '@/core/personas';
@@ -19,16 +19,23 @@ import { PATHS } from '@/lib/paths';
 import { NotificationCenter } from '@/components/notification-center';
 import { DemoControl } from './demo-control';
 import { CommandPalette } from '@/components/command-palette';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useDeviceClass } from '@/hooks/use-device-class';
-import { useAppStore } from '@/store/use-app-store';
+import { useCommandStore } from '@/modules/platform-command/store/command.store';
 
 export function DashboardHeader() {
-  const { role, orgType, isPlatformAdmin, setRole, availableRoles, logout } = useAppState();
-  const { isMobile } = useDeviceClass();
+  const { role, orgType, isPlatformAdmin, setRole, availableRoles, logout, displayName } = useAppState();
+  const { isHandheld } = useDeviceClass();
   const router = useRouter();
-  const setCommandPaletteOpen = useAppStore((state) => state.setCommandPaletteOpen);
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  // The phone menu is a drawer over the page: close it once a page has been chosen.
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+  // The search window (CommandPalette) reads THIS store. The button used to write to a different
+  // one, so it never opened anything; only the keyboard shortcut worked.
+  const setSearchOpen = useCommandStore((state) => state.setSearchOpen);
 
   const persona = getPersona(role);
   const PersonaIcon = persona.icon;
@@ -50,148 +57,107 @@ export function DashboardHeader() {
     router.replace(PATHS.LOGIN || '/login');
   };
 
+  // The simulation tools are for demonstrations only: they change shared platform records, so a
+  // customer must never see them. They appear only where the deployment turns demo mode on, and
+  // only for platform administrators.
+  const showDemoTools = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && isPlatformAdmin;
+  const initials = (displayName || persona.label)
+    .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
+
   return (
-    <header className={cn(
-      "sticky top-0 z-40 flex items-center border-b bg-background/80 backdrop-blur-xl px-4 transition-all",
-      isMobile ? "h-12" : "h-14 md:px-8"
-    )}>
-      {isMobile && (
-        <Sheet>
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:gap-3 sm:px-4 lg:px-6">
+      {isHandheld && (
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="border-2 rounded-xl h-11 w-11 shadow-sm mr-4" aria-label="Open navigation menu">
-              <Menu className="h-5 w-5" />
+            <Button size="icon" variant="outline" className="h-11 w-11 shrink-0 rounded-lg" aria-label="Open the menu">
+              <Menu aria-hidden className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="sm:max-w-xs p-0 border-r-2 overflow-hidden">
-            <nav className="grid gap-0 h-full">
-              <div className="h-12 flex items-center px-8 border-b bg-muted/30">
-                 <Link href={PATHS.DASHBOARD || '/dashboard'} className="flex items-center gap-3">
-                   <BaalvionLogo className="h-6 w-6 text-primary" />
-                   <span className="font-black uppercase tracking-tighter">Baalvion</span>
-                 </Link>
+          <SheetContent side="left" className="w-[85vw] max-w-sm overflow-y-auto p-0">
+            <div className="grid h-full content-start">
+              <div className="flex h-14 items-center border-b px-5">
+                <Link href={PATHS.DASHBOARD || '/dashboard'} className="flex items-center gap-3">
+                  <BaalvionLogo className="h-6 w-6 text-primary" />
+                  <span className="text-lg font-semibold tracking-tight">Baalvion</span>
+                </Link>
               </div>
-              <div className="p-4">
-                 <SidebarNav />
+              <div className="p-3">
+                <SidebarNav />
               </div>
-            </nav>
+            </div>
           </SheetContent>
         </Sheet>
       )}
-      
-      <div className="flex-1 flex items-center gap-6">
-        <div className="flex items-center gap-4">
-           {!isMobile && <div className="h-8 w-1 bg-primary rounded-full" />}
-           <div className="flex items-center gap-3 min-w-0">
-             {!isMobile && <PersonaIcon className={cn('h-6 w-6 shrink-0', persona.accent)} />}
-             <div className="flex flex-col leading-none min-w-0">
-               <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-foreground truncate max-w-[150px] md:max-w-none">
-                {identityLabel}
-               </h1>
-               {!isMobile && (
-                 <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[260px] hidden md:block">
-                   {persona.tagline}
-                 </span>
-               )}
-             </div>
-           </div>
+
+      {/* Who you are signed in as. The page below carries its own title, so this is not a heading. */}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <PersonaIcon aria-hidden className={cn('hidden h-6 w-6 shrink-0 sm:block', persona.accent)} />
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-base font-semibold sm:text-lg">{identityLabel}</p>
+          <p className="hidden truncate text-sm text-muted-foreground lg:block">{persona.tagline}</p>
         </div>
-        
-        {!isMobile && (
-          <div className="hidden lg:flex items-center gap-6">
-             <button 
-               className="flex items-center gap-3 px-5 py-2 bg-muted/30 hover:bg-muted/50 rounded-2xl border-2 transition-all group"
-               onClick={() => setCommandPaletteOpen(true)}
-             >
-                <Command className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Search Commands</span>
-                <kbd className="text-[9px] font-mono opacity-40">⌘K</kbd>
-             </button>
-             <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/5 rounded-full border-2 border-primary/10 text-[9px] font-black uppercase tracking-wide text-primary shadow-inner">
-                <Zap className="h-3 w-3" /> System v4.2 Stable
-             </div>
-          </div>
-        )}
       </div>
 
-      <div className="flex items-center gap-3 md:gap-5">
-        {!isMobile && (
-          <div className="hidden xl:flex gap-3 mr-2">
-             <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl border-2 border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all" onClick={() => router.push(PATHS.EXECUTIVE_COMMAND)} aria-label="Executive command center">
-                <Zap className="h-5 w-5 text-primary" />
-             </Button>
-             <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl border-2 border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all" onClick={() => router.push(PATHS.FIELD_OPERATIONS)} aria-label="Field operations">
-                <Activity className="h-5 w-5 text-primary" />
-             </Button>
-          </div>
-        )}
-        
-        {!isMobile && <div className="h-10 w-px bg-border hidden md:block" />}
-        
-        {!isMobile && <DemoControl />}
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        {showDemoTools && <div className="hidden 2xl:block"><DemoControl /></div>}
+
+        <Button
+          variant="outline"
+          className="h-11 w-11 rounded-lg px-0 md:w-auto md:gap-2 md:px-4"
+          onClick={() => setSearchOpen(true)}
+          aria-label="Search"
+        >
+          <Search aria-hidden className="h-5 w-5 md:h-4 md:w-4" />
+          <span className="hidden text-sm md:inline">Search</span>
+          <kbd className="hidden rounded border px-1.5 text-xs text-muted-foreground lg:inline">Ctrl K</kbd>
+        </Button>
+
         <NotificationCenter />
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-3 px-2 md:px-4 h-11 md:h-12 rounded-2xl border-2 shadow-sm hover:border-primary/40 transition-all bg-background">
-              <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
-                 <UserCircle className="h-4.5 w-4.5 text-primary" />
-              </div>
-              {!isMobile && (
-                <div className="flex flex-col items-start leading-none">
-                   <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Alexander Chen</span>
-                   <span className="text-[8px] font-bold text-muted-foreground uppercase mt-1 opacity-60">Verified Node</span>
-                </div>
-              )}
-              <ChevronDown className="h-3.5 w-3.5 opacity-30" />
+            <Button variant="outline" className="h-11 gap-2 rounded-lg px-2 sm:px-3" aria-label="Your account">
+              <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{initials}</span>
+              <span className="hidden max-w-[10rem] flex-col items-start leading-tight md:flex">
+                <span className="w-full truncate text-sm font-medium">{displayName || persona.label}</span>
+                <span className="w-full truncate text-xs text-muted-foreground">{persona.label}</span>
+              </span>
+              <ChevronDown aria-hidden className="hidden h-4 w-4 text-muted-foreground sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72 rounded-2xl border-2 shadow-2xl p-2 mt-2">
-            <DropdownMenuLabel className="text-[10px] font-black uppercase opacity-60 px-4 py-3 tracking-widest">Operational Context</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-2">
+            <DropdownMenuLabel className="px-3 py-2">
+              <p className="truncate text-sm font-semibold">{displayName || persona.label}</p>
+              <p className="truncate text-xs font-normal text-muted-foreground">{persona.label}</p>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* Cross-persona switching is a sovereign/platform god-view privilege. Every other
-                authority is locked to its own console — no "become any role" lens. */}
-            {canSwitchPersona ? (
+            {canSwitchPersona && (
               <>
-                <div className="p-1 space-y-1 max-h-[40vh] overflow-y-auto">
-                   <p className="text-[8px] font-black text-muted-foreground uppercase tracking-wide px-3 mb-2 opacity-40">Enter Persona Console</p>
-                   {availableRoles.map((r) => (
-                     <DropdownMenuItem key={r} onClick={() => switchPersona(r)} className="rounded-xl px-4 py-3 cursor-pointer group">
-                        <div className="flex items-center gap-3 w-full">
-                           <Landmark className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                           <span className="text-xs font-bold group-hover:text-primary transition-colors">{r}</span>
-                           {role === r && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
-                        </div>
-                     </DropdownMenuItem>
-                   ))}
+                <p className="px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground">View the platform as</p>
+                <div className="max-h-[40vh] overflow-y-auto">
+                  {availableRoles.map((r) => (
+                    <DropdownMenuItem key={r} onClick={() => switchPersona(r)} className="min-h-11 cursor-pointer rounded-lg px-3">
+                      <Landmark aria-hidden className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-sm">{r}</span>
+                      {role === r && <span className="h-2 w-2 rounded-full bg-primary" aria-label="Current view" />}
+                    </DropdownMenuItem>
+                  ))}
                 </div>
                 <DropdownMenuSeparator />
               </>
-            ) : (
-              <div className="px-4 py-3">
-                 <div className="flex items-center gap-3">
-                    <PersonaIcon className={cn('h-4 w-4', persona.accent)} />
-                    <div className="flex flex-col leading-tight">
-                       <span className="text-xs font-bold">{persona.label}</span>
-                       <span className="text-[9px] text-muted-foreground uppercase tracking-wide opacity-60">Authority Locked</span>
-                    </div>
-                 </div>
-              </div>
             )}
-            <DropdownMenuSeparator />
-            <div className="p-1 space-y-1">
-               <DropdownMenuItem className="rounded-xl px-4 py-3" onClick={() => router.push(PATHS.PROFILE)}>
-                  <span className="text-xs font-semibold">Institutional Profile</span>
-               </DropdownMenuItem>
-               <DropdownMenuItem className="rounded-xl px-4 py-3" onClick={() => router.push(PATHS.DOCUMENTS)}>
-                  <span className="text-xs font-semibold">Immutable Vault</span>
-               </DropdownMenuItem>
-            </div>
+            <DropdownMenuItem className="min-h-11 cursor-pointer rounded-lg px-3" onClick={() => router.push(PATHS.PROFILE)}>
+              <User aria-hidden className="mr-3 h-4 w-4" /> <span className="text-sm">Your profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11 cursor-pointer rounded-lg px-3" onClick={() => router.push(PATHS.DOCUMENTS)}>
+              <FileText aria-hidden className="mr-3 h-4 w-4" /> <span className="text-sm">Your documents</span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-               onSelect={(e) => { e.preventDefault(); void handleLogout(); }}
-               className="text-red-600 font-black uppercase text-[10px] py-4 hover:bg-red-50 tracking-wide rounded-xl px-4 justify-center flex cursor-pointer"
+              onSelect={(e) => { e.preventDefault(); void handleLogout(); }}
+              className="min-h-11 cursor-pointer rounded-lg px-3 text-destructive focus:text-destructive"
             >
-               TERMINATE SESSION
+              <LogOut aria-hidden className="mr-3 h-4 w-4" /> <span className="text-sm font-medium">Sign out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

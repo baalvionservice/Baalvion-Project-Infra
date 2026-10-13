@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface UIState {
   sidebarCollapsed: boolean;
+  mobileNavOpen: boolean;
   commandPaletteOpen: boolean;
   activeModal: string | null;
   modalData: unknown;
@@ -13,6 +14,7 @@ interface UIState {
 
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebar: () => void;
+  setMobileNavOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
   openModal: (id: string, data?: unknown) => void;
   closeModal: () => void;
@@ -24,6 +26,7 @@ export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
       sidebarCollapsed: false,
+      mobileNavOpen: false,
       commandPaletteOpen: false,
       activeModal: null,
       modalData: null,
@@ -32,6 +35,7 @@ export const useUIStore = create<UIState>()(
 
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      setMobileNavOpen: (open) => set({ mobileNavOpen: open }),
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
       openModal: (id, data = null) => set({ activeModal: id, modalData: data }),
       closeModal: () => set({ activeModal: null, modalData: null }),

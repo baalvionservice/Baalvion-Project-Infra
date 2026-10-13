@@ -21,11 +21,11 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopBar />
         <main className="flex-1 overflow-y-auto bg-muted/20">
           {isHydrated ? (
-            <div className="container mx-auto p-6 max-w-screen-2xl">{children}</div>
+            <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-screen-2xl">{children}</div>
           ) : (
             // Outside the content container so it centres on the whole area, not the padded box.
             <BaalvionLoader full label="Restoring your session" />

@@ -222,7 +222,7 @@ export interface GrantSkip {
  * an unknown email gets a token invite per site instead. Both can occur in one request.
  */
 export interface GrantSiteAccessResult {
-  granted: Array<{ websiteId: string; kind: 'member'; cmsRole: CmsRole }>;
+  granted: Array<{ websiteId: string; kind: 'member'; cmsRole: CmsRole; notified?: boolean }>;
   invited: Array<{ websiteId: string; kind: 'invitation'; email: string; emailSent: boolean }>;
   skipped: GrantSkip[];
   role: CmsRole;
