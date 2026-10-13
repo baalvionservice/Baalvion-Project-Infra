@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import QRCode from "qrcode"
+import { IntermediaryHelp } from "@/components/payments/intermediary-help"
 import { AlertTriangle, Copy, ExternalLink, ImagePlus, X } from "lucide-react"
 import { AppButton } from "@/components/ui/AppButton"
 import { changePaymentMethod, changePaymentNetwork, listPaymentMethods, type CategoryPayment, type PaymentMethod, type PaymentMethodInfo, type PaymentNetworkInfo, type ProofUpload } from "@/lib/api/seller-access"
@@ -93,6 +94,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
           <p className="text-[11px] text-gray-500">Changing this changes the address or QR below. Use only what is shown after you change it.</p>
         </div>
       )}
+      <IntermediaryHelp amountUsd={amountUsd} networkLabel={isUsdt ? pay.networkLabel : null} address={isBinance ? null : pay.address} />
       <p className="text-xs text-gray-400">
         {isBinance
           ? <>Pay <strong className="text-white">{usd}</strong> in USDT with Binance Pay. Scan this QR in the Binance app — that is the safest way, because it goes straight to the right account:</>

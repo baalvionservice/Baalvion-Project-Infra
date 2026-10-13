@@ -10,6 +10,7 @@ import { PayToPanel } from "@/components/payments/pay-to-panel"
 import { ReviewStatus } from "@/components/payments/review-status"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { IntermediaryHelp } from "@/components/payments/intermediary-help"
 import { getBuyerAccess, startAccessPass, submitPayment, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { listPaymentMethods, type PaymentMethod, type PaymentMethodInfo } from "@/lib/api/seller-access"
 
@@ -104,6 +105,7 @@ export default function BuyerPassPage() {
                 </div>
               )}
             </div>
+            <IntermediaryHelp amountUsd={price} open />
             <NexusButton onClick={start} disabled={busy || !methods.some((m) => m.available)}>{busy ? "Starting…" : `Get my access pass — $${price}`}</NexusButton>
             {!methods.some((m) => m.available) && <p className="text-xs text-gray-500">Payments are not available right now. Please try again later.</p>}
           </NexusCard>

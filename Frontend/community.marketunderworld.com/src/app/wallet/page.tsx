@@ -12,6 +12,7 @@ import { PayToPanel } from "@/components/payments/pay-to-panel"
 import { ReviewStatus } from "@/components/payments/review-status"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { IntermediaryHelp } from "@/components/payments/intermediary-help"
 import { getPointsWallet, startWalletTopup, submitPayment, type PointsWallet } from "@/lib/api/points"
 import { listPaymentMethods, type PaymentMethod, type PaymentMethodInfo } from "@/lib/api/seller-access"
 
@@ -132,6 +133,7 @@ export default function WalletPage() {
                   </div>
                 )}
               </div>
+              <IntermediaryHelp amountUsd={inRange ? amount : wallet.minTopupUsd} open />
               <NexusButton onClick={start} disabled={busy || !inRange || !methods.some((m) => m.available)}>{busy ? "Starting…" : `Load ${inRange ? `$${amount}` : "wallet"}`}</NexusButton>
             </NexusCard>
           )}
