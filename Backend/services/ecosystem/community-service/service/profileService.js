@@ -26,8 +26,23 @@ const present = (p) => ({
     socialLinks: (p && p.social_links) || {},
 });
 
+// The paid access tiers a member holds (Marketplace, Global Elite, VIP, Exclusive), highest first.
+async function tiersOf(userIds) {
+    const ids = [].concat(userIds).map(String);
+    if (!ids.length) return {};
+    const rows = await db.CommunityMembership.findAll({
+        where: { user_id: { [Op.in]: ids }, status: 'paid' },
+        include: [{ model: db.Community, as: 'community', where: { is_platform_tier: true, is_active: true }, attributes: ['slug', 'name', 'price_usd_cents'] }],
+    });
+    const out = {};
+    for (const r of rows) (out[String(r.user_id)] ||= []).push({ slug: r.community.slug, name: r.community.name, since: r.started_at || r.createdAt, price: Number(r.community.price_usd_cents) || 0 });
+    for (const k of Object.keys(out)) out[k].sort((a, b) => b.price - a.price).forEach((t) => delete t.price);
+    return out;
+}
+
 async function getMine(userId) {
-    return present(await db.MemberProfile.findByPk(String(userId)));
+    const [p, tiers] = await Promise.all([db.MemberProfile.findByPk(String(userId)), tiersOf(userId)]);
+    return { ...present(p), tiers: tiers[String(userId)] || [] };
 }
 
 async function saveMine(userId, d) {
@@ -139,7 +154,7 @@ async function publicByHandle(handle) {
         handle: p.handle, name: p.public_name, headline: p.headline || '', bio: p.bio || '', knownFor: p.known_for || '', city: p.city || '',
         isFounder: !!p.is_founder, company: p.company_name || '', role: p.role_title || '', searchIndex: p.search_index !== false,
         interests: p.interests || [], links: p.social_links || {}, photoPath: p.photo_asset_id ? `/media/${p.photo_asset_id}` : null,
-        verified: !!kyc, since: p.createdAt,
+        verified: !!kyc, since: p.createdAt, tiers: (await tiersOf(p.user_id))[String(p.user_id)] || [],
     };
 }
 

@@ -96,6 +96,8 @@ export function ProfilePanel({ displayName, memberNumber }: { displayName: strin
               <ShieldCheck className={`w-3.5 h-3.5 ${kycState?.tone ?? "text-gray-500"}`} />
               KYC: <span className={kycState?.tone ?? "text-gray-400"}>{kycCase === undefined ? "…" : kycState?.label ?? "Not started"}</span>
             </span>
+            {(profile?.tiers ?? []).map((t) => <span key={t.slug} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/40 text-amber-300 font-semibold">{t.name}</span>)}
+            {profile && !(profile.tiers ?? []).length && <Link href="/access" className="inline-flex items-center px-2.5 py-1 rounded-full border border-white/10 text-gray-400 hover:text-white">No access tier yet · see plans</Link>}
             {kycCase?.status !== "approved" && kycCase !== undefined && <Link href="/kyc" className="text-cyan-400 font-bold uppercase tracking-widest">{kycCase ? "Open KYC" : "Start KYC"}</Link>}
           </div>
           <div className="grid sm:grid-cols-2 gap-3">

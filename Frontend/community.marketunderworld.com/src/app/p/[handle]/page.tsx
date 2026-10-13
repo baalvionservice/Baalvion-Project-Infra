@@ -45,7 +45,7 @@ export default async function PublicProfile({ params }: { params: Promise<{ hand
           {photo ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={photo} alt={p.name} className="w-full max-h-[480px] object-cover" /> : <div className="h-40 bg-gradient-to-br from-red-950 to-black" />}
           <div className="p-6 sm:p-8 space-y-4">
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2 flex-wrap">{p.name}{p.verified && <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30 rounded-full px-2.5 py-1"><BadgeCheck className="w-3.5 h-3.5" /> Verified</span>}</h1>
+              <h1 className="text-3xl font-bold flex items-center gap-2 flex-wrap">{p.name}{p.verified && <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30 rounded-full px-2.5 py-1"><BadgeCheck className="w-3.5 h-3.5" /> Verified</span>}{(p.tiers ?? []).map((t) => <span key={t.slug} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 border border-amber-500/30 rounded-full px-2.5 py-1">{t.name}</span>)}</h1>
               {p.isFounder && (p.role || p.company) && <p className="text-pink-300 mt-1">{[p.role || "Founder", p.company].filter(Boolean).join(" at ")}</p>}
               {p.headline && <p className="text-gray-300 mt-1">{p.headline}</p>}
               <p className="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">

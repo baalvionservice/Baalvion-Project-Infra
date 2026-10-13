@@ -3,7 +3,7 @@ import { memo } from "./server-cache"
 
 const BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? "https://api.baalvion.com/api/v1/community"
 export interface PersonCard { handle: string; name: string; headline: string; city: string; isFounder: boolean; company: string; role: string; photoPath: string | null; searchIndex: boolean; updatedAt: string }
-export interface PersonPage extends PersonCard { bio: string; knownFor: string; interests: string[]; links: Record<string, string>; verified: boolean; since: string }
+export interface PersonPage extends PersonCard { bio: string; knownFor: string; interests: string[]; links: Record<string, string>; verified: boolean; since: string; tiers?: { slug: string; name: string }[] }
 
 export async function getPerson(handle: string): Promise<PersonPage | null> {
   try {

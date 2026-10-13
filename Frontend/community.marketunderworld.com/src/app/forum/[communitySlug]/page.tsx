@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -141,6 +141,17 @@ export default function CommunityForumPage({
     })();
   }, [communitySlug, authLoading, joinedNow]);
 
+  // A free community has nothing to approve, so signing in is enough: join automatically.
+  const autoJoining = useRef(false);
+  useEffect(() => {
+    if (authLoading || pageLoading || !isAuthenticated || !community || community.membership) return;
+    if (community.accessModel !== "free" || autoJoining.current) return;
+    autoJoining.current = true;
+    joinCommunity(communitySlug)
+      .then(() => setJoinedNow((v) => !v))
+      .catch((err: any) => { setJoinError(err?.message ?? "Could not join. Please try again."); });
+  }, [authLoading, pageLoading, isAuthenticated, community, communitySlug]);
+
   const handleJoin = async () => {
     if (!isAuthenticated) {
       router.push(`/auth/signin?next=/forum/${communitySlug}`);
@@ -204,8 +215,7 @@ export default function CommunityForumPage({
       return (
         <div className="min-h-screen bg-[#06040a] flex items-center justify-center">
           <div className="text-center text-gray-400">
-            <Loader2 className="w-8 h-8 text-red-500 animate-spin mx-auto mb-3" />
-            <p className="text-sm">Joining community…</p>
+            {joinError ? <p className="text-sm text-red-400">{joinError}</p> : <><Loader2 className="w-8 h-8 text-red-500 animate-spin mx-auto mb-3" /><p className="text-sm">Joining community…</p></>}
           </div>
         </div>
       );
