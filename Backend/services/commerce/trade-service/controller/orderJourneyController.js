@@ -21,6 +21,7 @@ const wrap = (fn) => async (req, res, next) => { try { return await fn(req, res)
 const mine = wrap(async (req, res) => sendSuccess(req, res, await journeys.listMyJourneys({ ...who(req), limit: req.query.limit })));
 const byOrder = wrap(async (req, res) => sendSuccess(req, res, await journeys.getJourneyByOrder({ ...who(req), orderId: req.params.orderId })));
 const one = wrap(async (req, res) => sendSuccess(req, res, await journeys.getJourney({ ...who(req), journeyId: req.params.id })));
+const steps = wrap(async (req, res) => sendSuccess(req, res, await journeys.getSteps({ ...who(req), journeyId: req.params.id })));
 const listParties = wrap(async (req, res) => sendSuccess(req, res, await parties.listParties({ ...who(req), journeyId: req.params.id })));
 const events = wrap(async (req, res) => sendSuccess(req, res, await parties.listEvents({ ...who(req), journeyId: req.params.id, limit: req.query.limit })));
 
@@ -64,4 +65,4 @@ const openFromOrder = wrap(async (req, res) => {
     return sendSuccess(req, res, out, 201);
 });
 
-module.exports = { mine, byOrder, one, listParties, events, invite, respond, grants, remove, rules, status, openFromOrder };
+module.exports = { steps, mine, byOrder, one, listParties, events, invite, respond, grants, remove, rules, status, openFromOrder };
