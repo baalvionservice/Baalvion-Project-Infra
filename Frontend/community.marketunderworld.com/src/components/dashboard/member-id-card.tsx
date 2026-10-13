@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Check, Copy, ExternalLink, Pencil } from "lucide-react"
 import { NexusCard } from "@/components/ui/nexus-card"
 import { useToast } from "@/hooks/use-toast"
 import { setMyDisplayName, type MyMember } from "@/lib/api/members"
+import { getMyProfile, type MyProfile } from "@/lib/api/profile"
 
 export function MemberIdCard({ member, onChange }: { member: MyMember; onChange: (m: MyMember) => void }) {
   const { toast } = useToast()
@@ -13,6 +14,10 @@ export function MemberIdCard({ member, onChange }: { member: MyMember; onChange:
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(member.displayName)
   const [saving, setSaving] = useState(false)
+  const [prof, setProf] = useState<MyProfile | null>(null)
+  useEffect(() => { getMyProfile().then(setProf).catch(() => {}) }, [])
+  const tiers = prof?.tiers ?? []
+  const link = prof?.publicProfile && prof.handle ? `/p/${prof.handle}` : null
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(member.memberNumber); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* clipboard blocked */ }
@@ -36,6 +41,11 @@ export function MemberIdCard({ member, onChange }: { member: MyMember; onChange:
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
+          {tiers.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {tiers.map((t) => <span key={t.slug} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-semibold"><Check className="w-3 h-3" />{t.name} · paid</span>)}
+            </div>
+          )}
           {editing ? (
             <div className="flex items-center gap-2 pt-1">
               <input value={name} maxLength={80} onChange={(e) => setName(e.target.value)} aria-label="Display name"
@@ -51,10 +61,16 @@ export function MemberIdCard({ member, onChange }: { member: MyMember; onChange:
           )}
         </div>
         <div className="flex flex-col items-start md:items-end gap-1 shrink-0">
-          <Link href={member.profilePath} className="inline-flex items-center gap-2 text-[11px] font-bold text-cyan-400 uppercase tracking-widest hover:text-cyan-300">
-            View public profile <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
-          <span className="font-mono text-[11px] text-gray-600">{member.profilePath}</span>
+          {link ? (
+            <>
+              <Link href={link} className="inline-flex items-center gap-2 text-[11px] font-bold text-cyan-400 uppercase tracking-widest hover:text-cyan-300">
+                View public profile <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+              <span className="font-mono text-[11px] text-gray-500">{link}</span>
+            </>
+          ) : (
+            <span className="text-[11px] text-gray-400 md:text-right max-w-[16rem]">Your public link is not set up yet. Choose a link name and switch your public page on in &ldquo;Your public page&rdquo; below.</span>
+          )}
         </div>
       </div>
     </NexusCard>
