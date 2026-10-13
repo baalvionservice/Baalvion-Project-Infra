@@ -78,6 +78,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
         ]}
       />
       <ProductDetailClient product={product} related={related} categorySlug={categorySlug} />
+      {((product.documents?.length ?? 0) > 0 || product.infoLink) && (
+        <section aria-label="More information" className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-3">
+          <h2 className="text-lg font-bold text-white">More information from the seller</h2>
+          <ul className="flex flex-wrap gap-3">
+            {(product.documents ?? []).map((d, i) => (
+              <li key={d.url + i}><a href={d.url} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center h-11 px-5 rounded-xl border border-white/15 hover:border-emerald-400/60 text-sm font-semibold">Open PDF: {d.name}</a></li>
+            ))}
+            {product.infoLink && (
+              <li><a href={product.infoLink} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center h-11 px-5 rounded-xl border border-white/15 hover:border-emerald-400/60 text-sm font-semibold">Open the seller&apos;s information link</a></li>
+            )}
+          </ul>
+          <p className="text-xs text-gray-500">These files and links belong to the seller and open on other sites or files. Hell Road does not control them.</p>
+        </section>
+      )}
     </div>
   );
 }

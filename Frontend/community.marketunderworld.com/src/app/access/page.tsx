@@ -69,6 +69,22 @@ const TIERS: (TierCardData & { slug: string; redirectTo: string })[] = [
       "VIP Member Badge",
     ],
   },
+  {
+    level: "Access Tier 4",
+    name: "Exclusive Member",
+    priceLabel: "$3,000 USD",
+    slug: "exclusive-member",
+    redirectTo: "/forum",
+    ctaLabel: "Deposit $3,000 & Become Exclusive",
+    tone: "exclusive",
+    badge: "Exclusive",
+    features: [
+      "Everything in VIP Access, plus:",
+      "Exclusive Member Badge",
+      "First Invitation to New Elite Parties and Events",
+      "Priority Line to the Hell Road Team",
+    ],
+  },
 ];
 
 const SECURITY_BADGES = [
@@ -159,7 +175,7 @@ export default function AccessPage() {
 
       {/* Tiers */}
       <section className="container mx-auto px-6 pb-24 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-8">
           {TIERS.map((tier) => (
             <TierCard key={tier.slug} tier={tier} status={statusFor(tier.slug)} onSelect={() => openModal(tier)} />
           ))}
@@ -177,24 +193,29 @@ export default function AccessPage() {
                 <th className="p-4 font-bold text-gray-400 uppercase text-[11px] tracking-widest text-center">$100</th>
                 <th className="p-4 font-bold text-emerald-400 uppercase text-[11px] tracking-widest text-center">$250</th>
                 <th className="p-4 font-bold text-amber-400 uppercase text-[11px] tracking-widest text-center">$1,000</th>
+                <th className="p-4 font-bold text-rose-300 uppercase text-[11px] tracking-widest text-center">$3,000</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {[
-                ["Marketplace", true, true, true],
-                ["Buy & Sell", true, true, true],
-                ["Trade Dashboard", true, true, true],
-                ["Forums", false, true, true],
-                ["Private Communities", false, true, true],
-                ["Premium Resources", false, true, true],
-                ["VIP Trading Rooms", false, false, true],
-                ["Dedicated Priority", false, false, true],
-              ].map(([label, a, b, c]) => (
+                ["Marketplace", true, true, true, true],
+                ["Buy & Sell", true, true, true, true],
+                ["Trade Dashboard", true, true, true, true],
+                ["Forums", false, true, true, true],
+                ["Private Communities", false, true, true, true],
+                ["Premium Resources", false, true, true, true],
+                ["VIP Trading Rooms", false, false, true, true],
+                ["Dedicated Priority", false, false, true, true],
+                ["Exclusive Member Badge", false, false, false, true],
+                ["First Invitation to Elite Parties and Events", false, false, false, true],
+                ["Priority Line to the Team", false, false, false, true],
+              ].map(([label, a, b, c, d]) => (
                 <tr key={label as string}>
                   <td className="p-4 text-gray-300 whitespace-nowrap">{label as string}</td>
                   <td className="p-4 text-center">{a ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-gray-700 mx-auto" />}</td>
                   <td className="p-4 text-center">{b ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-gray-700 mx-auto" />}</td>
                   <td className="p-4 text-center">{c ? <Check className="w-4 h-4 text-amber-400 mx-auto" /> : <X className="w-4 h-4 text-gray-700 mx-auto" />}</td>
+                  <td className="p-4 text-center">{d ? <Check className="w-4 h-4 text-rose-300 mx-auto" /> : <X className="w-4 h-4 text-gray-700 mx-auto" />}</td>
                 </tr>
               ))}
             </tbody>

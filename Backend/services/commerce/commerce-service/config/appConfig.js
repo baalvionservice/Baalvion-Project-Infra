@@ -78,6 +78,7 @@ module.exports = {
         'marketplace-access': { name: 'Marketplace Access', amountUsd: Number(process.env.TIER_MARKETPLACE_USD || 100) },
         'global-elite': { name: 'Global Elite Access', amountUsd: Number(process.env.TIER_ELITE_USD || 250) },
         'vip-access': { name: 'VIP Access', amountUsd: Number(process.env.TIER_VIP_USD || 1000) },
+        'exclusive-member': { name: 'Exclusive Member', amountUsd: Number(process.env.TIER_EXCLUSIVE_USD || 3000) },
     },
     communityServiceUrl: process.env.COMMUNITY_SERVICE_URL || 'http://app-community:3064',
     // One-time fee a buyer pays to enter the marketplace and buy.

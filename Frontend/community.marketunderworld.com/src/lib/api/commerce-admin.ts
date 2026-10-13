@@ -406,10 +406,10 @@ export async function listProductMedia(storeId: string, productId: string): Prom
   return commerceFetch<CommerceProductMedia[]>(`/stores/${storeId}/products/${productId}/media`);
 }
 
-export async function uploadProductMedia(storeId: string, productId: string, file: File, opts: { altText?: string; isFeatured?: boolean } = {}): Promise<CommerceProductMedia> {
+export async function uploadProductMedia(storeId: string, productId: string, file: File, opts: { altText?: string; isFeatured?: boolean; mediaType?: 'image' | 'document' } = {}): Promise<CommerceProductMedia> {
   const form = new FormData();
   form.append('file', file);
-  form.append('mediaType', 'image');
+  form.append('mediaType', opts.mediaType ?? 'image');
   if (opts.altText) form.append('altText', opts.altText);
   if (opts.isFeatured) form.append('isFeatured', 'true');
   const res = await fetch(`${PROXY_BASE}/stores/${storeId}/products/${productId}/media`, {

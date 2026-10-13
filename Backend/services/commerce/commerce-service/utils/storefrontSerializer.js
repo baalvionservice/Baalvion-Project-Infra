@@ -32,7 +32,12 @@ const orderedMedia = (p) =>
         .slice()
         .sort((a, b) => (Number(b.isFeatured) - Number(a.isFeatured)) || ((a.sortOrder || 0) - (b.sortOrder || 0)));
 
-const mediaUrls = (p) => orderedMedia(p).map((m) => m.url).filter(Boolean);
+// PDFs attached to a listing are documents, not pictures, so they stay out of the image gallery.
+const mediaUrls = (p) => orderedMedia(p).filter((m) => m.mediaType !== 'document').map((m) => m.url).filter(Boolean);
+
+// Public documents and the seller's information link (https only).
+const documentsOf = (p) => orderedMedia(p).filter((m) => m.mediaType === 'document' && m.url).map((m) => ({ url: m.url, name: m.altText || 'Document (PDF)' }));
+const infoLinkOf = (cf) => (typeof cf.infoLink === 'string' && /^https:\/\//i.test(cf.infoLink) ? cf.infoLink.slice(0, 500) : undefined);
 
 // Rich media objects (url + thumbnail + alt) for galleries; same ordering as imageUrl.
 const mediaObjects = (p) =>
@@ -101,7 +106,9 @@ function serializeProductListItem(p, opts = {}) {
         taxRate: pricing.taxRate,
         taxInclusive: pricing.taxInclusive,
         imageUrl: mediaUrls(p),
-        media: mediaObjects(p),
+        media: mediaObjects(p).filter((m) => m.mediaType !== 'document'),
+        documents: documentsOf(p),
+        infoLink: infoLinkOf(cf),
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
         // Buying this needs a one-time approved KYC (enforced by order-service; this is display only).
         kycRequired: cf.requiresKyc === true,

@@ -10,7 +10,7 @@ export interface TierCardData {
   priceLabel: string;
   features: string[];
   ctaLabel: string;
-  tone?: "default" | "elite" | "vip";
+  tone?: "default" | "elite" | "vip" | "exclusive";
   badge?: string;
 }
 
@@ -32,6 +32,12 @@ const TONE_STYLES = {
     level: "text-amber-400",
     cta: "bg-amber-400 text-black hover:bg-amber-300",
     badge: "text-amber-300 border-amber-400/40",
+  },
+  exclusive: {
+    card: "border-rose-400/60 bg-rose-500/[0.06] shadow-[0_0_80px_-12px_rgba(244,63,94,0.45)]",
+    level: "text-rose-300",
+    cta: "bg-rose-400 text-black hover:bg-rose-300",
+    badge: "text-rose-200 border-rose-400/50",
   },
 } as const;
 

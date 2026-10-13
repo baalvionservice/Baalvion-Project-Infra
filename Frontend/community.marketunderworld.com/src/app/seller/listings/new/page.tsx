@@ -19,6 +19,8 @@ const MAX_PHOTOS = 8
 const slugify = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
 
 interface Shot { file: File; url: string }
+const MAX_PDFS = 3
+const isHttps = (v: string) => { try { return new URL(v).protocol === "https:" } catch { return false } }
 
 // One page to add a product: details, price and photos together, then publish. The draft is created behind the scenes.
 export default function NewListingPage() {
@@ -37,6 +39,9 @@ export default function NewListingPage() {
   const [short, setShort] = useState("")
   const [long, setLong] = useState("")
   const [shots, setShots] = useState<Shot[]>([])
+  const [pdfs, setPdfs] = useState<File[]>([])
+  const [infoLink, setInfoLink] = useState("")
+  const pdfInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState<"" | "draft" | "publish">("")
   const [step, setStep] = useState("")
   const [blocker, setBlocker] = useState("")
@@ -86,6 +91,7 @@ export default function NewListingPage() {
     if (!storeId) return
     setBlocker("")
     if (!name.trim() || !categoryId) { toast({ variant: "destructive", title: "Add a name and choose a category" }); return }
+    if (infoLink.trim() && !isHttps(infoLink.trim())) { toast({ variant: "destructive", title: "The information link must start with https://" }); return }
     if (publish && !ready.ready) { toast({ variant: "destructive", title: "Almost there", description: `Still needed: ${ready.missing.join(", ")}.` }); return }
     setBusy(publish ? "publish" : "draft")
     let product: CommerceProduct | null = null
@@ -96,11 +102,16 @@ export default function NewListingPage() {
       await updateStoreProduct(storeId, product.id, {
         name: name.trim(), slug: slugify(name) || undefined, shortDescription: short.trim() || undefined, description: long.trim() || undefined,
         categoryId, stockQuantity: Math.max(0, Number(stock) || 0),
+        ...(infoLink.trim() ? { customFields: { infoLink: infoLink.trim() } } : {}),
       })
       if (priceNum && priceNum > 0) await updateStoreProductPricing(storeId, product.id, { price: priceNum, currencyCode: currency })
       for (let i = 0; i < shots.length; i += 1) {
         setStep(`Uploading photo ${i + 1} of ${shots.length}…`)
         await uploadProductMedia(storeId, product.id, shots[i].file, { isFeatured: i === 0 })
+      }
+      for (let i = 0; i < pdfs.length; i += 1) {
+        setStep(`Uploading PDF ${i + 1} of ${pdfs.length}…`)
+        await uploadProductMedia(storeId, product.id, pdfs[i], { mediaType: "document", altText: pdfs[i].name.replace(/\.pdf$/i, "") })
       }
       if (publish) {
         setStep("Publishing…")
@@ -220,6 +231,27 @@ export default function NewListingPage() {
               ))}
             </ul>
           )}
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-7 space-y-4">
+          <h2 className="font-bold">4. PDFs and an information link <span className="text-xs font-normal text-gray-500">(optional)</span></h2>
+          <p className="text-sm text-gray-400">Add a PDF (a brochure, a sample, a price list) or a link to a page with more details. Buyers see them on your product page.</p>
+          {pdfs.length > 0 && (
+            <ul className="space-y-2">{pdfs.map((f, i) => (
+              <li key={f.name + i} className="flex items-center gap-3 rounded-lg border border-white/10 px-3 py-2 text-sm"><span className="flex-1 min-w-0 truncate">{f.name}</span><span className="text-xs text-gray-500">{(f.size / 1048576).toFixed(1)} MB</span><button type="button" aria-label="Remove PDF" onClick={() => setPdfs(pdfs.filter((_, j) => j !== i))} className="p-1.5 text-gray-400 hover:text-red-400"><X className="w-4 h-4" /></button></li>
+            ))}</ul>
+          )}
+          {pdfs.length < MAX_PDFS && <button type="button" onClick={() => pdfInput.current?.click()} className="h-11 px-4 rounded-lg border border-dashed border-white/20 hover:border-white/40 text-sm">Add a PDF (up to {MAX_PDFS}, 10 MB each)</button>}
+          <input ref={pdfInput} type="file" accept="application/pdf" multiple className="hidden" onChange={(e) => {
+            const next = [...pdfs]
+            for (const f of Array.from(e.target.files ?? [])) {
+              if (f.type !== "application/pdf") { toast({ variant: "destructive", title: `${f.name} is not a PDF` }); continue }
+              if (f.size > 10 * 1024 * 1024) { toast({ variant: "destructive", title: `${f.name} is over 10 MB` }); continue }
+              if (next.length < MAX_PDFS) next.push(f)
+            }
+            setPdfs(next); e.target.value = ""
+          }} />
+          <div><label className={label} htmlFor="p-link">Information link</label><input id="p-link" className={field} value={infoLink} onChange={(e) => setInfoLink(e.target.value)} placeholder="https://" inputMode="url" /></div>
         </section>
 
         {blocker && <p className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">{blocker}</p>}

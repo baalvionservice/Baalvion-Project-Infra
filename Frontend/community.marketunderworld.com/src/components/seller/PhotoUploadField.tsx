@@ -105,13 +105,13 @@ export function PhotoUploadField({ storeId, productId, media, onChange }: PhotoU
         <p className="text-xs text-gray-600 mt-1">JPEG, PNG, WebP, AVIF, GIF — encrypted at rest</p>
       </div>
 
-      {media.length === 0 ? (
+      {media.filter((m) => m.mediaType !== 'document').length === 0 ? (
         <div className="flex items-center gap-2 text-gray-600 text-sm">
           <ImageOff className="w-4 h-4" /> No photos yet.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {media.map((m) => (
+          {media.filter((m) => m.mediaType !== 'document').map((m) => (
             <div key={m.id} className="relative group rounded-xl overflow-hidden border border-white/10 bg-white/[0.02] aspect-square">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={m.thumbnailUrl ?? m.url} alt={m.altText ?? ""} className="w-full h-full object-cover" />

@@ -8,6 +8,7 @@ import { NexusCard } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useToast } from "@/hooks/use-toast"
 import { PhotoUploadField } from "@/components/seller/PhotoUploadField"
+import { DocumentsField } from "@/components/seller/DocumentsField"
 import {
   listMyStores,
   getStoreProduct,
@@ -36,11 +37,12 @@ interface FormState {
   currencyCode: string;
   metaTitle: string;
   metaDescription: string;
+  infoLink: string;
 }
 
 const emptyForm: FormState = {
   name: "", slug: "", shortDescription: "", description: "", categoryId: "", sku: "",
-  tags: "", stockQuantity: 0, price: "", currencyCode: "USD", metaTitle: "", metaDescription: "",
+  tags: "", stockQuantity: 0, price: "", currencyCode: "USD", metaTitle: "", metaDescription: "", infoLink: "",
 };
 
 const inputCls = "w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50";
@@ -113,6 +115,7 @@ export default function EditListingPage() {
           // come from seo.title/seo.description), not metaTitle/metaDescription.
           metaTitle: typeof seo.title === "string" ? seo.title : "",
           metaDescription: typeof seo.description === "string" ? seo.description : "",
+          infoLink: typeof (p.customFields as Record<string, unknown> | undefined)?.infoLink === "string" ? String((p.customFields as Record<string, unknown>).infoLink) : "",
         });
       })
       .catch((err) => toast({ variant: "destructive", title: "Couldn't load listing", description: err instanceof Error ? err.message : "Please try again." }))
@@ -148,6 +151,7 @@ export default function EditListingPage() {
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         stockQuantity: form.stockQuantity,
         seoMetadata: { ...(product?.seoMetadata ?? {}), title: form.metaTitle || undefined, description: form.metaDescription || undefined },
+        customFields: { ...(product?.customFields ?? {}), infoLink: form.infoLink.trim() || undefined },
       });
       if (priceNumber && priceNumber > 0) {
         await updateStoreProductPricing(storeId, productId, { price: priceNumber, currencyCode: form.currencyCode });
@@ -314,6 +318,14 @@ export default function EditListingPage() {
       <NexusCard className="p-6 space-y-4 border-white/5 bg-white/[0.01]">
         <h3 className="font-bold text-sm uppercase tracking-widest text-gray-500">Photos</h3>
         <PhotoUploadField storeId={storeId} productId={productId} media={media} onChange={setMedia} />
+      </NexusCard>
+
+      <NexusCard className="p-6 space-y-5 border-white/5 bg-white/[0.01]">
+        <h3 className="font-bold text-sm uppercase tracking-widest text-gray-500">PDFs and information link (optional)</h3>
+        <DocumentsField storeId={storeId} productId={productId} media={media} onChange={setMedia} />
+        <Field label="Information link" hint="A web page with more about this product. It must start with https://">
+          <input value={form.infoLink} onChange={(e) => setForm((f) => ({ ...f, infoLink: e.target.value }))} placeholder="https://" className={inputCls} />
+        </Field>
       </NexusCard>
 
       <NexusCard className="p-6 space-y-5 border-white/5 bg-white/[0.01]">

@@ -37,6 +37,9 @@ export interface StorefrontProduct {
 // NOT metaTitle/metaDescription, despite that being the more obvious guess).
 export interface StorefrontProductDetail extends StorefrontProduct {
   description: string;
+  // PDFs and a link the seller attached for buyers (https only).
+  documents?: { url: string; name: string }[];
+  infoLink?: string;
   condition?: string;
   conditionGrade?: string;
   conditionDetails?: string;

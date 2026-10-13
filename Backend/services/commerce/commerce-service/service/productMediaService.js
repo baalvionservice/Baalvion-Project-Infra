@@ -115,6 +115,11 @@ function validateFile(filePart, mediaType) {
     if (mediaType === 'image' && !IMAGE_MIMES.has(mime)) {
         throw new AppError('UNSUPPORTED_MEDIA_TYPE', `Unsupported image type: ${mime}`, 415);
     }
+    // A listing's document is a PDF and nothing else; it is stored at a public address, so no other file type is accepted.
+    if (mediaType === 'document') {
+        if (mime !== 'application/pdf') throw new AppError('UNSUPPORTED_MEDIA_TYPE', 'Documents must be PDF files', 415);
+        if (filePart.data.length > 10 * 1024 * 1024) throw new AppError('PAYLOAD_TOO_LARGE', 'A PDF can be at most 10MB', 413);
+    }
     return mime;
 }
 
