@@ -9,6 +9,7 @@ const { computeOrderPricing } = require('../services/pricing');
 const { screenCounterparties } = require('../services/counterpartyScreening');
 const paymentClient = require('../services/paymentClient');
 const kycRegistry = require('../services/kycRegistry');
+const journeyClient = require('../services/journeyClient');
 const config = require('../config/appConfig');
 const fx = require('../providers/fx');
 const { auditPayment } = require('../utils/audit');
@@ -187,6 +188,8 @@ const createOrder = async (req, res, next) => {
             await db.OrderSagaState.create({ order_id: String(o.id), tenant_id: tenantId, state: 'CREATED', last_event: OrderEvents.CREATED }, { transaction: t });
             return o;
         });
+        // Open the shared journey for this order. Not awaited: it must never hold up or fail the order.
+        void journeyClient.handOffNewOrder(order, { originCountry: body.seller_country });
         return sendSuccess(req, res, order, 201);
     } catch (err) {
         if (err instanceof z.ZodError) return next(new AppError('BAD_REQUEST', err.errors[0].message, 422));
