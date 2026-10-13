@@ -15,7 +15,7 @@ const STYLE = {
 // Closing a notice hides it on this browser only; editing it (or switching it on again) shows it again.
 const key = (a: ActiveAnnouncement) => `seller-notice:${a.id}:${a.title.length}:${a.body.length}`
 
-export function SellerNotice() {
+export function SellerNotice({ bare = false }: { bare?: boolean }) {
   const [notice, setNotice] = useState<ActiveAnnouncement | null>(null)
 
   useEffect(() => {
@@ -37,8 +37,9 @@ export function SellerNotice() {
     setNotice(null)
   }
 
+  const Wrap = ({ children }: { children: React.ReactNode }) => bare ? <>{children}</> : <div className="max-w-[1200px] mx-auto px-3 sm:px-6 mt-4">{children}</div>
   return (
-    <div className="max-w-[1200px] mx-auto px-3 sm:px-6 mt-4">
+    <Wrap>
     <div role="status" className={`border rounded-xl px-4 py-3 flex items-start gap-3 ${STYLE[notice.severity]}`}>
       <Megaphone className="w-4 h-4 mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0 text-sm">
@@ -50,6 +51,6 @@ export function SellerNotice() {
       </div>
       <button onClick={close} aria-label="Close notice" className="opacity-70 hover:opacity-100"><X className="w-4 h-4" /></button>
     </div>
-    </div>
+    </Wrap>
   )
 }

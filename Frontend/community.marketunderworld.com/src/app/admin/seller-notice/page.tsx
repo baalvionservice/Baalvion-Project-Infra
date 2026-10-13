@@ -21,6 +21,7 @@ export default function SellerNoticePage() {
   const [current, setCurrent] = useState<Announcement | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [fresh, setFresh] = useState(false) // writing a different notice, not editing the saved one
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [severity, setSeverity] = useState<Severity>("info")
@@ -41,7 +42,8 @@ export default function SellerNoticePage() {
 
   useEffect(() => { load() }, [load])
 
-  const isOn = current?.status === "published"
+  const startNew = () => { setFresh(true); setTitle(""); setBody(""); setLinkUrl(""); setSeverity("info") }
+  const isOn = current?.status === "published" && !fresh
   const ready = title.trim().length > 0 && body.trim().length > 0
 
   const fields = () => ({ title: withSellerTag(title.trim()), body: body.trim(), severity, linkUrl: linkUrl.trim() || undefined })
@@ -50,12 +52,14 @@ export default function SellerNoticePage() {
     if (!ready) return toast({ variant: "destructive", title: "Write a headline and a message first" })
     setBusy(true)
     try {
-      if (current) await announcementsAdmin.update(current.id, { ...fields(), linkUrl: linkUrl.trim(), endsAt: null, status: "published" })
+      if (current && !fresh) await announcementsAdmin.update(current.id, { ...fields(), linkUrl: linkUrl.trim(), endsAt: null, status: "published" })
       else {
+        if (current && current.status === "published") await announcementsAdmin.update(current.id, { status: "archived" })
         const made = await announcementsAdmin.create(fields())
         await announcementsAdmin.update(made.id, { status: "published" })
       }
       toast({ title: "Notice is on", description: "Every seller sees it now." })
+      setFresh(false)
       await load()
     } catch (e) {
       toast({ variant: "destructive", title: "Couldn't switch it on", description: e instanceof Error ? e.message : "Please try again." })
@@ -134,7 +138,12 @@ export default function SellerNoticePage() {
           <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Link (optional)</label>
           <input className={input} value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="/seller/access or https://…" />
         </div>
-        {isOn && <NexusButton onClick={saveWhileOn} isLoading={busy} disabled={!ready}>Save changes</NexusButton>}
+        <div className="flex flex-wrap gap-3">
+          {isOn && <NexusButton onClick={saveWhileOn} isLoading={busy} disabled={!ready}>Save changes</NexusButton>}
+          {current && !fresh && <NexusButton variant="outline" onClick={startNew} disabled={busy}>Write a different notice</NexusButton>}
+          {fresh && <NexusButton variant="outline" onClick={() => { setFresh(false); load() }} disabled={busy}>Back to the saved notice</NexusButton>}
+        </div>
+        {fresh && current?.status === "published" && <p className="text-xs text-amber-400">A notice is live right now. Switching this new one on replaces it.</p>}
       </NexusCard>
 
       {ready && (

@@ -29,6 +29,7 @@ import { getMyMember, type MyMember } from "@/lib/api/members"
 import { getBuyerAccess, type BuyerAccessStatus } from "@/lib/api/buyer-access"
 import { getPointsWallet, type PointsWallet } from "@/lib/api/points"
 import { MemberIdCard } from "@/components/dashboard/member-id-card"
+import { SellerNotice } from "@/components/seller/SellerNotice"
 import { ProfilePanel } from "@/components/dashboard/profile-panel"
 import { ForumPanel } from "@/components/dashboard/forum-panel"
 import { NextSteps } from "@/components/dashboard/next-steps"
@@ -158,6 +159,7 @@ export default function DashboardPage() {
 
         <NextSteps />
         <MySpaces />
+        {member?.isSeller && <SellerNotice bare />}
         {member && <MemberIdCard member={member} onChange={setMember} />}
         {member && <div id="profile" className="scroll-mt-32"><ProfilePanel displayName={member.displayName} memberNumber={member.memberNumber} /></div>}
         {member && <div id="forum" className="scroll-mt-32"><ForumPanel /></div>}
