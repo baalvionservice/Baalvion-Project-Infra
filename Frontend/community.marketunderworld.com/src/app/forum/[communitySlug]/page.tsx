@@ -79,7 +79,7 @@ function ThreadRow({ thread, communitySlug }: { thread: ForumThread; communitySl
       {/* Stats */}
       <div className="md:col-span-2 flex md:flex-col items-center justify-center gap-4 md:gap-0 text-center text-xs">
         <div className="text-gray-300 font-semibold flex items-center gap-1 md:block">
-          <span>{thread.postcount}</span>
+          <span>{Math.max(0, thread.postcount - 1)}</span>
           <span className="text-[10px] text-gray-500 md:block ml-1 md:ml-0 uppercase">Replies</span>
         </div>
         <div className="text-gray-400 text-[11px] hidden md:block mt-0.5">

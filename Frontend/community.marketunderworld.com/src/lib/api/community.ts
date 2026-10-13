@@ -122,12 +122,28 @@ export interface ForumThread {
     acceptedPid?: string | null;
 }
 
+export interface ForumAuthorCard {
+    username?: string;
+    picture?: string | null;
+    verified?: boolean;
+    tiers?: { slug: string; name: string }[];
+    memberSince?: number | null;
+    postCount?: number;
+    handle?: string | null;
+    isFounder?: boolean;
+    role?: string | null;
+    company?: string | null;
+    headline?: string | null;
+    city?: string | null;
+}
+
 export interface ForumPost {
     pid: string;
     uid?: string;
     content: string;
     timestamp: number;
-    user?: { username?: string; picture?: string | null };
+    edited?: boolean;
+    user?: ForumAuthorCard;
 }
 
 export async function getThreads(slug: string): Promise<ForumThread[]> {

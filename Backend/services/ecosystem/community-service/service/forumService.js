@@ -3,6 +3,7 @@
 const { Op, fn, col, literal } = require('sequelize');
 const db = require('../models');
 const { AppError } = require('../utils/errors');
+const profiles = require('./profileService');
 
 const iso = (d) => (d ? new Date(d).getTime() : null);
 
@@ -20,7 +21,7 @@ async function authorName(userId) {
 const topicJson = (t) => ({
     tid: String(t.id),
     title: t.title,
-    timestamp: iso(t.created_at),
+    timestamp: iso(t.createdAt),
     postcount: t.post_count,
     viewcount: t.views,
     pinned: t.is_pinned,
@@ -42,6 +43,43 @@ async function listTopics(community, { limit = 50, offset = 0 } = {}) {
     return { topics: rows.map(topicJson) };
 }
 
+// What a reader sees beside each post: the author's name, verified and paid-tier badges, role, member-since and post count.
+// Role, company and a public link appear only when the author switched their public page on.
+async function authorCards(userIds) {
+    const ids = [...new Set(userIds.map(String))];
+    if (!ids.length) return {};
+    const [profs, kyc, tiers, counts, joined] = await Promise.all([
+        db.MemberProfile.findAll({ where: { user_id: { [Op.in]: ids } } }),
+        db.KycVerification.findAll({ where: { user_id: { [Op.in]: ids }, status: 'approved' }, attributes: ['user_id'], raw: true }),
+        profiles.tiersOf(ids),
+        db.ForumPost.findAll({ where: { author_user_id: { [Op.in]: ids }, removed: false }, group: ['author_user_id'], attributes: ['author_user_id', [fn('count', col('id')), 'n']], raw: true }),
+        db.CommunityMembership.findAll({ where: { user_id: { [Op.in]: ids } }, group: ['user_id'], attributes: ['user_id', [fn('min', col('created_at')), 'first']], raw: true }),
+    ]);
+    const verified = new Set(kyc.map((k) => String(k.user_id)));
+    const byProf = new Map(profs.map((p) => [String(p.user_id), p]));
+    const postCount = new Map(counts.map((c) => [String(c.author_user_id), Number(c.n)]));
+    const since = new Map(joined.map((j) => [String(j.user_id), j.first]));
+    const out = {};
+    for (const id of ids) {
+        const p = byProf.get(id);
+        const pub = !!(p && p.public_profile && p.handle);
+        out[id] = {
+            verified: verified.has(id),
+            tiers: (tiers[id] || []).map((t) => ({ slug: t.slug, name: t.name })),
+            memberSince: iso(since.get(id) || (p && p.createdAt)),
+            postCount: postCount.get(id) || 0,
+            name: pub && p.public_name ? p.public_name : null,
+            handle: pub ? p.handle : null,
+            isFounder: pub ? !!p.is_founder : false,
+            role: pub ? p.role_title || null : null,
+            company: pub ? p.company_name || null : null,
+            headline: pub ? p.headline || null : null,
+            city: pub ? p.city || null : null,
+        };
+    }
+    return out;
+}
+
 async function getTopic(community, tid) {
     const id = Number(tid);
     if (!Number.isInteger(id)) throw new AppError('NOT_FOUND', 'Thread not found', 404);
@@ -49,13 +87,14 @@ async function getTopic(community, tid) {
     if (!t) throw new AppError('NOT_FOUND', 'Thread not found', 404);
     db.ForumTopic.increment('views', { where: { id } }).catch(() => {});
     const posts = await db.ForumPost.findAll({ where: { topic_id: id }, order: [['id', 'ASC']], limit: 500 });
+    const cards = await authorCards([t.author_user_id, ...posts.map((p) => p.author_user_id)]);
     return {
         ...topicJson(t), viewcount: t.views + 1,
         posts: posts.map((p) => ({
             pid: String(p.id), uid: p.author_user_id,
             content: p.removed ? '[This post was removed by a moderator]' : p.content,
-            timestamp: iso(p.created_at), edited: !!p.edited_at,
-            user: { username: p.author_name, picture: null },
+            timestamp: iso(p.createdAt), edited: !!p.edited_at,
+            user: { username: (cards[p.author_user_id] && cards[p.author_user_id].name) || p.author_name, picture: null, ...(cards[p.author_user_id] || {}) },
         })),
     };
 }

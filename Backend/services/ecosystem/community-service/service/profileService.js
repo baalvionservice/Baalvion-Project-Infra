@@ -180,4 +180,4 @@ async function publicDirectory({ founders, city, q, limit, offset } = {}) {
     };
 }
 
-module.exports = { publicDirectory, publicByHandle, getMine, saveMine, myRequests, createRequest, withdraw, adminList, decide };
+module.exports = { tiersOf, publicDirectory, publicByHandle, getMine, saveMine, myRequests, createRequest, withdraw, adminList, decide };

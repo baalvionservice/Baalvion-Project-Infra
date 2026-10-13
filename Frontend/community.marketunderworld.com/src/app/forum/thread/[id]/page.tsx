@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   Home, ChevronRight, Heart, Quote, Reply, Flag,
   Send, Bold, Italic, Link as LinkIcon, Code, Clock,
-  ArrowLeft, Loader2, LogIn, ShieldOff,
+  ArrowLeft, Loader2, LogIn, ShieldOff, BadgeCheck, Crown, MapPin, Briefcase,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -23,6 +23,26 @@ function fmtDate(ts: number) {
     hour: "2-digit", minute: "2-digit",
   });
 }
+
+function ago(ts: number, now: number) {
+  const s = Math.max(0, Math.round((now - ts) / 1000));
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} h ago`;
+  const d = Math.round(h / 24);
+  return d < 30 ? `${d} day${d === 1 ? "" : "s"} ago` : "";
+}
+
+// Re-renders every 30 seconds so "5 min ago" stays true while the page is open.
+function useNow() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(t); }, []);
+  return now;
+}
+
+const since = (ts?: number | null) => (ts ? new Date(ts).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : null);
 
 function Avatar({ username, picture, size = "md" }: { username?: string; picture?: string | null; size?: "sm" | "md" | "lg" }) {
   const dim = size === "lg" ? "w-20 h-20 text-2xl" : size === "md" ? "w-16 h-16 text-xl" : "w-9 h-9 text-xs";
@@ -49,18 +69,38 @@ function PostCard({
   canReport: boolean;
 }) {
   const [liked, setLiked] = useState(false);
+  const now = useNow();
   const date = fmtDate(post.timestamp);
+  const rel = ago(post.timestamp, now);
+  const u = post.user ?? {};
 
   return (
     <div className="rounded-lg border border-[#272736] bg-[#121218] overflow-hidden shadow-xl flex flex-col md:flex-row">
       {/* Author sidebar */}
-      <div className="md:w-44 shrink-0 p-4 bg-[#161620] border-b md:border-b-0 md:border-r border-[#242432] flex flex-col items-center text-center gap-2">
+      <div className="md:w-52 shrink-0 p-4 bg-[#161620] border-b md:border-b-0 md:border-r border-[#242432] flex md:flex-col items-center md:items-center text-left md:text-center gap-3 md:gap-2">
         <Avatar username={post.user?.username} picture={post.user?.picture} size={index === 0 ? "lg" : "md"} />
-        <div className="text-sm font-bold text-white hover:text-red-400 transition-colors truncate max-w-full">
-          {post.user?.username ?? "Unknown"}
-        </div>
-        <div className="text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider text-red-400 border-red-900/60 bg-red-950/30">
-          Member
+        <div className="min-w-0 md:w-full flex flex-col md:items-center gap-1.5">
+          {u.handle ? (
+            <Link href={`/p/${u.handle}`} className="text-sm font-bold text-white hover:text-red-400 transition-colors truncate max-w-full">{u.username ?? "Unknown"}</Link>
+          ) : (
+            <div className="text-sm font-bold text-white truncate max-w-full">{u.username ?? "Unknown"}</div>
+          )}
+          <div className="flex flex-wrap md:justify-center gap-1">
+            {u.verified ? (
+              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border font-bold text-emerald-300 border-emerald-800/60 bg-emerald-950/30"><BadgeCheck className="w-3 h-3" /> Verified</span>
+            ) : (
+              <span className="text-[10px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-wider text-gray-400 border-gray-700 bg-black/20">Member</span>
+            )}
+            {u.isFounder && <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border font-bold text-cyan-300 border-cyan-800/60 bg-cyan-950/30"><Crown className="w-3 h-3" /> Founder</span>}
+            {(u.tiers ?? []).map((t) => <span key={t.slug} className="text-[10px] px-1.5 py-0.5 rounded border font-bold text-amber-300 border-amber-800/60 bg-amber-950/30">{t.name}</span>)}
+          </div>
+          {(u.role || u.company) && <div className="text-[11px] text-gray-300 flex items-center gap-1 md:justify-center"><Briefcase className="w-3 h-3 text-gray-500 shrink-0" /><span className="truncate">{[u.role, u.company].filter(Boolean).join(" at ")}</span></div>}
+          {u.headline && <div className="text-[11px] text-gray-400 line-clamp-2">{u.headline}</div>}
+          {u.city && <div className="text-[11px] text-gray-400 flex items-center gap-1 md:justify-center"><MapPin className="w-3 h-3 text-gray-500" />{u.city}</div>}
+          <div className="text-[11px] text-gray-500 md:mt-1 md:pt-2 md:border-t md:border-[#242432] md:w-full">
+            {since(u.memberSince) && <div>Joined {since(u.memberSince)}</div>}
+            <div>{(u.postCount ?? 0).toLocaleString()} post{u.postCount === 1 ? "" : "s"}</div>
+          </div>
         </div>
       </div>
 
@@ -70,7 +110,9 @@ function PostCard({
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#232330] text-xs text-gray-400">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-gray-500" />
-              <span>{date}</span>
+              <time dateTime={new Date(post.timestamp).toISOString()}>{date}</time>
+              {rel && <span className="text-gray-500">· {rel}</span>}
+              {post.edited && <span className="text-gray-600">· edited</span>}
             </div>
             <span className="font-bold text-gray-500">#{index + 1}</span>
           </div>
@@ -260,7 +302,7 @@ export default function ThreadDetailPage({
               <span>{threadDate}</span>
             </div>
             <span className="opacity-40">·</span>
-            <div>Replies: <strong className="text-gray-200">{thread.postcount}</strong></div>
+            <div>Replies: <strong className="text-gray-200">{Math.max(0, thread.postcount - 1)}</strong></div>
             <span className="opacity-40">·</span>
             <div>Views: <strong className="text-gray-200">{thread.viewcount?.toLocaleString() ?? "—"}</strong></div>
           </div>
