@@ -13,6 +13,7 @@
 const { AppError } = require('../../utils/errors');
 const db = require('./db');
 const { DEFAULT_PERMISSIONS, DEFAULT_DOCUMENT_SCOPES } = require('./permissions');
+const { buildSteps } = require('./steps');
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const COUNTRY = /^[A-Za-z]{2}$/;
@@ -123,4 +124,36 @@ async function listMyJourneys({ orgId, limit = 50 }) {
     });
 }
 
-module.exports = { openJourneyForOrder, getJourney, getJourneyByOrder, listMyJourneys, myParty, JOURNEY_COLUMNS };
+/**
+ * The seven steps of a journey as `orgId` may see them. The records behind the steps come from
+ * tradeops.journey_records, which leaves prices out and returns only the kinds the caller's
+ * permissions allow, so the steps cannot reveal more than the caller could be shown directly.
+ */
+async function getSteps({ orgId, journeyId }) {
+    if (!UUID.test(String(journeyId))) throw notFound();
+    return db.withOrg(orgId, async (query) => {
+        const rows = await query(
+            `SELECT ${JOURNEY_COLUMNS} FROM tradeops.order_journeys j WHERE j.id = :j AND tradeops.party_can(j.id, :org, 'journey.view')`,
+            { j: journeyId, org: String(orgId) },
+        );
+        if (!rows[0]) throw notFound();
+        const me = await myParty(query, journeyId, String(orgId));
+        const people = await query('SELECT party_role, org_id, external_name, status FROM tradeops.order_party_directory WHERE journey_id = :j', { j: journeyId });
+        const records = await query('SELECT kind, record_id, status, title, detail, occurred_at, owner_org FROM tradeops.journey_records(:j, :org)', { j: journeyId, org: String(orgId) });
+        const j = rows[0];
+        const built = buildSteps({
+            journey: j,
+            records,
+            parties: people.map((p) => ({ role: p.party_role, status: p.status })),
+            me: me ? { role: me.party_role, permissions: me.permissions, documentScopes: me.document_scopes } : null,
+        });
+        return {
+            journeyId: j.id, orderId: j.order_id, reference: j.reference_no,
+            origin: j.origin_country, destination: j.destination_country, incoterm: j.incoterm,
+            myRole: me ? me.party_role : null,
+            ...built,
+        };
+    });
+}
+
+module.exports = { getSteps, openJourneyForOrder, getJourney, getJourneyByOrder, listMyJourneys, myParty, JOURNEY_COLUMNS };

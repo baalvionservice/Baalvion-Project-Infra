@@ -10,6 +10,7 @@ router.get('/_status',                                authMiddleware, ctrl.statu
 router.get('/_rules',                                 authMiddleware, ctrl.rules);
 router.get('/by_order/:orderId',                      authMiddleware, ctrl.byOrder);
 router.get('/:id',                                    authMiddleware, ctrl.one);
+router.get('/:id/steps',                              authMiddleware, ctrl.steps);
 router.get('/:id/parties',                            authMiddleware, ctrl.listParties);
 router.post('/:id/parties',                           authMiddleware, ctrl.invite);
 router.post('/:id/parties/:partyId/respond',          authMiddleware, ctrl.respond);

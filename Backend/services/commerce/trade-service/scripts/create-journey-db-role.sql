@@ -16,3 +16,4 @@ GRANT SELECT ON tradeops.order_party_directory TO baalvion_journey;
 GRANT EXECUTE ON FUNCTION tradeops.current_party_org() TO baalvion_journey;
 GRANT EXECUTE ON FUNCTION tradeops.party_can(uuid, text, text) TO baalvion_journey;
 GRANT EXECUTE ON FUNCTION tradeops.create_journey(uuid, text, text, text, text, text, text, text, text, text, text[]) TO baalvion_journey;
+GRANT EXECUTE ON FUNCTION tradeops.journey_records(uuid, text) TO baalvion_journey;

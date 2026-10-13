@@ -103,14 +103,32 @@ country.
 enforcement modes with identical answers; an end-to-end walk through the real login, the site's API
 proxy and the gateway (27 checks). Architecture contract (C1–C8) clean; existing suites unchanged.
 
+## Step 2 — built and tested (migration 090)
+`GET /v1/order_journeys/:id/steps` returns the seven steps, each with a state (done, in progress,
+waiting, blocked, not started, not applicable), a plain summary, who must act next (and whether that
+is the caller), and the linked records. The current step and overall progress are included.
+- **Records come from one database function**, `tradeops.journey_records`, which leaves out every
+  price column (declared value, booking amount, quotes, declaration, order total), returns only the
+  kinds the caller's permissions allow, filters documents to the caller's document types, and counts
+  a record only when its owner is itself an active party (a non-party cannot attach a record to
+  someone else's order). It also refuses to answer for any organisation other than the one the
+  connection is acting for.
+- **Who books transport** follows the Incoterm; **customs** is "not applicable" when origin and
+  destination are the same country; required documents are data, and a party that cannot see them all
+  is told its view is partial.
+- **Payment is not reported yet.** The delivery step says so; it does not claim settlement. It needs
+  payment events from the order service (Step 4).
+- Tested: 9 pure checks, 9 database checks as a non-superuser role (no price in any role's output, forwarder
+  and bank see different documents, planted record never appears, removed party and outsider get nothing).
+
 ## What is not done
-- The journey **read model** (the seven steps and who acts next) and the **page**: Steps 2 and 3.
+- The journey **page** (Step 3).
 - Hand-offs between steps and the order service's call to open a journey: Step 4.
 - Invitations to organisations not yet on the platform beyond tracking them as external parties.
 - The restricted database role on production, and the `customs_broker` type: need your action/decision.
 
 ## Next
-2. Journey read endpoint: the seven steps, state, next actor, linked records, filtered per party.
+2. ~~Journey read endpoint~~ built (above).
 3. Journey page in plain words, phone and iPad friendly, reusing the new dashboard building blocks.
 4. Hand-offs and the order service's call.
 5. Replace the unbacked steps (settlements, contracts, approvals) with real workflows.
