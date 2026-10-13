@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { AlertTriangle, Copy, ExternalLink, ImagePlus, X } from "lucide-react"
 import { AppButton } from "@/components/ui/AppButton"
-import { changePaymentNetwork, listPaymentMethods, type CategoryPayment, type PaymentNetworkInfo, type ProofUpload } from "@/lib/api/seller-access"
+import { changePaymentMethod, changePaymentNetwork, listPaymentMethods, type CategoryPayment, type PaymentMethod, type PaymentMethodInfo, type PaymentNetworkInfo, type ProofUpload } from "@/lib/api/seller-access"
 import { fileToProof, type ProofWithPreview } from "@/lib/image-proof"
 
 const MAX_SHOTS = 3
@@ -24,18 +24,24 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
   const fileRef = useRef<HTMLInputElement>(null)
   // The address and network belong together. Changing the network here re-issues both, and what is shown is always that pair.
   const [payTo, setPayTo] = useState(payment.payTo)
-  const [networks, setNetworks] = useState<PaymentNetworkInfo[]>([])
+  const [currency, setCurrency] = useState<PaymentMethod>(payment.currency)
+  const [methods, setMethods] = useState<PaymentMethodInfo[]>([])
+  const networks: PaymentNetworkInfo[] = methods.find((x) => x.method === "USDT")?.networks.filter((n) => n.available) ?? []
   const [switching, setSwitching] = useState<string | null>(null)
   const [netError, setNetError] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
-  useEffect(() => { setPayTo(payment.payTo); setConfirmed(false) }, [payment.id, payment.payTo?.address, payment.payTo?.network])
-  useEffect(() => {
-    if (payment.currency !== "USDT") return
-    listPaymentMethods().then((m) => setNetworks(m.find((x) => x.method === "USDT")?.networks.filter((n) => n.available) ?? [])).catch(() => setNetworks([]))
-  }, [payment.currency])
+  useEffect(() => { setPayTo(payment.payTo); setCurrency(payment.currency); setConfirmed(false) }, [payment.id, payment.currency, payment.payTo?.address, payment.payTo?.network])
+  useEffect(() => { listPaymentMethods().then(setMethods).catch(() => setMethods([])) }, [])
   const pay = payTo
   if (!pay) return null
-  const isUsdt = payment.currency === "USDT"
+  const isUsdt = currency === "USDT"
+  const chooseMethod = async (method: PaymentMethod) => {
+    if (method === currency || switching) return
+    setSwitching(method); setNetError(null)
+    try { const next = await changePaymentMethod(payment.id, method, method === "USDT" ? (networks[0]?.network ?? "TRC20") : undefined); setPayTo(next.payTo); setCurrency(next.currency); setConfirmed(false) }
+    catch (e) { setNetError(e instanceof Error ? e.message : "Could not change how you pay. Nothing was changed.") }
+    finally { setSwitching(null) }
+  }
   const chooseNetwork = async (network: string) => {
     if (network === pay.network || switching) return
     setSwitching(network); setNetError(null)
@@ -43,7 +49,7 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
     catch (e) { setNetError(e instanceof Error ? e.message : "Could not change the network. Nothing was changed.") }
     finally { setSwitching(null) }
   }
-  const isBinance = payment.currency === "BINANCE"
+  const isBinance = currency === "BINANCE"
   const usd = `$${amountUsd.toLocaleString()}`
   const wait = payment.review?.waitMinutes
 
@@ -63,10 +69,24 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
   const ready = (hash.trim().length >= 6 || shots.length > 0) && (!isUsdt || confirmed)
   return (
     <div className="space-y-4 p-4 rounded-lg bg-black/40 border border-white/10">
+      {methods.filter((m) => m.available).length > 1 && (
+        <div role="group" aria-label="Pay with" className="space-y-2">
+          <p className="text-[11px] text-gray-500 uppercase tracking-widest font-bold">Pay with</p>
+          <div className="flex flex-wrap gap-2">
+            {methods.filter((m) => m.available).map((m) => (
+              <button key={m.method} type="button" onClick={() => chooseMethod(m.method)} disabled={!!switching} aria-pressed={currency === m.method}
+                className={`px-4 h-9 rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-60 ${currency === m.method ? "bg-[#39FF14] text-black" : "bg-black border border-white/15 text-gray-300 hover:border-white/40"}`}>
+                {switching === m.method ? "Changing…" : m.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-500">Changing this changes the address or QR below. Use only what is shown after you change it.</p>
+        </div>
+      )}
       <p className="text-xs text-gray-400">
         {isBinance
           ? <>Pay <strong className="text-white">{usd}</strong> in USDT with Binance Pay. Scan this QR in the Binance app — that is the safest way, because it goes straight to the right account:</>
-          : <>Send exactly <strong className="text-white">{usd}</strong> worth of {pay.label}{pay.networkLabel && payment.currency === "USDT" ? <> on the <strong className="text-white">{pay.networkLabel}</strong> network</> : null} to:</>}
+          : <>Send exactly <strong className="text-white">{usd}</strong> worth of {pay.label}{pay.networkLabel && currency === "USDT" ? <> on the <strong className="text-white">{pay.networkLabel}</strong> network</> : null} to:</>}
       </p>
 
       {isUsdt && (

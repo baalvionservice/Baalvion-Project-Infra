@@ -128,6 +128,8 @@ export const sendAdminChatMessage = (id: string, body: string) => post<ChatMessa
 // Which ways to pay are switched on right now (no addresses: those are issued with a payment).
 export interface PaymentNetworkInfo { network: string; label: string; available: boolean }
 export interface PaymentMethodInfo { method: PaymentMethod; label: string; available: boolean; networks: PaymentNetworkInfo[] }
+// Switch how an unpaid payment is made (USDT, Bitcoin or Binance Pay); the address changes with it.
+export const changePaymentMethod = (id: string, currency: PaymentMethod, network?: string) => post<CategoryPayment>(`/seller-bonds/${id}/method`, { currency, network });
 // Switch the chain of an unpaid USDT payment; the address changes with it.
 export const changePaymentNetwork = (id: string, network: string) => post<CategoryPayment>(`/seller-bonds/${id}/network`, { network });
 export const listPaymentMethods = () => call<PaymentMethodInfo[]>('/payment-destinations/available');

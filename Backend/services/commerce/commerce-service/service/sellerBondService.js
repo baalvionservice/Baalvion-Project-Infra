@@ -119,6 +119,21 @@ async function changeNetwork(authCtx, bondId, network) {
     });
 }
 
+// While a payment is still unpaid the payer may switch how they pay (USDT, Bitcoin or Binance Pay) and, for USDT, the chain.
+// The method and the address are re-issued together and frozen again, so the payer is always told the pair the admin will check.
+async function changeMethod(authCtx, bondId, { currency, network }) {
+    return sequelize.transaction(async (t) => {
+        const bond = await CommerceSellerCategoryBond.findByPk(bondId, { transaction: t, lock: t.LOCK.UPDATE });
+        if (!bond || String(bond.sellerUserId) !== String(authCtx.userId)) throw new AppError('NOT_FOUND', 'Payment not found', 404);
+        if (bond.status !== 'awaiting_payment') throw new AppError('CONFLICT', 'How you pay can only be changed before you send the payment for review', 409);
+        const chain = currency === 'USDT' ? (network || 'TRC20') : undefined;
+        const dest = await paymentDestinations.resolve(currency, chain);
+        if (!dest) throw new AppError('UNAVAILABLE', `${paymentDestinations.METHODS[currency].label}${chain ? ` on ${chain}` : ''} is not available right now`, 503);
+        await bond.update({ currency, payToAddress: dest.address, payToNetwork: dest.network, payToLabel: dest.label }, { transaction: t });
+        return present(bond);
+    });
+}
+
 async function submitPayment(authCtx, bondId, { txHash, proofs } = {}) {
     const decoded = decodeProofs(proofs);
     const reference = txHash ? String(txHash).trim() : '';
@@ -280,4 +295,4 @@ async function assertCanSellInCategory(userId, categoryId) {
 
 const createCommunityTier = (authCtx, body) => issuePayment(authCtx, { ...body, kind: 'community_tier' });
 
-module.exports = { changeNetwork, createCommunityTier, listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };
+module.exports = { changeMethod, changeNetwork, createCommunityTier, listProofs, createWalletTopup, presentBond: present, issuePayment, createAccessPass, createBond, submitPayment, listMine, listAll, confirmPayment, rejectPayment, forfeitBond, assertCanSellInCategory, rootCategoryId };

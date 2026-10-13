@@ -3,13 +3,14 @@ const { Router } = require('express');
 const ctrl = require('../controller/sellerBondController');
 const { validate } = require('../middleware/validate');
 const { requirePlatformAdmin } = require('../middleware/commerceAccess');
-const { createBondSchema, changeNetworkSchema, submitPaymentSchema, confirmSchema, noteSchema } = require('../validators/sellerBondSchemas');
+const { createBondSchema, changeNetworkSchema, changeMethodSchema, submitPaymentSchema, confirmSchema, noteSchema } = require('../validators/sellerBondSchemas');
 
 const router = Router();
 
 // Seller side
 router.get('/mine', ctrl.mine);
 router.post('/', validate(createBondSchema), ctrl.create);
+router.post('/:id/method', validate(changeMethodSchema), ctrl.changeMethod);
 router.post('/:id/network', validate(changeNetworkSchema), ctrl.changeNetwork);
 router.post('/:id/payment', validate(submitPaymentSchema), ctrl.submitPayment);
 
