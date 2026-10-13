@@ -87,6 +87,7 @@ async function createInvitation(website, email, role, { inviterId, personalNote 
         to: normalizedEmail,
         publication: website.name,
         roleName: roleLabelOf(role),
+        roleDescription: mailer.roleDescriptionOf(role),
         inviterName,
         personalNote: personalNote || undefined,
         token: rawToken,

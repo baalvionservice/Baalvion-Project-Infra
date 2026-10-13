@@ -34,6 +34,7 @@ import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import WebsiteDashboard from '@/components/cms/dashboard/WebsiteDashboard';
+import WebsiteShopPanel, { hasShop } from '@/components/cms/WebsiteShopPanel';
 import { Separator } from '@/components/ui/separator';
 
 // The site dashboard is the first screen after choosing a website, so every label
@@ -376,6 +377,8 @@ export default function WebsiteDetailPage({
           </Badge>
         ))}
       </div>
+
+      {hasShop(website.slug) && <WebsiteShopPanel websiteSlug={website.slug} />}
 
       {/* Tools, grouped by what you're trying to do */}
       {LINK_GROUPS.map((group) => (

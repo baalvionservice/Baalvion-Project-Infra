@@ -75,15 +75,12 @@ export function AiCopilotDrawer() {
         <motion.div 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="fixed bottom-8 right-8 z-50 flex flex-col items-center gap-4"
+          className="fixed bottom-4 right-4 z-50 flex flex-col items-center gap-4 pb-[env(safe-area-inset-bottom)] sm:bottom-8 sm:right-8"
         >
-          <div className="hidden xl:flex items-center gap-2 px-4 py-2 bg-slate-900 border border-white/10 rounded-full shadow-2xl opacity-60">
-             <Command className="h-3 w-3 text-slate-500" />
-             <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">K to search</span>
-          </div>
           <Button 
             onClick={() => setIsOpen(true)}
-            className="h-12 w-16 rounded-full bg-primary shadow-2xl hover:scale-110 transition-transform group border-4 border-white/5"
+            className="h-14 w-14 rounded-full bg-primary p-0 shadow-xl transition-transform hover:scale-105 group"
+            aria-label="Open the assistant"
           >
             <Bot className="h-7 w-7 text-white group-hover:animate-pulse" />
           </Button>
@@ -115,8 +112,8 @@ export function AiCopilotDrawer() {
                     <BrainCircuit className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black uppercase tracking-widest leading-none">Sovereign Oracle</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1 opacity-60 italic">AI Strategy Engine v4.2</p>
+                    <h3 className="text-base font-semibold leading-none">Assistant</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Ask about your orders, payments and shipments.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -1,10 +1,14 @@
 /**
  * @file dashboard-shell.tsx
- * @description THE SUPREME DASHBOARD ORCHESTRATOR (client half).
- * Integrates the resizable workspace engine and global navigation.
- * Split out of layout.tsx so the route segment config (`dynamic = 'force-dynamic'`)
- * can live in a Server Component — Next.js does not allow route segment config
- * exports from a 'use client' module.
+ * @description The frame around every signed-in page: navigation, top bar and content area.
+ * Split out of layout.tsx so the route segment config (`dynamic = 'force-dynamic'`) can live in a
+ * Server Component — Next.js does not allow route segment config exports from a 'use client' module.
+ *
+ * Layout by screen width (the same rules phones, iPads and desktops all follow):
+ *   under 1024px  one column, full width. Navigation opens from the menu button in the top bar with
+ *                 full labels (phones and iPad portrait), so nobody has to guess what an icon means
+ *   1024px and up the full navigation beside the content (iPad landscape, laptops, desktops), which
+ *                 the user may collapse to a slim icon rail
  */
 'use client';
 
@@ -27,26 +31,29 @@ export function DashboardShell({
 
   return (
     <TradeQueryProvider>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
       <div
         className={cn(
-          "min-h-screen w-full bg-background grid transition-all duration-500",
-          sidebarCollapsed ? "grid-cols-[80px_1fr]" : "grid-cols-[280px_1fr]"
+          // min-h-dvh follows the visible height on phones, where the browser toolbar grows and shrinks.
+          "min-h-dvh w-full bg-background grid grid-cols-1 transition-[grid-template-columns] duration-300",
+          sidebarCollapsed ? "lg:grid-cols-[80px_1fr]" : "lg:grid-cols-[280px_1fr]"
         )}
       >
-        {/* 1. PRIMARY NAVIGATION RAIL */}
+        {/* Navigation beside the content from 1024px up; below that it opens from the top bar. */}
         <DashboardSidebar collapsed={sidebarCollapsed} />
 
-        {/* 2. OPERATIONAL WORKSPACE (COMMAND PLANE) */}
-        <div className="flex flex-col min-w-0 overflow-hidden bg-background relative">
+        <div className="relative flex min-h-dvh min-w-0 flex-col bg-background">
           <DashboardHeader />
-
-          {/* THE TACTICAL SHELL: Resizable panes & tabs */}
           <WorkspaceShell>
              {children}
           </WorkspaceShell>
         </div>
 
-        {/* OVERLAYS & COGNITIVE CLUSTERS */}
         <AiCopilotDrawer />
         <RealtimeProvider />
       </div>

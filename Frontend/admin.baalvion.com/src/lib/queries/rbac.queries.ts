@@ -69,7 +69,9 @@ export const useAssignRbacRole = () => {
     onSuccess: (_res, payload) => {
       qc.invalidateQueries({ queryKey: rbacKeys.assignmentsByScope(payload.scopeId) });
       qc.invalidateQueries({ queryKey: rbacKeys.all });
-      toast.success('Role assigned');
+      // Saying this out loud matters: assigning a role records the permission and sends NO email,
+      // so people otherwise wait for a message that was never going to arrive.
+      toast.success('Role assigned. No email is sent automatically. Tell them to sign in at admin.baalvion.com (they can use "Forgot password?" if needed).', { duration: 12000 });
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

@@ -25,7 +25,7 @@ export function WorkspaceTabs() {
   if (tabs.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1 h-12 bg-muted/30 border-b px-4 overflow-hidden overflow-x-auto no-scrollbar scroll-smooth shrink-0">
+    <div className="hidden md:flex items-center gap-1 h-12 bg-muted/30 border-b px-4 overflow-hidden overflow-x-auto no-scrollbar scroll-smooth shrink-0">
       <AnimatePresence initial={false}>
         {tabs.map((tab) => {
           const isActive = tab.path === pathname;
@@ -44,7 +44,7 @@ export function WorkspaceTabs() {
               onClick={() => handleTabClick(tab)}
             >
               <span className={cn(
-                "text-[10px] font-black uppercase tracking-tight truncate flex-1",
+                "text-xs font-medium truncate flex-1",
                 isActive ? "text-primary" : ""
               )}>
                 {tab.title}
@@ -54,9 +54,10 @@ export function WorkspaceTabs() {
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-5 w-5 rounded-md p-0 opacity-0 group-hover:opacity-100 transition-opacity ml-2",
+                  "h-7 w-7 rounded-md p-0 ml-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity",
                   isActive ? "text-primary/40 hover:text-red-500 hover:bg-red-50" : "text-muted-foreground/40 hover:bg-black/5"
                 )}
+                aria-label={`Close ${tab.title}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   removeTab(tab.id);

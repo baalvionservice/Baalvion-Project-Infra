@@ -120,9 +120,15 @@ export const useGrantSiteAccess = () => {
 
       const parts: string[] = [];
       if (res.granted.length) parts.push(`${res.granted.length} site${res.granted.length > 1 ? 's' : ''} granted`);
-      if (res.invited.length) parts.push(`${res.invited.length} invite${res.invited.length > 1 ? 's' : ''} sent`);
+      if (res.invited.length) parts.push(`${res.invited.length} invite${res.invited.length > 1 ? 's' : ''} created`);
 
       if (parts.length) toast.success(parts.join(' · '));
+
+      // Say plainly whether the person was actually emailed, so nobody assumes a mail that never left.
+      const emailed = res.invited.some((i) => i.emailSent) || res.granted.some((g) => g.notified);
+      const unsent = res.invited.some((i) => !i.emailSent) || (res.granted.length > 0 && !res.granted.some((g) => g.notified));
+      if (emailed && !unsent) toast.success('They have been emailed.');
+      else if (unsent) toast.warning('Access is set, but the email could not be sent. Ask them to sign in at admin.baalvion.com.');
 
       // Never swallow a partial failure — the admin needs to know which sites didn't take.
       if (res.skipped.length) {

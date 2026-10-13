@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -191,15 +191,47 @@ function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
   );
 }
 
+// Tracks the lg breakpoint (1024px). Below it the sidebar is an off-canvas drawer.
+function useIsDesktop() {
+  const [desktop, setDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const update = () => setDesktop(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return desktop;
+}
+
 export default function Sidebar() {
-  const { sidebarCollapsed } = useUIStore();
+  const { sidebarCollapsed: storedCollapsed, mobileNavOpen, setMobileNavOpen } = useUIStore();
+  const isDesktop = useIsDesktop();
+  const pathname = usePathname();
+  // The drawer always shows full labels; icon-only mode is a desktop feature.
+  const sidebarCollapsed = storedCollapsed && isDesktop;
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname, setMobileNavOpen]);
+
   return (
-    <aside
-      className={cn(
-        'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
-        sidebarCollapsed ? 'w-[60px]' : 'w-64',
+    <>
+      {mobileNavOpen && !isDesktop && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
       )}
-    >
+      <aside
+        className={cn(
+          'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
+          'fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] lg:static lg:z-auto lg:max-w-none',
+          mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          sidebarCollapsed ? 'lg:w-[60px]' : 'lg:w-64',
+        )}
+      >
       {/* Logo */}
       <div
         className={cn(
@@ -236,6 +268,7 @@ export default function Sidebar() {
           })}
         </nav>
       </ScrollArea>
-    </aside>
+      </aside>
+    </>
   );
 }

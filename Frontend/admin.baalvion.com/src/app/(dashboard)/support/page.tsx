@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUIStore } from '@/lib/store/uiStore';
 import { supportApi } from '@/lib/api/support';
+import CreateDialog from '@/components/common/CreateDialog';
 import { formatRelative, formatDateTime } from '@/lib/utils/format';
 import type {
   SupportTicket, TicketMessage, TicketStatus, TicketPriority,
@@ -360,6 +361,7 @@ export default function SupportPage() {
 // ── Macros panel ──────────────────────────────────────────────────────────────
 
 function MacrosPanel() {
+  const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ['support-macros'],
     queryFn: () => supportApi.listMacros().then((r) => r.data.data),
@@ -373,7 +375,22 @@ function MacrosPanel() {
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Tag className="h-4 w-4" /> Canned Replies & Macros
           </CardTitle>
-          <Button size="sm" variant="outline" className="text-xs gap-1.5">New Macro</Button>
+          <CreateDialog
+            trigger="New Macro"
+            triggerProps={{ size: 'sm', variant: 'outline', className: 'text-xs gap-1.5' }}
+            title="New canned reply"
+            description="A reusable reply agents can insert into any ticket."
+            successMessage="Macro created"
+            fields={[
+              { name: 'name', label: 'Name', required: true, placeholder: 'Refund policy', maxLength: 120 },
+              { name: 'category', label: 'Category', placeholder: 'billing', maxLength: 60, help: 'Optional. Groups macros in the picker.' },
+              { name: 'body', label: 'Reply text', type: 'textarea', required: true, maxLength: 4000 },
+            ]}
+            onSubmit={async (v) => {
+              await supportApi.createMacro({ name: v.name, category: v.category || 'general', body: v.body });
+              await qc.invalidateQueries({ queryKey: ['support-macros'] });
+            }}
+          />
         </div>
         <CardDescription>Reusable reply templates for common support scenarios</CardDescription>
       </CardHeader>

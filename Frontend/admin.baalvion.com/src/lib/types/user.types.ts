@@ -5,7 +5,7 @@ export interface AdminUser {
   email: string;
   fullName: string;
   avatarUrl: string | null;
-  status: 'active' | 'suspended' | 'pending';
+  status: 'active' | 'suspended' | 'pending' | 'deleted';
   emailVerifiedAt: string | null;
   mfaEnabled: boolean;
   role: UserRole;
@@ -46,4 +46,14 @@ export interface UpdateUserPayload {
 export interface SuspendUserPayload {
   reason: string;
   duration?: number;
+}
+
+/** Someone removed from the panel — soft-deleted, history kept, restorable. */
+export interface RemovedUser {
+  id: number;
+  email: string;
+  fullName: string;
+  removedAt: string | null;
+  removedBy: string | null;
+  reason: string | null;
 }

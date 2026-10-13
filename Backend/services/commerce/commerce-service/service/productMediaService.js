@@ -100,9 +100,11 @@ async function removeObjectByUrl(url) {
 
 /** Public URL for the decrypt-and-stream route (encrypted images are never served as a static
  *  object URL — see controller/mediaServeController.js). */
-function mediaServeUrl(mediaId) {
-    // Route lives in routes/v1.js (mounted at /api/v1 by index.js), NOT under the /uploads static
-    // mount PUBLIC_BASE-relative URLs normally point at — full path must be spelled out.
+function mediaServeUrl(mediaId, storeId) {
+    // Preferred: the public STOREFRONT media route. The edge already exposes /commerce/storefront/*
+    // to anonymous visitors, so product photos load on the live site without any extra proxy rule.
+    // Legacy `/commerce/media/:id/raw` stays for rows created before this change.
+    if (storeId) return `${PUBLIC_BASE}/api/v1/commerce/storefront/${storeId}/media/${mediaId}`;
     return `${PUBLIC_BASE}/api/v1/commerce/media/${mediaId}/raw`;
 }
 
@@ -165,7 +167,7 @@ async function uploadMedia(storeId, productId, { filePart, mediaType = 'image', 
     if (mediaType === 'image') {
         const sealed = encryption.encrypt(filePart.data);
         await putObject(key, sealed.ciphertext, mime);
-        url = mediaServeUrl(mediaId);
+        url = mediaServeUrl(mediaId, storeId);
         encryptionMeta = { encryptionAlgo: sealed.algo, encryptionKeyId: sealed.keyId, encryptionIv: sealed.iv, encryptionTag: sealed.tag };
     } else {
         url = await putObject(key, filePart.data, mime);
@@ -271,7 +273,7 @@ async function replaceMedia(storeId, productId, mediaId, { filePart, mediaType }
     if (type === 'image') {
         const sealed = encryption.encrypt(filePart.data);
         await putObject(key, sealed.ciphertext, mime);
-        url = mediaServeUrl(mediaId); // same route, ciphertext swapped underneath — url is unchanged
+        url = mediaServeUrl(mediaId, storeId); // same route, ciphertext swapped underneath — url is unchanged
         encryptionMeta = { encryptionAlgo: sealed.algo, encryptionKeyId: sealed.keyId, encryptionIv: sealed.iv, encryptionTag: sealed.tag };
     } else {
         url = await putObject(key, filePart.data, mime);
@@ -335,8 +337,28 @@ async function getMediaForServe(mediaId) {
     return { buffer, contentType: media.mimeType || 'application/octet-stream' };
 }
 
+/**
+ * Public read for the storefront route. The media must belong to a product in THIS store; the
+ * unguessable media id (UUIDv4) is the capability, exactly as before. A missing file on disk is a
+ * 404 for the visitor (and a log line for us), never a 500.
+ */
+async function getPublicMediaForServe(storeId, mediaId) {
+    const media = await CommerceProductMedia.findByPk(mediaId);
+    if (!media || !media.storageKey) throw new AppError('NOT_FOUND', 'Media not found', 404);
+    const owner = await CommerceProduct.findOne({ where: { id: media.productId, storeId }, attributes: ['id'] });
+    if (!owner) throw new AppError('NOT_FOUND', 'Media not found', 404);
+    let raw;
+    try { raw = await getObject(media.storageKey); }
+    catch (err) {
+        if (err && (err.code === 'ENOENT' || err.code === 'NoSuchKey' || err.statusCode === 404)) throw new AppError('NOT_FOUND', 'Media not found', 404);
+        throw err;
+    }
+    const buffer = encryption.decrypt({ ciphertext: raw, algo: media.encryptionAlgo, iv: media.encryptionIv, tag: media.encryptionTag });
+    return { buffer, contentType: media.mimeType || 'application/octet-stream' };
+}
+
 module.exports = {
     listMedia, uploadMedia, updateMedia, setFeatured, reorderMedia, replaceMedia, deleteMedia,
-    getMediaForServe,
+    getMediaForServe, getPublicMediaForServe,
     UPLOAD_DIR, DRIVER,
 };

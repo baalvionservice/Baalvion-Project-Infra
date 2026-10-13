@@ -73,6 +73,7 @@ router.get('/cms/integrations/summary', authMiddleware, integrationController.su
 router.use('/cms/invitations', invitationRoutes);
 
 // All CMS management APIs require auth
+router.use('/cms/access-requests', authMiddleware, require('./accessRequestRoutes'));
 router.use('/cms/websites', authMiddleware, websiteRoutes);
 
 // Media library (org-scoped, global across the org's websites)

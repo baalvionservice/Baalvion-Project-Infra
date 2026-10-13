@@ -17,9 +17,14 @@ router.get('/stats', ctrl.getPlatformStats);
 
 // User management
 router.get('/users',                   ctrl.listUsers);
+// Literal path declared BEFORE /users/:userId so "removed" is never read as a user id.
+router.get('/users/removed',           ctrl.listRemovedUsers);
 router.get('/users/:userId',           ctrl.getUserDetail);
 router.patch('/users/:userId',         ctrl.updateUser);
 router.delete('/users/:userId',        superAdminOnly, ctrl.deleteUser);
+// POST twin of DELETE so a removal reason can travel in a body that proxies never strip.
+router.post('/users/:userId/remove',   superAdminOnly, ctrl.deleteUser);
+router.post('/users/:userId/restore',  superAdminOnly, ctrl.restoreUser);
 // Org-role change. Rank guards (cannot grant above your own, cannot change your own,
 // cannot remove the last super_admin) are enforced in the service.
 router.patch('/users/:userId/role',    ctrl.changeUserRole);

@@ -62,6 +62,8 @@ interface AppState {
    *  route guard waits on this to avoid flashing privileged content or wrongly redirecting. */
   authResolved: boolean;
   userId: string;
+  /** The signed-in person's real name (falls back to their email); empty until known. */
+  displayName: string;
   tenantId: string;
   isAuthenticated: boolean;
   setRole: (role: UserRole) => void;
@@ -98,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [membershipRole, setMembershipRole] = useState<MembershipRole>(MEMBERSHIP_ROLES.VIEWER);
   const [authResolved, setAuthResolved] = useState(false);
   const [userId, setUserId] = useState('USR-101');
+  const [displayName, setDisplayName] = useState('');
   const [tenantId, setTenantId] = useState('T-101');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -154,6 +157,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // (highest-ranked wins) — never roles[0].
           const resolved = resolveTradeAuthority(me.roles, me.businesses);
           setUserId(String(me.userId ?? me.id ?? 'USR-101'));
+          const who = me as { fullName?: string; name?: string; email?: string };
+          setDisplayName(String(who.fullName ?? who.name ?? who.email ?? ''));
           if (me.orgId) setTenantId(String(me.orgId));
           setAuthorityRole(resolved);
           setEffectiveRole(resolved);
@@ -212,6 +217,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Invalidate any cached session org so service modules resolve THIS account's tenant.
     clearSessionOrgCache();
     setUserId(session.userId || email);
+    setDisplayName(String((session.user as { fullName?: string; email?: string } | undefined)?.fullName ?? (session.user as { email?: string } | undefined)?.email ?? email));
     setTenantId(session.orgId ? String(session.orgId) : 'T-DEMO');
     // Same rule as the rehydration path above: an explicit console grant wins, the org role
     // is the fallback. Both call sites must agree, or a grant would only take effect after a
@@ -240,6 +246,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearSessionOrgCache();
     setIsAuthenticated(false);
     setUserId('USR-101');
+    setDisplayName('');
     setTenantId('T-101');
     // Reset to the least-privilege baseline — never leave a privileged role in memory after logout.
     setAuthorityRole(USER_ROLES.MEMBER);
@@ -274,6 +281,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     authz,
     authResolved,
     userId,
+    displayName,
     tenantId,
     isAuthenticated,
     setRole,
@@ -305,7 +313,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [role, authorityRole, orgType, membershipRole, isPlatformAdmin, authResolved, userId, tenantId, isAuthenticated, isDemoMode, activeScenario, isTourActive, currentTourStep]);
+  }), [role, authorityRole, orgType, membershipRole, isPlatformAdmin, authResolved, userId, displayName, tenantId, isAuthenticated, isDemoMode, activeScenario, isTourActive, currentTourStep]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

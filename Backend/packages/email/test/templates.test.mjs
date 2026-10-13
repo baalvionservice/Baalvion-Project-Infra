@@ -58,3 +58,34 @@ test('contributorInvitation renders accept link and escapes the note', () => {
     assert.ok(!r.html.includes('<script>x'));
     assert.ok(templates.categoryOf('contributorInvitation'));
 });
+
+test('invitation emails use the premium layout; other emails keep the standard one', () => {
+    const inv = templates.render('contributorInvitation', { publication: 'Amarisé', roleName: 'Editor', inviterName: 'Tushar', email: 'a@b.com', acceptUrl: 'https://admin.baalvion.com/invite/t', expiresHours: 72 }, ctx);
+    assert.match(inv.html, /Trade &middot; Commerce &middot; Intelligence/);
+    assert.match(inv.subject, /Tushar has invited you to Amarisé/);
+    assert.match(inv.text, /https:\/\/admin\.baalvion\.com\/invite\/t/);
+    const otp = templates.render('otp', { code: '123456', expiresMinutes: 5 }, ctx);
+    assert.ok(!otp.html.includes('Trade &middot; Commerce'), 'OTP must not pick up the premium shell');
+});
+
+test('invitation escapes injected markup in every user-supplied field', () => {
+    const evil = '<img src=x onerror=alert(1)>';
+    const r = templates.render('contributorInvitation', { publication: evil, roleName: evil, inviterName: evil, personalNote: evil, email: evil, acceptUrl: 'https://x/y', expiresHours: 72 }, ctx);
+    assert.ok(!r.html.includes(evil));
+    assert.match(r.html, /&lt;img src=x onerror=alert\(1\)&gt;/);
+});
+
+test('siteAccessGranted names one site, or counts several', () => {
+    const one = templates.render('siteAccessGranted', { sites: [{ name: 'Amarisé', url: 'https://admin.baalvion.com/cms/websites/amarise' }], roleName: 'Editor', inviterName: 'Tushar' }, ctx);
+    assert.equal(one.subject, 'You now have access to Amarisé');
+    assert.match(one.html, /Open Amarisé/);
+    const many = templates.render('siteAccessGranted', { sites: [{ name: 'A', url: 'https://x/a' }, { name: 'B', url: 'https://x/b' }], roleName: 'Writer' }, ctx);
+    assert.equal(many.subject, 'You now have access to 2 Baalvion sites');
+    assert.match(many.text, /A: https:\/\/x\/a/);
+    assert.equal(templates.categoryOf('siteAccessGranted'), 'notifications');
+});
+
+test('siteAccessGranted tolerates missing optional data', () => {
+    const r = templates.render('siteAccessGranted', {}, ctx);
+    assert.ok(r.html.length > 0 && r.subject.length > 0);
+});

@@ -25,6 +25,19 @@ function emailService() {
     return _emailService;
 }
 
+const ROLE_DESCRIPTIONS = {
+    cms_admin: 'Full control of the site: people, settings, publishing and deletion.',
+    cms_editor: 'Create, edit and publish all content on the site.',
+    cms_publisher: 'Publish and unpublish approved content.',
+    cms_reviewer: 'Review and approve submitted content.',
+    cms_compliance: 'Compliance review and sign-off before anything goes live.',
+    cms_seo_manager: 'Manage SEO metadata, sitemaps and redirects.',
+    cms_author: 'Write, edit and publish your own content on the site.',
+    cms_contributor: 'Draft content for review. An editor publishes it.',
+    cms_viewer: 'Read-only access to the site.',
+};
+const roleDescriptionOf = (role) => ROLE_DESCRIPTIONS[role] || '';
+
 /** Base URL of the admin console (where /invite/:token lives). */
 function adminUrl() {
     return emailConfig().adminUrl;
@@ -35,7 +48,7 @@ function adminUrl() {
  * Never throws — a mail failure must not fail the invite/member-add request.
  */
 async function sendContributorInvitation({
-    to, publication, roleName, inviterName, personalNote, token, expiresHours,
+    to, publication, roleName, roleDescription, inviterName, personalNote, token, expiresHours,
 }) {
     if (!to) return { sent: false };
     const acceptUrl = `${adminUrl()}/invite/${encodeURIComponent(token)}`;
@@ -50,6 +63,7 @@ async function sendContributorInvitation({
             data: {
                 publication,
                 roleName,
+                roleDescription,
                 inviterName,
                 personalNote,
                 acceptUrl,
@@ -62,6 +76,33 @@ async function sendContributorInvitation({
         return { sent: false, error: res.error };
     } catch (err) {
         log.error({ err: err.message, to }, '[mailer] contributor invitation send failed');
+        return { sent: false, error: err.message };
+    }
+}
+
+/**
+ * "You now have access" email for someone who ALREADY has an account (so there is no invite link
+ * to accept). `sites` is [{ name, slug }]; one email covers a multi-site grant. Never throws.
+ */
+async function sendSiteAccessGranted({ to, sites, roleName, roleDescription, inviterName, personalNote, expiresAt }) {
+    if (!to || !Array.isArray(sites) || sites.length === 0) return { sent: false };
+    const base = adminUrl();
+    const withUrls = sites.map((s) => ({ name: s.name, url: `${base}/cms/websites/${encodeURIComponent(s.slug)}` }));
+    try {
+        if (!sesEnabled()) {
+            log.info({ to, sites: withUrls.map((s) => s.name) }, '[mailer] SES not configured — access email logged, not sent');
+            return { sent: false, logged: true };
+        }
+        const res = await emailService().send({
+            to,
+            template: 'siteAccessGranted',
+            data: { sites: withUrls, roleName, roleDescription, inviterName, personalNote, expiresAt },
+        });
+        if (res.status === 'sent') return { sent: true, messageId: res.messageId };
+        log.warn({ to, status: res.status, error: res.error }, '[mailer] access-granted email not sent');
+        return { sent: false, error: res.error };
+    } catch (err) {
+        log.error({ err: err.message, to }, '[mailer] access-granted email failed');
         return { sent: false, error: err.message };
     }
 }
@@ -115,4 +156,4 @@ async function sendAuthorContactMessage({ authorSlug, authorName, fromName, from
     }
 }
 
-module.exports = { sendContributorInvitation, sendAuthorContactMessage };
+module.exports = { sendContributorInvitation, sendSiteAccessGranted, sendAuthorContactMessage, roleDescriptionOf };
