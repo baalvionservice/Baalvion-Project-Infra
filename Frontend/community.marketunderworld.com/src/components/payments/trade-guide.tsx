@@ -6,7 +6,7 @@ import { CheckCircle2, Circle } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import type { Intermediary } from "@/lib/api/intermediaries"
 
-interface Rate { ok: boolean; usd?: number; inr?: number | null; aed?: number | null; at?: string }
+interface Rate { ok: boolean; usd?: number; inr?: number | null; aed?: number | null; at?: string; source?: string; exact?: boolean }
 const OPEN_TRADES = 5
 const fmt = (n: number, cur: string) => new Intl.NumberFormat(cur === "INR" ? "en-IN" : "en-US", { style: "currency", currency: cur, maximumFractionDigits: cur === "USD" ? 2 : 0 }).format(n)
 
@@ -58,7 +58,7 @@ export function TradeGuide({ item }: { item: Intermediary }) {
           </dl>
         )}
         {overLimit && <p role="alert" className="text-sm text-red-300">This intermediary takes trades up to ${limit!.toLocaleString()}. Lower the amount or choose another intermediary.</p>}
-        <p className="text-[11px] text-zinc-500 leading-snug">A guide only{rate?.ok && rate.at ? `, price from CoinGecko at ${new Date(rate.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}. The exact price and fee are agreed with the intermediary in the trade chat, <strong className="text-zinc-300">before you pay</strong>. Never pay before you have agreed the amount.</p>
+        <p className="text-[11px] text-zinc-500 leading-snug">A guide only{rate?.ok && rate.at ? `, price from ${rate.source} at ${new Date(rate.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}${rate.exact === false ? " (a general exchange rate, not the USDT market price)" : ""}` : ""}. The exact price and fee are agreed with the intermediary in the trade chat, <strong className="text-zinc-300">before you pay</strong>. Never pay before you have agreed the amount.</p>
       </div>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-3">
