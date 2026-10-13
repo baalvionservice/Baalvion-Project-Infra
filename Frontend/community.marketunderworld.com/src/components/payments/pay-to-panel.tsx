@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import QRCode from "qrcode"
 import { AlertTriangle, Copy, ExternalLink, ImagePlus, X } from "lucide-react"
 import { AppButton } from "@/components/ui/AppButton"
 import { changePaymentMethod, changePaymentNetwork, listPaymentMethods, type CategoryPayment, type PaymentMethod, type PaymentMethodInfo, type PaymentNetworkInfo, type ProofUpload } from "@/lib/api/seller-access"
@@ -33,6 +34,15 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
   useEffect(() => { setPayTo(payment.payTo); setCurrency(payment.currency); setConfirmed(false) }, [payment.id, payment.currency, payment.payTo?.address, payment.payTo?.network])
   useEffect(() => { listPaymentMethods().then(setMethods).catch(() => setMethods([])) }, [])
   const pay = payTo
+  // A scannable picture of the address: the photo the admin uploaded for it if there is one, otherwise a code made from the address itself.
+  const [qr, setQr] = useState<string | null>(null)
+  useEffect(() => {
+    let live = true
+    const addr = pay?.address
+    if (!addr || currency === "BINANCE") { setQr(null); return }
+    QRCode.toDataURL(addr, { margin: 1, width: 280, errorCorrectionLevel: "M" }).then((u) => { if (live) setQr(u) }).catch(() => { if (live) setQr(null) })
+    return () => { live = false }
+  }, [pay?.address, currency])
   if (!pay) return null
   const isUsdt = currency === "USDT"
   const chooseMethod = async (method: PaymentMethod) => {
@@ -122,6 +132,13 @@ export function PayToPanel({ payment, amountUsd, busy, onSubmit }: {
       {isBinance && pay.address && (
         <p className="text-[11px] text-gray-400">Binance ID (UID) for this account: <code className="text-emerald-400 select-all">{pay.address}</code>
           {pay.recipient ? <> — the name Binance shows must be <strong className="text-white">{pay.recipient}</strong>. If it is a different name, stop and use the QR.</> : null}</p>
+      )}
+      {!isBinance && pay.address && (pay.qrImageUrl || qr) && (
+        <figure className="mx-auto w-fit space-y-2 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={pay.qrImageUrl || qr!} alt={`QR code of the ${pay.label}${pay.networkLabel ? ` ${pay.networkLabel}` : ""} address`} className="mx-auto w-52 h-52 sm:w-60 sm:h-60 rounded-lg bg-white p-2" />
+          <figcaption className="text-[11px] text-gray-400">Scan with your wallet to fill in the address. <strong className="text-white">{pay.label}{pay.networkLabel && currency === "USDT" ? ` · ${pay.networkLabel}` : ""}</strong></figcaption>
+        </figure>
       )}
       {!isBinance && pay.address && (
         <div className="flex items-center gap-2">
