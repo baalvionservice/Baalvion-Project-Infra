@@ -10,7 +10,7 @@ import { GiftCardTile } from "@/components/giftcards/giftcard-tile";
 import { GiftCardCheckoutModal } from "@/components/giftcards/giftcard-checkout-modal";
 import { getCatalog, type GiftCardBrand } from "@/lib/api/giftcards";
 import { cn } from "@/lib/utils";
-import { DIGITAL_GOODS, type DigitalGood } from "@/data/digital-goods";
+import { getStorefrontProducts, getStorefrontCategories, type StorefrontProduct, type StorefrontCategory } from "@/lib/api/commerce";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { Breadcrumbs } from "@/components/ui/breadcrumb";
@@ -25,16 +25,9 @@ const COUNTRIES = [
   { code: "IN", label: "India" },
 ];
 
-const DIGITAL_ICONS: Record<string, any> = {
-  BookOpen,
-  Key,
-  Terminal,
-  UserSquare,
-  RefreshCw
-};
 
 export default function MarketplacePage() {
-  const [activeTab, setActiveTab] = useState<"indie" | "giftcards">("indie");
+  const [activeTab, setActiveTab] = useState<"store" | "giftcards">("store");
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
 
@@ -46,11 +39,20 @@ export default function MarketplacePage() {
   const [selectedBrand, setSelectedBrand] = useState<GiftCardBrand | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Digital Goods State
-  const [indieCategory, setIndieCategory] = useState<string>("All");
+  // Store listings: everything published by admin and approved sellers
+  const [products, setProducts] = useState<StorefrontProduct[]>([]);
+  const [storeCategories, setStoreCategories] = useState<StorefrontCategory[]>([]);
+  const [storeLoading, setStoreLoading] = useState(true);
+  const [storeCategory, setStoreCategory] = useState<string>("All");
 
   const { addItem } = useCart();
   const { toast } = useToast();
+
+  useEffect(() => {
+    Promise.all([getStorefrontProducts(undefined, { limit: 100 }), getStorefrontCategories().catch(() => [])])
+      .then(([items, cats]) => { setProducts(items); setStoreCategories(cats); })
+      .finally(() => setStoreLoading(false));
+  }, []);
 
   useEffect(() => {
     if (activeTab === "giftcards") {
@@ -68,10 +70,10 @@ export default function MarketplacePage() {
     return brands.filter((b) => b.name.toLowerCase().includes(q));
   }, [brands, search]);
 
-  const filteredDigitalGoods = useMemo(() => {
-    if (indieCategory === "All") return DIGITAL_GOODS;
-    return DIGITAL_GOODS.filter(g => g.category === indieCategory);
-  }, [indieCategory]);
+  const filteredProducts = useMemo(() => {
+    if (storeCategory === "All") return products;
+    return products.filter((p) => p.categoryId === storeCategory);
+  }, [products, storeCategory]);
 
   const handleApplyPromo = () => {
     if (promoCode.trim().length >= 3) {
@@ -97,7 +99,7 @@ export default function MarketplacePage() {
             The Underground <span className="text-fuchsia-400">Storefront.</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl font-medium">
-            Purchase indie products, methods, personal info keys, or real-world gift cards for 7 countries — fully automated and crypto-native.
+            Products from verified sellers, plus gift cards for 7 countries. Listings appear here as soon as they are approved.
           </p>
 
           <div className="flex flex-wrap gap-4 pt-2">
@@ -137,13 +139,13 @@ export default function MarketplacePage() {
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/10 pb-4 overflow-x-auto no-scrollbar">
           <button
-            onClick={() => setActiveTab("indie")}
+            onClick={() => setActiveTab("store")}
             className={cn(
               "px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all whitespace-nowrap",
-              activeTab === "indie" ? "bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20" : "text-gray-400 hover:text-white"
+              activeTab === "store" ? "bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20" : "text-gray-400 hover:text-white"
             )}
           >
-            Indie Store (Methods & Keys)
+            Store
           </button>
           <button
             onClick={() => setActiveTab("giftcards")}
@@ -194,99 +196,75 @@ export default function MarketplacePage() {
 
         {/* Content */}
         <AnimatePresence mode="wait">
-          {activeTab === "indie" && (
+          {activeTab === "store" && (
             <motion.div
-              key="indie"
+              key="store"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              {/* Indie Category Filter */}
               <div className="flex flex-wrap gap-2 mb-8">
-                {["All", "Methods", "Tutorials Keys", "Application Working Keys", "Personal Information Keys"].map(cat => (
+                {[{ id: "All", name: "All" }, ...storeCategories.filter((c) => products.some((p) => p.categoryId === c.id)).map((c) => ({ id: c.id, name: c.name }))].map((cat) => (
                   <button
-                    key={cat}
-                    onClick={() => setIndieCategory(cat)}
+                    key={cat.id}
+                    onClick={() => setStoreCategory(cat.id)}
                     className={cn(
                       "px-4 py-2 rounded-lg text-xs font-bold transition-all border",
-                      indieCategory === cat ? "bg-white/10 border-white/20 text-white" : "bg-transparent border-transparent text-gray-500 hover:text-gray-300"
+                      storeCategory === cat.id ? "bg-white/10 border-white/20 text-white" : "bg-transparent border-transparent text-gray-500 hover:text-gray-300"
                     )}
                   >
-                    {cat}
+                    {cat.name}
                   </button>
                 ))}
               </div>
 
-              <div className="space-y-16">
-                {["Methods", "Tutorials Keys", "Application Working Keys", "Personal Information Keys"]
-                  .filter(cat => indieCategory === "All" || indieCategory === cat)
-                  .map(categoryName => {
-                    const goodsInCategory = filteredDigitalGoods.filter(g => g.category === categoryName);
-                    if (goodsInCategory.length === 0) return null;
-
+              {storeLoading ? (
+                <div className="py-24 text-center text-gray-500">Loading listings…</div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="py-24 text-center text-gray-500">No listings here yet. New listings appear as soon as they are approved.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredProducts.map((p) => {
+                    const unit = Number(p.price ?? p.basePrice)
+                    const finalPrice = promoApplied ? (unit * 0.85).toFixed(2) : unit.toFixed(2)
+                    const href = `/shop/${p.categoryId}/${p.slug}`
                     return (
-                      <div key={categoryName} className="space-y-6">
-                        <div className="flex items-center gap-4">
-                          <h2 className="text-2xl font-black">{categoryName}</h2>
-                          <div className="h-[1px] flex-1 bg-white/10"></div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          {goodsInCategory.map(good => {
-                            const Icon = DIGITAL_ICONS[good.imageIcon] || ShieldCheck;
-                            const finalPrice = promoApplied ? (good.priceUsd * 0.85).toFixed(2) : good.priceUsd;
-                            return (
-                              <div key={good.id} className="group relative flex flex-col bg-white/[0.02] border border-white/10 hover:border-fuchsia-500/30 rounded-3xl p-6 transition-colors overflow-hidden">
-                                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                                  <Icon className="w-24 h-24" />
-                                </div>
-                                <div className="w-12 h-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center mb-6">
-                                  <Icon className="w-6 h-6 text-fuchsia-400" />
-                                </div>
-                                <h3 className="font-bold text-lg mb-2 group-hover:text-fuchsia-400 transition-colors">{good.title}</h3>
-                                <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3">{good.description}</p>
-                                
-                                <div className="flex items-end justify-between mt-auto">
-                                  <div>
-                                    <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Price</div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="font-black text-2xl">${finalPrice}</div>
-                                      {promoApplied && <div className="text-sm text-gray-500 line-through">${good.priceUsd}</div>}
-                                    </div>
-                                  </div>
-                                  <button 
-                                    onClick={() => {
-                                      addItem({
-                                        sku: `INDIE-${good.id}`,
-                                        name: good.title,
-                                        price: Number(finalPrice),
-                                        productId: good.id,
-                                        quantity: 1
-                                      }).then(() => {
-                                        toast({
-                                          title: "Added to Cart",
-                                          description: `${good.title} has been added to your cart.`,
-                                        });
-                                      }).catch((err) => {
-                                        toast({
-                                          variant: "destructive",
-                                          title: "Failed to Add",
-                                          description: err.message || "An error occurred.",
-                                        });
-                                      });
-                                    }}
-                                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 flex items-center justify-center transition-colors group-hover:bg-fuchsia-500"
-                                  >
-                                    <ShoppingCart className="w-4 h-4 text-white" />
-                                  </button>
-                                </div>
+                      <div key={p.id} className="group relative flex flex-col bg-white/[0.02] border border-white/10 hover:border-fuchsia-500/30 rounded-3xl overflow-hidden transition-all">
+                        <Link href={href} className="block">
+                          <div className="aspect-square bg-white/5 overflow-hidden">
+                            {p.imageUrl?.[0] ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={p.imageUrl[0]} alt={p.name} className="w-full h-full object-cover" /> : null}
+                          </div>
+                        </Link>
+                        <div className="p-5 flex flex-col flex-1">
+                          <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">{p.categoryName}</div>
+                          <Link href={href}><h3 className="font-bold text-lg mb-4 group-hover:text-fuchsia-400 transition-colors line-clamp-2">{p.name}</h3></Link>
+                          <div className="flex items-end justify-between mt-auto">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-black text-2xl">{finalPrice} <span className="text-xs text-gray-500 font-bold">{p.currencyCode}</span></div>
+                                {promoApplied && <div className="text-sm text-gray-500 line-through">{unit.toFixed(2)}</div>}
                               </div>
-                            )
-                          })}
+                              {!p.inStock && <div className="text-xs text-red-400 font-bold mt-1">Out of stock</div>}
+                            </div>
+                            <button
+                              disabled={!p.inStock}
+                              aria-label={`Add ${p.name} to cart`}
+                              onClick={() => {
+                                addItem({ sku: p.slug, name: p.name, price: Number(finalPrice), productId: p.id, quantity: 1 })
+                                  .then(() => toast({ title: "Added to cart", description: `${p.name} has been added to your cart.` }))
+                                  .catch((err) => toast({ variant: "destructive", title: "Couldn't add", description: err.message || "Please try again." }))
+                              }}
+                              className="w-10 h-10 rounded-full bg-white/5 hover:bg-fuchsia-500 disabled:opacity-40 flex items-center justify-center transition-colors"
+                            >
+                              <ShoppingCart className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    );
+                    )
                   })}
-              </div>
+                </div>
+              )}
             </motion.div>
           )}
 
