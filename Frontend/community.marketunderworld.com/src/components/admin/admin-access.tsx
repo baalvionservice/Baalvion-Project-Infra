@@ -28,6 +28,7 @@ export const PAGE_REQUIREMENTS: [string, Permission | "platform"][] = [
   ["/admin/sessions", "content.manage"],
   ["/admin/support/tickets", "support.handle"],
   ["/admin/system/announcements", "announce.publish"],
+  ["/admin/seller-notice", "announce.publish"],
   ["/admin/system/audit", "audit.view"],
   ["/admin/users", "platform"],
   ["/admin/sellers", "platform"],

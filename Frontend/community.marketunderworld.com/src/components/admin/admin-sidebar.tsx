@@ -66,6 +66,7 @@ const ADMIN_NAV = [
       { name: "Categories", path: "/admin/categories", icon: FolderTree },
       { name: "Seller Chat", path: "/admin/seller-chat", icon: MessageSquare },
       { name: "Seller Payments", path: "/admin/seller-payments", icon: Wallet },
+      { name: "Seller Notice", path: "/admin/seller-notice", icon: Megaphone },
     ]
   },
   {

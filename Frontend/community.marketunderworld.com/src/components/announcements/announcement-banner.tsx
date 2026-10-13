@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { X } from "lucide-react"
 import { getActiveAnnouncements, type ActiveAnnouncement } from "@/lib/api/staff"
+import { isSellerNotice } from "@/lib/seller-notice"
 
 const STYLE = {
   info: "bg-blue-950/90 border-blue-500/40 text-blue-100",
@@ -22,7 +23,7 @@ export function AnnouncementBanner() {
     let alive = true
     getActiveAnnouncements().then((list) => {
       if (!alive) return
-      const shown = list.filter((a) => {
+      const shown = list.filter((a) => !isSellerNotice(a.title)).filter((a) => {
         try { return !localStorage.getItem(key(a)) } catch { return true }
       })
       setItems(shown)
