@@ -133,12 +133,12 @@ CREATE POLICY journey_party_read ON tradeops.order_journeys FOR SELECT USING (tr
 DROP POLICY IF EXISTS journey_party_update ON tradeops.order_journeys;
 CREATE POLICY journey_party_update ON tradeops.order_journeys FOR UPDATE USING (tradeops.party_can(id, tradeops.current_party_org(), 'journey.manage')) WITH CHECK (tradeops.party_can(id, tradeops.current_party_org(), 'journey.manage'));
 
-DROP POLICY IF EXISTS parties_read ON tradeops.order_parties;
-CREATE POLICY parties_read ON tradeops.order_parties FOR SELECT USING (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage'));
-DROP POLICY IF EXISTS parties_insert ON tradeops.order_parties;
-CREATE POLICY parties_insert ON tradeops.order_parties FOR INSERT WITH CHECK (tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage') AND added_by_org_id = tradeops.current_party_org());
-DROP POLICY IF EXISTS parties_update ON tradeops.order_parties;
-CREATE POLICY parties_update ON tradeops.order_parties FOR UPDATE USING (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage')) WITH CHECK (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage'));
+DROP POLICY IF EXISTS parties_read_tenant_isolation ON tradeops.order_parties;
+CREATE POLICY parties_read_tenant_isolation ON tradeops.order_parties FOR SELECT USING (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage'));
+DROP POLICY IF EXISTS parties_insert_tenant_isolation ON tradeops.order_parties;
+CREATE POLICY parties_insert_tenant_isolation ON tradeops.order_parties FOR INSERT WITH CHECK (tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage') AND added_by_org_id = tradeops.current_party_org());
+DROP POLICY IF EXISTS parties_update_tenant_isolation ON tradeops.order_parties;
+CREATE POLICY parties_update_tenant_isolation ON tradeops.order_parties FOR UPDATE USING (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage')) WITH CHECK (org_id = tradeops.current_party_org() OR tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage'));
 
 DROP POLICY IF EXISTS events_read ON tradeops.order_party_events;
 CREATE POLICY events_read ON tradeops.order_party_events FOR SELECT USING (tradeops.party_can(journey_id, tradeops.current_party_org(), 'parties.manage'));
