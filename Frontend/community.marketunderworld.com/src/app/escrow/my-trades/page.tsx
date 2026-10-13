@@ -1,5 +1,6 @@
 "use client";
 
+import { QuotePanel } from "@/components/payments/trade-quote";
 import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { fileToProof, type ProofWithPreview } from "@/lib/image-proof";
 import {
   SERVICE_LABEL, addTradeProofs, cancelTrade, completeTrade, confirmTradePayment, disputeTrade, getTrade, listTrades, markTradePaid,
-  qrUrl, sendTradeMessage, tradeProofs, type Trade, type TradeDetail, type TradeProofImage, type TradeStatus,
+  sendTradeMessage, tradeProofs, type Trade, type TradeDetail, type TradeProofImage, type TradeStatus,
 } from "@/lib/api/intermediaries";
 
 const STATUS_LABEL: Record<TradeStatus, string> = {
@@ -144,20 +145,7 @@ function Trades() {
                 ) : null}
                 {isCustomer && open && d.protectedUpToUsd > 0 && <p className="text-xs text-zinc-400">Protected up to ${d.protectedUpToUsd.toLocaleString()} by this intermediary&apos;s deposit if a dispute is decided in your favour.</p>}
 
-                {isCustomer && (d.status === "created" || d.status === "payment_submitted") && d.payQrs.length > 0 && (
-                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
-                    <p className="text-sm text-zinc-300">Agree the amount in the chat, then pay by scanning. The name shown must be <strong className="text-white">{d.intermediary.name}</strong>.</p>
-                    <div className="flex flex-wrap gap-4">
-                      {d.payQrs.map((q) => (
-                        <div key={q.id} className="space-y-1">
-                          <p className="text-xs font-bold">{q.label}</p>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={qrUrl(d.intermediary.id, q.id)} alt={`${d.intermediary.name} ${q.label} QR`} className="w-40 h-40 rounded-md border border-zinc-800 bg-white object-contain" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <QuotePanel d={d} isCustomer={isCustomer} isInt={isInt} run={run} busy={busy} />
 
                 <div className="flex flex-wrap gap-2">
                   {isCustomer && d.status === "created" && <button onClick={() => setPaying(true)} className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">I have paid</button>}

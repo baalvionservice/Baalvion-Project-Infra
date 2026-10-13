@@ -11,12 +11,18 @@ export const SERVICE_LABEL: Record<ServiceType, string> = {
 
 export interface Intermediary {
   id: string; slug: string; displayName: string; bio: string | null; services: ServiceType[]; languages: string[];
-  commissionNote: string | null; tradeLimitUsd: number | null; verified: boolean; depositUsd: number;
+  commissionNote: string | null; feePercent: number | null; tradeLimitUsd: number | null; verified: boolean; depositUsd: number;
   listedSince: string; completedTrades: number; qrs: { id: string; label: string }[];
 }
 export interface OwnIntermediary extends Intermediary { status: 'applied' | 'payment_submitted' | 'active' | 'rejected' | 'suspended'; userId: string | null }
 export interface AdminApplication extends OwnIntermediary { createdAt: string; qrImages?: { id: string; label: string; dataUrl: string }[] }
 
+export type QuoteCurrency = 'INR' | 'AED' | 'USD';
+// The price of a trade, worked out and locked: what the buyer pays the intermediary, and how it was reached.
+export interface TradeQuote {
+  by: 'system' | 'intermediary'; currency: QuoteCurrency; usdt: number | null; totalLocal: number; note?: string | null; at: string;
+  ratePerUsdt?: number; valueLocal?: number; feePercent?: number; feeLocal?: number; source?: string | null;
+}
 export type TradeStatus = 'created' | 'payment_submitted' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 export interface Trade {
   id: string; ref: string; status: TradeStatus; serviceType: ServiceType; amountUsdt: number | null; instructions: string | null;
@@ -24,6 +30,7 @@ export interface Trade {
   customerUserId: string; createdAt: string; updatedAt: string; paidAt: string | null; completedAt: string | null;
   cancelledBy: string | null; disputeReason: string | null; resolutionNote: string | null;
   refundUsd: number | null; refundPaidAt: string | null;
+  quote: TradeQuote | null; quoteAcceptedAt: string | null; quoteExpiresAt: string | null; quoteRequired: boolean; quoteLive: boolean;
 }
 export interface TradeMessage { id: string; senderUserId: string; senderRole: 'customer' | 'intermediary' | 'admin'; body: string; createdAt: string }
 export interface TradeDetail extends Trade {
@@ -51,7 +58,8 @@ const post = <T>(path: string, data?: unknown) => call<T>(path, { method: 'POST'
 // Public
 export const listIntermediaries = () => call<{ items: Intermediary[]; total: number }>('/public/intermediaries');
 export const getIntermediary = (slug: string) => call<Intermediary>(`/public/intermediaries/${encodeURIComponent(slug)}`);
-export const qrUrl = (intermediaryId: string, qrId: string) => `${BASE}/public/intermediaries/${intermediaryId}/qr/${qrId}`;
+// A scanner image is served inside a trade, and to the buyer only while the price they locked is valid.
+export const tradeQrUrl = (tradeId: string, qrId: string) => `${BASE}/intermediary-trades/${tradeId}/qr/${qrId}`;
 
 // Applicant
 export interface ApplyBody {
@@ -67,12 +75,16 @@ export const adminApplication = (id: string) => call<AdminApplication>(`/interme
 
 // Trades
 export const listTrades = () => call<{ items: Trade[]; total: number; isIntermediary: boolean }>('/intermediary-trades');
-export const createTrade = (body: { intermediaryId: string; serviceType: ServiceType; amountUsdt?: number; instructions?: string }) => post<Trade>('/intermediary-trades', body);
+export const createTrade = (body: { intermediaryId: string; serviceType: ServiceType; amountUsdt?: number; currency?: QuoteCurrency; instructions?: string }) => post<Trade>('/intermediary-trades', body);
 export const getTrade = (id: string) => call<TradeDetail>(`/intermediary-trades/${id}`);
 export const tradeProofs = (id: string) => call<TradeProofImage[]>(`/intermediary-trades/${id}/proofs`);
 export const sendTradeMessage = (id: string, body: string) => post<TradeDetail>(`/intermediary-trades/${id}/messages`, { body });
 export const addTradeProofs = (id: string, proofs: ProofUpload[]) => post<TradeDetail>(`/intermediary-trades/${id}/proofs`, { proofs });
 export const markTradePaid = (id: string, proofs: ProofUpload[], note?: string) => post<TradeDetail>(`/intermediary-trades/${id}/paid`, { proofs, note });
+export const sendTradeQuote = (id: string, body: { currency: QuoteCurrency; totalLocal: number; usdt?: number; note?: string }) => post<TradeDetail>(`/intermediary-trades/${id}/quote`, body);
+export const acceptTradeQuote = (id: string) => post<TradeDetail>(`/intermediary-trades/${id}/accept-quote`);
+export const requoteTrade = (id: string, currency?: QuoteCurrency) => post<TradeDetail>(`/intermediary-trades/${id}/requote`, { currency });
+export const setMyFee = (feePercent: number | null) => call<Intermediary>('/intermediaries/mine/fee', { method: 'PUT', body: JSON.stringify({ feePercent }) });
 export const confirmTradePayment = (id: string) => post<TradeDetail>(`/intermediary-trades/${id}/confirm-payment`);
 export const completeTrade = (id: string) => post<TradeDetail>(`/intermediary-trades/${id}/complete`);
 export const cancelTrade = (id: string) => post<TradeDetail>(`/intermediary-trades/${id}/cancel`);

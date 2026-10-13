@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { HowItWorks } from "@/components/payments/how-it-works";
 import { TradeGuide } from "@/components/payments/trade-guide";
-import { SERVICE_LABEL, createTrade, getIntermediary, qrUrl, type Intermediary, type ServiceType } from "@/lib/api/intermediaries";
+import { SERVICE_LABEL, createTrade, getIntermediary, type Intermediary, type QuoteCurrency, type ServiceType } from "@/lib/api/intermediaries";
 
 export default function IntermediaryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = use(params);
@@ -25,6 +25,20 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     getIntermediary(slug).then((i) => { setItem(i); setService(i.services[0]); }).catch(() => setItem(null));
   }, [slug]);
+
+  // Lock a price (or ask for one) from the calculator: the trade is created and the buyer lands on it.
+  const lock = async (usdt: number, currency: QuoteCurrency) => {
+    if (!item) return;
+    if (!isAuthenticated) { router.push(`/auth/signin?redirect=/escrow/intermediaries/${slug}`); return; }
+    setBusy(true);
+    try {
+      const trade = await createTrade({ intermediaryId: item.id, serviceType: "buy_usdt", amountUsdt: usdt, currency });
+      router.push(`/escrow/my-trades?trade=${trade.id}`);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Couldn't lock the price", description: e instanceof Error ? e.message : "Please try again." });
+      setBusy(false);
+    }
+  };
 
   const start = async () => {
     if (!item) return;
@@ -73,7 +87,7 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
           className="self-start bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm">Request a trade</button>
       </div>
 
-      <TradeGuide item={item} />
+      <TradeGuide item={item} locking={busy} onLock={lock} />
 
       <HowItWorks />
 
@@ -83,7 +97,7 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
             <h2 className="text-lg font-bold mb-3">About</h2>
             <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{item.bio || "This intermediary has not added a description."}</p>
             <dl className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              {item.commissionNote && <div><dt className="text-zinc-500 text-xs">Fee</dt><dd>{item.commissionNote}</dd></div>}
+              {(item.feePercent !== null || item.commissionNote) && <div><dt className="text-zinc-500 text-xs">Fee</dt><dd>{item.feePercent !== null ? `${item.feePercent}% of the amount` : item.commissionNote}</dd></div>}
               {item.tradeLimitUsd ? <div><dt className="text-zinc-500 text-xs">Trade limit</dt><dd>${item.tradeLimitUsd.toLocaleString()}</dd></div> : null}
               {item.languages.length > 0 && <div><dt className="text-zinc-500 text-xs">Languages</dt><dd>{item.languages.join(", ")}</dd></div>}
             </dl>
@@ -91,23 +105,17 @@ export default function IntermediaryPage({ params }: { params: Promise<{ id: str
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h3 className="font-bold mb-1">Before you pay</h3>
             <p className="text-xs text-zinc-400 leading-normal">
-              You pay the intermediary directly; Baalvion does not hold your money. Start a trade request first, agree the amount and fee in the trade chat, then pay and attach your screenshot.
+              You pay the intermediary directly; Baalvion does not hold your money. Work out your price above and lock it, then scan the scanner that appears, pay exactly the locked total and attach your screenshot.
               {item.depositUsd > 0 ? <> This intermediary has a refundable deposit of <strong className="text-white">${item.depositUsd.toLocaleString()}</strong> held by the platform. If you raise a dispute and an admin decides in your favour, your refund is taken from that deposit, up to the amount it still holds.</> : <> This intermediary has no deposit held, so a dispute cannot be refunded from one.</>}
               Disputes are reviewed by an admin who reads the chat and screenshots.
             </p>
           </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-5 h-fit">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-3 h-fit">
           <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Pay by scanning</h3>
-          {item.qrs.map((q) => (
-            <div key={q.id} className="space-y-2">
-              <p className="text-xs font-bold">{q.label}</p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrUrl(item.id, q.id)} alt={`${item.displayName} ${q.label} QR`} className="mx-auto w-full max-w-[260px] rounded-lg border border-zinc-800 bg-white" />
-            </div>
-          ))}
-          <p className="text-[11px] text-zinc-400">Scan with any UPI app. The name shown must be <strong className="text-white">{item.displayName}</strong>; if it is different, do not pay.</p>
+          <p className="text-sm text-zinc-300">The scanner is not shown here on purpose. Work out your price above and lock it first. The scanner then appears on your trade page next to the exact amount to pay, so you cannot pay the wrong amount.</p>
+          <p className="text-[11px] text-zinc-500">The name shown in your payment app must be <strong className="text-zinc-300">{item.displayName}</strong>. If it is different, do not pay.</p>
         </div>
       </div>
 

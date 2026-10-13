@@ -1,8 +1,8 @@
 // The whole intermediary flow in five plain lines, shown on the directory and on each profile.
 const STEPS = [
   ["Choose", "Pick an intermediary and press Request a trade."],
-  ["Agree", "In the trade chat, agree the amount and their fee."],
-  ["Pay", "Scan their QR, pay them directly, and attach your payment screenshot."],
+  ["Lock the price", "See the full calculation: amount, today's price, fee and total. Lock it."],
+  ["Pay", "The scanner appears. Pay exactly the locked total and attach your payment screenshot."],
   ["They do the work", "The intermediary buys the USDT or does the job you asked for."],
   ["Confirm", "You confirm it is done. If something goes wrong, press Dispute and an admin decides."],
 ];

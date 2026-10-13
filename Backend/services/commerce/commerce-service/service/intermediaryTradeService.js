@@ -4,6 +4,8 @@ const { sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const { decodeProofs } = require('../utils/paymentProof');
 const intermediaries = require('./intermediaryService');
+const { perUsdt } = require('./usdtRate');
+const { buildQuote } = require('./tradeQuote');
 
 const TRADES = 'commerce.commerce_intermediary_trades';
 const MSGS = 'commerce.commerce_intermediary_trade_messages';
@@ -14,6 +16,8 @@ const OPEN_LIMIT = 5;
 const MAX_PROOFS = 8;
 const DISPUTE_WINDOW_MS = 72 * 3600 * 1000;
 const FINAL = ['completed', 'cancelled'];
+const QUOTE_MINUTES = 30; // a locked price stays valid this long, so the rate cannot drift while someone pays
+const quoteLive = (r) => !!(r.quote && r.quote_accepted_at && r.quote_expires_at && new Date(r.quote_expires_at).getTime() > Date.now());
 
 const fail = (code, msg, status = 400) => new AppError(code, msg, status);
 
@@ -44,6 +48,8 @@ const present = (r, role) => ({
     role, customerUserId: String(r.customer_user_id), createdAt: r.created_at, updatedAt: r.updated_at, paidAt: r.paid_at, completedAt: r.completed_at,
     cancelledBy: r.cancelled_by, disputeReason: r.dispute_reason, resolutionNote: r.resolution_note,
     refundUsd: r.refund_usd === null || r.refund_usd === undefined ? null : Number(r.refund_usd), refundPaidAt: r.refund_paid_at || null,
+    quote: r.quote || null, quoteAcceptedAt: r.quote_accepted_at || null, quoteExpiresAt: r.quote_expires_at || null,
+    quoteRequired: !!r.quote_required, quoteLive: quoteLive(r),
 });
 
 async function create(authCtx, body) {
@@ -59,13 +65,20 @@ async function create(authCtx, body) {
         { type: QueryTypes.SELECT, replacements: { u: authCtx.userId } });
     if (open.n >= OPEN_LIMIT) throw fail('CONFLICT', `You already have ${OPEN_LIMIT} trades in progress. Finish or cancel one first.`, 409);
 
+    // With a published fee, the server works out the price itself (live rate + fee) and locks it for the customer.
+    let quote = null; let acceptedAt = null; let expiresAt = null;
+    if (body.amountUsdt && body.currency && i.fee_percent !== null && i.fee_percent !== undefined) {
+        const r = await perUsdt(body.currency);
+        quote = buildQuote({ usdt: Number(body.amountUsdt), currency: body.currency, ratePerUsdt: r.rate, feePercent: Number(i.fee_percent), source: r.source, at: r.at, by: 'system' });
+        acceptedAt = new Date(); expiresAt = new Date(Date.now() + QUOTE_MINUTES * 60000);
+    }
     for (let attempt = 0; attempt < 8; attempt += 1) {
         const ref = `REQ-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`;
         try {
             const [[row]] = await sequelize.query(
-                `INSERT INTO ${TRADES} (ref, intermediary_id, customer_user_id, service_type, amount_usdt, instructions)
-                 VALUES (:ref, :i, :u, :svc, :amt, :ins) RETURNING id`,
-                { replacements: { ref, i: i.id, u: authCtx.userId, svc: body.serviceType, amt: body.amountUsdt || null, ins: body.instructions || null } });
+                `INSERT INTO ${TRADES} (ref, intermediary_id, customer_user_id, service_type, amount_usdt, instructions, quote, quote_accepted_at, quote_expires_at, quote_required)
+                 VALUES (:ref, :i, :u, :svc, :amt, :ins, :quote::jsonb, :qa, :qe, TRUE) RETURNING id`,
+                { replacements: { ref, i: i.id, u: authCtx.userId, svc: body.serviceType, amt: body.amountUsdt || null, ins: body.instructions || null, quote: quote ? JSON.stringify(quote) : null, qa: acceptedAt, qe: expiresAt } });
             return present(await loadTrade(row.id), 'customer');
         } catch (err) {
             if (!/unique|duplicate/i.test(String(err.message))) throw err;
@@ -93,7 +106,9 @@ async function detail(trade, role) {
         { type: QueryTypes.SELECT, replacements: { id: trade.id } });
     const pub = await intermediaries.getPublic(trade.intermediary_id).catch(() => null);
     // What the intermediary's deposit still holds: the most this trade can be refunded from it.
-    return { ...present(trade, role), messages, proofs, payQrs: pub ? pub.qrs : [], protectedUpToUsd: await intermediaries.heldUsd(trade.intermediary_id) };
+    // The customer sees the scanner only while a price they have locked is valid; before that, nothing to pay yet.
+    const showQr = role !== 'customer' || !trade.quote_required || quoteLive(trade);
+    return { ...present(trade, role), messages, proofs, payQrs: pub && showQr ? pub.qrs : [], protectedUpToUsd: await intermediaries.heldUsd(trade.intermediary_id) };
 }
 
 async function get(authCtx, id) {
@@ -152,6 +167,7 @@ async function markPaid(authCtx, id, { proofs, note }) {
     const role = mustParticipate(authCtx.userId, trade);
     if (role !== 'customer') throw fail('FORBIDDEN', 'Only the customer can mark a trade as paid', 403);
     if (trade.status !== 'created') throw fail('CONFLICT', `This trade is ${trade.status}`, 409);
+    if (trade.quote_required && !trade.quote_accepted_at) throw fail('PRICE_NOT_AGREED', 'Agree the price first. Lock it (or accept the intermediary\'s price) before you pay.', 409);
     await sequelize.transaction(async (t) => {
         await storeProofs(trade, authCtx.userId, role, decoded, t);
         await sequelize.query(`UPDATE ${TRADES} SET status = 'payment_submitted', paid_at = NOW(), updated_at = NOW() WHERE id = :id`, { replacements: { id }, transaction: t });
@@ -159,6 +175,56 @@ async function markPaid(authCtx, id, { proofs, note }) {
             { replacements: { t: id, u: authCtx.userId, b: note ? `I have paid. ${note}` : 'I have paid. Screenshot attached.' }, transaction: t });
     });
     return detail(await loadTrade(id), role);
+}
+
+// The intermediary sends the customer a final price in the chat when they have no published fee (or want a different one).
+async function sendQuote(authCtx, id, { currency, totalLocal, usdt, note }) {
+    const trade = await loadTrade(id);
+    const role = mustParticipate(authCtx.userId, trade);
+    if (role !== 'intermediary') throw fail('FORBIDDEN', 'Only the intermediary can send a price', 403);
+    if (trade.status !== 'created') throw fail('CONFLICT', `This trade is ${trade.status}`, 409);
+    const amount = usdt || (trade.amount_usdt === null ? null : Number(trade.amount_usdt));
+    const quote = { by: 'intermediary', currency, usdt: amount, totalLocal: Number(totalLocal), note: note || null, at: new Date().toISOString() };
+    await sequelize.query(`UPDATE ${TRADES} SET quote = :q::jsonb, quote_accepted_at = NULL, quote_expires_at = NULL, updated_at = NOW() WHERE id = :id`, { replacements: { id, q: JSON.stringify(quote) } });
+    await addMessage(authCtx.userId, trade, role, `Sent a price: ${Number(totalLocal)} ${currency}${amount ? ` for ${amount} USDT` : ''}. Open "Accept this price" to continue.`);
+    return detail(await loadTrade(id), role);
+}
+
+// The customer accepts the intermediary's price; it is then locked for QUOTE_MINUTES and the scanner appears.
+async function acceptQuote(authCtx, id) {
+    const trade = await loadTrade(id);
+    const role = mustParticipate(authCtx.userId, trade);
+    if (role !== 'customer') throw fail('FORBIDDEN', 'Only the customer can accept a price', 403);
+    if (trade.status !== 'created') throw fail('CONFLICT', `This trade is ${trade.status}`, 409);
+    if (!trade.quote) throw fail('CONFLICT', 'There is no price to accept yet', 409);
+    if (quoteLive(trade)) return detail(trade, role);
+    await sequelize.query(`UPDATE ${TRADES} SET quote_accepted_at = NOW(), quote_expires_at = NOW() + (:m || ' minutes')::interval, updated_at = NOW() WHERE id = :id`, { replacements: { id, m: QUOTE_MINUTES } });
+    await addMessage(authCtx.userId, trade, role, 'Accepted the price. I will pay now.');
+    return detail(await loadTrade(id), role);
+}
+
+// The customer asks for a fresh price at today's rate (only where the server prices the trade from a published fee).
+async function requote(authCtx, id, currency) {
+    const trade = await loadTrade(id);
+    const role = mustParticipate(authCtx.userId, trade);
+    if (role !== 'customer') throw fail('FORBIDDEN', 'Only the customer can ask for a new price', 403);
+    if (trade.status !== 'created') throw fail('CONFLICT', `This trade is ${trade.status}`, 409);
+    const [i] = await sequelize.query(`SELECT fee_percent FROM ${INT} WHERE id = :id`, { type: QueryTypes.SELECT, replacements: { id: trade.intermediary_id } });
+    const cur = currency || (trade.quote && trade.quote.currency);
+    if (!i || i.fee_percent === null || !trade.amount_usdt || !cur) throw fail('CONFLICT', 'This price is set by the intermediary. Ask them for a new one in the chat.', 409);
+    const r = await perUsdt(cur);
+    const quote = buildQuote({ usdt: Number(trade.amount_usdt), currency: cur, ratePerUsdt: r.rate, feePercent: Number(i.fee_percent), source: r.source, at: r.at, by: 'system' });
+    await sequelize.query(`UPDATE ${TRADES} SET quote = :q::jsonb, quote_accepted_at = NOW(), quote_expires_at = NOW() + (:m || ' minutes')::interval, updated_at = NOW() WHERE id = :id`, { replacements: { id, q: JSON.stringify(quote), m: QUOTE_MINUTES } });
+    await addMessage(authCtx.userId, trade, role, `Locked a new price: ${quote.totalLocal} ${quote.currency}.`);
+    return detail(await loadTrade(id), role);
+}
+
+// One of the intermediary's QR images, for a trade. A customer can open it only while a price they locked is valid.
+async function qrForTrade(authCtx, id, qrId) {
+    const trade = await loadTrade(id);
+    const role = mustParticipate(authCtx.userId, trade);
+    if (role === 'customer' && trade.quote_required && !quoteLive(trade)) throw fail('PRICE_NOT_LOCKED', 'Lock the price first. The scanner appears once the price is agreed.', 403);
+    return intermediaries.qrImage(trade.intermediary_id, qrId);
 }
 
 async function move(authCtx, id, { roles, from, to, set = '', noteBody }) {
@@ -234,4 +300,4 @@ async function markRefundPaid(authCtx, id) {
     return detail(await loadTrade(id), 'admin');
 }
 
-module.exports = { create, list, get, proofImages, message, addProofs, markPaid, confirmPayment, complete, cancel, dispute, adminList, adminGet, resolve, markRefundPaid };
+module.exports = { sendQuote, acceptQuote, requote, qrForTrade, create, list, get, proofImages, message, addProofs, markPaid, confirmPayment, complete, cancel, dispute, adminList, adminGet, resolve, markRefundPaid };

@@ -18,7 +18,8 @@ const bad = (msg) => new AppError('VALIDATION_ERROR', msg, 400);
 // What anyone may see about an intermediary: no user id, no UPI IDs, no contact details.
 const toPublic = (r, qrs, completedTrades, held = 0) => ({
     id: r.id, slug: r.slug, displayName: r.display_name, bio: r.bio, services: r.services || [], languages: r.languages || [],
-    commissionNote: r.commission_note, tradeLimitUsd: r.trade_limit_usd, verified: r.verified,
+    commissionNote: r.commission_note, feePercent: r.fee_percent === null || r.fee_percent === undefined ? null : Number(r.fee_percent),
+    tradeLimitUsd: r.trade_limit_usd, verified: r.verified,
     // What the deposit still holds: the most a customer can be refunded from it.
     depositUsd: Math.max(0, Number(held) || 0),
     listedSince: r.approved_at || r.created_at, completedTrades: completedTrades || 0,
@@ -131,6 +132,20 @@ async function getPublic(slugOrId) {
     return toPublic(r, await qrList(r.id), c.n, await heldUsd(r.id));
 }
 
+// The intermediary's own percentage fee (0 to 20), or null to quote each trade by hand in the trade chat.
+async function setFee(userId, feePercent) {
+    const [r] = await sequelize.query(`SELECT id FROM ${T} WHERE user_id = :u AND status = 'active'`, { type: QueryTypes.SELECT, replacements: { u: userId } });
+    if (!r) throw new AppError('FORBIDDEN', 'You are not a listed intermediary', 403);
+    return applyFee(r.id, feePercent);
+}
+async function adminSetFee(id, feePercent) { return applyFee(id, feePercent); }
+async function applyFee(id, feePercent) {
+    const v = feePercent === null || feePercent === undefined ? null : Number(feePercent);
+    if (v !== null && (!Number.isFinite(v) || v < 0 || v > 20)) throw bad('The fee must be between 0 and 20 percent');
+    await sequelize.query(`UPDATE ${T} SET fee_percent = :v, updated_at = NOW() WHERE id = :id`, { replacements: { v, id } });
+    return getPublic(id);
+}
+
 // One QR image, only while the intermediary is listed.
 async function qrImage(intermediaryId, qrId) {
     const [q] = await sequelize.query(
@@ -217,7 +232,7 @@ async function adminLedger(id) {
     return sequelize.query(`SELECT id, delta_usd::float AS "deltaUsd", reason, trade_id AS "tradeId", note, created_at AS "createdAt" FROM ${LEDGER} WHERE intermediary_id = :id ORDER BY created_at DESC`, { type: QueryTypes.SELECT, replacements: { id } });
 }
 
-module.exports = {
+module.exports = { setFee, adminSetFee,
     debit, heldUsd, releaseDeposit, adminLedger,
     SERVICES, apply, mine, listPublic, getPublic, qrImage, adminList, adminGet,
     onPaymentSubmitted, onPaymentConfirmed, onPaymentClosed, activeForUser, config,

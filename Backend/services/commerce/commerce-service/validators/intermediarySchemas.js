@@ -26,8 +26,18 @@ exports.createTradeSchema = z.object({
     intermediaryId: z.string().uuid(),
     serviceType: z.enum(SERVICES),
     amountUsdt: z.number().positive().max(1000000).optional(),
+    // With an amount and a currency, an intermediary who has published a fee gets a locked price straight away.
+    currency: z.enum(['INR', 'AED', 'USD']).optional(),
     instructions: z.string().trim().max(1500).optional(),
 });
+exports.quoteSchema = z.object({
+    currency: z.enum(['INR', 'AED', 'USD']),
+    totalLocal: z.number().positive().max(100000000),
+    usdt: z.number().positive().max(1000000).optional(),
+    note: z.string().trim().max(300).optional(),
+});
+exports.requoteSchema = z.object({ currency: z.enum(['INR', 'AED', 'USD']).optional() });
+exports.feeSchema = z.object({ feePercent: z.number().min(0).max(20).nullable() });
 exports.messageSchema = z.object({ body: z.string().trim().min(1).max(2000) });
 exports.proofsSchema = z.object({ proofs: z.array(image).min(1).max(3) });
 exports.paidSchema = z.object({ proofs: z.array(image).min(1).max(3), note: z.string().trim().max(500).optional() });
