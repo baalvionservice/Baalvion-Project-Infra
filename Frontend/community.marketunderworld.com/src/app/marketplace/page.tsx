@@ -12,6 +12,8 @@ import { getCatalog, type GiftCardBrand } from "@/lib/api/giftcards";
 import { cn } from "@/lib/utils";
 import { getStorefrontProducts, getStorefrontCategories, type StorefrontProduct, type StorefrontCategory } from "@/lib/api/commerce";
 import { useCart } from "@/context/cart-context";
+import { useAuth } from "@/context/auth-context";
+import { isAdminIdentity } from "@/lib/auth/gateway-session";
 import { useToast } from "@/hooks/use-toast";
 import { Breadcrumbs } from "@/components/ui/breadcrumb";
 
@@ -28,6 +30,8 @@ const COUNTRIES = [
 
 export default function MarketplacePage() {
   const [activeTab, setActiveTab] = useState<"store" | "giftcards">("store");
+  const { user } = useAuth();
+  const isAdmin = isAdminIdentity(user);
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
 
@@ -71,12 +75,13 @@ export default function MarketplacePage() {
   }, [brands, search]);
 
   const filteredProducts = useMemo(() => {
-    // A listing with no price set cannot be bought, so it stays off the storefront until it has one.
-    const priced = products.filter((p) => Number(p.price ?? p.basePrice) > 0);
+    // A listing with no price set cannot be bought, so it stays off the storefront until it has one. Admins still
+    // see it so they can set the price.
+    const priced = isAdmin ? products : products.filter((p) => Number(p.price ?? p.basePrice) > 0);
     const visible = storeCategories.length > 0 ? priced.filter((p) => storeCategories.some((c) => c.id === p.categoryId)) : priced;
     if (storeCategory === "All") return visible;
     return visible.filter((p) => p.categoryId === storeCategory);
-  }, [products, storeCategories, storeCategory]);
+  }, [products, storeCategories, storeCategory, isAdmin]);
 
   const handleApplyPromo = () => {
     if (promoCode.trim().length >= 3) {
@@ -89,6 +94,16 @@ export default function MarketplacePage() {
       <Navbar />
 
       <main className="container max-w-[1440px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-24">
+        {isAdmin && (
+          <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/5 px-4 py-3 text-sm">
+            <span className="font-bold text-fuchsia-300">Admin view</span>
+            <span className="text-gray-400">You can edit any listing from here.</span>
+            <Link href="/seller/listings/new" className="ml-auto inline-flex items-center min-h-[40px] px-4 rounded-lg bg-fuchsia-500 text-black font-bold">Add a listing</Link>
+            <Link href="/seller/listings" className="inline-flex items-center min-h-[40px] px-4 rounded-lg border border-white/20 text-white font-bold">All listings</Link>
+            <Link href="/admin/marketplace" className="inline-flex items-center min-h-[40px] px-4 rounded-lg border border-white/20 text-white font-bold">Marketplace admin</Link>
+          </div>
+        )}
+
         {/* Hero */}
         <header className="mb-12 space-y-8">
           <Breadcrumbs 
@@ -238,6 +253,9 @@ export default function MarketplacePage() {
                             {p.imageUrl?.[0] ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={p.imageUrl[0]} alt={p.name} className="w-full h-full object-cover" /> : null}
                           </div>
                         </Link>
+                        {isAdmin && (
+                          <Link href={`/seller/listings/${p.id}/edit`} className="absolute top-3 right-3 z-10 inline-flex items-center min-h-[36px] px-3 rounded-lg bg-black/80 border border-fuchsia-500/50 text-fuchsia-300 text-xs font-bold hover:bg-fuchsia-500 hover:text-black">Edit</Link>
+                        )}
                         <div className="p-5 flex flex-col flex-1">
                           <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">{p.categoryName}</div>
                           <Link href={href}><h3 className="font-bold text-lg mb-4 group-hover:text-fuchsia-400 transition-colors line-clamp-2">{p.name}</h3></Link>
@@ -248,6 +266,7 @@ export default function MarketplacePage() {
                                 {promoApplied && <div className="text-sm text-gray-500 line-through">{unit.toFixed(2)}</div>}
                               </div>
                               {!p.inStock && <div className="text-xs text-red-400 font-bold mt-1">Out of stock</div>}
+                              {isAdmin && unit <= 0 && <div className="text-xs text-amber-300 font-bold mt-1">No price set</div>}
                             </div>
                             <button
                               disabled={!p.inStock}

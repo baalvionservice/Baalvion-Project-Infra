@@ -17,6 +17,7 @@ interface GeoResponse {
   state: string | null;
   city: string | null;
   timezone: string | null;
+  isp: string | null;
 }
 
 // The region lists in mockData spell a few countries differently from Intl.
@@ -70,6 +71,7 @@ export function IdentityProvider({ children }: { children: React.ReactNode }) {
         regionId: region?.id ?? '',
         city: geo.city ?? '',
         state: geo.state ?? undefined,
+        isp: geo.isp ?? undefined,
         language: navigator.language || 'English',
         timezone: geo.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
         detectedAt: new Date().toISOString()

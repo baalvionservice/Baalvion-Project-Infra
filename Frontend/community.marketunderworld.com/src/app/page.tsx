@@ -88,6 +88,11 @@ interface PublicStats {
   cities: number;
   openListings: number;
   upcomingEvents: number;
+  // Head counts; null (or missing, on an older API) means the figure could not be read, so it is left out.
+  members?: number | null;
+  sellers?: number | null;
+  passHolders?: number | null;
+  staff?: number | null;
 }
 
 // Real counts from the community API; shown only once loaded, never as placeholders.
@@ -443,7 +448,16 @@ export default function HomePage() {
     setWarningSeen(true);
   };
 
+  const peopleStats = publicStats ? [
+    { label: 'Members', value: publicStats.members },
+    { label: 'Sellers', value: publicStats.sellers },
+    { label: 'Buyers with access', value: publicStats.passHolders },
+    { label: 'Team', value: publicStats.staff },
+  ].filter((s): s is { label: string; value: number } => typeof s.value === 'number')
+    .map((s) => ({ label: s.label, value: s.value.toLocaleString('en-IN') })) : [];
+
   const heroStats = publicStats ? [
+    ...peopleStats,
     { label: 'Clubs Listed', value: publicStats.clubs.toLocaleString('en-IN') },
     { label: 'Cities', value: publicStats.cities.toLocaleString('en-IN') },
     { label: 'Open Listings', value: publicStats.openListings.toLocaleString('en-IN') },
@@ -572,7 +586,7 @@ export default function HomePage() {
 
           {/* Terminal panel (right side) */}
           <div id="terminal-auth" className="lg:col-span-5 hidden lg:block">
-            <TerminalPanel identity={identity} />
+            <TerminalPanel identity={identity} ready={!isLoading} />
           </div>
         </div>
       </section>
@@ -749,7 +763,7 @@ const SECRET_CODE = 'UNDERGROUND';
 
 type TerminalStage = 'booting' | 'scanning' | 'warning' | 'prompt' | 'checking' | 'denied' | 'granted';
 
-function TerminalPanel({ identity }: { identity: any }) {
+function TerminalPanel({ identity, ready }: { identity: any; ready: boolean }) {
   const [lines, setLines] = useState<Array<{ text: string; color?: string }>>([]);
   const [stage, setStage] = useState<TerminalStage>('booting');
   const [inputVal, setInputVal] = useState('');
@@ -781,7 +795,8 @@ function TerminalPanel({ identity }: { identity: any }) {
 
   // Boot sequence → scan → prompt
   useEffect(() => {
-    if (hasRun.current) return;
+    // Wait until the location lookup has finished, so the lines below show the visitor's real details.
+    if (!ready || hasRun.current) return;
     hasRun.current = true;
     let cancelled = false;
 
@@ -790,9 +805,10 @@ function TerminalPanel({ identity }: { identity: any }) {
         ['> underground_market.boot()', '#444', 0],
         ['✓ Encrypted tunnel established', '#00cc66', 180],
         ['> identity.geolocate()', '#444', 280],
-        [identity ? `✓ Node: ${identity.region}` : '  Scanning global proxy...', '#00cc66', 380],
-        [identity ? `✓ Country: ${identity.country}` : '  Tracing IP headers...', '#00cc66', 480],
-        [identity ? `✓ IP: ${identity.ip}` : '  Verifying anonymity...', '#00cc66', 580],
+        [identity ? `✓ Node: ${identity.region}` : '  Location unavailable', identity ? '#00cc66' : '#888', 380],
+        [identity ? `✓ Country: ${identity.country}` : '  Country: unknown', identity ? '#00cc66' : '#888', 480],
+        ...(identity?.state ? [[`✓ Region: ${identity.state}${identity.city ? `, ${identity.city}` : ''}`, '#00cc66', 530] as [string, string, number]] : []),
+        [identity?.ip ? `✓ IP: ${identity.ip}` : '  IP: unavailable', identity?.ip ? '#00cc66' : '#888', 580],
         ['> market.status()', '#444', 700],
         ['  Status:            online', '#888', 820],
       ]);
@@ -807,7 +823,7 @@ function TerminalPanel({ identity }: { identity: any }) {
         ['⚠  UNKNOWN ENTITY DETECTED ON NETWORK', '#ff3300', 400],
         ['   Facial recognition: RUNNING...', '#888', 600],
         ['   Device fingerprint: CAPTURED', '#ff8800', 800],
-        ['   ISP:  ' + (identity?.ip ? identity.ip.split('.').slice(0, 2).join('.') + '.x.x' : '103.x.x.x'), '#888', 1000],
+        ['   ISP:  ' + (identity?.isp || 'unknown'), '#888', 1000],
         ['   Cookies: HARVESTED', '#ff8800', 1100],
         ['   Browser history: SCANNING...', '#888', 1200],
       ]);
@@ -847,7 +863,7 @@ function TerminalPanel({ identity }: { identity: any }) {
     run();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

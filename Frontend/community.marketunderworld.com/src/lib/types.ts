@@ -155,6 +155,7 @@ export interface UserIdentity {
   regionId: string;
   city: string;
   state?: string;
+  isp?: string;
   language: string;
   timezone: string;
   detectedAt: string;

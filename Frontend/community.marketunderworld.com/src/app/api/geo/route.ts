@@ -24,6 +24,9 @@ export async function GET(req: Request) {
       stateCode: str(cf?.regionCode),
       city: str(cf?.city),
       timezone: str(cf?.timezone),
+      isp: str(cf?.asOrganization),
+      latitude: str(cf?.latitude),
+      longitude: str(cf?.longitude),
     },
     { headers: { 'Cache-Control': 'private, no-store' } },
   );
