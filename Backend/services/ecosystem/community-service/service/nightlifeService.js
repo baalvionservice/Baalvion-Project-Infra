@@ -182,7 +182,29 @@ async function publicStats() {
         db.LocalListing.count({ where: { status: 'active' } }),
         db.ClubEvent.count({ where: { status: 'active', event_date: { [Op.gte]: today } } }),
     ]);
-    return { clubs, cities, openListings: listings, upcomingEvents: events };
+    const people = await peopleCounts();
+    return { clubs, cities, openListings: listings, upcomingEvents: events, ...people };
+}
+
+// Head counts for the public landing page: how many people have joined and in what role. Real rows only, and
+// each figure is null when its table cannot be read, so the page leaves that number out instead of guessing.
+async function count(sql) {
+    try {
+        const [rows] = await db.sequelize.query(sql);
+        return Number(rows[0].n);
+    } catch {
+        return null;
+    }
+}
+
+async function peopleCounts() {
+    const [members, sellers, passHolders, staff] = await Promise.all([
+        count('SELECT COUNT(*)::int AS n FROM auth.users'),
+        count("SELECT COUNT(DISTINCT applicant_user_id)::int AS n FROM commerce.commerce_seller_applications WHERE status = 'approved'"),
+        count("SELECT COUNT(DISTINCT seller_user_id)::int AS n FROM commerce.commerce_seller_category_bonds WHERE kind = 'buyer_access' AND status = 'active'"),
+        count('SELECT COUNT(*)::int AS n FROM community.staff_members'),
+    ]);
+    return { members, sellers, passHolders, staff };
 }
 
 // ── Locals listings ──────────────────────────────────────────────────────────
