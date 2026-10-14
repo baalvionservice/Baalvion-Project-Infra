@@ -64,8 +64,9 @@ export default async function CategoryIndexPage({ params }: PageProps) {
           {products.map((p) => (
             <Link key={p.id} href={`/shop/${categorySlug}/${p.slug}`} className="group block rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02]">
               <div className="aspect-square bg-gray-900/50 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.imageUrl?.[0] || 'https://picsum.photos/seed/mu/400/400'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                {p.imageUrl?.[0] && (
+                <img src={p.imageUrl[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                )}
               </div>
               <div className="p-3 space-y-1">
                 <p className="text-sm font-bold text-white line-clamp-2">{p.name}</p>

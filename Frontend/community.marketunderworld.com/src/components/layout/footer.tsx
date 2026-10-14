@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useSetup } from '@/lib/setup';
+import { CommunityJoinLinks } from '@/components/layout/community-join';
 
 const COLUMNS: { title: string; links: [string, string][] }[] = [
   {
@@ -82,15 +83,17 @@ export const Footer = () => {
               Create an account
             </Link>
           )}
+          <h4 className="text-sm font-semibold text-white mt-6 mb-2">Join the community</h4>
+          <CommunityJoinLinks />
         </div>
 
         {columns.map((col) => (
-          <nav key={col.title} aria-label={col.title}>
-            <h4 className="text-sm font-semibold text-white mb-4">{col.title}</h4>
-            <ul className="space-y-1">
+          <nav key={col.title} aria-label={col.title} className={col.title === 'Explore' ? 'col-span-2 md:col-span-1' : undefined}>
+            <h4 className="text-sm font-semibold text-white mb-3 md:mb-4 pb-2 border-b border-[#1F232B] md:border-0 md:pb-0">{col.title}</h4>
+            <ul className={col.title === 'Explore' ? 'grid grid-cols-2 md:grid-cols-1 gap-x-6' : undefined}>
               {col.links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="inline-block py-1.5 text-sm text-gray-400 hover:text-white transition-colors">{label}</Link>
+                  <Link href={href} className="inline-flex items-center min-h-[40px] md:min-h-0 md:py-1.5 text-sm text-gray-400 hover:text-white transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
@@ -98,9 +101,9 @@ export const Footer = () => {
         ))}
       </div>
 
-      <div className="mt-12 pt-6 border-t border-[#1F232B] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+      <div className="mt-10 md:mt-12 pt-6 pb-24 sm:pb-0 border-t border-[#1F232B] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 text-center sm:text-left">
         <span>© {new Date().getFullYear()} Hell Road. All rights reserved.</span>
-        <span className="flex gap-5">
+        <span className="flex flex-wrap justify-center gap-x-5 gap-y-2">
           <Link href="/terms" className="hover:text-white">Terms</Link>
           <Link href="/privacy" className="hover:text-white">Privacy</Link>
           <Link href="/contact" className="hover:text-white">Contact</Link>

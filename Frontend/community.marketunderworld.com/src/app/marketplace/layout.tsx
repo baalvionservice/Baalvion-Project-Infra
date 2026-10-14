@@ -9,5 +9,5 @@ function MarketplaceLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <MarketplaceLayout>{children}<PageContent slug="marketplace" tone="light" /></MarketplaceLayout>
+  return <MarketplaceLayout>{children}<PageContent slug="marketplace" tone="dark" /></MarketplaceLayout>
 }

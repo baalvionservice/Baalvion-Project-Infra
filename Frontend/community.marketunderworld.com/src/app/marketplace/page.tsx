@@ -71,7 +71,9 @@ export default function MarketplacePage() {
   }, [brands, search]);
 
   const filteredProducts = useMemo(() => {
-    const visible = storeCategories.length > 0 ? products.filter((p) => storeCategories.some((c) => c.id === p.categoryId)) : products;
+    // A listing with no price set cannot be bought, so it stays off the storefront until it has one.
+    const priced = products.filter((p) => Number(p.price ?? p.basePrice) > 0);
+    const visible = storeCategories.length > 0 ? priced.filter((p) => storeCategories.some((c) => c.id === p.categoryId)) : priced;
     if (storeCategory === "All") return visible;
     return visible.filter((p) => p.categoryId === storeCategory);
   }, [products, storeCategories, storeCategory]);
@@ -86,7 +88,7 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-[#08080c] text-white">
       <Navbar />
 
-      <main className="container max-w-[1440px] mx-auto px-6 pt-44 pb-32">
+      <main className="container max-w-[1440px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-24">
         {/* Hero */}
         <header className="mb-12 space-y-8">
           <Breadcrumbs 

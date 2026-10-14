@@ -68,7 +68,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-[#e5e7eb] px-6 py-12 max-w-6xl mx-auto space-y-8">
+    <div className="text-[#e5e7eb] px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto space-y-6">
       <JsonLd data={jsonLd} />
       <Breadcrumbs
         items={[

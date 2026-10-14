@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
-import { Star, ShoppingCart, Heart } from "lucide-react"
+import { Star, ShoppingCart, Heart, ImageOff } from "lucide-react"
 import posthog from "posthog-js"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useCart } from "@/context/cart-context"
@@ -45,6 +45,8 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
       .catch(() => {});
   }, [isAuthenticated, product.id, product.name, product.price, categorySlug]);
 
+  const priced = Number(product.price) > 0;
+
   const handleAddToCart = async () => {
     try {
       await addItem({ productId: product.id, sku: product.id, name: product.name, price: product.price });
@@ -77,10 +79,11 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
 
   return (
     <div className="space-y-16">
-      <div className="grid md:grid-cols-2 gap-10">
-        <div className="aspect-square rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={product.imageUrl?.[0] || 'https://picsum.photos/seed/mu/600/600'} alt={product.name} className="w-full h-full object-cover" />
+      <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-start">
+        <div className="aspect-square max-h-[560px] w-full rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02] flex items-center justify-center">
+          {product.imageUrl?.[0]
+            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={product.imageUrl[0]} alt={product.name} className="w-full h-full object-cover" />
+            : <ImageOff className="w-10 h-10 text-gray-700" aria-label="No photo yet" />}
         </div>
         <div className="space-y-6">
           <h1 className="text-3xl font-bold text-white tracking-tight">{product.name}</h1>
@@ -94,7 +97,9 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
               <span className="text-sm text-gray-500">({product.ratingCount} reviews)</span>
             </div>
           )}
-          <p className="text-2xl font-bold text-white">{product.price} <span className="text-sm opacity-50">{product.currencyCode}</span></p>
+          {priced
+            ? <p className="text-2xl font-bold text-white">{Number(product.price).toFixed(2)} <span className="text-sm opacity-50">{product.currencyCode}</span></p>
+            : <p className="text-sm text-amber-300">This listing has no price yet, so it can't be bought right now.</p>}
           <p className="text-sm text-gray-400 leading-relaxed">{product.description}</p>
           {product.investment && (
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
@@ -127,7 +132,7 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
           )}
           <p className="text-xs text-gray-500">{product.inStock ? `${product.stock} in stock` : "Out of stock"}</p>
           <div className="flex gap-3">
-            <NexusButton onClick={handleAddToCart} disabled={!product.inStock} className="gap-2 h-12 px-8">
+            <NexusButton onClick={handleAddToCart} disabled={!product.inStock || !priced} className="gap-2 h-12 px-8 flex-1 sm:flex-none">
               <ShoppingCart className="w-4 h-4" /> Add to Cart
             </NexusButton>
             <button
@@ -149,8 +154,9 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
             {related.map((p) => (
               <Link key={p.id} href={`/shop/${categorySlug}/${p.slug}`} className="group block rounded-xl overflow-hidden border border-white/5 bg-white/[0.02]">
                 <div className="aspect-square bg-gray-900/50 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.imageUrl?.[0] || 'https://picsum.photos/seed/mu/300/300'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {p.imageUrl?.[0] && (
+                  <img src={p.imageUrl[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  )}
                 </div>
                 <div className="p-2">
                   <p className="text-xs font-bold text-white line-clamp-2">{p.name}</p>

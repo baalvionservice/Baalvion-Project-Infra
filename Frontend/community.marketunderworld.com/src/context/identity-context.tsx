@@ -11,6 +11,27 @@ interface IdentityContextType {
   isLoading: boolean;
 }
 
+interface GeoResponse {
+  ip: string | null;
+  countryCode: string | null;
+  state: string | null;
+  city: string | null;
+  timezone: string | null;
+}
+
+// The region lists in mockData spell a few countries differently from Intl.
+const COUNTRY_ALIASES: Record<string, string> = { 'United Arab Emirates': 'UAE' };
+
+function countryName(code: string): string {
+  let name = code;
+  try {
+    name = new Intl.DisplayNames(['en'], { type: 'region' }).of(code.toUpperCase()) ?? code;
+  } catch {
+    // keep the code
+  }
+  return COUNTRY_ALIASES[name] ?? name;
+}
+
 const IdentityContext = createContext<IdentityContextType | undefined>(undefined);
 
 export function IdentityProvider({ children }: { children: React.ReactNode }) {
@@ -19,36 +40,38 @@ export function IdentityProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate Global Identity Detection
+    // Location comes from the edge (/api/geo): country plus state/region where known.
     const detectIdentity = async () => {
       setIsLoading(true);
       
-      // Artificial delay for "Scanning Node" effect
-      await new Promise<void>(resolve => {
-        setTimeout(resolve, 1200);
-      });
-
-      const randomRegion = REGIONS[Math.floor(Math.random() * REGIONS.length)];
-      const randomCountry = (randomRegion.countries ?? [])[Math.floor(Math.random() * (randomRegion.countries?.length ?? 0))];
-
-      let realIp = `103.24.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+      let geo: GeoResponse | null = null;
       try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        if (data.ip) realIp = data.ip;
-      } catch (e) {
-        // Fallback to random if block
+        const res = await fetch('/api/geo', { cache: 'no-store' });
+        if (res.ok) geo = await res.json();
+      } catch {
+        // Offline or blocked: fall through to the global view.
       }
+
+      if (!geo?.countryCode) {
+        setIdentity(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const country = countryName(geo.countryCode);
+      const region = REGIONS.find((r) => (r.countries ?? []).includes(country));
+      const realIp = geo.ip ?? '';
 
       const mockIdentity: UserIdentity = {
         ip: realIp,
-        country: randomCountry,
-        countryCode: randomCountry.substring(0, 2).toUpperCase(),
-        region: randomRegion.name,
-        regionId: randomRegion.id,
-        city: "Intelligence Node Central",
-        language: "English / " + (randomRegion.id === 'sas' ? 'Hindi' : randomRegion.id === 'mena' ? 'Arabic' : 'Local'),
-        timezone: "GMT " + (Math.random() > 0.5 ? "+" : "-") + Math.floor(Math.random() * 12),
+        country,
+        countryCode: geo.countryCode.toUpperCase(),
+        region: region?.name ?? country,
+        regionId: region?.id ?? '',
+        city: geo.city ?? '',
+        state: geo.state ?? undefined,
+        language: navigator.language || 'English',
+        timezone: geo.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
         detectedAt: new Date().toISOString()
       };
 

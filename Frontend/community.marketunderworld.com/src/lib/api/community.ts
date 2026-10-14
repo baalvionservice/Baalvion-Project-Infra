@@ -7,6 +7,7 @@
 // tokens directly, so it works the same from Server Components, Client Components, and
 // Route Handlers alike.
 
+import { notifyPassRequired } from '@/lib/access-pass-event';
 import { memo } from '@/lib/server-cache';
 
 const PROXY_BASE = '/api/community-proxy';
@@ -37,7 +38,7 @@ export interface CommunityDetail extends Community {
 interface ApiEnvelope<T> {
     success: boolean;
     data: T;
-    error?: { code: string; message: string };
+    error?: { code: string; message: string; details?: { priceUsd?: number } };
 }
 
 function absoluteUrl(path: string): string {
@@ -62,6 +63,7 @@ async function communityFetchNow<T>(path: string, init: RequestInit = {}, revali
     });
     const body = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
     if (!res.ok || body.success === false) {
+        notifyPassRequired(body.error);
         throw new Error(body.error?.message || `community API ${path} failed: ${res.status}`);
     }
     return body.data;

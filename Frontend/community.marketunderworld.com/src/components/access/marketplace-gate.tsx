@@ -25,7 +25,7 @@ export async function MarketplaceGate({ children, returnTo, withNav = false }: {
     } catch { /* browsing still works; the notice below just stays generic */ }
   }
   // The shop pages carry no site menu or footer of their own, so they get them here; the marketplace pages bring theirs.
-  if (hasAccess) return withNav ? <><Navbar /><div className="pt-24">{children}</div><Footer /></> : <>{children}</>
+  if (hasAccess) return withNav ? <><Navbar /><div className="pt-24">{children}</div><Footer /></> : <div className="pt-24">{children}</div>
 
   return (
     <>
