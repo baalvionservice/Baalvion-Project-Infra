@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { CommunityJoinSection, InviteSection } from '@/components/layout/community-join';
 import { AppButton } from '@/components/ui/AppButton';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { REGIONS } from '@/data/mockData';
@@ -87,6 +88,11 @@ interface PublicStats {
   cities: number;
   openListings: number;
   upcomingEvents: number;
+  // Head counts; null (or missing, on an older API) means the figure could not be read, so it is left out.
+  members?: number | null;
+  sellers?: number | null;
+  passHolders?: number | null;
+  staff?: number | null;
 }
 
 // Real counts from the community API; shown only once loaded, never as placeholders.
@@ -408,6 +414,12 @@ function SiteEntryWarning({ onEnter }: { onEnter: () => void }) {
   );
 }
 
+// "INDIA · MAHARASHTRA", or just the country/region when the state is unknown.
+function nodeLabel(id: { country: string; state?: string; region: string }) {
+  const place = id.state ? `${id.country} · ${id.state}` : id.country || id.region;
+  return place.toUpperCase();
+}
+
 function CountryCycler({ initialCountry }: { initialCountry: string }) {
   const [country, setCountry] = useState(initialCountry);
   
@@ -436,7 +448,16 @@ export default function HomePage() {
     setWarningSeen(true);
   };
 
+  const peopleStats = publicStats ? [
+    { label: 'Members', value: publicStats.members },
+    { label: 'Sellers', value: publicStats.sellers },
+    { label: 'Buyers with access', value: publicStats.passHolders },
+    { label: 'Team', value: publicStats.staff },
+  ].filter((s): s is { label: string; value: number } => typeof s.value === 'number')
+    .map((s) => ({ label: s.label, value: s.value.toLocaleString('en-IN') })) : [];
+
   const heroStats = publicStats ? [
+    ...peopleStats,
     { label: 'Clubs Listed', value: publicStats.clubs.toLocaleString('en-IN') },
     { label: 'Cities', value: publicStats.cities.toLocaleString('en-IN') },
     { label: 'Open Listings', value: publicStats.openListings.toLocaleString('en-IN') },
@@ -512,7 +533,7 @@ export default function HomePage() {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-red-900/50 bg-red-950/30">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-[10px] sm:text-[11px] font-bold text-red-400 uppercase tracking-[0.25em]">
-                  {identity && !isGlobalView ? `NODE ACTIVE: ${identity.region?.toUpperCase() || 'UNKNOWN'}` : 'GLOBAL NETWORK ONLINE'}
+                  {identity && !isGlobalView ? `NODE ACTIVE: ${nodeLabel(identity)}` : 'GLOBAL NETWORK ONLINE'}
                 </span>
               </div>
 
@@ -565,7 +586,7 @@ export default function HomePage() {
 
           {/* Terminal panel (right side) */}
           <div id="terminal-auth" className="lg:col-span-5 hidden lg:block">
-            <TerminalPanel identity={identity} />
+            <TerminalPanel identity={identity} ready={!isLoading} />
           </div>
         </div>
       </section>
@@ -647,8 +668,8 @@ export default function HomePage() {
                 className="flex items-center gap-2 px-4 py-2 rounded border text-xs font-bold uppercase tracking-widest"
                 style={{ background: 'rgba(0,180,0,0.08)', borderColor: 'rgba(0,200,0,0.3)', color: '#00cc66' }}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Connected: {identity.regionId.toUpperCase()}
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                Connected: {nodeLabel(identity)}
               </div>
             )}
           </div>
@@ -676,6 +697,11 @@ export default function HomePage() {
                     )}
                     <div className="text-3xl sm:text-4xl mb-4 sm:mb-6">{reg.icon}</div>
                     <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{reg.name}</h3>
+                    {identity?.regionId === reg.id && !isGlobalView && (
+                      <p className="text-xs font-semibold text-green-400">
+                        Your node: {identity.state ? `${identity.state}, ${identity.country}` : identity.country}
+                      </p>
+                    )}
                   </ListingCard>
                 </Link>
               ))}
@@ -683,6 +709,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <InviteSection />
+
+      <CommunityJoinSection />
 
       {/* ══════════════════════════════════════════════════════
           FINAL CTA — Hell Gate Banner
@@ -733,7 +763,7 @@ const SECRET_CODE = 'UNDERGROUND';
 
 type TerminalStage = 'booting' | 'scanning' | 'warning' | 'prompt' | 'checking' | 'denied' | 'granted';
 
-function TerminalPanel({ identity }: { identity: any }) {
+function TerminalPanel({ identity, ready }: { identity: any; ready: boolean }) {
   const [lines, setLines] = useState<Array<{ text: string; color?: string }>>([]);
   const [stage, setStage] = useState<TerminalStage>('booting');
   const [inputVal, setInputVal] = useState('');
@@ -765,7 +795,8 @@ function TerminalPanel({ identity }: { identity: any }) {
 
   // Boot sequence → scan → prompt
   useEffect(() => {
-    if (hasRun.current) return;
+    // Wait until the location lookup has finished, so the lines below show the visitor's real details.
+    if (!ready || hasRun.current) return;
     hasRun.current = true;
     let cancelled = false;
 
@@ -774,9 +805,10 @@ function TerminalPanel({ identity }: { identity: any }) {
         ['> underground_market.boot()', '#444', 0],
         ['✓ Encrypted tunnel established', '#00cc66', 180],
         ['> identity.geolocate()', '#444', 280],
-        [identity ? `✓ Node: ${identity.region}` : '  Scanning global proxy...', '#00cc66', 380],
-        [identity ? `✓ Country: ${identity.country}` : '  Tracing IP headers...', '#00cc66', 480],
-        [identity ? `✓ IP: ${identity.ip}` : '  Verifying anonymity...', '#00cc66', 580],
+        [identity ? `✓ Node: ${identity.region}` : '  Location unavailable', identity ? '#00cc66' : '#888', 380],
+        [identity ? `✓ Country: ${identity.country}` : '  Country: unknown', identity ? '#00cc66' : '#888', 480],
+        ...(identity?.state ? [[`✓ Region: ${identity.state}${identity.city ? `, ${identity.city}` : ''}`, '#00cc66', 530] as [string, string, number]] : []),
+        [identity?.ip ? `✓ IP: ${identity.ip}` : '  IP: unavailable', identity?.ip ? '#00cc66' : '#888', 580],
         ['> market.status()', '#444', 700],
         ['  Status:            online', '#888', 820],
       ]);
@@ -791,7 +823,7 @@ function TerminalPanel({ identity }: { identity: any }) {
         ['⚠  UNKNOWN ENTITY DETECTED ON NETWORK', '#ff3300', 400],
         ['   Facial recognition: RUNNING...', '#888', 600],
         ['   Device fingerprint: CAPTURED', '#ff8800', 800],
-        ['   ISP:  ' + (identity?.ip ? identity.ip.split('.').slice(0, 2).join('.') + '.x.x' : '103.x.x.x'), '#888', 1000],
+        ['   ISP:  ' + (identity?.isp || 'unknown'), '#888', 1000],
         ['   Cookies: HARVESTED', '#ff8800', 1100],
         ['   Browser history: SCANNING...', '#888', 1200],
       ]);
@@ -831,7 +863,7 @@ function TerminalPanel({ identity }: { identity: any }) {
     run();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

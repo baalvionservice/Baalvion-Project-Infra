@@ -51,10 +51,13 @@ export const setMyDisplayName = (displayName: string) =>
   call<MyMember>('/members/me', { method: 'PUT', body: JSON.stringify({ displayName }) });
 
 // Server-side only (the public profile page): reads the upstream directly.
+// The commerce edge only routes these reads for requests from this site's own server, and checks this key.
+const edgeHeaders = (): Record<string, string> => (process.env.COMMUNITY_ADMIN_EDGE_KEY ? { 'x-edge-key': process.env.COMMUNITY_ADMIN_EDGE_KEY } : {});
+
 export async function getPublicMember(memberNumber: string): Promise<PublicMember | null> {
   const base = process.env.COMMERCE_UPSTREAM_URL ?? '';
   try {
-    const res = await fetch(`${base}/members/${encodeURIComponent(memberNumber)}`, { next: { revalidate: 30 } });
+    const res = await fetch(`${base}/members/${encodeURIComponent(memberNumber)}`, { headers: edgeHeaders(), cache: 'no-store' });
     if (!res.ok) return null;
     return (await res.json()).data as PublicMember;
   } catch {
@@ -70,7 +73,7 @@ export async function getMemberListings(memberNumber: string, accessToken: strin
   if (!accessToken) return { status: 'signin' };
   const base = process.env.COMMERCE_UPSTREAM_URL ?? '';
   try {
-    const res = await fetch(`${base}/members/${encodeURIComponent(memberNumber)}/listings`, { headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
+    const res = await fetch(`${base}/members/${encodeURIComponent(memberNumber)}/listings`, { headers: { authorization: `Bearer ${accessToken}`, ...edgeHeaders() }, cache: 'no-store' });
     if (res.status === 401) return { status: 'signin' };
     if (res.status === 402) return { status: 'pass' };
     if (!res.ok) return { status: 'error' };

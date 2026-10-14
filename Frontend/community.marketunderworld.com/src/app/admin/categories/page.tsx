@@ -95,6 +95,19 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const handleToggle = async (cat: CommerceCategory) => {
+    setBusyId(cat.id);
+    try {
+      await updateAdminCategory(cat.storeId, cat.id, { isActive: !cat.isActive });
+      toast({ title: cat.isActive ? `${cat.name} is now hidden` : `${cat.name} is now visible` });
+      load();
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't change visibility", description: err instanceof Error ? err.message : "Please try again." });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const handleDelete = async (cat: CommerceCategory) => {
     setBusyId(cat.id);
     try {
@@ -208,6 +221,9 @@ export default function AdminCategoriesPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <NexusButton size="sm" variant="outline" isLoading={busyId === cat.id} onClick={() => handleToggle(cat)} className="text-[10px] h-9 min-w-[88px]">
+                    {cat.isActive ? "Hide" : "Show"}
+                  </NexusButton>
                   <NexusButton size="sm" variant="outline" onClick={() => startEdit(cat)} className="gap-2 text-[10px] h-9">
                     <Pencil className="w-3.5 h-3.5" /> Edit
                   </NexusButton>

@@ -26,7 +26,7 @@ export const CryptoTicker = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-8 bg-black border-b border-[#1F232B] z-[1100] overflow-hidden whitespace-nowrap hidden md:block">
+    <div className="fixed top-0 left-0 right-0 h-8 bg-black border-b border-[#1F232B] z-[1100] overflow-hidden whitespace-nowrap">
       <div className="flex h-full items-center animate-ticker">
         {[...items, ...items, ...items].map((item, idx) => (
           <div key={idx} className="inline-flex items-center mx-12 gap-3 group cursor-default">

@@ -5,6 +5,7 @@
 // Public reads fall back to the bundled snapshot so a backend outage degrades the directory
 // instead of blanking it; writes never fall back — a failed submit must say so.
 
+import { notifyPassRequired } from "@/lib/access-pass-event";
 import { INDIAN_CLUBS, type Club, type VipPackage } from "@/data/clubs-data";
 import { memo } from "@/lib/server-cache";
 import { MUMBAI_CLUBS } from "@/data/mumbai-clubs";
@@ -20,7 +21,7 @@ const DIRECT_BASE = process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? "https://api.b
 interface Envelope<T> {
   success: boolean;
   data: T;
-  error?: { code: string; message: string };
+  error?: { code: string; message: string; details?: { priceUsd?: number } };
 }
 
 export class ApiError extends Error {
@@ -38,6 +39,7 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   const body = (await res.json().catch(() => ({}))) as Envelope<T>;
   if (!res.ok || body.success === false) {
+    notifyPassRequired(body.error);
     throw new ApiError(body.error?.message || `Request failed (${res.status})`, res.status, body.error?.code);
   }
   return body.data;

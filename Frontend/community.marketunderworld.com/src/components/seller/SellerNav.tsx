@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Package, FolderTree, KeyRound, Users, BarChart2, Wallet, LayoutDashboard, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SellerNotice } from "@/components/seller/SellerNotice"
 
 const NAV = [
   { name: "Listings",       path: "/seller/listings",   icon: Package   },
@@ -19,6 +20,7 @@ export function SellerNav() {
   const pathname = usePathname();
   // The site has a fixed 32px ticker at the very top, so this menu starts under it and sticks just below it.
   return (
+    <>
     <div className="mt-8 border-b border-white/5 bg-[#050508]/95 backdrop-blur-md sticky top-8 z-40">
       <div className="max-w-[1200px] mx-auto px-3 sm:px-6 flex flex-nowrap items-center gap-1 py-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Back to dashboard */}
@@ -48,5 +50,7 @@ export function SellerNav() {
         })}
       </div>
     </div>
+    <SellerNotice />
+    </>
   );
 }

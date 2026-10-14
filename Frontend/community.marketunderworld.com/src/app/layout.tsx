@@ -19,6 +19,8 @@ import { BountyChatWidget } from "@/components/chat/bounty-chat-widget";
 import { CSPostHogProvider } from "@/components/providers/posthog-provider";
 import { CookieBanner } from "@/components/layout/cookie-banner";
 import { AiAssistantWidget } from "@/components/chat/ai-assistant-widget";
+import { PassPrompt } from "@/components/access/pass-prompt";
+import { DashboardCommunityBar } from "@/components/layout/community-join";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -99,6 +101,8 @@ export default function RootLayout({
                       <main className="flex-1 flex flex-col">
                         {children}
                       </main>
+                      <DashboardCommunityBar />
+                      <PassPrompt />
                       <ToastContainer />
                       <Toaster />
                       <GlobalSearch />

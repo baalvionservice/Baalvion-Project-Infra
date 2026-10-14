@@ -44,6 +44,19 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // One canonical address for search engines and visitors: www goes to the bare domain in a single hop.
+      {
+        source: '/',
+        has: [{ type: 'host', value: 'www.community.marketunderworld.com' }],
+        destination: 'https://community.marketunderworld.com/',
+        permanent: true,
+      },
+      {
+        source: '/:path+',
+        has: [{ type: 'host', value: 'www.community.marketunderworld.com' }],
+        destination: 'https://community.marketunderworld.com/:path*',
+        permanent: true,
+      },
       // The emailed links point at /reset-password and /verify-email; the pages live under /auth.
       { source: '/reset-password', destination: '/auth/reset-password', permanent: false },
       { source: '/verify-email', destination: '/auth/verify-email', permanent: false },

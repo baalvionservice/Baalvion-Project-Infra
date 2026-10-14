@@ -116,7 +116,7 @@ export default function MyBookingsPage() {
   const load = async () => {
     try {
       const res = await getMyBookings();
-      setBookings(res.items);
+      setBookings(Array.isArray(res?.items) ? res.items : []);
     } catch {
       setBookings([]);
     } finally {

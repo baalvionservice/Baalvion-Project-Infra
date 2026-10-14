@@ -6,5 +6,5 @@ function ShopLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ShopLayout>{children}<PageContent slug="shop" tone="light" /></ShopLayout>
+  return <ShopLayout>{children}<PageContent slug="shop" tone="dark" /></ShopLayout>
 }
