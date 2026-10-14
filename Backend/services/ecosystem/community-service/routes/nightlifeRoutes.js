@@ -1,10 +1,11 @@
 'use strict';
 const { Router } = require('express');
 const ctrl = require('../controller/nightlifeController');
-const { authMiddleware, optionalAuthMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { AppError } = require('../utils/errors');
 const { rememberContact } = require('../middleware/rememberContact');
 const { requirePerm } = require('../middleware/staffAccess');
+const { requireAccessPass } = require('../middleware/requireAccessPass');
 const { overview } = require('../service/adminOverviewService');
 const { sendSuccess } = require('../utils/response');
 
@@ -19,13 +20,13 @@ const adminAuth = [authMw];
 
 router.get('/nightlife/stats', ctrl.stats);
 
-// Clubs (public reads; bookings accept guests, attach the user when a token is present)
+// Clubs: reads are public. Booking (guest list, VIP table) and applying to a local listing need an account and the access pass.
 router.get('/nightlife/clubs', ctrl.listClubs);
 router.get('/nightlife/clubs/:id', ctrl.getClub);
 router.get('/nightlife/events', ctrl.listEvents);
 router.get('/nightlife/events/:id', uuidParam, ctrl.getEvent);
-router.post('/nightlife/clubs/:id/guest-list', optionalAuthMiddleware, ctrl.createGuestList);
-router.post('/nightlife/clubs/:id/vip-tables', optionalAuthMiddleware, ctrl.createVipTable);
+router.post('/nightlife/clubs/:id/guest-list', ...authMw, requireAccessPass, ctrl.createGuestList);
+router.post('/nightlife/clubs/:id/vip-tables', ...authMw, requireAccessPass, ctrl.createVipTable);
 router.get('/nightlife/bookings/mine', authMw, ctrl.myBookings);
 
 router.get('/admin/overview', ...adminAuth, requirePerm(), async (req, res, next) => {
@@ -43,7 +44,7 @@ router.patch('/admin/nightlife/bookings/:id', ...adminAuth, requirePerm('content
 // Locals hub
 router.get('/nightlife/locals', ctrl.listListings);
 router.get('/nightlife/locals/:slug', ctrl.getListing);
-router.post('/nightlife/locals/:slug/applications', authMw, ctrl.applyToListing);
+router.post('/nightlife/locals/:slug/applications', ...authMw, requireAccessPass, ctrl.applyToListing);
 router.get('/nightlife/applications/mine', authMw, ctrl.myApplications);
 
 router.get('/admin/nightlife/locals', ...adminAuth, requirePerm('content.manage'), ctrl.adminListListings);
