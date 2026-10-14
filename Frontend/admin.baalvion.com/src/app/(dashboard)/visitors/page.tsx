@@ -12,9 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { adminApiClient } from '@/lib/api/client';
-import { useRealtimeStore } from '@/lib/store/realtimeStore';
 import { cn } from '@/lib/utils/cn';
-import type { LiveEvent } from '@/lib/types/realtime.types';
 
 /* ─── Types ─────────────────────────────────────────────────────── */
 interface Visitor {
@@ -65,20 +63,19 @@ function FlagEmoji({ code }: { code: string }) {
   return <span className="text-base leading-none">{flag}</span>;
 }
 
-/* ─── Live visitor row from WS ─────────────────────────────────── */
-function LiveVisitorPill({ event }: { event: LiveEvent }) {
-  const meta = event.meta as Record<string, unknown> | undefined;
+/* ─── Recent visitor row ───────────────────────────────────────── */
+function RecentVisitorPill({ visitor }: { visitor: Visitor }) {
+  const where = [visitor.city, visitor.region, visitor.country].filter(Boolean).join(', ') || visitor.ip;
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-orange-500/20 bg-orange-500/5">
-      <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse flex-shrink-0" />
-      <DeviceIcon type={String(meta?.deviceType || 'Desktop')} />
+      <DeviceIcon type={visitor.device_type || 'Desktop'} />
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-white truncate">{event.summary}</div>
+        <div className="text-sm font-medium text-white truncate">{where}</div>
         <div className="text-[11px] text-gray-500 truncate">
-          {String(meta?.browser || '')} · {String(meta?.os || '')} · {String(meta?.screen || '')}
+          {visitor.browser} · {visitor.os} · {visitor.ip}
         </div>
       </div>
-      <div className="text-[11px] text-gray-600 flex-shrink-0">{timeAgo(event.timestamp)}</div>
+      <div className="text-[11px] text-gray-600 flex-shrink-0">{timeAgo(visitor.created_at)}</div>
     </div>
   );
 }
@@ -92,11 +89,7 @@ export default function VisitorsPage() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Live events from the WebSocket store
-  const allEvents  = useRealtimeStore(s => s.events);
-  const liveVisitors = allEvents
-    .filter(e => e.type === 'visitor')
-    .slice(0, 20);
+  const recentVisitors = visitors.slice(0, 20);
 
   /* ── Fetch DB visitors ── */
   const fetchVisitors = async () => {
@@ -201,21 +194,21 @@ export default function VisitorsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* ── Live feed (WebSocket) ── */}
+        {/* ── Most recent visitors ── */}
         <div className="lg:col-span-1 space-y-3">
           <Card className="bg-[#111318] border-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                Live Activity
-                <span className="ml-auto text-[10px] text-gray-600 font-normal">{liveVisitors.length} recent</span>
+                Recent Visitors
+                <span className="ml-auto text-[10px] text-gray-600 font-normal">{recentVisitors.length} shown</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
-              {liveVisitors.length === 0 ? (
-                <p className="text-xs text-gray-600 text-center py-6">Waiting for visitors...</p>
+              {recentVisitors.length === 0 ? (
+                <p className="text-xs text-gray-600 text-center py-6">No visitors recorded yet.</p>
               ) : (
-                liveVisitors.map(ev => <LiveVisitorPill key={ev.id} event={ev} />)
+                recentVisitors.map(v => <RecentVisitorPill key={v.id} visitor={v} />)
               )}
             </CardContent>
           </Card>
