@@ -1,4 +1,6 @@
 'use strict';
+// appConfig insists on JWT_PUBLIC_KEY at load time, which CI does not set; this test only needs the pass settings.
+jest.mock('../config/appConfig', () => ({ accessPass: { enforce: true, priceUsd: 50 } }));
 jest.mock('../models', () => ({ sequelize: { query: jest.fn() } }));
 const { sequelize } = require('../models');
 const config = require('../config/appConfig');
