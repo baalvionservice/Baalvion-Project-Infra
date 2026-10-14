@@ -32,6 +32,12 @@ module.exports = {
         baseUrl: process.env.NODEBB_BASE_URL || 'http://nodebb:4567',
         writeApiToken: process.env.NODEBB_WRITE_API_TOKEN || '',
     },
+    // Posting, registering and demanding things needs the one-time access pass (the same pass that
+    // unlocks buying; it lives in commerce-service's bonds table). Browsing never does.
+    accessPass: {
+        enforce: process.env.POSTING_REQUIRES_PASS !== 'false',
+        priceUsd: Number(process.env.BUYER_ACCESS_USD || 50),
+    },
     internal: {
         serviceSecret: process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret',
     },
