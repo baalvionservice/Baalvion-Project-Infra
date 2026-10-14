@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-const ADMIN_SERVICE = process.env.ADMIN_SERVICE_URL || 'http://localhost:9002';
+// On Cloudflare the admin API is reached through the gateway (ADMIN_UPSTREAM_URL ends in /api/v1); locally it is
+// the admin service itself on :9002, whose routes sit under /v1.
+const ADMIN_BASE = process.env.ADMIN_UPSTREAM_URL ?? `${process.env.ADMIN_SERVICE_URL || 'http://localhost:9002'}/v1`;
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
     const visitorIp = req.headers.get('cf-connecting-ip') ?? undefined;
 
     // Server-to-server — bypasses browser CORS
-    const response = await fetch(`${ADMIN_SERVICE}/v1/track/visitor`, {
+    const response = await fetch(`${ADMIN_BASE}/track/visitor`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(visitorIp ? { 'x-forwarded-for': visitorIp } : {}) },
       body: JSON.stringify({
@@ -54,7 +56,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
     const upstream = await fetch(
-      `${ADMIN_SERVICE}/v1/track/visitors?${searchParams.toString()}`,
+      `${ADMIN_BASE}/track/visitors?${searchParams.toString()}`,
       {
         headers: token ? { authorization: `Bearer ${token}` } : {},
       }
