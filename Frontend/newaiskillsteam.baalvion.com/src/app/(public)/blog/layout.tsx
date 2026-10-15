@@ -6,13 +6,13 @@ const blogUrl = absoluteUrl('/blog');
 export const metadata: Metadata = {
   title: 'Blog',
   description:
-    'Insights, guides, and industry research on skill-based hiring, talent verification, and the future of recruiting from the ControlTheMarket team.',
+    'Insights, guides, and industry research on skill-based hiring, talent verification, and the future of recruiting from the NEW AI Skills Team team.',
   alternates: {
     canonical: blogUrl,
   },
   openGraph: {
     url: blogUrl,
-    title: 'Blog | ControlTheMarket',
+    title: 'Blog | NEW AI Skills Team',
     description:
       'Insights, guides, and industry research on skill-based hiring, talent verification, and the future of recruiting.',
   },

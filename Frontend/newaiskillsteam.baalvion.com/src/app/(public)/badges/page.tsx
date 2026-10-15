@@ -16,13 +16,13 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Skill Badges',
   description:
-    'Explore the verifiable skill badges candidates earn on ControlTheMarket by proving real-world performance — recognised credentials that signal proven ability, not paper.',
+    'Explore the verifiable skill badges candidates earn on NEW AI Skills Team by proving real-world performance — recognised credentials that signal proven ability, not paper.',
   alternates: {
     canonical: absoluteUrl('/badges'),
   },
   openGraph: {
     url: absoluteUrl('/badges'),
-    title: 'Skill Badges | ControlTheMarket',
+    title: 'Skill Badges | NEW AI Skills Team',
     description:
       'Verifiable skill badges candidates earn by proving real-world performance — recognised credentials that signal proven ability.',
   },

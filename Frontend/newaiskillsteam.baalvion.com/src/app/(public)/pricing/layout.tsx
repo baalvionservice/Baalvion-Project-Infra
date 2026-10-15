@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     url: absoluteUrl('/pricing'),
-    title: 'Pricing | ControlTheMarket',
+    title: 'Pricing | NEW AI Skills Team',
     description:
       'Find the perfect plan for your hiring needs. Start with a free trial — no credit card required.',
   },

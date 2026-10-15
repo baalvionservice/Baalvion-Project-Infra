@@ -16,7 +16,7 @@ export default function Footer() {
               <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-black">
                 ✓
               </div>
-              ControlTheMarket
+              NEW AI Skills Team
             </Link>
             <p className="text-[13px] leading-[1.7] max-w-[250px]">
               The proof-of-skill hiring platform for the modern era. Where talent is proven, not promised.
@@ -102,7 +102,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/7 pt-5 flex flex-col sm:flex-row justify-between items-center gap-2.5 flex-wrap text-xs">
           <span>
-            © 2026 Baalvion Industries Private Limited. ControlTheMarket —{" "}
+            © 2026 Baalvion Industries Private Limited. NEW AI Skills Team —{" "}
             <Link href="https://newaiskillsteam.baalvion.com" className="text-white/35 hover:text-white transition-colors no-underline">
               newaiskillsteam.baalvion.com
             </Link>

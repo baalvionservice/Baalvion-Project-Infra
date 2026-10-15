@@ -26,7 +26,7 @@ export default function CTASection() {
         className="max-w-[620px] mx-auto relative z-10"
       >
         <h2 className="text-[clamp(32px,4.5vw,50px)] font-black text-white tracking-[-1.5px] leading-[1.1] mb-3.5">
-          Ready to <em className="text-green-500 not-italic">control the market</em>?
+          Ready to <em className="text-green-500 not-italic">hire by skill</em>?
         </h2>
         <p className="text-base text-white/55 mb-9 leading-[1.65]">
           Whether you're looking for the best talent or want to prove you are the best — your journey starts at newaiskillsteam.baalvion.com

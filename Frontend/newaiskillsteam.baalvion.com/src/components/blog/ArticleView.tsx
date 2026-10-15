@@ -77,7 +77,7 @@ export default function ArticleView({ articleId, onClose, onOpenArticle }: Artic
           <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
           <span>⏱ {article.read} read</span>
           <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
-          <span>✍️ ControlTheMarket Editorial Team</span>
+          <span>✍️ NEW AI Skills Team Editorial Team</span>
         </div>
       </div>
 

@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 export const dynamic = 'force-dynamic';
 
 /**
- * Shared-auth SSO landing for ControlTheMarket. The user verified on auth.baalvion.com,
+ * Shared-auth SSO landing for NEW AI Skills Team. The user verified on auth.baalvion.com,
  * which redirects back here as `/auth/sso-callback?next=<path>#token=<accessToken>`.
  *
  * CROSS-APEX CAVEAT: CTM lives on controlthemarket.com, NOT a *.baalvion.com host, so the shared

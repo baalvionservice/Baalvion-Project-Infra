@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// Reads live NEW AI Skills Team data through @/lib/api, which throws CtmDataError when
 // ctm-service is unreachable rather than showing placeholder data. Prerendering this at
 // build time therefore fails; it is a per-request view, not a static page.
 export const dynamic = 'force-dynamic';

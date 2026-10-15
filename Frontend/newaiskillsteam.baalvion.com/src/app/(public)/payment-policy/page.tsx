@@ -26,7 +26,7 @@ export default function PaymentPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-foreground">Payment Policy</h2>
               <p className="mt-4 text-foreground/80">
-                This Payment Policy describes how ControlTheMarket processes payments, protects your financial information, and manages transactions securely.
+                This Payment Policy describes how NEW AI Skills Team processes payments, protects your financial information, and manages transactions securely.
               </p>
             </div>
 

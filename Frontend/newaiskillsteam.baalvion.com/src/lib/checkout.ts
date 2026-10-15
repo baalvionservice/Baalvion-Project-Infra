@@ -1,4 +1,4 @@
-// Browser-side checkout orchestration for ControlTheMarket.
+// Browser-side checkout orchestration for NEW AI Skills Team.
 //
 // Calls the server-authoritative POST /payments/checkout (the charge amount is computed from
 // the plan on the backend — NEVER trusted from here), then drives the buyer's chosen provider:
@@ -102,7 +102,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<{ status: 
       order_id: cp.orderId,
       amount: cp.amount,
       currency: cp.currency,
-      name: (cp.name as string) ?? 'ControlTheMarket',
+      name: (cp.name as string) ?? 'NEW AI Skills Team',
       description: cp.name ? `${cp.name} subscription` : 'Subscription',
       prefill: cp.prefillEmail ? { email: cp.prefillEmail } : undefined,
       // The payment is captured here; the backend webhook is the source of truth for activation.

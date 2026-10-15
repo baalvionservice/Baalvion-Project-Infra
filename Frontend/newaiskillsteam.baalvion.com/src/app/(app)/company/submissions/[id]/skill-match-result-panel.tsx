@@ -12,13 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Award } from 'lucide-react';
 import type { Submission } from '@/lib/types';
 
-export function ControlTheMarketResultPanel({ submission }: { submission: Submission }) {
+export function SkillMatchResultPanel({ submission }: { submission: Submission }) {
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Award className="h-5 w-5 text-primary" />
-                    ControlTheMarket Result
+                    NEW AI Skills Team Result
                 </CardTitle>
                 <CardDescription>
                     Final assessment based on overall performance.

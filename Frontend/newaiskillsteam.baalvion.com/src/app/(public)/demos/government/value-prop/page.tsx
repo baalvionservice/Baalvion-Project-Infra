@@ -31,7 +31,7 @@ export default function GovernmentValuePropDemoPage() {
           The Solution for Public Sector Skill Development
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          ControlTheMarket offers a secure, scalable, and auditable platform to manage large-scale skill assessments, ensure compliance, and deliver measurable outcomes for government initiatives.
+          NEW AI Skills Team offers a secure, scalable, and auditable platform to manage large-scale skill assessments, ensure compliance, and deliver measurable outcomes for government initiatives.
         </p>
       </div>
 

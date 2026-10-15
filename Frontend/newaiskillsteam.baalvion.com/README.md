@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="ControlTheMarket — Baalvion Platform" width="100%">
+<img src="assets/banner.svg" alt="NEW AI Skills Team — Baalvion Platform" width="100%">
 
 <br/>
 <br/>
@@ -24,10 +24,10 @@
 
 ## Overview
 
-**ControlTheMarket** (package `testrank-baalvion-web`) is a **proof-of-skill hiring platform**:
+**NEW AI Skills Team** (package `testrank-baalvion-web`) is a **proof-of-skill hiring platform**:
 companies post real-world tasks, candidates submit work, and a ranking engine surfaces
 verified talent based on performance rather than paper credentials. Production domain:
-**[controlthemarket.com](https://controlthemarket.com)**.
+**[newaiskillsteam.baalvion.com](https://newaiskillsteam.baalvion.com)**.
 
 It lives inside the Baalvion **pnpm + Turborepo monorepo** under
 `Frontend/testrank-baalvion` and is the ecosystem-domain frontend for the **`ctm`**
@@ -36,7 +36,7 @@ package `@baalvion/auth-sdk` and routes auth through the central platform gatewa
 not stand up its own identity issuer.
 
 - **Local dev port:** `:3034`
-- **Production domain:** `https://controlthemarket.com` (`NEXT_PUBLIC_APP_URL`)
+- **Production domain:** `https://newaiskillsteam.baalvion.com` (`NEXT_PUBLIC_APP_URL`)
 - **Backend service:** `ctm` — API base `https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`
   (`NEXT_PUBLIC_CTM_API_URL`)
 - **Auth:** centralized via `@baalvion/auth-sdk` + same-origin `/auth-bff` proxy → auth-gateway
@@ -57,7 +57,7 @@ OpenTelemetry are kept out of the client bundle via `serverExternalPackages` in
 
 ```mermaid
 flowchart LR
-    V["Candidate · Company · Admin"] --> APP["ControlTheMarket Web<br/><i>Next.js 15 · :3034</i>"]
+    V["Candidate · Company · Admin"] --> APP["NEW AI Skills Team Web<br/><i>Next.js 15 · :3034</i>"]
     APP -->|"NEXT_PUBLIC_CTM_API_URL (Bearer)"| SVC["ctm service<br/><i>tasks · submissions · evaluations · rankings</i>"]
     APP -->|"/auth-bff/* rewrite"| GW["Auth Gateway · BFF<br/><i>httpOnly refresh cookie · single-flight refresh</i>"]
     APP -.->|"server-only · Genkit/Gemini"| AI["Genkit AI flows<br/><i>src/ai/flows</i>"]
@@ -154,7 +154,7 @@ else is server-only. Never commit real secrets. Defaults below come from `next.c
 
 | Variable | Purpose |
 |---|---|
-| `NEXT_PUBLIC_APP_URL` | Canonical public origin — SEO canonicals, robots host, sitemap URLs (prod `https://controlthemarket.com`) |
+| `NEXT_PUBLIC_APP_URL` | Canonical public origin — SEO canonicals, robots host, sitemap URLs (prod `https://newaiskillsteam.baalvion.com`) |
 | `NEXT_PUBLIC_CTM_API_URL` | `ctm` service API base (default `https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`) |
 | `AUTH_PROXY_TARGET` | Server-only upstream for the same-origin `/auth-bff/*` rewrite (central gateway) |
 | `NEXT_PUBLIC_REFRESH_COOKIE_NAME` | httpOnly refresh cookie name the edge gate checks (default `baalvion_refresh`) |

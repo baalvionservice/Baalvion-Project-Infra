@@ -25,7 +25,7 @@ const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'https://api.baalvion.co
 class CtmDataError extends Error {
   constructor(cause: unknown) {
     super(
-      'ControlTheMarket data is unavailable — ctm-service could not be reached. ' +
+      'NEW AI Skills Team data is unavailable — ctm-service could not be reached. ' +
       'No data is shown rather than placeholder data.',
     );
     this.name = 'CtmDataError';

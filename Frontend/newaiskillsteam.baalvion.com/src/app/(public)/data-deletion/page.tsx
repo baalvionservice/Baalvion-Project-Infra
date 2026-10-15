@@ -42,7 +42,7 @@ export default function DataDeletionPage() {
               <ol className="mt-4 space-y-3">
                 <li className="flex gap-3">
                   <span className="text-primary">1.</span>
-                  <span className="text-foreground/80">Log in to your ControlTheMarket account</span>
+                  <span className="text-foreground/80">Log in to your NEW AI Skills Team account</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary">2.</span>

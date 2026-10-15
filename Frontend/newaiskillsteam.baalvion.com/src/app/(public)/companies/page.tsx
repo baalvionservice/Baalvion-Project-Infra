@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { ArrowRight, BadgeCheck, MapPin, Briefcase, Quote, Building2 } from 'lucide-react';
 
-// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// Reads live NEW AI Skills Team data through @/lib/api, which throws CtmDataError when
 // ctm-service is unreachable rather than showing placeholder data. Prerendering this at
 // build time therefore fails; it is a per-request view, not a static page.
 export const dynamic = 'force-dynamic';
@@ -25,12 +25,12 @@ export const metadata: Metadata = {
   description:
     // Metadata is a claim too — it is what search engines quote. No scale assertion here
     // while the directory is empty.
-    'Hire on proven skill, not resumes. Browse the teams hiring on ControlTheMarket and see how evidence-based hiring works.',
+    'Hire on proven skill, not resumes. Browse the teams hiring on NEW AI Skills Team and see how evidence-based hiring works.',
   alternates: { canonical: absoluteUrl('/companies') },
   openGraph: {
     url: absoluteUrl('/companies'),
-    title: 'Companies Hiring | ControlTheMarket',
-    description: 'Hire on proven skill, not resumes. See who is hiring on ControlTheMarket.',
+    title: 'Companies Hiring | NEW AI Skills Team',
+    description: 'Hire on proven skill, not resumes. See who is hiring on NEW AI Skills Team.',
   },
 };
 
@@ -99,7 +99,7 @@ export default async function CompaniesPage() {
     name: c.name,
     industry: c.industry,
     location: c.location || c.country,
-    description: c.description || 'Hiring on ControlTheMarket — on proven skill, not resumes.',
+    description: c.description || 'Hiring on NEW AI Skills Team — on proven skill, not resumes.',
     verified: c.isVerified,
     href: `/company/${c.id}`,
   }));
@@ -119,7 +119,7 @@ export default async function CompaniesPage() {
               The companies hiring on proof
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              {/* "thousands of teams use ControlTheMarket" was a scale claim with nothing
+              {/* "thousands of teams use NEW AI Skills Team" was a scale claim with nothing
                   behind it. Describes what the product does, not how many use it. */}
               Hire on evidence, not resumes. Send a real task, review ranked submissions, and
               find people who can actually do the work.
@@ -167,7 +167,7 @@ export default async function CompaniesPage() {
               <Building2 className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
               <h2 className="text-lg font-semibold">No companies listed yet</h2>
               <p className="text-sm text-muted-foreground">
-                ControlTheMarket is new. Be one of the first teams to hire here on proven work
+                NEW AI Skills Team is new. Be one of the first teams to hire here on proven work
                 rather than resumes.
               </p>
               <Button asChild size="sm" className="mt-2">

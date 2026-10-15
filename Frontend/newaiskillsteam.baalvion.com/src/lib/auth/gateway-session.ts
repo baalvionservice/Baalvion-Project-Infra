@@ -1,6 +1,6 @@
 'use client';
 /**
- * ControlTheMarket → auth-gateway (BFF) unified session, via @baalvion/auth-sdk.
+ * NEW AI Skills Team → auth-gateway (BFF) unified session, via @baalvion/auth-sdk.
  *
  * ADDITIVE + gated by NEXT_PUBLIC_BFF_MODE (default off); the app's existing auth path is left
  * untouched for rollback. At cutover this replaces it: no token in JS, identity from /auth/me,

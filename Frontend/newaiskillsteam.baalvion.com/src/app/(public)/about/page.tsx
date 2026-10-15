@@ -10,11 +10,11 @@ import { Target, Scale, ShieldCheck, Zap, Quote, ArrowRight } from 'lucide-react
 export const metadata: Metadata = {
   title: 'About Us',
   description:
-    'ControlTheMarket helps companies hire on proven skill, not resumes. Candidates do real, job-like work; teams hire on objective performance. Learn about our mission, values and team.',
+    'NEW AI Skills Team helps companies hire on proven skill, not resumes. Candidates do real, job-like work; teams hire on objective performance. Learn about our mission, values and team.',
   alternates: { canonical: absoluteUrl('/about') },
   openGraph: {
     url: absoluteUrl('/about'),
-    title: 'About Us | ControlTheMarket',
+    title: 'About Us | NEW AI Skills Team',
     description: 'We help companies hire on proven skill, not resumes — with real, job-like work and objective performance data.',
   },
 };
@@ -64,7 +64,7 @@ export default function AboutPage() {
               Hiring should be decided by proof, not resumes.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground">
-              ControlTheMarket replaces guesswork with evidence. Candidates complete short, job-like tasks; companies
+              NEW AI Skills Team replaces guesswork with evidence. Candidates complete short, job-like tasks; companies
               hire on objective, side-by-side performance. The result is faster, fairer hiring — and teams that perform
               from day one.
             </p>
@@ -96,7 +96,7 @@ export default function AboutPage() {
         {/* Story */}
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
           {/* A stock photograph from picsum.photos used to sit here, captioned "The
-              ControlTheMarket team at work" — a random image presented as this company's own
+              NEW AI Skills Team team at work" — a random image presented as this company's own
               people. Removed rather than swapped for another stand-in; restore it when there
               is a real photograph to show. The story column now spans the full width. */}
           <div className="md:col-span-2">
@@ -142,7 +142,7 @@ export default function AboutPage() {
         <figure className="mx-auto mt-24 max-w-3xl rounded-2xl border bg-muted/30 p-8 text-center md:p-12">
           <Quote className="mx-auto h-8 w-8 text-primary" />
           <blockquote className="mt-4 font-headline text-xl font-medium leading-relaxed md:text-2xl">
-            &ldquo;We replaced three rounds of screening calls with one task on ControlTheMarket. Our time-to-hire dropped
+            &ldquo;We replaced three rounds of screening calls with one task on NEW AI Skills Team. Our time-to-hire dropped
             from six weeks to nine days, and the people we hired are measurably stronger.&rdquo;
           </blockquote>
           <figcaption className="mt-6 flex items-center justify-center gap-3">

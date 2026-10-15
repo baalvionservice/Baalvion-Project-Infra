@@ -39,13 +39,13 @@ export async function generateMetadata({
     alternates: { canonical },
     openGraph: {
       type: 'article',
-      title: `${article.title} | ControlTheMarket`,
+      title: `${article.title} | NEW AI Skills Team`,
       description: article.excerpt,
       url: canonical,
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${article.title} | ControlTheMarket`,
+      title: `${article.title} | NEW AI Skills Team`,
       description: article.excerpt,
     },
   };
@@ -77,12 +77,12 @@ export default async function BlogArticlePage({
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
     author: {
       '@type': 'Organization',
-      name: 'ControlTheMarket Editorial Team',
+      name: 'NEW AI Skills Team Editorial Team',
       url: absoluteUrl('/'),
     },
     publisher: {
       '@type': 'Organization',
-      name: 'ControlTheMarket',
+      name: 'NEW AI Skills Team',
       url: absoluteUrl('/'),
     },
   };
@@ -131,7 +131,7 @@ export default async function BlogArticlePage({
             <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
             <span>⏱ {article.read} read</span>
             <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
-            <span>✍️ ControlTheMarket Editorial Team</span>
+            <span>✍️ NEW AI Skills Team Editorial Team</span>
           </div>
         </header>
 

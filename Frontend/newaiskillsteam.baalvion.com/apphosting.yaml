@@ -21,7 +21,7 @@ env:
   # production 307-redirects the apex to www, so naming the apex here published a sitemap whose
   # every entry redirected, and a canonical pointing at a redirect.
   - variable: NEXT_PUBLIC_APP_URL
-    value: https://www.controlthemarket.com
+    value: https://newaiskillsteam.baalvion.com
     availability:
       - BUILD
       - RUNTIME

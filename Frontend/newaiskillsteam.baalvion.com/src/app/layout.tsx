@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   icons: { icon: 'data:,' },
   title: {
-    default: 'ControlTheMarket — Hire by Skill, Not by Resume',
-    template: '%s | ControlTheMarket',
+    default: 'NEW AI Skills Team — Hire by Skill, Not by Resume',
+    template: '%s | NEW AI Skills Team',
   },
   description:
     'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
@@ -40,15 +40,15 @@ export const metadata: Metadata = {
     'skill verification',
     'hiring platform',
     'real-world performance',
-    'ControlTheMarket',
+    'NEW AI Skills Team',
   ],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
     type: 'website',
-    siteName: 'ControlTheMarket',
-    title: 'ControlTheMarket — Hire by Skill, Not by Resume',
+    siteName: 'NEW AI Skills Team',
+    title: 'NEW AI Skills Team — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
     url: siteUrl,
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ControlTheMarket — Hire by Skill, Not by Resume',
+    title: 'NEW AI Skills Team — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
     // twitter:image is provided automatically by the file-convention OG image.
@@ -81,7 +81,7 @@ const jsonLd = {
     {
       '@type': 'Organization',
       '@id': `${siteUrl}/#organization`,
-      name: 'ControlTheMarket',
+      name: 'NEW AI Skills Team',
       legalName: LEGAL_ENTITY_NAME,
       identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
       url: siteUrl,
@@ -93,7 +93,7 @@ const jsonLd = {
     {
       '@type': 'WebSite',
       '@id': `${siteUrl}/#website`,
-      name: 'ControlTheMarket',
+      name: 'NEW AI Skills Team',
       url: siteUrl,
       description:
         'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',

@@ -5,13 +5,13 @@ import { getLeaderboard } from '@/lib/ranking-engine';
 export const metadata: Metadata = {
   title: 'Skill Leaderboard',
   description:
-    'See the top-ranked candidates on ControlTheMarket ranked by verified real-world skill performance. Discover who is leading the market.',
+    'See the top-ranked candidates on NEW AI Skills Team ranked by verified real-world skill performance. Discover who is leading the market.',
   alternates: {
     canonical: absoluteUrl('/leaderboard'),
   },
   openGraph: {
     url: absoluteUrl('/leaderboard'),
-    title: 'Skill Leaderboard | ControlTheMarket',
+    title: 'Skill Leaderboard | NEW AI Skills Team',
     description:
       'See the top-ranked candidates ranked by verified real-world skill performance.',
   },
