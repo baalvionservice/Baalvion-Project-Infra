@@ -1,4 +1,4 @@
-# ControlTheMarket (CTM) - Complete Implementation Guide
+# NEW AI Skills Team (CTM) - Complete Implementation Guide
 
 ## Summary: Current State
 
@@ -278,7 +278,7 @@ export default function RefundPolicyPage() {
         <section>
           <h3 className="text-xl font-semibold">How to Request</h3>
           <ol className="space-y-2 list-decimal list-inside">
-            <li>Contact support@controlthemarket.com</li>
+            <li>Contact support@baalvion.com</li>
             <li>Include invoice number</li>
             <li>Explain reason for refund</li>
             <li>Receive response within 48 hours</li>
@@ -421,7 +421,7 @@ export default function DataDeletionPage() {
         <section>
           <h3 className="text-xl font-semibold">Manual Request</h3>
           <p className="text-muted-foreground">
-            Contact <a href="mailto:support@controlthemarket.com" className="text-primary underline">support@controlthemarket.com</a> with subject "Data Deletion Request" and we'll process it within 48 hours.
+            Contact <a href="mailto:support@baalvion.com" className="text-primary underline">support@baalvion.com</a> with subject "Data Deletion Request" and we'll process it within 48 hours.
           </p>
         </section>
       </div>
@@ -478,5 +478,5 @@ Add these links:
 - Check `/payments/health` endpoint
 - Review browser console for errors
 - Check Network tab in DevTools
-- Email support@controlthemarket.com
+- Email support@baalvion.com
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: "Grievance Redressal",
-  description: "Grievance Redressal — ControlTheMarket, operated by Baalvion Industries Private Limited.",
+  description: "Grievance Redressal — NEW AI Skills Team, operated by Baalvion Industries Private Limited.",
   alternates: { canonical: "/grievance" },
 };
 
@@ -12,13 +12,13 @@ export default function GrievancePage() {
       <div className="container py-20 md:py-28 max-w-4xl mx-auto">
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground">Grievance Redressal</h1>
-          <p className="mt-4 text-lg text-muted-foreground">How to raise a complaint about ControlTheMarket, who receives it, and how quickly it is answered.</p>
+          <p className="mt-4 text-lg text-muted-foreground">How to raise a complaint about NEW AI Skills Team, who receives it, and how quickly it is answered.</p>
           <p className="mt-2 text-sm text-muted-foreground">Last updated: October 4, 2026</p>
         </header>
         <div className="bg-card p-8 md:p-12 rounded-lg border shadow-sm text-left space-y-8">
           <section className="space-y-3">
             <h2 className="text-2xl font-medium tracking-tight text-foreground border-b pb-2">1. Who we are</h2>
-            <p className="text-muted-foreground leading-relaxed">ControlTheMarket is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India. This page sets out our grievance redressal mechanism in line with the Consumer Protection (E-Commerce) Rules, 2020 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021.</p>
+            <p className="text-muted-foreground leading-relaxed">NEW AI Skills Team is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India. This page sets out our grievance redressal mechanism in line with the Consumer Protection (E-Commerce) Rules, 2020 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021.</p>
           </section>
           <section className="space-y-3">
             <h2 className="text-2xl font-medium tracking-tight text-foreground border-b pb-2">2. Grievance Officer</h2>

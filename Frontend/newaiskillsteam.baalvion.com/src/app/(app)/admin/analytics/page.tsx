@@ -22,7 +22,7 @@ import {
 } from "./charts";
 import type { Evaluation, EvaluationSchema, Submission } from "@/lib/types";
 
-// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// Reads live NEW AI Skills Team data through @/lib/api, which throws CtmDataError when
 // ctm-service is unreachable rather than showing placeholder data. Prerendering this at
 // build time therefore fails; it is a per-request view, not a static page.
 export const dynamic = 'force-dynamic';
@@ -152,7 +152,7 @@ export default async function AdminAnalyticsPage() {
                     Platform Analytics
                     </h2>
                     <p className="text-muted-foreground">
-                        An overview of all activity across the ControlTheMarket platform.
+                        An overview of all activity across the NEW AI Skills Team platform.
                     </p>
                 </div>
             </div>

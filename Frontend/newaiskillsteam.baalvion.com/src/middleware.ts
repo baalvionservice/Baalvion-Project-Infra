@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * ControlTheMarket edge middleware (P0).
+ * NEW AI Skills Team edge middleware (P0).
  *
  * Adds an edge presence gate to complement the bootstrap-aware client guard in auth-context.
  * SECURITY MODEL: gates on the un-forgeable httpOnly `baalvion_refresh` cookie; the access token is

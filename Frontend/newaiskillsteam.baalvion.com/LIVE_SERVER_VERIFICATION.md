@@ -362,7 +362,7 @@ Fill Card → Click Pay → OTP prompt → Enter 123456 → Success
 ✅ "Subscription Refunds" section
 ✅ "How to Request a Refund" steps
 ✅ "Non-Refundable Items" list
-✅ Contact email: support@controlthemarket.com
+✅ Contact email: support@baalvion.com
 ```
 
 ---
@@ -392,7 +392,7 @@ Fill Card → Click Pay → OTP prompt → Enter 123456 → Success
 ✅ "What Gets Deleted" list
 ✅ "What's Retained" (transaction history, etc.)
 ✅ Deletion timeline (1-4 steps with timeline)
-✅ Contact email: privacy@controlthemarket.com
+✅ Contact email: privacy@baalvion.com
 ```
 
 ---

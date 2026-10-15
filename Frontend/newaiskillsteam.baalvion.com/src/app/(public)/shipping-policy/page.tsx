@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: "Service Delivery Policy",
-  description: "Service Delivery Policy — ControlTheMarket, operated by Baalvion Industries Private Limited.",
+  description: "Service Delivery Policy — NEW AI Skills Team, operated by Baalvion Industries Private Limited.",
   alternates: { canonical: "/shipping-policy" },
 };
 
@@ -12,13 +12,13 @@ export default function ShippingPolicyPage() {
       <div className="container py-20 md:py-28 max-w-4xl mx-auto">
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground">Service Delivery Policy</h1>
-          <p className="mt-4 text-lg text-muted-foreground">How access to ControlTheMarket plans is delivered. Nothing is shipped physically.</p>
+          <p className="mt-4 text-lg text-muted-foreground">How access to NEW AI Skills Team plans is delivered. Nothing is shipped physically.</p>
           <p className="mt-2 text-sm text-muted-foreground">Last updated: October 4, 2026</p>
         </header>
         <div className="bg-card p-8 md:p-12 rounded-lg border shadow-sm text-left space-y-8">
           <section className="space-y-3">
             <h2 className="text-2xl font-medium tracking-tight text-foreground border-b pb-2">1. Digital service</h2>
-            <p className="text-muted-foreground leading-relaxed">ControlTheMarket is an online hiring and skills platform. No physical goods are sold or shipped, so no shipping charges apply.</p>
+            <p className="text-muted-foreground leading-relaxed">NEW AI Skills Team is an online hiring and skills platform. No physical goods are sold or shipped, so no shipping charges apply.</p>
           </section>
           <section className="space-y-3">
             <h2 className="text-2xl font-medium tracking-tight text-foreground border-b pb-2">2. When access starts</h2>

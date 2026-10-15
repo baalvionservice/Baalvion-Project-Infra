@@ -30,7 +30,7 @@ export default function CandidateOnboardingPage() {
         <main className="flex-1">
             <div className="container py-10 md:py-14">
                 <div className="mx-auto mb-8 max-w-3xl text-center">
-                    <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome to ControlTheMarket</h1>
+                    <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome to NEW AI Skills Team</h1>
                     <p className="mt-2 text-muted-foreground">A few quick steps and your verified profile is ready to compete.</p>
                 </div>
                 <OnboardingFlow />

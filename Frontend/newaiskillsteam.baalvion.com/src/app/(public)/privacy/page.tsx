@@ -4,7 +4,7 @@ import { absoluteUrl } from '@/lib/site-url';
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'Learn how ControlTheMarket collects, uses, and protects your personal information. Your privacy is important to us.',
+    'Learn how NEW AI Skills Team collects, uses, and protects your personal information. Your privacy is important to us.',
   alternates: {
     canonical: absoluteUrl('/privacy'),
   },
@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
   const sections = [
     {
       title: "1. Introduction",
-      content: "Welcome to ControlTheMarket, operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), the data controller for the information described here. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
+      content: "Welcome to NEW AI Skills Team, operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), the data controller for the information described here. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
     },
     {
       title: "2. Information We Collect",

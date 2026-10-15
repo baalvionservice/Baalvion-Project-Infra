@@ -1,5 +1,5 @@
 // Shared Baalvion auth surface (auth.baalvion.com). The primary "Log in" control delegates here;
-// the existing /login + /signup routes stay reachable as a fallback. ControlTheMarket is CROSS-APEX
+// the existing /login + /signup routes stay reachable as a fallback. NEW AI Skills Team is CROSS-APEX
 // (controlthemarket.com), so the shared .baalvion.com refresh cookie does NOT reach it — the session
 // arrives via the #token hash on /auth/sso-callback (see that page for the caveat).
 // Base via NEXT_PUBLIC_SHARED_AUTH_URL (kept distinct from the existing /auth-bff base).

@@ -66,7 +66,7 @@ export function ConsentModal() {
     <Dialog open={true} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-3xl" hideCloseButton={true}>
         <DialogHeader>
-          <DialogTitle className="text-2xl">ControlTheMarket Candidate Consent & Agreement</DialogTitle>
+          <DialogTitle className="text-2xl">NEW AI Skills Team Candidate Consent & Agreement</DialogTitle>
           <DialogDescription>
             Please read and accept the terms to proceed.
           </DialogDescription>

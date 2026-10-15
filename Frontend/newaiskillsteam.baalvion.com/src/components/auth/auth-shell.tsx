@@ -12,7 +12,7 @@ const PROOF: Record<Variant, { eyebrow: string; headline: string; sub: string; p
   default: {
     eyebrow: 'Hiring, decided on merit',
     headline: 'Talent proves itself.\nThe market decides.',
-    sub: 'ControlTheMarket is where candidates prove real skill on real challenges — and companies hire the people who can actually do the work.',
+    sub: 'NEW AI Skills Team is where candidates prove real skill on real challenges — and companies hire the people who can actually do the work.',
     points: [
       { icon: ShieldCheck, title: 'Verified by work, not words', body: 'Every score comes from a graded, real-world challenge.' },
       { icon: Trophy, title: 'A ranked, public arena', body: 'Leaderboards that reward outcomes, not résumés.' },

@@ -4,7 +4,7 @@ import { absoluteUrl } from '@/lib/site-url';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description:
-    'Review the Terms of Service for ControlTheMarket. By using our platform you agree to these terms governing candidate submissions and company hiring.',
+    'Review the Terms of Service for NEW AI Skills Team. By using our platform you agree to these terms governing candidate submissions and company hiring.',
   alternates: {
     canonical: absoluteUrl('/terms'),
   },
@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      content: "ControlTheMarket is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India; references to \"we\" and \"us\" mean that company. By accessing or using the ControlTheMarket platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
+      content: "NEW AI Skills Team is operated by Baalvion Industries Private Limited (CIN U43121OD2025PTC048479), a company incorporated in India; references to \"we\" and \"us\" mean that company. By accessing or using the NEW AI Skills Team platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
     },
     {
       title: "2. Platform Usage",
@@ -22,7 +22,7 @@ export default function TermsOfServicePage() {
     },
     {
       title: "3. Intellectual Property",
-      content: "Candidates retain intellectual property rights to their submissions. By submitting work, you grant companies a license to review and evaluate your work for hiring purposes. You also grant ControlTheMarket a license to host, display, and use the submission for platform operations."
+      content: "Candidates retain intellectual property rights to their submissions. By submitting work, you grant companies a license to review and evaluate your work for hiring purposes. You also grant NEW AI Skills Team a license to host, display, and use the submission for platform operations."
     },
     {
       title: "4. User Conduct",
@@ -30,7 +30,7 @@ export default function TermsOfServicePage() {
     },
     {
       title: "5. Limitation of Liability",
-      content: "ControlTheMarket is provided 'as is'. We make no warranties regarding the outcomes of the hiring process. Our liability is limited to the maximum extent permitted by law."
+      content: "NEW AI Skills Team is provided 'as is'. We make no warranties regarding the outcomes of the hiring process. Our liability is limited to the maximum extent permitted by law."
     },
     {
       title: "6. Termination",

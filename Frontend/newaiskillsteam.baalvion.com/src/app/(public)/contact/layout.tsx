@@ -4,15 +4,15 @@ import { absoluteUrl } from '@/lib/site-url';
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
-    'Have a question or want to learn more about ControlTheMarket? Reach out to our team — we\'d love to hear from you.',
+    'Have a question or want to learn more about NEW AI Skills Team? Reach out to our team — we\'d love to hear from you.',
   alternates: {
     canonical: absoluteUrl('/contact'),
   },
   openGraph: {
     url: absoluteUrl('/contact'),
-    title: 'Contact Us | ControlTheMarket',
+    title: 'Contact Us | NEW AI Skills Team',
     description:
-      'Have a question or want to learn more about ControlTheMarket? Reach out to our team.',
+      'Have a question or want to learn more about NEW AI Skills Team? Reach out to our team.',
   },
 };
 

@@ -27,7 +27,7 @@ import { TaskCard } from "@/app/(app)/candidate/tasks/task-card";
 import type { Metadata } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 
-// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// Reads live NEW AI Skills Team data through @/lib/api, which throws CtmDataError when
 // ctm-service is unreachable rather than showing placeholder data. Prerendering this at
 // build time therefore fails; it is a per-request view, not a static page.
 export const dynamic = 'force-dynamic';
@@ -43,7 +43,7 @@ export async function generateMetadata({
   if (!company) {
     return {
       title: "Company Not Found",
-      description: "This company profile could not be found on ControlTheMarket.",
+      description: "This company profile could not be found on NEW AI Skills Team.",
       robots: { index: false, follow: false },
     };
   }
@@ -53,7 +53,7 @@ export async function generateMetadata({
   const title = `${company.name} — Hiring by Proven Skill`;
   const description =
     company.description?.trim() ||
-    `Discover ${company.name}'s open roles and skill-based hiring challenges on ControlTheMarket${
+    `Discover ${company.name}'s open roles and skill-based hiring challenges on NEW AI Skills Team${
       company.industry ? ` — ${company.industry}` : ""
     }.`;
 
@@ -64,14 +64,14 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",
-      title: `${title} | ControlTheMarket`,
+      title: `${title} | NEW AI Skills Team`,
       description,
       url: canonical,
       images: company.logoUrl ? [{ url: company.logoUrl, alt: company.name }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ControlTheMarket`,
+      title: `${title} | NEW AI Skills Team`,
       description,
       images: company.logoUrl ? [company.logoUrl] : undefined,
     },
@@ -306,7 +306,7 @@ export default async function CompanyProfilePage({
               <CardHeader>
                 <CardTitle>Top Hires (Mock)</CardTitle>
                 <CardDescription>
-                  A showcase of talent hired through ControlTheMarket.
+                  A showcase of talent hired through NEW AI Skills Team.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

@@ -11,7 +11,7 @@ import { ImageResponse } from 'next/og';
  */
 export const runtime = 'edge';
 
-export const alt = 'ControlTheMarket — Proof-of-Skill Hiring Platform';
+export const alt = 'NEW AI Skills Team — Proof-of-Skill Hiring Platform';
 
 export const size = {
   width: 1200,
@@ -65,7 +65,7 @@ export default function OpenGraphImage() {
             ✓
           </div>
           <div style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-1px' }}>
-            ControlTheMarket
+            NEW AI Skills Team
           </div>
         </div>
 

@@ -54,7 +54,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 
-// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// Reads live NEW AI Skills Team data through @/lib/api, which throws CtmDataError when
 // ctm-service is unreachable rather than showing placeholder data. Prerendering this at
 // build time therefore fails; it is a per-request view, not a static page.
 export const dynamic = 'force-dynamic';
@@ -70,7 +70,7 @@ export async function generateMetadata({
   if (!candidate || candidate.role !== "candidate") {
     return {
       title: "Candidate Not Found",
-      description: "This candidate profile could not be found on ControlTheMarket.",
+      description: "This candidate profile could not be found on NEW AI Skills Team.",
       robots: { index: false, follow: false },
     };
   }
@@ -81,11 +81,11 @@ export async function generateMetadata({
   const headline =
     topSkill || candidate.profile?.experienceLevel || "Verified Talent";
   const skills = skillsList.slice(0, 5).join(", ");
-  // Data-driven, profile-specific title (e.g. "Jane Doe — React | ControlTheMarket")
+  // Data-driven, profile-specific title (e.g. "Jane Doe — React | NEW AI Skills Team")
   const title = `${candidate.name} — ${headline}`;
   const description =
     candidate.profile?.bio?.trim() ||
-    `View ${candidate.name}'s verified, proof-of-skill profile on ControlTheMarket${
+    `View ${candidate.name}'s verified, proof-of-skill profile on NEW AI Skills Team${
       skills ? ` — skilled in ${skills}` : ""
     }.`;
   const avatarUrl = candidate.profile?.avatarUrl;
@@ -97,14 +97,14 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     openGraph: {
       type: "profile",
-      title: `${title} | ControlTheMarket`,
+      title: `${title} | NEW AI Skills Team`,
       description,
       url: canonical,
       images: avatarUrl ? [{ url: avatarUrl, alt: candidate.name }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ControlTheMarket`,
+      title: `${title} | NEW AI Skills Team`,
       description,
       images: avatarUrl ? [avatarUrl] : undefined,
     },

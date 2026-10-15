@@ -16,7 +16,7 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: 'ControlTheMarket — Hire by Skill, Not by Resume',
+  title: 'NEW AI Skills Team — Hire by Skill, Not by Resume',
   description:
     'The proof-of-skill ecosystem where top companies discover verified talent based on real-world performance — not paper. Start your free 14-day trial today.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     url: absoluteUrl('/'),
-    title: 'ControlTheMarket — Hire by Skill, Not by Resume',
+    title: 'NEW AI Skills Team — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill ecosystem where top companies discover verified talent based on real-world performance — not paper.',
   },
