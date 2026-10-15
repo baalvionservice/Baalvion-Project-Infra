@@ -283,11 +283,12 @@ export const SITES: readonly Site[] = Object.freeze([
     name: 'NEW AI Skills Team',
     domains: ['newaiskillsteam.baalvion.com'],
     apexOwnsSubdomains: false,
-    status: 'not_live',
+    // Owner confirmed 2026-10-15: live, indexed by Google, and permanent -- not a stand-in
+    // for controlthemarket.com, which will be a separate new site.
+    status: 'live',
     // Frontend/newaiskillsteam.baalvion.com (renamed 2026-09-29 from testrank-baalvion,
-    // itself renamed from controlthemarket-main). Owner-directed rebrand; no Caddy block or
-    // DNS wired up yet. Note: this is NOT the same property as the 'ctm' entry above --
-    // controlthemarket.com is a separate, still-live Vercel deployment unrelated to this folder.
+    // itself renamed from controlthemarket-main). Its page metadata still says
+    // "ControlTheMarket"; that predates the rebrand and is not this property's name.
     rails: [],
     railsBasis: 'none',
     services: ['ctm-service'],
