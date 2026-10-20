@@ -10,7 +10,7 @@
 # pipeline already builds a proven payment-service image, prefer reusing that tag here
 # instead of this template.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM maven:3-eclipse-temurin-26 AS build
+FROM maven:3-eclipse-temurin-27 AS build
 WORKDIR /src
 COPY Backend/services/commerce/financial-services-java/ ./
 # Build only the runnable payment module (+ its in-reactor deps via -am) instead of
