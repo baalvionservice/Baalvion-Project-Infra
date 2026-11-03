@@ -6,7 +6,7 @@
 # runtime image copies that service jar.
 
 # ---- Build stage ----
-FROM maven:3-eclipse-temurin-26@sha256:c30718f442eb39c55b2d45440bb849d8755ad8d9d6ef67aadefcce150267116f AS build
+FROM maven:3-eclipse-temurin-27@sha256:bd2c0a2c430f787b7b6887826b6b1a43fe48f1e3ca4196b9ab886567bf54de58 AS build
 ARG SERVICE
 WORKDIR /workspace
 COPY . .
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.m2,sharing=locked \
     mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:25-jre@sha256:bb036ed6cfdc57e3da7c22634d15f1b840d2caf76183861c80e81ca4b5104abb
+FROM eclipse-temurin:25-jre@sha256:ecdc0adb37bde1a281c4d245a3cd535004b1fc8322d560f5b09463b248c81df0
 
 # Apply the Ubuntu security patch for OpenSSL in-place. The pinned base still ships
 # openssl/libssl3t64 3.5.5-1ubuntu3 (CVE-2026-45447 HIGH: heap use-after-free in PKCS7_verify);
