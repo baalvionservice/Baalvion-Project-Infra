@@ -6,7 +6,7 @@
 # runtime image copies that service jar.
 
 # ---- Build stage ----
-FROM maven:3-eclipse-temurin-26@sha256:c30718f442eb39c55b2d45440bb849d8755ad8d9d6ef67aadefcce150267116f AS build
+FROM maven:3-eclipse-temurin-27@sha256:3175c44b207d6698aecb9bbb5bf285b5b4efcf7f567d6f65d88cd218276a6ab2 AS build
 ARG SERVICE
 WORKDIR /workspace
 COPY . .
